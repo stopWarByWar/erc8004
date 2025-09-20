@@ -1,8 +1,9 @@
-package server
+package main
 
 import (
 	"agent_identity/logger"
 	"agent_identity/model"
+	"agent_identity/server/server"
 	"flag"
 	"os"
 
@@ -32,9 +33,8 @@ func main() {
 	}
 
 	model.InitDB(config.Dns)
-	InitLogger(_logger)
-	mock = config.Mock
-	Run([]string{"*"}, config.Port)
+	server.InitRouter(_logger, config.Mock)
+	server.Run([]string{"*"}, config.Port)
 }
 
 type Config struct {
