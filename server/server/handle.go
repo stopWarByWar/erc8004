@@ -26,18 +26,22 @@ func GetAgentCardListHandler(c *gin.Context) {
 	pageInt, err := strconv.Atoi(page)
 	if err != nil {
 		ErrResp(nil, "fail to get page", "Invalid Request", c)
+		return
 	}
 	pageSizeInt, err := strconv.Atoi(pageSize)
 	if err != nil {
 		ErrResp(nil, "fail to get page_size", "Invalid Request", c)
+		return
 	}
 	limitInt, err := strconv.Atoi(limit)
 	if err != nil {
 		ErrResp(nil, "fail to get limit", "Invalid Request", c)
+		return
 	}
 	agentCardList, total, err := GetCardList(pageInt, pageSizeInt, limitInt)
 	if err != nil {
 		ErrResp(nil, "fail to get agent card list", "Internal Error", c)
+		return
 	}
 
 	SuccessResp(gin.H{
@@ -59,6 +63,7 @@ func GetAgentCardDetailHandler(c *gin.Context) {
 	agentCard, err := GetCardResponse(agentID)
 	if err != nil {
 		ErrResp(nil, "fail to get agent card detail", "Internal Error", c)
+		return
 	}
 	SuccessResp(gin.H{
 		"agent_card": agentCard,
@@ -82,18 +87,22 @@ func GetAgentCardListByTrustModelHandler(c *gin.Context) {
 	pageInt, err := strconv.Atoi(page)
 	if err != nil {
 		ErrResp(nil, "fail to get page", "Invalid Request", c)
+		return
 	}
 	pageSizeInt, err := strconv.Atoi(pageSize)
 	if err != nil {
 		ErrResp(nil, "fail to get page_size", "Invalid Request", c)
+		return
 	}
 	limitInt, err := strconv.Atoi(limit)
 	if err != nil {
 		ErrResp(nil, "fail to get limit", "Invalid Request", c)
+		return
 	}
 	agentCardList, total, err := GetCardResponseByTrustModel(pageInt, pageSizeInt, limitInt, trustModel)
 	if err != nil {
 		ErrResp(nil, "fail to get agent card list by trust model", "Internal Error", c)
+		return
 	}
 	SuccessResp(gin.H{
 		"agent_card_list": agentCardList,
@@ -120,6 +129,7 @@ func GetAgentCardsSearchBySkillHandler(c *gin.Context) {
 	agentCardList, err := SearchCardResponseBySkill(skill)
 	if err != nil {
 		ErrResp(nil, "fail to get agent card list by skill", "Internal Error", c)
+		return
 	}
 	SuccessResp(gin.H{
 		"agent_card_list": agentCardList,
