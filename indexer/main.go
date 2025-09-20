@@ -1,6 +1,7 @@
 package indexer
 
 import (
+	"agent_identity/indexer/processor"
 	"agent_identity/logger"
 	"agent_identity/model"
 	"flag"
@@ -33,7 +34,7 @@ func main() {
 
 	model.InitDB(config.Dns)
 
-	idx := NewIndexer(config.IdentityAddr, config.ReputationAddr, config.ValidationAddr, config.CommentAddr, config.RpcURL, config.FetchBlockInterval, _logger)
+	idx := processor.NewProcessor(config.IdentityAddr, config.ReputationAddr, config.ValidationAddr, config.CommentAddr, config.RpcURL, config.FetchBlockInterval, _logger)
 	idx.Process()
 }
 
