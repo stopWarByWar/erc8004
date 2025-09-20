@@ -49,7 +49,7 @@ type Config struct {
 }
 
 func initConf(confPath string) (*Config, error) {
-	var config *Config
+	config := &Config{}
 	dataBytes, err := os.ReadFile(confPath)
 	if err != nil {
 		return nil, err
