@@ -1,0 +1,80 @@
+-- PostgreSQL schema generated for model structs
+
+CREATE TABLE IF NOT EXISTS agent_cards (
+  agent_id varchar(255) PRIMARY KEY,
+  agent_domain text,
+  agent_address text,
+  name varchar(255),
+  description text,
+  url text,
+  icon_url varchar(255),
+  version varchar(255),
+  documentation_url text,
+  feedback_data_uri text,
+  chain_id varchar(255),
+  namespace varchar(255),
+  signature varchar(255),
+  user_interface text
+);
+
+CREATE TABLE IF NOT EXISTS capabilities (
+  agent_id varchar(255) PRIMARY KEY,
+  streaming boolean,
+  push_notifications boolean,
+  state_transition_history boolean
+);
+
+CREATE TABLE IF NOT EXISTS skills (
+  agent_id varchar(255) NOT NULL,
+  name varchar(255) NOT NULL,
+  description text,
+  PRIMARY KEY (agent_id, name)
+);
+CREATE INDEX IF NOT EXISTS idx_skills_agent_id ON skills(agent_id);
+
+CREATE TABLE IF NOT EXISTS skill_tags (
+  agent_id varchar(255) NOT NULL,
+  name varchar(255) NOT NULL,
+  tag varchar(255) NOT NULL,
+  PRIMARY KEY (agent_id, name, tag)
+);
+CREATE INDEX IF NOT EXISTS idx_skill_tags_agent_id ON skill_tags(agent_id);
+
+CREATE TABLE IF NOT EXISTS providers (
+  agent_id varchar(255) NOT NULL,
+  organization varchar(255) NOT NULL,
+  url varchar(255)
+,
+  PRIMARY KEY (agent_id, organization)
+);
+
+CREATE TABLE IF NOT EXISTS trust_models (
+  agent_id varchar(255) NOT NULL,
+  trust_model varchar(255) NOT NULL,
+  PRIMARY KEY (agent_id, trust_model)
+);
+CREATE INDEX IF NOT EXISTS idx_trust_models_agent_id ON trust_models(agent_id);
+
+CREATE TABLE IF NOT EXISTS extensions (
+  agent_id varchar(255) NOT NULL,
+  uri text NOT NULL,
+  required boolean,
+  description text,
+  PRIMARY KEY (agent_id, uri)
+);
+CREATE INDEX IF NOT EXISTS idx_extensions_agent_id ON extensions(agent_id);
+
+CREATE TABLE IF NOT EXISTS agent_registries (
+  agent_id varchar(255),
+  agent_address varchar(255),
+  agent_domain varchar(255),
+  block_number bigint NOT NULL,
+  index bigint NOT NULL,
+  tx_hash varchar(255),
+  timestamps bigint,
+  PRIMARY KEY (block_number, index)
+);
+CREATE INDEX IF NOT EXISTS idx_agent_registries_agent_id ON agent_registries(agent_id);
+CREATE INDEX IF NOT EXISTS idx_agent_registries_agent_address ON agent_registries(agent_address);
+
+

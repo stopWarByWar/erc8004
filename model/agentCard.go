@@ -36,27 +36,40 @@ func InsertAgentCard(agentCard agentcard.AgentCard) error {
 			FeedbackDataURI:  agentCard.FeedbackDataURI,
 			ChainID:          agentCard.ChainID,
 			Namespace:        agentCard.Namespace,
-			Domain:           agentCard.Domain,
 			Signature:        agentCard.Signature,
+			UserInterface:    agentCard.UserInterface,
 		}
 
 		if err := tx.Create(&agentCardModel).Error; err != nil {
 			return err
 		}
 
+		var skillTags []SkillTags
 		var skills []Skill
 		for _, skill := range agentCard.Skills {
 			skills = append(skills, Skill{
 				AgentID:     agentCard.AgentID,
+				ID:          skill.ID,
 				Name:        skill.Name,
 				Description: *skill.Description,
-				Tags:        skill.Tags,
-				InputModes:  skill.InputModes,
-				OutputModes: skill.OutputModes,
 			})
+			for _, tag := range skill.Tags {
+				skillTags = append(skillTags, SkillTags{
+					AgentID: agentCard.AgentID,
+					SkillID: skill.ID,
+					Tag:     tag,
+				})
+			}
 		}
 		if len(skills) > 0 {
 			if err := tx.Create(&skills).Error; err != nil {
+				return err
+			}
+		}
+
+		//todo: 如果重复如何处理
+		if len(skillTags) > 0 {
+			if err := tx.Create(&skillTags).Error; err != nil {
 				return err
 			}
 		}
@@ -82,12 +95,12 @@ func InsertAgentCard(agentCard agentcard.AgentCard) error {
 
 		var trustModels []TrustModel
 		for _, trustModel := range agentCard.TrustModels {
-
 			trustModels = append(trustModels, TrustModel{
 				AgentID:    agentCard.AgentID,
-				TrustModel: []string{trustModel},
+				TrustModel: trustModel,
 			})
 		}
+
 		if len(trustModels) > 0 {
 			if err := tx.Create(&trustModels).Error; err != nil {
 				return err
@@ -111,14 +124,6 @@ func InsertAgentCard(agentCard agentcard.AgentCard) error {
 
 		return nil
 	})
-}
-
-func GetRawAgentCardByAgentID(agentID string) (*AgentCard, error) {
-	var agentCards *AgentCard
-	if err := db.Where("agent_id = ?", agentID).Find(&agentCards).Error; err != nil {
-		return nil, err
-	}
-	return agentCards, nil
 }
 
 func GetAgentCard(agentID string) (*AgentCard, error) {
@@ -168,6 +173,32 @@ func GetSkillsByAgentIDs(agentIDs []string) (map[string][]*Skill, error) {
 		skillsMap[skill.AgentID] = append(skillsMap[skill.AgentID], skill)
 	}
 	return skillsMap, nil
+}
+
+func GetSkillTagsByAgentID(agentID string) (map[string][]*SkillTags, error) {
+	var skillTags []*SkillTags
+	if err := db.Where("agent_id = ?", agentID).Find(&skillTags).Error; err != nil {
+		return nil, err
+	}
+	var skillTagsMap = make(map[string][]*SkillTags)
+	for _, skillTag := range skillTags {
+		skillTagsMap[skillTag.SkillID] = append(skillTagsMap[skillTag.SkillID], skillTag)
+	}
+	return skillTagsMap, nil
+}
+
+func GetSkillTagsByAgentIDs(agentIDs []string) (map[string]map[string][]*SkillTags, error) {
+	var skillTags []*SkillTags
+	if err := db.Where("agent_id IN ?", agentIDs).Find(&skillTags).Error; err != nil {
+		return nil, err
+	}
+	var agentSkillTagsMap = make(map[string]map[string][]*SkillTags)
+	for _, skillTag := range skillTags {
+		var skillTagsMap = make(map[string][]*SkillTags)
+		skillTagsMap[skillTag.SkillID] = append(skillTagsMap[skillTag.SkillID], skillTag)
+		agentSkillTagsMap[skillTag.AgentID] = skillTagsMap
+	}
+	return agentSkillTagsMap, nil
 }
 
 func GetProviderByAgentID(agentID string) (*Provider, error) {
@@ -245,24 +276,42 @@ func GetExtensionsByAgentIDs(agentIDs []string) (map[string][]*Extension, error)
 	return extensionsMap, nil
 }
 
-func GetAgentCardsByTrustModel(trustModelIDs []string) ([]*AgentCard, error) {
+func GetAgentCardsByTrustModel(page, pageSize, limit int, trustModelIDs []string) ([]*AgentCard, int64, error) {
 	if len(trustModelIDs) == 0 {
-		return nil, nil
+		return nil, 0, nil
+	}
+
+	var agentIDs []string
+	if err := db.Model(&TrustModel{}).Select("DISTINCT agent_id").Where("trust_model IN (?)", trustModelIDs).Scan(&agentIDs).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if len(agentIDs) == 0 {
+		return nil, 0, nil
 	}
 
 	var agentCards []*AgentCard
-	if err := db.Model(&TrustModel{}).Where("trust_model IN ?", trustModelIDs).Find(&agentCards).Error; err != nil {
-		return nil, err
+	if err := db.Where("agent_id IN (?)", agentIDs).Offset((page - 1) * pageSize).Limit(limit).Find(&agentCards).Error; err != nil {
+		return nil, 0, err
 	}
-	return agentCards, nil
+
+	var total int64
+	if err := db.Model(&AgentCard{}).Where("agent_id IN (?)", agentIDs).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	return agentCards, total, nil
 }
 
-func GetAgentList(page, pageSize, limit int) ([]*AgentCard, error) {
+func GetAgentList(page, pageSize, limit int) ([]*AgentCard, int64, error) {
 	var agentCards []*AgentCard
 	if err := db.Offset((page - 1) * pageSize).Limit(limit).Find(&agentCards).Error; err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return agentCards, nil
+	var total int64
+	if err := db.Model(&AgentCard{}).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	return agentCards, total, nil
 }
 
 func GetLatestAgentRegistry() (uint64, uint64, error) {
@@ -278,4 +327,17 @@ func GetLatestAgentRegistry() (uint64, uint64, error) {
 
 func CreateAgentRegistry(agentRegistries *AgentRegistry) error {
 	return db.Create(&agentRegistries).Error
+}
+
+func SearchSkillsAgentCards(skill string) ([]*AgentCard, error) {
+	var agentIDs []string
+	if err := db.Model(&Skill{}).Select("DISTINCT agent_id").Where("name LIKE ?", "%"+skill+"%").Scan(&agentIDs).Error; err != nil {
+		return nil, err
+	}
+
+	var agentCards []*AgentCard
+	if err := db.Where("agent_id IN (?)", agentIDs).Find(&agentCards).Error; err != nil {
+		return nil, err
+	}
+	return agentCards, nil
 }

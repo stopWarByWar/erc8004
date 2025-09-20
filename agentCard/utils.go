@@ -21,11 +21,11 @@ func GetAgentCard(address, agentID, domain string) ([]*AgentCard, error) {
 func ValidateAgentCard(agentID string, address string, agentCard *AgentCard) []*AgentCard {
 	var agentCards []*AgentCard
 	for _, agentRegistration := range agentCard.Registrations {
-		address, chainID, namespace, err := formatAddress(agentRegistration.AgentAddress)
+		namespace, chainID, _address, err := formatAddress(agentRegistration.AgentAddress)
 		if err != nil {
 			continue
 		}
-		if agentRegistration.AgentID == agentID && agentRegistration.AgentAddress == address {
+		if agentRegistration.AgentID == agentID && _address == address {
 			if !validateSignature(agentRegistration.Signature, address) {
 				continue
 			}
@@ -35,7 +35,7 @@ func ValidateAgentCard(agentID string, address string, agentCard *AgentCard) []*
 			newCard.Domain = agentCard.Domain
 			newCard.Signature = agentRegistration.Signature
 			newCard.AgentID = agentRegistration.AgentID
-			newCard.AgentAddress = agentRegistration.AgentAddress
+			newCard.AgentAddress = _address
 			agentCards = append(agentCards, newCard)
 		}
 	}
@@ -115,5 +115,6 @@ func formatAgentCard(agentCard *AgentCard) *AgentCard {
 		FeedbackDataURI: agentCard.FeedbackDataURI,
 		ChainID:         agentCard.ChainID,
 		Namespace:       agentCard.Namespace,
+		UserInterface:   agentCard.UserInterface,
 	}
 }

@@ -6,21 +6,22 @@ import (
 
 type AgentCard struct {
 	server.AgentCard
-	TrustModels     []string
-	Registrations   []Registration
-	FeedbackDataURI string
-	ChainID         string
-	Namespace       string
-	Domain          string
-	Signature       string
-	AgentID         string
-	AgentAddress    string
+	TrustModels     []string       `json:"trustModels"`
+	Registrations   []Registration `json:"registrations"`
+	FeedbackDataURI string         `json:"FeedbackDataURI"`
+	ChainID         string         `json:"chainId"`
+	Namespace       string         `json:"namespace"`
+	Domain          string         `json:"domain"`
+	Signature       string         `json:"signature"`
+	AgentID         string         `json:"agentId"`
+	AgentAddress    string         `json:"agentAddress"`
+	UserInterface   string         `json:"userInterface"`
 }
 
 type Registration struct {
-	AgentID      string
-	AgentAddress string
-	Signature    string
+	AgentID      string `json:"agentId"`
+	AgentAddress string `json:"agentAddress"`
+	Signature    string `json:"signature"`
 }
 
 const TrustModelFeedback = "feedback"

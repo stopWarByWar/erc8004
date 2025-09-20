@@ -76,8 +76,10 @@
     "registrations": [
         {
             "agentId": "agent_id",
-            "agentAddress": "{namespace}:{reference}:{address}. eg.eip155:1:0x...",
+            "agentAddress": "{namespace}:{reference}:{address}. eg.eip155:{chainId}:0x...",
             "signature": "sign(keccak256(agent_id)"
         }
-    ]
+    ],
+    "FeedbackDataURI":"",
+    "userInterface": "https://georoute-agent.example.com/user-interface.html"
   }
