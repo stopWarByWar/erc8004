@@ -1,3 +1,6 @@
 /log
 /server/config.yaml
 /indexer/config.yaml
+/indexer/log
+/indexer/processor/log
+/indexer/processor/config.yaml

@@ -5,8 +5,10 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 
+	"github.com/ethereum/go-ethereum/common"
 	"trpc.group/trpc-go/trpc-a2a-go/server"
 )
 
@@ -25,14 +27,13 @@ func ValidateAgentCard(agentID string, address string, agentCard *AgentCard) []*
 		if err != nil {
 			continue
 		}
-		if agentRegistration.AgentID == agentID && _address == address {
+		if agentRegistration.AgentID == agentID && common.HexToAddress(_address).String() == common.HexToAddress(address).String() {
 			if !validateSignature(agentRegistration.Signature, address) {
 				continue
 			}
 			newCard := formatAgentCard(agentCard)
 			newCard.ChainID = chainID
 			newCard.Namespace = namespace
-			newCard.Domain = agentCard.Domain
 			newCard.Signature = agentRegistration.Signature
 			newCard.AgentID = agentRegistration.AgentID
 			newCard.AgentAddress = _address
@@ -48,11 +49,22 @@ func GetAgentCardFromDomain(domain string) (*AgentCard, error) {
 		return nil, err
 	}
 	defer response.Body.Close()
+
+	// Add HTTP error handling with English error message
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return nil, errors.New("HTTP request failed, status: " + response.Status + ", status code: " + strconv.Itoa(response.StatusCode))
+	}
+
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
-	return unmarshalAgentCard(body)
+	agentCard, err := unmarshalAgentCard(body)
+	if err != nil {
+		return nil, err
+	}
+	agentCard.Domain = domain
+	return agentCard, nil
 }
 
 func unmarshalAgentCard(body []byte) (*AgentCard, error) {

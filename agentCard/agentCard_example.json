@@ -75,8 +75,8 @@
     "trustModels": ["feedback", "inference-validation", "tee-attestation"],
     "registrations": [
         {
-            "agentId": "agent_id",
-            "agentAddress": "{namespace}:{reference}:{address}. eg.eip155:{chainId}:0x...",
+            "agentId": "4",
+            "agentAddress": "{namespace}:{reference}:0x9d8796B0AC1064ede1378D785df96970eAf5A2B9",
             "signature": "sign(keccak256(agent_id)"
         }
     ],

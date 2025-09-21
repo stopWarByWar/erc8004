@@ -1,21 +1,16 @@
-package indexer
+package processor
 
 import (
-	"agent_identity/indexer/processor"
 	"agent_identity/logger"
 	"agent_identity/model"
-	"flag"
 	"os"
+	"testing"
 
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
-var configFile = flag.String("f", "./conf.yaml", "the config file")
-
-func main() {
-	flag.Parse()
-
+func TestProcessor(t *testing.T) {
 	logConf := &logger.Config{
 		Level:        logrus.InfoLevel,
 		ReportCaller: true,
@@ -27,14 +22,14 @@ func main() {
 		panic(err)
 	}
 
-	config, err := initConf(*configFile)
+	config, err := initConf("./config.yaml")
 	if err != nil {
 		panic(err)
 	}
 
 	model.InitDB(config.Dns)
 
-	idx := processor.NewProcessor(config.IdentityAddr, config.ReputationAddr, config.ValidationAddr, config.CommentAddr, config.RpcURL, config.FetchBlockInterval, config.StartBlock, _logger)
+	idx := NewProcessor(config.IdentityAddr, config.ReputationAddr, config.ValidationAddr, config.CommentAddr, config.RpcURL, config.FetchBlockInterval, config.StartBlock, _logger)
 	idx.Process()
 }
 

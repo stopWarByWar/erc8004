@@ -35,10 +35,15 @@ type Processor struct {
 	logger             *logger.Logger
 }
 
-func NewProcessor(identityAddr, reputationAddr, validationAddr, commentAddr, rpcURL string, fetchBlockInterval int64, _logger *logger.Logger) *Processor {
+func NewProcessor(identityAddr, reputationAddr, validationAddr, commentAddr, rpcURL string, fetchBlockInterval int64, startBlock uint64, _logger *logger.Logger) *Processor {
 	execBlock, execIndex, err := model.GetLatestAgentRegistry()
 	if err != nil {
 		panic(err)
+	}
+
+	if startBlock > 0 {
+		execBlock = startBlock
+		execIndex = 0
 	}
 
 	ethClient, err := ethclient.Dial(rpcURL)
@@ -127,7 +132,7 @@ loop:
 				"error": err,
 			}).Error("fail to get schemaRegistry event from chain")
 			time.Sleep(10 * time.Second)
-			continue
+			continue loop
 		}
 
 		for _, e := range registryIdentityEvents {
@@ -143,9 +148,6 @@ loop:
 					"block": e.BlockNumber,
 					"index": e.Index,
 				}).Error("fail to deal with event")
-				time.Sleep(10 * time.Second)
-				fromBlock = int64(e.BlockNumber)
-				continue loop
 			}
 
 			idx.execBlock = uint64(e.BlockNumber)
@@ -154,20 +156,13 @@ loop:
 
 		if toBlock < currentBlockNum {
 			fromBlock = toBlock
-			continue
+			continue loop
 		} else {
 			idx.execBlock = uint64(currentBlockNum)
+			idx.execIndex = 0
 			break
 		}
-
 	}
-	idx.execBlock = uint64(currentBlockNum)
-	idx.execIndex = 0
-	idx.logger.WithFields(logrus.Fields{
-		"exec block number": idx.execBlock,
-		"exec index":        idx.execIndex,
-		"current block":     currentBlockNum,
-	}).Debug("finish one fetch period")
 }
 
 func (idx *Processor) dealWithEvent(e types.Log) error {

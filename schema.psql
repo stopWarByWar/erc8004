@@ -26,17 +26,18 @@ CREATE TABLE IF NOT EXISTS capabilities (
 
 CREATE TABLE IF NOT EXISTS skills (
   agent_id varchar(255) NOT NULL,
-  name varchar(255) NOT NULL,
+  id varchar(255) NOT NULL,
+  name varchar(255),
   description text,
-  PRIMARY KEY (agent_id, name)
+  PRIMARY KEY (agent_id, id)
 );
 CREATE INDEX IF NOT EXISTS idx_skills_agent_id ON skills(agent_id);
 
 CREATE TABLE IF NOT EXISTS skill_tags (
   agent_id varchar(255) NOT NULL,
-  name varchar(255) NOT NULL,
+  id varchar(255) NOT NULL,
   tag varchar(255) NOT NULL,
-  PRIMARY KEY (agent_id, name, tag)
+  PRIMARY KEY (agent_id, id, tag)
 );
 CREATE INDEX IF NOT EXISTS idx_skill_tags_agent_id ON skill_tags(agent_id);
 
