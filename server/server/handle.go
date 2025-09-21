@@ -168,6 +168,7 @@ func mockAgentCard() *CardResponse {
 				Tags:        []string{"maps", "customization", "visualization", "cartography"},
 			},
 		},
-		TrustModels: []string{agentcard.TrustModelFeedback, agentcard.TrustModelInferenceValidation, agentcard.TrustModelTeeAttestation},
+		TrustModels:   []string{agentcard.TrustModelFeedback, agentcard.TrustModelInferenceValidation, agentcard.TrustModelTeeAttestation},
+		UserInterface: "https://passport.bnbattest.io",
 	}
 }

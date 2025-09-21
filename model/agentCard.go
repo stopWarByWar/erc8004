@@ -331,7 +331,8 @@ func CreateAgentRegistry(agentRegistries *AgentRegistry) error {
 
 func SearchSkillsAgentCards(skill string) ([]*AgentCard, error) {
 	var agentIDs []string
-	if err := db.Model(&Skill{}).Select("DISTINCT agent_id").Where("name LIKE ?", "%"+skill+"%").Scan(&agentIDs).Error; err != nil {
+	// 使用ILIKE（PostgreSQL）或LOWER函数实现不区分大小写的检索
+	if err := db.Model(&Skill{}).Select("DISTINCT agent_id").Where("LOWER(name) LIKE LOWER(?)", "%"+skill+"%").Scan(&agentIDs).Error; err != nil {
 		return nil, err
 	}
 

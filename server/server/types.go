@@ -16,6 +16,7 @@ type CardResponse struct {
 	DocumentationURL string             `json:"documentationUrl,omitempty"`
 	Skills           []SkillTagResponse `json:"skills"`
 	TrustModels      []string           `json:"trustModels"`
+	UserInterface    string             `json:"userInterface"`
 }
 
 type SkillTagResponse struct {

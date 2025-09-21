@@ -170,6 +170,7 @@ func formatCardResponse(agentCards []*model.AgentCard) ([]*CardResponse, error) 
 			DocumentationURL: agentCard.DocumentationURL,
 			Skills:           skillTagsResponse,
 			TrustModels:      trustModelsResponse,
+			UserInterface:    agentCard.UserInterface,
 		}, nil)
 	}
 
