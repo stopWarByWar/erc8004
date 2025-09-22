@@ -1,3 +1,0 @@
-dns: postgres://passport:passport123@localhost:5432/bas_dev
-port: 8777
-mock: true

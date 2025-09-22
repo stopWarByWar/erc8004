@@ -3,6 +3,7 @@ package agentcard
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -45,7 +46,7 @@ func ValidateAgentCard(agentID string, address string, agentCard *AgentCard) []*
 
 func GetAgentCardFromDomain(domain string) (*AgentCard, error) {
 	if !strings.HasSuffix(domain, ".well-known/agent-card.json") {
-		return nil, errors.New("invalid domain")
+		return nil, fmt.Errorf("invalid domain: %s", domain)
 	}
 	response, err := http.Get(domain)
 	if err != nil {

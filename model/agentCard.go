@@ -1,7 +1,7 @@
 package model
 
 import (
-	agentcard "agent_identity/agentCard"
+	"agent_identity/agentcard"
 	"errors"
 
 	"gorm.io/driver/postgres"

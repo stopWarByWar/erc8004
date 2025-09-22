@@ -3,7 +3,7 @@ package main
 import (
 	"agent_identity/logger"
 	"agent_identity/model"
-	"agent_identity/server/server"
+	"agent_identity/server/api"
 	"flag"
 	"os"
 
@@ -33,8 +33,8 @@ func main() {
 	}
 
 	model.InitDB(config.Dns)
-	server.InitRouter(_logger, config.Mock)
-	server.Run([]string{"*"}, config.Port)
+	api.InitRouter(_logger, config.Mock)
+	api.Run([]string{"*"}, config.Port)
 }
 
 type Config struct {

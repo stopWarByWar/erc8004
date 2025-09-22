@@ -2,7 +2,7 @@ package processor
 
 import (
 	"agent_identity/abi"
-	agentcard "agent_identity/agentCard"
+	"agent_identity/agentcard"
 	"agent_identity/model"
 	"context"
 	"fmt"

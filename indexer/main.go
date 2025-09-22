@@ -1,4 +1,4 @@
-package indexer
+package main
 
 import (
 	"agent_identity/indexer/processor"

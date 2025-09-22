@@ -4,3 +4,8 @@
 /indexer/log
 /indexer/processor/log
 /indexer/processor/config.yaml
+/server/conf.yaml
+/server/log
+/server/api/config.yaml
+/server/server
+/indexer/indexer
