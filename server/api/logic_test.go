@@ -42,7 +42,7 @@ func TestGetCardResponse(t *testing.T) {
 
 func TestGetCardList(t *testing.T) {
 	initTest()
-	CardList, total, err := GetCardList(1, 10, 10)
+	CardList, total, err := GetCardList(1, 10)
 	if err != nil {
 		t.Errorf("GetCardList error: %v", err)
 	}
@@ -54,7 +54,7 @@ func TestGetCardList(t *testing.T) {
 
 func TestGetCardResponseByTrustModel(t *testing.T) {
 	initTest()
-	CardList, total, err := GetCardResponseByTrustModel(1, 10, 10, []string{"feedback", "inference-validation"})
+	CardList, total, err := GetCardResponseByTrustModel(1, 10, []string{"feedback", "inference-validation"})
 	if err != nil {
 		t.Errorf("GetCardResponseByTrustModel error: %v", err)
 	}

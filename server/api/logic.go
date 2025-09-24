@@ -68,8 +68,8 @@ func GetCardResponse(agentID string) (*CardResponse, error) {
 	}, nil
 }
 
-func GetCardList(page, pageSize, limit int) ([]*CardResponse, int64, error) {
-	agentCards, total, err := model.GetAgentList(page, pageSize, limit)
+func GetCardList(page, pageSize int) ([]*CardResponse, int64, error) {
+	agentCards, total, err := model.GetAgentList(page, pageSize)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -80,8 +80,8 @@ func GetCardList(page, pageSize, limit int) ([]*CardResponse, int64, error) {
 	return cards, total, nil
 }
 
-func GetCardResponseByTrustModel(page, pageSize, limit int, trustModel []string) ([]*CardResponse, int64, error) {
-	agentCards, total, err := model.GetAgentCardsByTrustModel(page, pageSize, limit, trustModel)
+func GetCardResponseByTrustModel(page, pageSize int, trustModel []string) ([]*CardResponse, int64, error) {
+	agentCards, total, err := model.GetAgentCardsByTrustModel(page, pageSize, trustModel)
 	if err != nil {
 		return nil, 0, err
 	}

@@ -333,7 +333,7 @@ func GetExtensionsByAgentIDs(agentIDs []string) (map[string][]*Extension, error)
 	return extensionsMap, nil
 }
 
-func GetAgentCardsByTrustModel(page, pageSize, limit int, trustModelIDs []string) ([]*AgentCard, int64, error) {
+func GetAgentCardsByTrustModel(page, pageSize int, trustModelIDs []string) ([]*AgentCard, int64, error) {
 	if len(trustModelIDs) == 0 {
 		return nil, 0, nil
 	}
@@ -348,7 +348,7 @@ func GetAgentCardsByTrustModel(page, pageSize, limit int, trustModelIDs []string
 	}
 
 	var agentCards []*AgentCard
-	if err := db.Where("agent_id IN (?)", agentIDs).Offset((page - 1) * pageSize).Limit(limit).Find(&agentCards).Error; err != nil {
+	if err := db.Where("agent_id IN (?)", agentIDs).Offset((page - 1) * pageSize).Limit(pageSize).Find(&agentCards).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -359,9 +359,9 @@ func GetAgentCardsByTrustModel(page, pageSize, limit int, trustModelIDs []string
 	return agentCards, total, nil
 }
 
-func GetAgentList(page, pageSize, limit int) ([]*AgentCard, int64, error) {
+func GetAgentList(page, pageSize int) ([]*AgentCard, int64, error) {
 	var agentCards []*AgentCard
-	if err := db.Offset((page - 1) * pageSize).Limit(limit).Find(&agentCards).Error; err != nil {
+	if err := db.Offset((page - 1) * pageSize).Limit(pageSize).Find(&agentCards).Error; err != nil {
 		return nil, 0, err
 	}
 	var total int64
