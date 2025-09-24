@@ -2,7 +2,7 @@ package processor
 
 import (
 	"agent_identity/abi"
-	"agent_identity/agentcard"
+	agentcard "agent_identity/agentCard"
 	"agent_identity/model"
 	"context"
 	"fmt"
@@ -177,21 +177,43 @@ func (idx *Processor) dealWithEvent(e types.Log) error {
 func (idx *Processor) dealWithAgentRegisteredEvent(e types.Log) error {
 	agentRegisteredEvent, err := idx.identityRegistry.ParseAgentRegistered(e)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to parse agent registered event: %w", err)
 	}
 
 	agentCards, err := agentcard.GetAgentCard(agentRegisteredEvent.AgentAddress.String(), agentRegisteredEvent.AgentId.String(), agentRegisteredEvent.AgentDomain)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get agent card from domain %s: %w", agentRegisteredEvent.AgentDomain, err)
 	}
 
-	for _, agentCard := range agentCards {
-		if err := model.InsertAgentCard(*agentCard); err != nil {
-			return err
+	if len(agentCards) == 0 {
+		idx.logger.WithFields(logrus.Fields{
+			"agent_id":      agentRegisteredEvent.AgentId.String(),
+			"agent_address": agentRegisteredEvent.AgentAddress.String(),
+			"domain":        agentRegisteredEvent.AgentDomain,
+		}).Warn("no valid agent cards found for registered agent")
+	}
+
+	var insertErrors []error
+	for i, card := range agentCards {
+		if err := model.InsertAgentCard(*card); err != nil {
+			insertErrors = append(insertErrors, fmt.Errorf("failed to insert agent card %d: %w", i, err))
+			idx.logger.WithFields(logrus.Fields{
+				"agent_id": card.AgentID,
+				"error":    err,
+			}).Error("failed to insert agent card")
 		}
 	}
 
-	return model.CreateAgentRegistry(&model.AgentRegistry{
+	// 如果有插入错误，记录但不中断流程，因为 registry 记录仍然需要创建
+	if len(insertErrors) > 0 {
+		idx.logger.WithFields(logrus.Fields{
+			"total_cards": len(agentCards),
+			"errors":      len(insertErrors),
+		}).Error("some agent cards failed to insert")
+	}
+
+	// 创建 agent registry 记录
+	registry := &model.AgentRegistry{
 		AgentID:      agentRegisteredEvent.AgentId.String(),
 		AgentAddress: agentRegisteredEvent.AgentAddress.String(),
 		AgentDomain:  agentRegisteredEvent.AgentDomain,
@@ -199,5 +221,11 @@ func (idx *Processor) dealWithAgentRegisteredEvent(e types.Log) error {
 		Index:        uint64(e.Index),
 		TxHash:       e.TxHash.String(),
 		Timestamps:   uint64(time.Now().Unix()),
-	})
+	}
+
+	if err := model.CreateAgentRegistry(registry); err != nil {
+		return fmt.Errorf("failed to create agent registry: %w", err)
+	}
+
+	return nil
 }

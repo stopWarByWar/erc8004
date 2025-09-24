@@ -1,7 +1,7 @@
 package api
 
 import (
-	"agent_identity/agentcard"
+	agentcard "agent_identity/agentCard"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
