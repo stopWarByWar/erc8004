@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"strings"
 	"time"
 
 	"agent_identity/logger"
@@ -96,18 +97,28 @@ func (idx *Processor) Process() {
 		"index": idx.execIndex,
 	}).Info("start run identity registry processor")
 
+	ticker := time.NewTicker(20 * time.Second)
+	defer ticker.Stop()
+
+	fetchAgentCardTicker := time.NewTicker(20 * time.Second)
+	defer fetchAgentCardTicker.Stop()
+
 	for {
-		currentBlock, err := idx.ethClient.BlockNumber(ctx)
-		if err != nil {
-			idx.logger.WithFields(logrus.Fields{
-				"error": err,
-			}).Error("fail to get current block num")
-			time.Sleep(5 * time.Second)
+		select {
+		case <-ticker.C:
+			currentBlock, err := idx.ethClient.BlockNumber(ctx)
+			if err != nil {
+				idx.logger.WithFields(logrus.Fields{
+					"error": err,
+				}).Error("fail to get current block num")
+				continue
+			}
+			if idx.execBlock < uint64(currentBlock) {
+				idx.process(int64(currentBlock))
+			}
+		case <-fetchAgentCardTicker.C:
+			idx.setAgentCardInserted()
 		}
-		if idx.execBlock < uint64(currentBlock) {
-			idx.process(int64(currentBlock))
-		}
-		time.Sleep(20 * time.Second)
 	}
 }
 
@@ -181,35 +192,6 @@ func (idx *Processor) dealWithAgentRegisteredEvent(e types.Log) error {
 		return fmt.Errorf("failed to parse agent registered event: %w", err)
 	}
 
-	agentCards, err := agentcard.GetAgentCard(agentRegisteredEvent.AgentAddress.String(), agentRegisteredEvent.AgentId.String(), agentRegisteredEvent.AgentDomain)
-	if err != nil {
-		idx.logger.WithFields(logrus.Fields{
-			"agent_address": agentRegisteredEvent.AgentAddress.String(),
-			"agent_id":      agentRegisteredEvent.AgentId.String(),
-			"domain":        agentRegisteredEvent.AgentDomain,
-			"error":         err,
-		}).Error("failed to get agent card from domain")
-	}
-
-	var insertErrors []error
-	for i, card := range agentCards {
-		if err := model.InsertAgentCard(*card); err != nil {
-			insertErrors = append(insertErrors, fmt.Errorf("failed to insert agent card %d: %w", i, err))
-			idx.logger.WithFields(logrus.Fields{
-				"agent_id": card.AgentID,
-				"error":    err,
-			}).Error("failed to insert agent card")
-		}
-	}
-
-	// 如果有插入错误，记录但不中断流程，因为 registry 记录仍然需要创建
-	if len(insertErrors) > 0 {
-		idx.logger.WithFields(logrus.Fields{
-			"total_cards": len(agentCards),
-			"errors":      len(insertErrors),
-		}).Error("some agent cards failed to insert")
-	}
-
 	// 创建 agent registry 记录
 	registry := &model.AgentRegistry{
 		AgentID:      agentRegisteredEvent.AgentId.String(),
@@ -219,7 +201,6 @@ func (idx *Processor) dealWithAgentRegisteredEvent(e types.Log) error {
 		Index:        uint64(e.Index),
 		TxHash:       e.TxHash.String(),
 		Timestamps:   uint64(time.Now().Unix()),
-		Inserted:     err == nil && len(insertErrors) == 0,
 	}
 
 	if err := model.CreateAgentRegistry(registry); err != nil {
@@ -227,4 +208,74 @@ func (idx *Processor) dealWithAgentRegisteredEvent(e types.Log) error {
 	}
 
 	return nil
+}
+
+func (idx *Processor) setAgentCardInserted() {
+	var limit = 100
+	for {
+		agentRegistries, err := model.GetUnInsertedAgentRegistry(limit)
+		if err != nil {
+			idx.logger.WithFields(logrus.Fields{
+				"error": err,
+			}).Error("failed to get un inserted agent registry")
+			return
+		}
+
+		if len(agentRegistries) == 0 {
+			break
+		}
+
+		var insertedAgentIDs []string
+
+		for _, agentRegistry := range agentRegistries {
+			agentCards, err := agentcard.GetAgentCard(agentRegistry.AgentAddress, agentRegistry.AgentID, agentRegistry.AgentDomain)
+			if err != nil {
+				idx.logger.WithFields(logrus.Fields{
+					"agent_address": agentRegistry.AgentAddress,
+					"agent_id":      agentRegistry.AgentID,
+					"domain":        agentRegistry.AgentDomain,
+					"error":         err,
+				}).Error("failed to get agent card from domain")
+
+				if strings.Contains(err.Error(), "invalid domain") {
+					insertedAgentIDs = append(insertedAgentIDs, agentRegistry.AgentID)
+				}
+			}
+
+			var insertErrors []error
+			for i, card := range agentCards {
+				if err := model.InsertAgentCard(*card); err != nil {
+					insertErrors = append(insertErrors, fmt.Errorf("failed to insert agent card %d: %w", i, err))
+					idx.logger.WithFields(logrus.Fields{
+						"agent_id": card.AgentID,
+						"error":    err,
+					}).Error("failed to insert agent card")
+					continue
+				}
+				insertedAgentIDs = append(insertedAgentIDs, card.AgentID)
+			}
+
+			if len(insertErrors) > 0 {
+				idx.logger.WithFields(logrus.Fields{
+					"total_cards": len(agentCards),
+					"errors":      len(insertErrors),
+				}).Error("some agent cards failed to insert")
+			}
+
+			if len(insertedAgentIDs) > 0 {
+				if err := model.UpdateAgentRegistryInserted(insertedAgentIDs); err != nil {
+					idx.logger.WithFields(logrus.Fields{
+						"agent_ids": insertedAgentIDs,
+						"error":     err,
+					}).Error("failed to update agent registry inserted")
+					continue
+				}
+			}
+		}
+
+		if len(agentRegistries) < limit {
+			return
+		}
+
+	}
 }

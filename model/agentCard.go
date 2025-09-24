@@ -6,6 +6,7 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	gormLogger "gorm.io/gorm/logger"
 )
 
@@ -56,7 +57,13 @@ func InsertAgentCard(agentCard agentcard.AgentCard) error {
 			UserInterface:    agentCard.UserInterface,
 		}
 
-		if err := tx.Create(&agentCardModel).Error; err != nil {
+		if err := tx.Clauses(clause.OnConflict{
+			DoUpdates: clause.AssignmentColumns([]string{
+				"agent_domain", "agent_address", "name", "description", "url",
+				"icon_url", "version", "documentation_url", "feedback_data_uri",
+				"chain_id", "namespace", "signature", "user_interface",
+			}),
+		}).Create(&agentCardModel).Error; err != nil {
 			return err
 		}
 
@@ -83,14 +90,25 @@ func InsertAgentCard(agentCard agentcard.AgentCard) error {
 			}
 		}
 		if len(skills) > 0 {
-			if err := tx.Create(&skills).Error; err != nil {
+			if err := tx.Clauses(clause.OnConflict{
+				DoUpdates: clause.AssignmentColumns([]string{"name", "description"}),
+			}).Create(&skills).Error; err != nil {
 				return err
 			}
 		}
 
-		//todo: 如果重复如何处理
 		if len(skillTags) > 0 {
-			if err := tx.Create(&skillTags).Error; err != nil {
+			uniqueSkillTagsMap := make(map[string]SkillTags)
+			for _, tag := range skillTags {
+				key := tag.AgentID + "|" + tag.SkillID + "|" + tag.Tag
+				uniqueSkillTagsMap[key] = tag
+			}
+			uniqueSkillTags := make([]SkillTags, 0, len(uniqueSkillTagsMap))
+			for _, tag := range uniqueSkillTagsMap {
+				uniqueSkillTags = append(uniqueSkillTags, tag)
+			}
+			// 全主键，无需更新，冲突时忽略
+			if err := tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&uniqueSkillTags).Error; err != nil {
 				return err
 			}
 		}
@@ -102,7 +120,9 @@ func InsertAgentCard(agentCard agentcard.AgentCard) error {
 			Organization: agentCard.Provider.Organization,
 			URL:          providerURL,
 		}
-		if err := tx.Create(&provider).Error; err != nil {
+		if err := tx.Clauses(clause.OnConflict{
+			DoUpdates: clause.AssignmentColumns([]string{"url"}),
+		}).Create(&provider).Error; err != nil {
 			return err
 		}
 
@@ -127,7 +147,9 @@ func InsertAgentCard(agentCard agentcard.AgentCard) error {
 				return *agentCard.Capabilities.StateTransitionHistory
 			}(),
 		}
-		if err := tx.Create(&capability).Error; err != nil {
+		if err := tx.Clauses(clause.OnConflict{
+			DoUpdates: clause.AssignmentColumns([]string{"streaming", "push_notifications", "state_transition_history"}),
+		}).Create(&capability).Error; err != nil {
 			return err
 		}
 
@@ -140,7 +162,8 @@ func InsertAgentCard(agentCard agentcard.AgentCard) error {
 		}
 
 		if len(trustModels) > 0 {
-			if err := tx.Create(&trustModels).Error; err != nil {
+			// 全主键，无需更新，冲突时忽略
+			if err := tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&trustModels).Error; err != nil {
 				return err
 			}
 		}
@@ -165,7 +188,9 @@ func InsertAgentCard(agentCard agentcard.AgentCard) error {
 			})
 		}
 		if len(extensions) > 0 {
-			if err := tx.Create(&extensions).Error; err != nil {
+			if err := tx.Clauses(clause.OnConflict{
+				DoUpdates: clause.AssignmentColumns([]string{"required", "description"}),
+			}).Create(&extensions).Error; err != nil {
 				return err
 			}
 		}
@@ -389,4 +414,16 @@ func SearchSkillsAgentCards(skill string) ([]*AgentCard, error) {
 		return nil, err
 	}
 	return agentCards, nil
+}
+
+func GetUnInsertedAgentRegistry(limit int) ([]*AgentRegistry, error) {
+	var agentRegistries []*AgentRegistry
+	if err := db.Where("inserted = ?", false).Limit(limit).Find(&agentRegistries).Error; err != nil {
+		return nil, err
+	}
+	return agentRegistries, nil
+}
+
+func UpdateAgentRegistryInserted(agentIDs []string) error {
+	return db.Model(&AgentRegistry{}).Where("agent_id IN (?)", agentIDs).Update("inserted", true).Error
 }
