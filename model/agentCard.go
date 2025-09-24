@@ -57,13 +57,7 @@ func InsertAgentCard(agentCard agentcard.AgentCard) error {
 			UserInterface:    agentCard.UserInterface,
 		}
 
-		if err := tx.Clauses(clause.OnConflict{
-			DoUpdates: clause.AssignmentColumns([]string{
-				"agent_domain", "agent_address", "name", "description", "url",
-				"icon_url", "version", "documentation_url", "feedback_data_uri",
-				"chain_id", "namespace", "signature", "user_interface",
-			}),
-		}).Create(&agentCardModel).Error; err != nil {
+		if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&agentCardModel).Error; err != nil {
 			return err
 		}
 
@@ -90,9 +84,7 @@ func InsertAgentCard(agentCard agentcard.AgentCard) error {
 			}
 		}
 		if len(skills) > 0 {
-			if err := tx.Clauses(clause.OnConflict{
-				DoUpdates: clause.AssignmentColumns([]string{"name", "description"}),
-			}).Create(&skills).Error; err != nil {
+			if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&skills).Error; err != nil {
 				return err
 			}
 		}
@@ -107,8 +99,7 @@ func InsertAgentCard(agentCard agentcard.AgentCard) error {
 			for _, tag := range uniqueSkillTagsMap {
 				uniqueSkillTags = append(uniqueSkillTags, tag)
 			}
-			// 全主键，无需更新，冲突时忽略
-			if err := tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&uniqueSkillTags).Error; err != nil {
+			if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&uniqueSkillTags).Error; err != nil {
 				return err
 			}
 		}
@@ -120,9 +111,7 @@ func InsertAgentCard(agentCard agentcard.AgentCard) error {
 			Organization: agentCard.Provider.Organization,
 			URL:          providerURL,
 		}
-		if err := tx.Clauses(clause.OnConflict{
-			DoUpdates: clause.AssignmentColumns([]string{"url"}),
-		}).Create(&provider).Error; err != nil {
+		if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&provider).Error; err != nil {
 			return err
 		}
 
@@ -147,9 +136,7 @@ func InsertAgentCard(agentCard agentcard.AgentCard) error {
 				return *agentCard.Capabilities.StateTransitionHistory
 			}(),
 		}
-		if err := tx.Clauses(clause.OnConflict{
-			DoUpdates: clause.AssignmentColumns([]string{"streaming", "push_notifications", "state_transition_history"}),
-		}).Create(&capability).Error; err != nil {
+		if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&capability).Error; err != nil {
 			return err
 		}
 
@@ -162,8 +149,7 @@ func InsertAgentCard(agentCard agentcard.AgentCard) error {
 		}
 
 		if len(trustModels) > 0 {
-			// 全主键，无需更新，冲突时忽略
-			if err := tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&trustModels).Error; err != nil {
+			if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&trustModels).Error; err != nil {
 				return err
 			}
 		}
@@ -188,9 +174,7 @@ func InsertAgentCard(agentCard agentcard.AgentCard) error {
 			})
 		}
 		if len(extensions) > 0 {
-			if err := tx.Clauses(clause.OnConflict{
-				DoUpdates: clause.AssignmentColumns([]string{"required", "description"}),
-			}).Create(&extensions).Error; err != nil {
+			if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&extensions).Error; err != nil {
 				return err
 			}
 		}
