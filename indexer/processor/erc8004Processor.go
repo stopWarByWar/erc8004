@@ -148,6 +148,7 @@ loop:
 					"block": e.BlockNumber,
 					"index": e.Index,
 				}).Error("fail to deal with event")
+				return
 			}
 
 			idx.execBlock = uint64(e.BlockNumber)
@@ -160,7 +161,7 @@ loop:
 		} else {
 			idx.execBlock = uint64(currentBlockNum)
 			idx.execIndex = 0
-			break
+			return
 		}
 	}
 }
@@ -182,7 +183,12 @@ func (idx *Processor) dealWithAgentRegisteredEvent(e types.Log) error {
 
 	agentCards, err := agentcard.GetAgentCard(agentRegisteredEvent.AgentAddress.String(), agentRegisteredEvent.AgentId.String(), agentRegisteredEvent.AgentDomain)
 	if err != nil {
-		return fmt.Errorf("failed to get agent card from domain %s: %w", agentRegisteredEvent.AgentDomain, err)
+		idx.logger.WithFields(logrus.Fields{
+			"agent_address": agentRegisteredEvent.AgentAddress.String(),
+			"agent_id":      agentRegisteredEvent.AgentId.String(),
+			"domain":        agentRegisteredEvent.AgentDomain,
+			"error":         err,
+		}).Error("failed to get agent card from domain")
 	}
 
 	if len(agentCards) == 0 {
@@ -221,6 +227,7 @@ func (idx *Processor) dealWithAgentRegisteredEvent(e types.Log) error {
 		Index:        uint64(e.Index),
 		TxHash:       e.TxHash.String(),
 		Timestamps:   uint64(time.Now().Unix()),
+		Inserted:     err == nil && len(insertErrors) == 0,
 	}
 
 	if err := model.CreateAgentRegistry(registry); err != nil {

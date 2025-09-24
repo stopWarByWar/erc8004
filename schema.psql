@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS agent_registries (
   index bigint NOT NULL,
   tx_hash varchar(255),
   timestamps bigint,
+  inserted boolean,
   PRIMARY KEY (block_number, index)
 );
 CREATE INDEX IF NOT EXISTS idx_agent_registries_agent_id ON agent_registries(agent_id);

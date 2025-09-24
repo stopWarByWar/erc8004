@@ -77,6 +77,7 @@ type AgentRegistry struct {
 	Index        uint64 `gorm:"column:index;type:bigint;primaryKey"`
 	TxHash       string `gorm:"column:tx_hash;type:varchar(255)"`
 	Timestamps   uint64 `gorm:"column:timestamps;type:bigint"`
+	Inserted     bool   `gorm:"column:inserted;type:boolean"`
 }
 
 func (AgentRegistry) TableName() string { return "agent_registries" }
