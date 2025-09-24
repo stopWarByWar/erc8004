@@ -23,6 +23,22 @@ func InitDB(dns string) {
 
 func InsertAgentCard(agentCard agentcard.AgentCard) error {
 	return db.Transaction(func(tx *gorm.DB) error {
+		var iconURL string
+		var documentationURL string
+		var providerURL string
+
+		if agentCard.IconURL != nil {
+			iconURL = *agentCard.IconURL
+		}
+
+		if agentCard.DocumentationURL != nil {
+			documentationURL = *agentCard.DocumentationURL
+		}
+
+		if agentCard.Provider.URL != nil {
+			providerURL = *agentCard.Provider.URL
+		}
+
 		agentCardModel := AgentCard{
 			AgentID:          agentCard.AgentID,
 			AgentDomain:      agentCard.Domain,
@@ -30,9 +46,9 @@ func InsertAgentCard(agentCard agentcard.AgentCard) error {
 			Name:             agentCard.Name,
 			Description:      agentCard.Description,
 			URL:              agentCard.URL,
-			IconURL:          *agentCard.IconURL,
+			IconURL:          iconURL,
 			Version:          agentCard.Version,
-			DocumentationURL: *agentCard.DocumentationURL,
+			DocumentationURL: documentationURL,
 			FeedbackDataURI:  agentCard.FeedbackDataURI,
 			ChainID:          agentCard.ChainID,
 			Namespace:        agentCard.Namespace,
@@ -47,11 +63,16 @@ func InsertAgentCard(agentCard agentcard.AgentCard) error {
 		var skillTags []SkillTags
 		var skills []Skill
 		for _, skill := range agentCard.Skills {
+			var skillDescription string
+			if skill.Description != nil {
+				skillDescription = *skill.Description
+			}
+
 			skills = append(skills, Skill{
 				AgentID:     agentCard.AgentID,
 				ID:          skill.ID,
 				Name:        skill.Name,
-				Description: *skill.Description,
+				Description: skillDescription,
 			})
 			for _, tag := range skill.Tags {
 				skillTags = append(skillTags, SkillTags{
@@ -74,20 +95,37 @@ func InsertAgentCard(agentCard agentcard.AgentCard) error {
 			}
 		}
 
+		// providerURL 已在上方声明与赋值
+
 		provider := Provider{
 			AgentID:      agentCard.AgentID,
 			Organization: agentCard.Provider.Organization,
-			URL:          *agentCard.Provider.URL,
+			URL:          providerURL,
 		}
 		if err := tx.Create(&provider).Error; err != nil {
 			return err
 		}
 
 		capability := Capability{
-			AgentID:                agentCard.AgentID,
-			Streaming:              *agentCard.Capabilities.Streaming,
-			PushNotifications:      *agentCard.Capabilities.PushNotifications,
-			StateTransitionHistory: *agentCard.Capabilities.StateTransitionHistory,
+			AgentID: agentCard.AgentID,
+			Streaming: func() bool {
+				if agentCard.Capabilities.Streaming == nil {
+					return false
+				}
+				return *agentCard.Capabilities.Streaming
+			}(),
+			PushNotifications: func() bool {
+				if agentCard.Capabilities.PushNotifications == nil {
+					return false
+				}
+				return *agentCard.Capabilities.PushNotifications
+			}(),
+			StateTransitionHistory: func() bool {
+				if agentCard.Capabilities.StateTransitionHistory == nil {
+					return false
+				}
+				return *agentCard.Capabilities.StateTransitionHistory
+			}(),
 		}
 		if err := tx.Create(&capability).Error; err != nil {
 			return err
@@ -110,10 +148,20 @@ func InsertAgentCard(agentCard agentcard.AgentCard) error {
 		var extensions []Extension
 		for _, extension := range agentCard.Capabilities.Extensions {
 			extensions = append(extensions, Extension{
-				AgentID:     agentCard.AgentID,
-				URI:         extension.URI,
-				Required:    *extension.Required,
-				Description: *extension.Description,
+				AgentID: agentCard.AgentID,
+				URI:     extension.URI,
+				Required: func() bool {
+					if extension.Required == nil {
+						return false
+					}
+					return *extension.Required
+				}(),
+				Description: func() string {
+					if extension.Description == nil {
+						return ""
+					}
+					return *extension.Description
+				}(),
 			})
 		}
 		if len(extensions) > 0 {
