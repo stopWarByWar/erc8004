@@ -191,14 +191,6 @@ func (idx *Processor) dealWithAgentRegisteredEvent(e types.Log) error {
 		}).Error("failed to get agent card from domain")
 	}
 
-	if len(agentCards) == 0 {
-		idx.logger.WithFields(logrus.Fields{
-			"agent_id":      agentRegisteredEvent.AgentId.String(),
-			"agent_address": agentRegisteredEvent.AgentAddress.String(),
-			"domain":        agentRegisteredEvent.AgentDomain,
-		}).Warn("no valid agent cards found for registered agent")
-	}
-
 	var insertErrors []error
 	for i, card := range agentCards {
 		if err := model.InsertAgentCard(*card); err != nil {
