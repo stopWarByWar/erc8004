@@ -35,8 +35,7 @@ func GetAgentCardListHandler(c *gin.Context) {
 	}
 	limitInt, err := strconv.Atoi(limit)
 	if err != nil {
-		ErrResp(nil, "fail to get limit", "Invalid Request", c)
-		return
+		limitInt = 20
 	}
 	agentCardList, total, err := GetCardList(pageInt, pageSizeInt, limitInt)
 	if err != nil {
