@@ -125,7 +125,7 @@ func (idx *Processor) Process() {
 var AgentRegisteredTopic = common.HexToHash("0xaef1fcdf962a03943b677ae3b92ef1b34c972aeef794ed6e9ba5f599b461883b")
 
 func (idx *Processor) process(currentBlockNum int64) {
-	fromBlock := int64(idx.execBlock)
+	fromBlock := int64(idx.execBlock) + 1
 
 loop:
 	for {

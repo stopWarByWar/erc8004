@@ -382,8 +382,16 @@ func GetLatestAgentRegistry() (uint64, uint64, error) {
 	return agentRegistry.BlockNumber, agentRegistry.Index, nil
 }
 
-func CreateAgentRegistry(agentRegistries *AgentRegistry) error {
-	return db.Create(&agentRegistries).Error
+func CreateAgentRegistry(agentRegistry *AgentRegistry) error {
+	var existing AgentRegistry
+	err := db.Where("block_number = ? and index = ?", agentRegistry.BlockNumber, agentRegistry.Index).First(&existing).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		}
+		return err
+	}
+	return db.Create(agentRegistry).Error
 }
 
 func SearchSkillsAgentCards(skill string) ([]*AgentCard, error) {
