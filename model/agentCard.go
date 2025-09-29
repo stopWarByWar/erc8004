@@ -383,15 +383,13 @@ func GetLatestAgentRegistry() (uint64, uint64, error) {
 }
 
 func CreateAgentRegistry(agentRegistry *AgentRegistry) error {
-	var existing AgentRegistry
-	err := db.Where("block_number = ? and index = ?", agentRegistry.BlockNumber, agentRegistry.Index).First(&existing).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil
-		}
+	var amount int64
+	err := db.Where("block_number = ? and index = ?", agentRegistry.BlockNumber, agentRegistry.Index).Count(&amount).Error
+	if err != nil || amount > 0 {
 		return err
 	}
-	return db.Create(agentRegistry).Error
+
+	return db.Create(&agentRegistry).Error
 }
 
 func SearchSkillsAgentCards(skill string) ([]*AgentCard, error) {
