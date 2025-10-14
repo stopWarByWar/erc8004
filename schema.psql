@@ -81,18 +81,18 @@ CREATE INDEX IF NOT EXISTS idx_agent_registries_agent_address ON agent_registrie
 
 
 CREATE TABLE IF NOT EXISTS agent_comments (
-  comment_attestation_id bytes32 NOT NULL PRIMARY KEY,
+  comment_attestation_id char(66) NOT NULL PRIMARY KEY,
   commenter char(42) NOT NULL,
   agent_client_id varchar(255) NOT NULL,
   agent_server_id varchar(255) NOT NULL,
   comment_text text,
-  score uint16,
+  score INTEGER,
   timestamps bigint NOT NULL,
   newest_comment boolean NOT NULL,
   block bigint NOT NULL,
   index bigint NOT NULL,
   tx_hash varchar(255) NOT NULL,
-  is_authorized boolean NOT NULL DEFAULT FALSE,
+  is_authorized boolean NOT NULL DEFAULT FALSE
 );
 
 CREATE INDEX IF NOT EXISTS idx_agent_comments_id ON agent_comments(agent_server_id,agent_client_id);
@@ -116,7 +116,7 @@ Alter table agent_cards add column all_comment_count bigint not null default 0;
 
 CREATE OR REPLACE FUNCTION update_agent_comment_and_score() RETURNS TRIGGER AS $$
 DECLARE
-    v_old_comment_id BYTEA;
+    v_old_comment_id char(66);
     v_old_score INTEGER;
 BEGIN
     if NEW.is_authorized = false then
