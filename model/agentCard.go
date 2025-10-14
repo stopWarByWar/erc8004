@@ -373,7 +373,7 @@ func GetAgentList(page, pageSize int) ([]*AgentCard, int64, error) {
 
 func GetLatestAgentRegistry() (uint64, uint64, error) {
 	var agentRegistry *AgentRegistry
-	err := db.Order("block_number DESC, index DESC").First(&agentRegistry).Error
+	err := db.Order("block DESC, index DESC").First(&agentRegistry).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, 0, nil
 	} else if err != nil {
@@ -420,7 +420,7 @@ func UpdateAgentRegistryInserted(agentIDs []string) error {
 
 func GetLatestAgentComment() (uint64, uint64, error) {
 	var agentComment *AgentComment
-	err := db.Order("block_number DESC, index DESC").First(&agentComment).Error
+	err := db.Order("block DESC, index DESC").First(&agentComment).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, 0, nil
 	} else if err != nil {
@@ -430,7 +430,7 @@ func GetLatestAgentComment() (uint64, uint64, error) {
 }
 
 func GetUnInsertedCommentAttestation(blockNumber uint64, index uint64, limit int, schemaUID, attestor string) (attestations []*Attestation, err error) {
-	err = db.Where("block_number > ? or (block_number = ? and index > ?) and schema_uid = ? and attestor = ?", blockNumber, blockNumber, index, schemaUID, attestor).Order("block_number DESC, index DESC").Limit(limit).Find(&attestations).Error
+	err = db.Where("block > ? or (block = ? and index > ?) and schema_uid = ? and attestor = ?", blockNumber, blockNumber, index, schemaUID, attestor).Order("block DESC, index DESC").Limit(limit).Find(&attestations).Error
 	return
 }
 
