@@ -93,7 +93,8 @@ func (p *CommentProcessor) dealWithCommentAttestation(att *model.Attestation) *m
 	comment, err := DecodeCommentEvent(att.RawData)
 	if err != nil {
 		p.logger.WithFields(logrus.Fields{
-			"error": err,
+			"attestation_id": att.UID,
+			"error":          err,
 		}).Warn("fail to decode comment event")
 		return nil
 	}
