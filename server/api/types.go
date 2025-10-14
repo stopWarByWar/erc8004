@@ -17,6 +17,7 @@ type CardResponse struct {
 	Skills           []SkillTagResponse `json:"skills"`
 	TrustModels      []string           `json:"trustModels"`
 	UserInterface    string             `json:"userInterface"`
+	Score            float64            `json:"score"`
 }
 
 type SkillTagResponse struct {

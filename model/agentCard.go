@@ -417,3 +417,103 @@ func GetUnInsertedAgentRegistry(limit int) ([]*AgentRegistry, error) {
 func UpdateAgentRegistryInserted(agentIDs []string) error {
 	return db.Model(&AgentRegistry{}).Where("agent_id IN (?)", agentIDs).Update("inserted", true).Error
 }
+
+func GetLatestAgentComment() (uint64, uint64, error) {
+	var agentComment *AgentComment
+	err := db.Order("block_number DESC, index DESC").First(&agentComment).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return 0, 0, nil
+	} else if err != nil {
+		return 0, 0, err
+	}
+	return agentComment.BlockNumber, agentComment.Index, nil
+}
+
+func GetUnInsertedCommentAttestation(blockNumber uint64, index uint64, limit int, schemaUID, attestor string) (attestations []*Attestation, err error) {
+	err = db.Where("block_number > ? or (block_number = ? and index > ?) and schema_uid = ? and attestor = ?", blockNumber, blockNumber, index, schemaUID, attestor).Order("block_number DESC, index DESC").Limit(limit).Find(&attestations).Error
+	return
+}
+
+func InsertAgentComments(agentComments []*AgentComment) error {
+	return db.Clauses(clause.OnConflict{DoNothing: true}).Create(&agentComments).Error
+}
+
+func InsertAuthFeedback(authFeedbacks AuthFeedback) error {
+	return db.Clauses(clause.OnConflict{DoNothing: true}).Create(&authFeedbacks).Error
+}
+
+func CheckAuthFeedbackExists(clientAddress string, agentServerID string) (bool, string, error) {
+	var authFeedback *AuthFeedback
+	err := db.Where("agent_client_address = ? and agent_server_id = ?", clientAddress, agentServerID).First(&authFeedback).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return false, "", nil
+	} else if err != nil {
+		return false, "", err
+	}
+	return true, authFeedback.AgentClientID, nil
+}
+
+func GetCommentList(agentID string, page, pageSize int, isAuthorized bool) ([]*Comment, int64, error) {
+	if page <= 0 || pageSize <= 0 {
+		return nil, 0, errors.New("invalid page or pageSize")
+	}
+	if agentID == "" {
+		return nil, 0, errors.New("agentID is required")
+	}
+
+	var comments []*Comment
+	query := db.Table("agent_comments ac").
+		Select("ac.commenter, ac.agent_client_id, ac.comment_text, ac.score, ac.timestamps, ag.icon_url, ag.name").
+		Joins("LEFT JOIN agent_cards ag ON ac.agent_server_id = ag.agent_id").
+		Where("ac.agent_server_id = ?", agentID).
+		Order("ac.timestamps DESC").
+		Offset((page - 1) * pageSize).
+		Limit(pageSize)
+
+	if isAuthorized {
+		query = query.Where("ac.is_authorized = ?", isAuthorized)
+	}
+
+	if err := query.Scan(&comments).Error; err != nil {
+		return nil, 0, err
+	}
+
+	var total int64
+	countQuery := db.Table("agent_comments ac").
+		Where("ac.agent_server_id = ?", agentID)
+	if isAuthorized {
+		countQuery = countQuery.Where("ac.is_authorized = ?", isAuthorized)
+	}
+	if err := countQuery.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	var commentAddrs []string
+	for _, comment := range comments {
+		commentAddrs = append(commentAddrs, comment.Commenter)
+	}
+
+	passportMap, err := checkPassport(commentAddrs)
+	if err != nil {
+		return nil, 0, err
+	}
+	for _, comment := range comments {
+		comment.Passport = passportMap[comment.Commenter]
+	}
+
+	return comments, total, nil
+}
+
+func checkPassport(addrs []string) (map[string]bool, error) {
+	passportMap := make(map[string]bool)
+	var externalAddrs []string
+
+	err := db.Table("passport_accounts").Select("address").Where("address IN (?) and length(twitter_name) > 0", addrs).Scan(&externalAddrs).Error
+	if err != nil {
+		return nil, err
+	}
+	for _, addr := range externalAddrs {
+		passportMap[addr] = true
+	}
+	return passportMap, nil
+}

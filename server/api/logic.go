@@ -1,6 +1,9 @@
 package api
 
-import "agent_identity/model"
+import (
+	"agent_identity/model"
+	"math"
+)
 
 func GetCardResponse(agentID string) (*CardResponse, error) {
 	agentCard, err := model.GetAgentCard(agentID)
@@ -65,6 +68,7 @@ func GetCardResponse(agentID string) (*CardResponse, error) {
 		DocumentationURL: agentCard.DocumentationURL,
 		Skills:           skillTagsResponse,
 		TrustModels:      trustModelsResponse,
+		Score:            math.Round(float64(agentCard.Score)/float64(agentCard.CommentCount)*10) / 10,
 	}, nil
 }
 
@@ -171,6 +175,7 @@ func formatCardResponse(agentCards []*model.AgentCard) ([]*CardResponse, error) 
 			Skills:           skillTagsResponse,
 			TrustModels:      trustModelsResponse,
 			UserInterface:    agentCard.UserInterface,
+			Score:            math.Round(float64(agentCard.Score)/float64(agentCard.CommentCount)*10) / 10,
 		})
 	}
 

@@ -2,6 +2,7 @@ package api
 
 import (
 	agentcard "agent_identity/agentCard"
+	"agent_identity/model"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -125,6 +126,53 @@ func GetAgentCardsSearchBySkillHandler(c *gin.Context) {
 	}, c)
 }
 
+func CheckAuthFeedbackExistsHandler(c *gin.Context) {
+	clientAddress := c.Query("address")
+	agentServerID := c.Query("agent_id")
+	authed, agentClientID, err := model.CheckAuthFeedbackExists(clientAddress, agentServerID)
+	if err != nil {
+		ErrResp(nil, "fail to check auth feedback exists", "Internal Error", c)
+		return
+	}
+	SuccessResp(gin.H{
+		"authed":          authed,
+		"agent_client_id": agentClientID,
+	}, c)
+}
+
+func GetCommentListHandler(c *gin.Context) {
+	agentID := c.Query("agent_id")
+	page := c.Query("page")
+	pageSize := c.Query("page_size")
+	pageInt, err := strconv.Atoi(page)
+	isAuthorized := c.Query("type") == "authorized"
+	if err != nil {
+		ErrResp(nil, "fail to get page", "Invalid Request", c)
+		return
+	}
+	if pageInt <= 0 {
+		pageInt = 1
+	}
+	pageSizeInt, err := strconv.Atoi(pageSize)
+	if err != nil {
+		ErrResp(nil, "fail to get page_size", "Invalid Request", c)
+		return
+	}
+	if pageSizeInt <= 0 {
+		pageSizeInt = 10
+	}
+
+	comments, total, err := model.GetCommentList(agentID, pageInt, pageSizeInt, isAuthorized)
+	if err != nil {
+		ErrResp(nil, "fail to get comment list", "Internal Error", c)
+		return
+	}
+	SuccessResp(gin.H{
+		"comments": comments,
+		"total":    total,
+	}, c)
+}
+
 func mockAgentCard() *CardResponse {
 	return &CardResponse{
 		AgentID:      "1",
@@ -159,5 +207,6 @@ func mockAgentCard() *CardResponse {
 		},
 		TrustModels:   []string{agentcard.TrustModelFeedback, agentcard.TrustModelInferenceValidation, agentcard.TrustModelTeeAttestation},
 		UserInterface: "https://passport.bnbattest.io",
+		Score:         10.0,
 	}
 }

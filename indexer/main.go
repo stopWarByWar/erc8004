@@ -34,19 +34,25 @@ func main() {
 
 	model.InitDB(config.Dns)
 
-	idx := processor.NewProcessor(config.IdentityAddr, config.ReputationAddr, config.ValidationAddr, config.CommentAddr, config.RpcURL, config.FetchBlockInterval, config.StartBlock, _logger)
-	idx.Process()
+	// createAgentIdx := processor.NewCreateAgentProcessor(config.IdentityAddr, config.ReputationAddr, config.ValidationAddr, config.CommentAddr, config.RpcURL, config.FetchBlockInterval, config.StartBlock, _logger)
+	// go createAgentIdx.Process()
+
+	commentIdx := processor.NewCommentProcessor(config.StartBlock, config.FetchCommentLimit, config.FetchCommentInterval, config.CommentAttestor, _logger)
+	commentIdx.Process()
 }
 
 type Config struct {
-	IdentityAddr       string `yaml:"identity_addr"`
-	ReputationAddr     string `yaml:"reputation_addr"`
-	ValidationAddr     string `yaml:"validation_addr"`
-	CommentAddr        string `yaml:"comment_addr"`
-	RpcURL             string `yaml:"rpc_url"`
-	FetchBlockInterval int64  `yaml:"fetch_block_interval"`
-	Dns                string `yaml:"dns"`
-	StartBlock         uint64 `yaml:"start_block"`
+	IdentityAddr         string `yaml:"identity_addr"`
+	ReputationAddr       string `yaml:"reputation_addr"`
+	ValidationAddr       string `yaml:"validation_addr"`
+	CommentAddr          string `yaml:"comment_addr"`
+	CommentAttestor      string `yaml:"comment_attestor"`
+	RpcURL               string `yaml:"rpc_url"`
+	FetchBlockInterval   int64  `yaml:"fetch_block_interval"`
+	FetchCommentInterval int64  `yaml:"fetch_comment_interval"`
+	FetchCommentLimit    int    `yaml:"fetch_comment_limit"`
+	Dns                  string `yaml:"dns"`
+	StartBlock           uint64 `yaml:"start_block"`
 }
 
 func initConf(confPath string) (*Config, error) {

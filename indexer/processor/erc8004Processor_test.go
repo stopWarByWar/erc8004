@@ -29,7 +29,7 @@ func TestProcessor(t *testing.T) {
 
 	model.InitDB(config.Dns)
 
-	idx := NewProcessor(config.IdentityAddr, config.ReputationAddr, config.ValidationAddr, config.CommentAddr, config.RpcURL, config.FetchBlockInterval, config.StartBlock, _logger)
+	idx := NewCreateAgentProcessor(config.IdentityAddr, config.ReputationAddr, config.ValidationAddr, config.CommentAddr, config.RpcURL, config.FetchBlockInterval, config.StartBlock, _logger)
 	idx.Process()
 }
 

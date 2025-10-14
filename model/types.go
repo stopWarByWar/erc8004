@@ -15,6 +15,8 @@ type AgentCard struct {
 	Namespace        string `gorm:"column:namespace;type:varchar(255)"`
 	Signature        string `gorm:"column:signature;type:varchar(255)"`
 	UserInterface    string `gorm:"column:user_interface;type:text"`
+	Score            uint64 `gorm:"column:score;type:bigint"`
+	CommentCount     uint64 `gorm:"column:comment_count;type:bigint"`
 }
 
 func (AgentCard) TableName() string { return "agent_cards" }
@@ -81,3 +83,71 @@ type AgentRegistry struct {
 }
 
 func (AgentRegistry) TableName() string { return "agent_registries" }
+
+type AgentComment struct {
+	CommentAttestationID string `gorm:"column:comment_attestation_id;type:bytes32;primaryKey"`
+	AgentClientID        string `gorm:"column:agent_client_id;type:varchar(255)"`
+	AgentServerID        string `gorm:"column:agent_server_id;type:varchar(255)"`
+	CommentText          string `gorm:"column:comment_text;type:text"`
+	Score                uint16 `gorm:"column:score;type:uint16"`
+	Commenter            string `gorm:"column:commenter;type:varchar(255)"`
+	Timestamps           uint64 `gorm:"column:timestamps;type:bigint"`
+	NewComment           bool   `gorm:"column:new_comment;type:boolean"`
+	BlockNumber          uint64 `gorm:"column:block_number;type:bigint"`
+	Index                uint64 `gorm:"column:index;type:bigint"`
+	TxHash               string `gorm:"column:tx_hash;type:varchar(255)"`
+	IsAuthorized         bool   `gorm:"column:is_authorized;type:boolean"`
+}
+
+func (AgentComment) TableName() string { return "agent_comments" }
+
+type Attestation struct {
+	UID                   string `gorm:"column:uid;primaryKey"`
+	Type                  string
+	SchemaUID             string `gorm:"column:schema_uid"`
+	Attestor              string
+	Recipient             string `gorm:"column:recipient"`
+	Timestamps            int64
+	Expiration            int64
+	Revoked               bool
+	Revocable             bool   `gorm:"column:revocable"`
+	RevokeTxHash          string `gorm:"column:revoke_tx_hash"`
+	RevocationTime        int64
+	TransactionId         string `gorm:"column:transaction_id"`
+	ReferencedAttestation string `gorm:"column:referenced_attestation"`
+	RawData               []byte `gorm:"column:raw_data"`
+	Public                bool
+
+	Block int64
+	Index int
+}
+
+func (Attestation) TableName() string {
+	return "attestation"
+}
+
+type AuthFeedback struct {
+	AuthFeedbackID     string `gorm:"column:auth_feedback_id;type:varchar(255);primaryKey"`
+	AgentClientID      string `gorm:"column:agent_client_id;type:varchar(255)"`
+	AgentServerID      string `gorm:"column:agent_server_id;type:varchar(255)"`
+	AgentClientAddress string `gorm:"column:agent_client_address;type:varchar(255)"`
+	AgentServerAddress string `gorm:"column:agent_server_address;type:varchar(255)"`
+	BlockNumber        int64  `gorm:"column:block_number;type:bigint"`
+	Index              int64  `gorm:"column:index;type:bigint"`
+	TxHash             string `gorm:"column:tx_hash;type:varchar(255)"`
+}
+
+func (AuthFeedback) TableName() string { return "auth_feedbacks" }
+
+type Comment struct {
+	Commenter     string `gorm:"column:commenter;type:varchar(255)"`
+	AgentClientID string `gorm:"column:agent_client_id;type:varchar(255)"`
+	CommentText   string `gorm:"column:comment_text;type:text"`
+	Score         uint16 `gorm:"column:score;type:uint16"`
+	Timestamps    uint64 `gorm:"column:timestamps;type:bigint"`
+
+	Logo         string `gorm:"column:logo;type:varchar(255)"`
+	Name         string `gorm:"column:name;type:varchar(255)"`
+	Passport     bool
+	IsAuthorized bool `gorm:"column:is_authorized;type:boolean"`
+}

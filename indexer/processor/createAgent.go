@@ -13,13 +13,14 @@ import (
 	"agent_identity/logger"
 
 	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/sirupsen/logrus"
 )
 
-type Processor struct {
+type CreateAgentProcessor struct {
 	execBlock          uint64
 	execIndex          uint64
 	identityRegistry   *abi.IdentityRegistry
@@ -36,7 +37,7 @@ type Processor struct {
 	logger             *logger.Logger
 }
 
-func NewProcessor(identityAddr, reputationAddr, validationAddr, commentAddr, rpcURL string, fetchBlockInterval int64, startBlock uint64, _logger *logger.Logger) *Processor {
+func NewCreateAgentProcessor(identityAddr, reputationAddr, validationAddr, commentAddr, rpcURL string, fetchBlockInterval int64, startBlock uint64, _logger *logger.Logger) *CreateAgentProcessor {
 	execBlock, execIndex, err := model.GetLatestAgentRegistry()
 	if err != nil {
 		panic(err)
@@ -72,7 +73,7 @@ func NewProcessor(identityAddr, reputationAddr, validationAddr, commentAddr, rpc
 		panic(err)
 	}
 
-	return &Processor{
+	return &CreateAgentProcessor{
 		execBlock:          execBlock,
 		execIndex:          execIndex,
 		identityRegistry:   identity,
@@ -91,7 +92,7 @@ func NewProcessor(identityAddr, reputationAddr, validationAddr, commentAddr, rpc
 
 var ctx = context.Background()
 
-func (idx *Processor) Process() {
+func (idx *CreateAgentProcessor) Process() {
 	idx.logger.WithFields(logrus.Fields{
 		"block": idx.execBlock,
 		"index": idx.execIndex,
@@ -123,8 +124,9 @@ func (idx *Processor) Process() {
 }
 
 var AgentRegisteredTopic = common.HexToHash("0xaef1fcdf962a03943b677ae3b92ef1b34c972aeef794ed6e9ba5f599b461883b")
+var AuthFeedbackTopic = common.HexToHash("")
 
-func (idx *Processor) process(currentBlockNum int64) {
+func (idx *CreateAgentProcessor) process(currentBlockNum int64) {
 	fromBlock := int64(idx.execBlock) + 1
 
 loop:
@@ -146,7 +148,25 @@ loop:
 			continue loop
 		}
 
-		for _, e := range registryIdentityEvents {
+		authFeedbackEvents, err := idx.ethClient.FilterLogs(ctx, ethereum.FilterQuery{
+			FromBlock: big.NewInt(fromBlock),
+			ToBlock:   big.NewInt(toBlock),
+			Addresses: []common.Address{idx.reputationAddr},
+			Topics:    [][]common.Hash{{AuthFeedbackTopic}},
+		})
+		if err != nil {
+			idx.logger.WithFields(logrus.Fields{
+				"from":  fromBlock,
+				"to":    toBlock,
+				"error": err,
+			}).Error("fail to get schemaRegistry event from chain")
+			time.Sleep(10 * time.Second)
+			continue loop
+		}
+
+		events := sortEvents(registryIdentityEvents, authFeedbackEvents)
+
+		for _, e := range events {
 			if uint64(idx.execBlock) > e.BlockNumber {
 				continue
 			} else if uint64(idx.execBlock) == e.BlockNumber && idx.execIndex >= uint64(e.Index) {
@@ -177,16 +197,18 @@ loop:
 	}
 }
 
-func (idx *Processor) dealWithEvent(e types.Log) error {
+func (idx *CreateAgentProcessor) dealWithEvent(e types.Log) error {
 	switch e.Topics[0] {
 	case AgentRegisteredTopic:
 		return idx.dealWithAgentRegisteredEvent(e)
+	case AuthFeedbackTopic:
+		return idx.dealWithAuthFeedbackEvent(e)
 	default:
 		return fmt.Errorf("unknown event topic: %s", e.Topics[0])
 	}
 }
 
-func (idx *Processor) dealWithAgentRegisteredEvent(e types.Log) error {
+func (idx *CreateAgentProcessor) dealWithAgentRegisteredEvent(e types.Log) error {
 	agentRegisteredEvent, err := idx.identityRegistry.ParseAgentRegistered(e)
 	if err != nil {
 		return fmt.Errorf("failed to parse agent registered event: %w", err)
@@ -210,7 +232,41 @@ func (idx *Processor) dealWithAgentRegisteredEvent(e types.Log) error {
 	return nil
 }
 
-func (idx *Processor) setAgentCardInserted() {
+func (idx *CreateAgentProcessor) dealWithAuthFeedbackEvent(e types.Log) error {
+	authFeedbackEvent, err := idx.reputationRegistry.ParseAuthFeedback(e)
+	if err != nil {
+		return fmt.Errorf("failed to parse auth feedback event: %w", err)
+	}
+
+	agentClient, err := idx.identityRegistry.GetAgent(&bind.CallOpts{}, authFeedbackEvent.AgentClientId)
+	if err != nil {
+		return fmt.Errorf("failed to get agent client address: %w", err)
+	}
+	agentServer, err := idx.identityRegistry.GetAgent(&bind.CallOpts{}, authFeedbackEvent.AgentServerId)
+	if err != nil {
+		return fmt.Errorf("failed to get agent server address: %w", err)
+	}
+
+	if err := model.InsertAuthFeedback(
+		model.AuthFeedback{
+			AuthFeedbackID:     common.BytesToHash(authFeedbackEvent.FeedbackAuthId[:]).String(),
+			AgentClientID:      authFeedbackEvent.AgentClientId.String(),
+			AgentServerID:      authFeedbackEvent.AgentServerId.String(),
+			AgentClientAddress: agentClient.AgentAddress.String(),
+			AgentServerAddress: agentServer.AgentAddress.String(),
+
+			BlockNumber: int64(e.BlockNumber),
+			Index:       int64(e.Index),
+			TxHash:      e.TxHash.String(),
+		},
+	); err != nil {
+		return fmt.Errorf("failed to insert auth feedback: %w", err)
+	}
+
+	return nil
+}
+
+func (idx *CreateAgentProcessor) setAgentCardInserted() {
 	var limit = 100
 	for {
 		agentRegistries, err := model.GetUnInsertedAgentRegistry(limit)

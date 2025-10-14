@@ -32,9 +32,12 @@ func Run(_cors []string, port string) {
 
 	r.GET("agent/identity/list", GetAgentCardListHandler)
 	r.GET("agent/identity/filter/trustMode", GetAgentCardListByTrustModelHandler)
-	r.GET("agent/identity/Detail", GetAgentCardDetailHandler)
+	r.GET("agent/identity/detail", GetAgentCardDetailHandler)
 	r.GET("agent/identity/trustModel", GetTrustModelListHandler)
 	r.GET("agent/identity/search/skill", GetAgentCardsSearchBySkillHandler)
+
+	r.GET("agent/identity/check/authFeedback", CheckAuthFeedbackExistsHandler)
+	r.GET("agent/identity/comment/list", GetCommentListHandler)
 
 	r.Run(fmt.Sprintf(":%s", port))
 }
