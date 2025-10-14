@@ -107,7 +107,7 @@ func (p *CommentProcessor) dealWithCommentAttestation(att *model.Attestation) *m
 		CommentText:          comment.Comment,
 		Score:                comment.Score,
 		Timestamps:           uint64(att.Timestamps),
-		NewComment:           true,
+		NewestComment:        true,
 		BlockNumber:          uint64(att.Block),
 		Index:                uint64(att.Index),
 		TxHash:               att.TransactionId,

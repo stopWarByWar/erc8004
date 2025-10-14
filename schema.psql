@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS agent_comments (
 
 CREATE INDEX IF NOT EXISTS idx_agent_comments_id ON agent_comments(agent_server_id,agent_client_id);
 CREATE INDEX IF NOT EXISTS idx_agent_comments_agent_server_id ON agent_comments(agent_server_id);
-CREATE INDEX IF NOT EXISTS idx_agent_comments_new_comment ON agent_comments(new_comment);
+CREATE INDEX IF NOT EXISTS idx_agent_comments_newest_comment ON agent_comments(newest_comment);
 
 Create Index IF NOT EXISTS idx_agent_comments_commenter ON agent_comments(commenter);
 

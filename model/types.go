@@ -92,7 +92,7 @@ type AgentComment struct {
 	Score                uint16 `gorm:"column:score;type:uint16"`
 	Commenter            string `gorm:"column:commenter;type:varchar(255)"`
 	Timestamps           uint64 `gorm:"column:timestamps;type:bigint"`
-	NewComment           bool   `gorm:"column:new_comment;type:boolean"`
+	NewestComment        bool   `gorm:"column:newest_comment;type:boolean"`
 	BlockNumber          uint64 `gorm:"column:block;type:bigint"`
 	Index                uint64 `gorm:"column:index;type:bigint"`
 	TxHash               string `gorm:"column:tx_hash;type:varchar(255)"`
