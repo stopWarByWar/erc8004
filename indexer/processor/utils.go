@@ -7,11 +7,12 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/umbracle/ethgo"
 	"github.com/umbracle/ethgo/abi"
 )
 
 type Comment struct {
-	Commenter     *common.Address
+	Commenter     common.Address
 	AgentClientId *big.Int
 	AgentServerId *big.Int
 	Score         uint16
@@ -36,10 +37,13 @@ func DecodeCommentEvent(data []byte) (*Comment, error) {
 	}
 
 	comment := &Comment{}
-	comment.Commenter, ok = result["commenter"].(*common.Address)
+	commenter, ok := result["commenter"].(ethgo.Address)
 	if !ok {
-		return nil, fmt.Errorf("failed to convert commenter to common.Address")
+		return nil, fmt.Errorf("failed to convert commenter to ethgo.Address")
 	}
+
+	comment.Commenter = common.Address(commenter)
+
 	comment.AgentClientId, ok = result["agentClientId"].(*big.Int)
 	if !ok {
 		return nil, fmt.Errorf("failed to convert agentClientId to *big.Int")
