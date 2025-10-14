@@ -17,7 +17,7 @@ func main() {
 	flag.Parse()
 
 	logConf := &logger.Config{
-		Level:        logrus.InfoLevel,
+		Level:        logrus.DebugLevel,
 		ReportCaller: true,
 		FilePath:     "./log/server",
 	}

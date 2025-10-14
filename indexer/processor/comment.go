@@ -56,6 +56,10 @@ func (p *CommentProcessor) Process() {
 			continue
 		}
 
+		p.logger.WithFields(logrus.Fields{
+			"total": len(commentAttestations),
+		}).Debug("get uninserted comment attestations")
+
 		var agentComments []*model.AgentComment
 		for _, commentAttestation := range commentAttestations {
 			agentComment := p.dealWithCommentAttestation(commentAttestation)
@@ -69,7 +73,7 @@ func (p *CommentProcessor) Process() {
 				p.logger.WithFields(logrus.Fields{
 					"error": err,
 				}).Error("fail to insert agent comments")
-				time.Sleep(time.Duration(p.fetchBlockInterval) * time.Second)
+				time.Sleep(10 * time.Second)
 				continue
 			}
 
@@ -78,7 +82,7 @@ func (p *CommentProcessor) Process() {
 		}
 
 		if len(commentAttestations) < p.limit {
-			time.Sleep(time.Duration(p.fetchBlockInterval) * time.Second)
+			time.Sleep(10 * time.Second)
 			continue
 		}
 	}

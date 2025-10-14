@@ -430,7 +430,13 @@ func GetLatestAgentComment() (uint64, uint64, error) {
 }
 
 func GetUnInsertedCommentAttestation(blockNumber uint64, index uint64, limit int, schemaUID, attestor string) (attestations []*Attestation, err error) {
-	err = db.Where("block > ? or (block = ? and index > ?) and schema_uid = ? and attestor = ?", blockNumber, blockNumber, index, schemaUID, attestor).Order("block DESC, index DESC").Limit(limit).Find(&attestations).Error
+	err = db.
+		Where("block > ? or (block = ? and index > ?)", blockNumber, blockNumber, index).
+		Where("schema_uid = ?", schemaUID).
+		Where("attestor = ?", attestor).
+		Order("block DESC, index DESC").
+		Limit(limit).
+		Find(&attestations).Error
 	return
 }
 
