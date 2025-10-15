@@ -105,16 +105,16 @@ func GetCardResponseByTrustModel(page, pageSize int, trustModel []string) ([]*Ca
 	return cards, total, nil
 }
 
-func SearchCardResponseBySkill(skill string) ([]*CardResponse, error) {
-	agentCards, err := model.SearchSkillsAgentCards(skill)
+func SearchCardResponseBySkill(skill string, page, pageSize int) ([]*CardResponse, int, error) {
+	agentCards, total, err := model.SearchSkillsAgentCards(skill, page, pageSize)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	cards, err := formatCardResponse(agentCards)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return cards, nil
+	return cards, total, nil
 }
 
 func formatCardResponse(agentCards []*model.AgentCard) ([]*CardResponse, error) {

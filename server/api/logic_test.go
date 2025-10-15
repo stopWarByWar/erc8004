@@ -66,13 +66,14 @@ func TestGetCardResponseByTrustModel(t *testing.T) {
 
 func TestSearchCardResponseBySkill(t *testing.T) {
 	initTest()
-	CardList, err := SearchCardResponseBySkill("traffic")
+	CardList, total, err := SearchCardResponseBySkill("traffic", 1, 10)
 	if err != nil {
 		t.Errorf("SearchCardResponseBySkill error: %v", err)
 	}
 	for _, card := range CardList {
 		fmt.Println(card)
 	}
+	fmt.Println(total)
 }
 
 type Config struct {
