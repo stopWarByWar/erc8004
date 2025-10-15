@@ -11,6 +11,10 @@ func GetCardResponse(agentID string) (*CardResponse, error) {
 		return nil, err
 	}
 
+	if agentCard == nil {
+		return nil, nil
+	}
+
 	skills, err := model.GetSkillsByAgentID(agentID)
 	if err != nil {
 		return nil, err
@@ -50,6 +54,11 @@ func GetCardResponse(agentID string) (*CardResponse, error) {
 		trustModelsResponse = append(trustModelsResponse, trustModel.TrustModel)
 	}
 
+	score := 0.0
+	if agentCard.CommentCount > 0 {
+		score = math.Round(float64(agentCard.Score)/float64(agentCard.CommentCount)*10) / 10
+	}
+
 	return &CardResponse{
 		AgentID:      agentCard.AgentID,
 		AgentDomain:  agentCard.AgentDomain,
@@ -68,7 +77,7 @@ func GetCardResponse(agentID string) (*CardResponse, error) {
 		DocumentationURL: agentCard.DocumentationURL,
 		Skills:           skillTagsResponse,
 		TrustModels:      trustModelsResponse,
-		Score:            math.Round(float64(agentCard.Score)/float64(agentCard.CommentCount)*10) / 10,
+		Score:            score,
 	}, nil
 }
 
@@ -156,6 +165,11 @@ func formatCardResponse(agentCards []*model.AgentCard) ([]*CardResponse, error) 
 			trustModelsResponse = append(trustModelsResponse, trustModel.TrustModel)
 		}
 
+		score := 0.0
+		if agentCard.CommentCount > 0 {
+			score = math.Round(float64(agentCard.Score)/float64(agentCard.CommentCount)*10) / 10
+		}
+
 		cards = append(cards, &CardResponse{
 			AgentID:      agentCard.AgentID,
 			AgentDomain:  agentCard.AgentDomain,
@@ -175,7 +189,7 @@ func formatCardResponse(agentCards []*model.AgentCard) ([]*CardResponse, error) 
 			Skills:           skillTagsResponse,
 			TrustModels:      trustModelsResponse,
 			UserInterface:    agentCard.UserInterface,
-			Score:            math.Round(float64(agentCard.Score)/float64(agentCard.CommentCount)*10) / 10,
+			Score:            score,
 		})
 	}
 
