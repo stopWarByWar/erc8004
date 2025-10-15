@@ -469,8 +469,8 @@ func GetCommentList(agentID string, page, pageSize int, isAuthorized bool) ([]*C
 
 	var comments []*Comment
 	query := db.Table("agent_comments ac").
-		Select("ac.commenter, ac.agent_client_id, ac.comment_text, ac.score, ac.timestamps, ag.icon_url, ag.name").
-		Joins("LEFT JOIN agent_cards ag ON ac.agent_server_id = ag.agent_id").
+		Select("ac.commenter, ac.agent_client_id, ac.comment_text, ac.score, ac.timestamps, ag.icon_url as logo, ag.name as name").
+		Joins("LEFT JOIN agent_cards ag ON ac.agent_client_id = ag.agent_id").
 		Where("ac.agent_server_id = ?", agentID).
 		Order("ac.timestamps DESC").
 		Offset((page - 1) * pageSize).
@@ -485,10 +485,10 @@ func GetCommentList(agentID string, page, pageSize int, isAuthorized bool) ([]*C
 	}
 
 	var total int64
-	countQuery := db.Table("agent_comments ac").
-		Where("ac.agent_server_id = ?", agentID)
+	countQuery := db.Table("agent_comments").
+		Where("agent_client_id = ?", agentID)
 	if isAuthorized {
-		countQuery = countQuery.Where("ac.is_authorized = ?", isAuthorized)
+		countQuery = countQuery.Where("is_authorized = ?", isAuthorized)
 	}
 	if err := countQuery.Count(&total).Error; err != nil {
 		return nil, 0, err
@@ -504,22 +504,35 @@ func GetCommentList(agentID string, page, pageSize int, isAuthorized bool) ([]*C
 		return nil, 0, err
 	}
 	for _, comment := range comments {
-		comment.Passport = passportMap[comment.Commenter]
+		account, ok := passportMap[comment.Commenter]
+		comment.Passport = ok
+		if comment.Name == "" {
+			comment.Name = account.Name
+		}
+		if comment.Logo == "" {
+			comment.Logo = account.Logo
+		}
 	}
 
 	return comments, total, nil
 }
 
-func checkPassport(addrs []string) (map[string]bool, error) {
-	passportMap := make(map[string]bool)
-	var externalAddrs []string
+func checkPassport(addrs []string) (map[string]SimplePassportAccount, error) {
+	passportMap := make(map[string]SimplePassportAccount)
+	var accounts []SimplePassportAccount
 
-	err := db.Table("passport_accounts").Select("address").Where("address IN (?) and length(twitter_name) > 0", addrs).Scan(&externalAddrs).Error
+	err := db.Table("passport_accounts").Select("address, twitter_name, avatar").Where("address IN (?) and length(twitter_name) > 0", addrs).Scan(&accounts).Error
 	if err != nil {
 		return nil, err
 	}
-	for _, addr := range externalAddrs {
-		passportMap[addr] = true
+	for _, account := range accounts {
+		passportMap[account.Address] = account
 	}
 	return passportMap, nil
+}
+
+type SimplePassportAccount struct {
+	Address string `gorm:"column:address;type:varchar(255)"`
+	Name    string `gorm:"column:twitter_name;type:varchar(255)"`
+	Logo    string `gorm:"column:avatar;type:varchar(255)"`
 }
