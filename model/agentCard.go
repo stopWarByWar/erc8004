@@ -486,7 +486,7 @@ func GetCommentList(agentID string, page, pageSize int, isAuthorized bool) ([]*C
 
 	var total int64
 	countQuery := db.Table("agent_comments").
-		Where("agent_client_id = ?", agentID)
+		Where("agent_server_id = ?", agentID)
 	if isAuthorized {
 		countQuery = countQuery.Where("is_authorized = ?", isAuthorized)
 	}
