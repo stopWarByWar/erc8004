@@ -3,6 +3,7 @@ package model
 import (
 	agentcard "agent_identity/agentCard"
 	"errors"
+	"strings"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -339,7 +340,16 @@ func GetAgentCardsByTrustModel(page, pageSize int, trustModelIDs []string) ([]*A
 	}
 
 	var agentIDs []string
-	if err := db.Model(&TrustModel{}).Select("DISTINCT(agent_id)").Where("trust_model IN (?)", trustModelIDs).Scan(&agentIDs).Error; err != nil {
+	// trustModelIDs 可能被识别成 'feedback,inference-validation,tee-attestation' 一个字符串而不是字符串数组, 这里做拆分
+	ids := make([]string, 0)
+	for _, v := range trustModelIDs {
+		for _, id := range strings.Split(v, ",") {
+			if id != "" {
+				ids = append(ids, id)
+			}
+		}
+	}
+	if err := db.Model(&TrustModel{}).Select("DISTINCT(agent_id)").Where("trust_model IN ?", ids).Scan(&agentIDs).Error; err != nil {
 		return nil, 0, err
 	}
 
