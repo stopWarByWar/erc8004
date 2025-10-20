@@ -373,7 +373,7 @@ func GetAgentList(page, pageSize int) ([]*AgentCard, int64, error) {
 
 func GetLatestAgentRegistry() (uint64, uint64, error) {
 	var agentRegistry *AgentRegistry
-	err := db.Order("block DESC, index DESC").First(&agentRegistry).Error
+	err := db.Order("block_number DESC, index DESC").First(&agentRegistry).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, 0, nil
 	} else if err != nil {
