@@ -339,7 +339,7 @@ func GetAgentCardsByTrustModel(page, pageSize int, trustModelIDs []string) ([]*A
 	}
 
 	var agentIDs []string
-	if err := db.Model(&TrustModel{}).Select("DISTINCT agent_id").Where("trust_model IN (?)", trustModelIDs).Scan(&agentIDs).Error; err != nil {
+	if err := db.Model(&TrustModel{}).Select("DISTINCT(agent_id)").Where("trust_model IN (?)", trustModelIDs).Scan(&agentIDs).Error; err != nil {
 		return nil, 0, err
 	}
 

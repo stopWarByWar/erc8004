@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 var mock = false
@@ -88,6 +89,12 @@ func GetAgentCardListByTrustModelHandler(c *gin.Context) {
 		ErrResp(nil, "fail to get page_size", "Invalid Request", c)
 		return
 	}
+
+	_logger.WithFields(logrus.Fields{
+		"page":        pageInt,
+		"page_size":   pageSizeInt,
+		"trust_model": trustModel,
+	}).Info("GetCardResponseByTrustModel")
 
 	agentCardList, total, err := GetCardResponseByTrustModel(pageInt, pageSizeInt, trustModel)
 	if err != nil {
