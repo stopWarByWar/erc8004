@@ -426,7 +426,7 @@ func GetLatestAgentComment() (uint64, uint64, error) {
 	} else if err != nil {
 		return 0, 0, err
 	}
-	return agentComment.BlockNumber, agentComment.Index, nil
+	return agentComment.Block, agentComment.Index, nil
 }
 
 func GetUnInsertedCommentAttestation(blockNumber uint64, index uint64, limit int, schemaUID, attestor string) (attestations []*Attestation, err error) {
