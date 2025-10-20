@@ -34,8 +34,8 @@ func main() {
 
 	model.InitDB(config.Dns)
 
-	// createAgentIdx := processor.NewCreateAgentProcessor(config.IdentityAddr, config.ReputationAddr, config.ValidationAddr, config.CommentAddr, config.RpcURL, config.FetchBlockInterval, config.StartBlock, _logger)
-	// go createAgentIdx.Process()
+	createAgentIdx := processor.NewCreateAgentProcessor(config.IdentityAddr, config.ReputationAddr, config.ValidationAddr, config.CommentAddr, config.RpcURL, config.FetchBlockInterval, config.StartBlock, _logger)
+	go createAgentIdx.Process()
 
 	commentIdx := processor.NewCommentProcessor(config.StartBlock, config.FetchCommentLimit, config.FetchCommentInterval, config.CommentAttestor, _logger)
 	commentIdx.Process()
