@@ -140,12 +140,12 @@ type AuthFeedback struct {
 func (AuthFeedback) TableName() string { return "auth_feedbacks" }
 
 type Comment struct {
-	AttestationUID string `gorm:column:comment_attestation_id`
-	Commenter      string `gorm:"column:commenter;type:varchar(255)"`
-	AgentClientID  string `gorm:"column:agent_client_id;type:varchar(255)"`
-	CommentText    string `gorm:"column:comment_text;type:text"`
-	Score          uint16 `gorm:"column:score;type:uint16"`
-	Timestamps     uint64 `gorm:"column:timestamps;type:bigint"`
+	CommentAttestationID string `gorm:"column:comment_attestation_id"`
+	Commenter            string `gorm:"column:commenter;type:varchar(255)"`
+	AgentClientID        string `gorm:"column:agent_client_id;type:varchar(255)"`
+	CommentText          string `gorm:"column:comment_text;type:text"`
+	Score                uint16 `gorm:"column:score;type:uint16"`
+	Timestamps           uint64 `gorm:"column:timestamps;type:bigint"`
 
 	Logo         string `gorm:"column:logo;type:varchar(255)"`
 	Name         string `gorm:"column:name;type:varchar(255)"`
