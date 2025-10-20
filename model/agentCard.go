@@ -469,7 +469,7 @@ func GetCommentList(agentID string, page, pageSize int, isAuthorized bool) ([]*C
 
 	var comments []*Comment
 	query := db.Table("agent_comments ac").
-		Select("ac.commenter, ac.agent_client_id, ac.comment_text, ac.score, ac.timestamps, ag.icon_url as logo, ag.name as name").
+		Select("ac.comment_attestation_id,ac.commenter, ac.agent_client_id, ac.comment_text, ac.score, ac.timestamps, ag.icon_url as logo, ag.name as name").
 		Joins("LEFT JOIN agent_cards ag ON ac.agent_client_id = ag.agent_id").
 		Where("ac.agent_server_id = ?", agentID).
 		Order("ac.timestamps DESC").
