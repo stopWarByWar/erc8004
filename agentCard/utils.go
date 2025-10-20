@@ -125,6 +125,7 @@ func formatAgentCard(agentCard *AgentCard) *AgentCard {
 	}
 
 	return &AgentCard{
+		Domain:          agentCard.Domain,
 		AgentCard:       embeddedCopy,
 		TrustModels:     trustModelsCopy,
 		Registrations:   registrationsCopy,
