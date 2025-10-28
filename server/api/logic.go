@@ -117,6 +117,18 @@ func SearchCardResponseBySkill(skill string, page, pageSize int) ([]*CardRespons
 	return cards, total, nil
 }
 
+func SearchCardResponseByName(name string, page, pageSize int) ([]*CardResponse, int, error) {
+	agentCards, total, err := model.SearchAgentCardByName(name, page, pageSize)
+	if err != nil {
+		return nil, 0, err
+	}
+	cards, err := formatCardResponse(agentCards)
+	if err != nil {
+		return nil, 0, err
+	}
+	return cards, total, nil
+}
+
 func formatCardResponse(agentCards []*model.AgentCard) ([]*CardResponse, error) {
 	agentIDs := make([]string, 0, len(agentCards))
 	for _, agentCard := range agentCards {

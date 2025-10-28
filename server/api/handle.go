@@ -149,6 +149,33 @@ func GetAgentCardsSearchBySkillHandler(c *gin.Context) {
 	}, c)
 }
 
+func GetAgentCardsSearchByNameHandler(c *gin.Context) {
+
+	name := c.Query("name")
+	page := c.Query("page")
+	pageSize := c.Query("page_size")
+	pageInt, err := strconv.Atoi(page)
+	if err != nil {
+		ErrResp(nil, "fail to get page", "Invalid Request", c)
+		return
+	}
+	pageSizeInt, err := strconv.Atoi(pageSize)
+	if err != nil {
+		ErrResp(nil, "fail to get page_size", "Invalid Request", c)
+		return
+	}
+	agentCardList, total, err := SearchCardResponseByName(name, pageInt, pageSizeInt)
+	if err != nil {
+		ErrResp(nil, "fail to get agent card list by name", "Internal Error", c)
+		return
+	}
+	SuccessResp(gin.H{
+		"agent_card_list": agentCardList,
+		"total":           total,
+		"current_page":    pageInt,
+	}, c)
+}
+
 func CheckAuthFeedbackExistsHandler(c *gin.Context) {
 	clientAddress := c.Query("address")
 	agentServerID := c.Query("agent_id")

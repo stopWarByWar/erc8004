@@ -35,7 +35,7 @@ func Run(_cors []string, port string) {
 	r.GET("agent/identity/detail", GetAgentCardDetailHandler)
 	r.GET("agent/identity/trustModel", GetTrustModelListHandler)
 	r.GET("agent/identity/search/skill", GetAgentCardsSearchBySkillHandler)
-
+	r.GET("agent/identity/search/name", GetAgentCardsSearchByNameHandler)
 	// r.GET("agent/identity/check/authFeedback", CheckAuthFeedbackExistsHandler)
 	r.GET("agent/identity/comment/list", GetCommentListHandler)
 

@@ -416,6 +416,19 @@ func SearchSkillsAgentCards(skill string, page, pageSize int) ([]*AgentCard, int
 	return agentCards, len(agentIDs), nil
 }
 
+func SearchAgentCardByName(name string, page, pageSize int) ([]*AgentCard, int, error) {
+	var agentIDs []string
+	if err := db.Model(&AgentCard{}).Select("DISTINCT agent_id").Where("LOWER(name) LIKE LOWER(?)", "%"+name+"%").Offset((page - 1) * pageSize).Limit(pageSize).Scan(&agentIDs).Error; err != nil {
+		return nil, 0, err
+	}
+
+	var agentCards []*AgentCard
+	if err := db.Where("agent_id IN (?)", agentIDs).Find(&agentCards).Error; err != nil {
+		return nil, 0, err
+	}
+	return agentCards, len(agentIDs), nil
+}
+
 func GetUnInsertedAgentRegistry(limit int) ([]*AgentRegistry, error) {
 	var agentRegistries []*AgentRegistry
 	if err := db.Where("inserted = ?", false).Limit(limit).Find(&agentRegistries).Error; err != nil {
