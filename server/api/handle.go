@@ -137,9 +137,15 @@ func GetAgentCardsSearchBySkillHandler(c *gin.Context) {
 		return
 	}
 
-	agentCardList, total, err := SearchCardResponseBySkill(skill, pageInt, pageSizeInt)
+	// agentCardList, total, err := SearchCardResponseBySkill(skill, pageInt, pageSizeInt)
+	// if err != nil {
+	// 	ErrResp(nil, "fail to get agent card list by skill", "Internal Error", c)
+	// 	return
+	// }
+	//todo: change to search by skill
+	agentCardList, total, err := SearchCardResponseByName(skill, pageInt, pageSizeInt)
 	if err != nil {
-		ErrResp(nil, "fail to get agent card list by skill", "Internal Error", c)
+		ErrResp(nil, "fail to get agent card list by name", "Internal Error", c)
 		return
 	}
 	SuccessResp(gin.H{
