@@ -10,14 +10,13 @@ func Test_DecodeCommentEvent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	comment, err := DecodeCommentEvent(data)
+	comment, err := DecodeCommentEvent("0x10aa9ce20a1b03b18b4e2fd7b5d747add9a02030", data)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(comment.Commenter.Hex())
-	t.Log(comment.AgentClientId.String())
-	t.Log(comment.AgentServerId.String())
+	t.Log(comment.AgentID.String())
 	t.Log(comment.Score)
-	t.Log(comment.Comment)
-	t.Log(comment.IsAuthorized)
+	t.Log(comment.CommentText)
+
 }

@@ -12,13 +12,16 @@ type CommentProcessor struct {
 	execBlock          uint64
 	execIndex          uint64
 	fetchBlockInterval int64
-	limit              int
-	attestor           string
-	logger             *logger.Logger
+
+	chainID string
+
+	limit  int
+	logger *logger.Logger
 }
 
-func NewCommentProcessor(startBlock uint64, limit int, fetchBlockInterval int64, attestor string, _logger *logger.Logger) *CommentProcessor {
-	execBlock, execIndex, err := model.GetLatestAgentComment()
+func NewCommentProcessor(chainID string, startBlock uint64, limit int, fetchBlockInterval int64, _logger *logger.Logger) *CommentProcessor {
+
+	execBlock, execIndex, err := model.GetLatestAgentComment(chainID)
 	if err != nil {
 		panic(err)
 	}
@@ -33,12 +36,13 @@ func NewCommentProcessor(startBlock uint64, limit int, fetchBlockInterval int64,
 		execIndex:          execIndex,
 		limit:              limit,
 		fetchBlockInterval: fetchBlockInterval,
-		attestor:           attestor,
 		logger:             _logger,
+		chainID:            chainID,
 	}
 }
 
-const commentSchemaID = "0x4a16aebbff5aeef5b4a39e5e4f900067db897619a8d75c4e9cf4c96c169546dc"
+// todo: new comment schema ID
+const commentSchemaID = ""
 
 func (p *CommentProcessor) Process() {
 	p.logger.WithFields(logrus.Fields{
@@ -47,7 +51,7 @@ func (p *CommentProcessor) Process() {
 	}).Info("start run comment processor")
 
 	for {
-		commentAttestations, err := model.GetUnInsertedCommentAttestation(p.execBlock, p.execIndex, p.limit, commentSchemaID, p.attestor)
+		commentAttestations, err := model.GetUnInsertedCommentAttestation(p.execBlock, p.execIndex, p.limit, commentSchemaID)
 		if err != nil {
 			p.logger.WithFields(logrus.Fields{
 				"error": err,
@@ -69,7 +73,7 @@ func (p *CommentProcessor) Process() {
 		}
 
 		if len(agentComments) > 0 {
-			if err := model.InsertAgentComments(agentComments); err != nil {
+			if err := model.CreateAgentComments(agentComments); err != nil {
 				p.logger.WithFields(logrus.Fields{
 					"error": err,
 				}).Error("fail to insert agent comments")
@@ -90,7 +94,7 @@ func (p *CommentProcessor) Process() {
 }
 
 func (p *CommentProcessor) dealWithCommentAttestation(att *model.Attestation) *model.AgentComment {
-	comment, err := DecodeCommentEvent(att.RawData)
+	comment, err := DecodeCommentEvent(att.Recipient, att.RawData)
 	if err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"attestation_id": att.UID,
@@ -99,18 +103,30 @@ func (p *CommentProcessor) dealWithCommentAttestation(att *model.Attestation) *m
 		return nil
 	}
 
+	agentUID, err := model.GetAgentUID(p.chainID, comment.IdentityRegistry, comment.AgentID.String())
+	if err != nil {
+		p.logger.WithFields(logrus.Fields{
+			"error":             err,
+			"chain_id":          p.chainID,
+			"agent_id":          comment.AgentID.String(),
+			"identity_registry": comment.IdentityRegistry,
+		}).Error("fail to get agent uid")
+		return nil
+	}
+
 	return &model.AgentComment{
 		CommentAttestationID: att.UID,
-		Commenter:            comment.Commenter.Hex(),
-		AgentClientID:        comment.AgentClientId.String(),
-		AgentServerID:        comment.AgentServerId.String(),
-		CommentText:          comment.Comment,
+		AgentUID:             agentUID,
+		ChainID:              p.chainID,
+		IdentityRegistry:     comment.IdentityRegistry,
+		AgentID:              comment.AgentID.String(),
+		Commenter:            comment.Commenter.String(),
+		CommentText:          comment.CommentText,
 		Score:                comment.Score,
 		Timestamps:           uint64(att.Timestamps),
-		NewestComment:        true,
 		Block:                uint64(att.Block),
 		Index:                uint64(att.Index),
 		TxHash:               att.TransactionId,
-		IsAuthorized:         comment.IsAuthorized,
+		Revoked:              att.Revoked,
 	}
 }

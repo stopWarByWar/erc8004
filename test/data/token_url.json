@@ -1,0 +1,51 @@
+
+{
+    "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+    "name": "bnb11",
+    "description": "bnb11",
+    "image": "https://bitagent.s3.ap-southeast-1.amazonaws.com/1761759518638-9hAq-bitagent.png",
+    "endpoints": [
+      {
+        "name": "A2A",
+        "endpoint": "https://bitagent.s3.ap-southeast-1.amazonaws.com/0x3ed1ab7a5667aa8c3dd3e95600eaeba1ec07c870/.well-known/agent-card.json",
+        "version": "0.3.0"
+      },
+      {
+        "name": "MCP",
+        "endpoint": "https://mcp.agent.eth/",
+        "capabilities": {},
+        "version": "2025-06-18"
+      },
+      {
+        "name": "OASF",
+        "endpoint": "ipfs://{cid}",
+        "version": "0.7"
+      },
+      {
+        "name": "ENS",
+        "endpoint": "vitalik.eth",
+        "version": "v1"
+      },
+      {
+        "name": "DID",
+        "endpoint": "did:method:foobar",
+        "version": "v1"
+      },
+      {
+        "name": "agentWallet",
+        "endpoint": "eip155:97:0x3ed1ab7a5667aa8c3dd3e95600eaeba1ec07c870"
+      }
+    ],
+    "registrations": [
+      {
+        "agentId": 224,
+        "agentRegistry": "eip155:97:0xA98A5542a1AaB336397d487e32021E0E48BEF717"
+      }
+    ],
+    "supportedTrust": [
+      "reputation",
+      "crypto-economic",
+      "tee-attestation"
+    ],
+    "user_interface_url": "https://bitagent.s3.ap-southeast-1.amazonaws.com/0x2fddb2b8b8dd2f10b1854d5671837329b92e3c1f/user-interface.json"
+  }

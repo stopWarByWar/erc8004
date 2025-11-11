@@ -1,12 +1,13 @@
 package api
 
-type CardResponse struct {
-	AgentID      string
-	AgentDomain  string
-	AgentAddress string
-	ChainID      string
-	Namespace    string
-
+type AgentResponse struct {
+	UID              uint64 // uid
+	AgentID          string `json:"agentId"` // agent id in contract json file
+	AgentDomain      string //a2a endpoint
+	AgentAddress     string //wallet address
+	ChainID          string
+	Namespace        string
+	IdentityRegistry string             `json:"identityRegistry"`
 	Name             string             `json:"name"`
 	Description      string             `json:"description"`
 	URL              string             `json:"url"`

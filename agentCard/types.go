@@ -4,26 +4,46 @@ import (
 	"trpc.group/trpc-go/trpc-a2a-go/server"
 )
 
-type AgentCard struct {
-	server.AgentCard
-	TrustModels     []string       `json:"trustModels"`
-	Registrations   []Registration `json:"registrations"`
-	FeedbackDataURI string         `json:"FeedbackDataURI"`
-	ChainID         string         `json:"chainId"`
-	Namespace       string         `json:"namespace"`
-	Domain          string         `json:"domain"`
-	Signature       string         `json:"signature"`
-	AgentID         string         `json:"agentId"`
-	AgentAddress    string         `json:"agentAddress"`
-	UserInterface   string         `json:"userInterface"`
+type TokenURLResponse struct {
+	Type             string         `json:"type"`
+	Name             string         `json:"name"`
+	Description      string         `json:"description"`
+	Image            string         `json:"image"`
+	Endpoints        []Endpoint     `json:"endpoints"`
+	Registrations    []Registration `json:"registrations"`
+	SupportedTrust   []string       `json:"supportedTrust"`
+	UserInterfaceURL string         `json:"userInterfaceURL"`
+}
+type Registration struct {
+	AgentID       uint64 `json:"agentId"`
+	AgentRegistry string `json:"agentRegistry"`
 }
 
-type Registration struct {
-	AgentID      string `json:"agentId"`
-	AgentAddress string `json:"agentAddress"`
-	Signature    string `json:"signature"`
+type Endpoint struct {
+	Name     string `json:"name"`
+	Endpoint string `json:"endpoint"`
+	Version  string `json:"version"`
 }
 
 const TrustModelFeedback = "feedback"
 const TrustModelInferenceValidation = "inference-validation"
 const TrustModelTeeAttestation = "tee-attestation"
+
+type Agent struct {
+	Owner            string            `json:"owner"`
+	Type             string            `json:"type"`
+	Name             string            `json:"name"`
+	Description      string            `json:"description"`
+	Image            string            `json:"image"`
+	Endpoint         string            `json:"endpoint"`
+	IdentityRegistry string            `json:"registry"`
+	SupportedTrust   []string          `json:"supportedTrust"`
+	AgentID          string            `json:"agentId"`
+	TokenURL         string            `json:"tokenUrl"`
+	AgentCard        *server.AgentCard `json:"agentCard"`
+	Namespace        string            `json:"namespace"`
+	ChainID          string            `json:"chainId"`
+	AgentWallet      string            `json:"agentWallet"`
+	Timestamps       uint64            `json:"timestamps"`
+	UserInterfaceURL string            `json:"userInterfaceURL"`
+}

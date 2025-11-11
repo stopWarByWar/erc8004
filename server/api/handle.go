@@ -14,7 +14,7 @@ var mock = false
 func GetAgentCardListHandler(c *gin.Context) {
 	if mock {
 		SuccessResp(gin.H{
-			"agent_card_list": []*CardResponse{mockAgentCard()},
+			"agent_card_list": []*AgentResponse{mockAgentCard()},
 			"total":           1,
 			"current_page":    1,
 		}, c)
@@ -34,14 +34,14 @@ func GetAgentCardListHandler(c *gin.Context) {
 		ErrResp(nil, "fail to get page_size", "Invalid Request", c)
 		return
 	}
-	agentCardList, total, err := GetCardList(pageInt, pageSizeInt)
+	resp, total, err := GetAgentList(pageInt, pageSizeInt)
 	if err != nil {
 		ErrResp(nil, "fail to get agent card list", "Internal Error", c)
 		return
 	}
 
 	SuccessResp(gin.H{
-		"agent_card_list": agentCardList,
+		"agent_card_list": resp,
 		"total":           total,
 		"current_page":    pageInt,
 	}, c)
@@ -55,8 +55,12 @@ func GetAgentCardDetailHandler(c *gin.Context) {
 		return
 	}
 
-	agentID := c.Query("agent_id")
-	agentCard, err := GetCardResponse(agentID)
+	agentUID, err := strconv.ParseUint(c.Query("uid"), 10, 64)
+	if err != nil {
+		ErrResp(nil, "fail to get agent uid", "Invalid Request", c)
+		return
+	}
+	agentCard, err := GetCardResponse(agentUID)
 	if err != nil {
 		ErrResp(nil, "fail to get agent card detail", "Internal Error", c)
 		return
@@ -69,7 +73,7 @@ func GetAgentCardDetailHandler(c *gin.Context) {
 func GetAgentCardListByTrustModelHandler(c *gin.Context) {
 	if mock {
 		SuccessResp(gin.H{
-			"agent_card_list": []*CardResponse{mockAgentCard()},
+			"agent_card_list": []*AgentResponse{mockAgentCard()},
 			"total":           1,
 			"current_page":    1,
 		}, c)
@@ -96,15 +100,15 @@ func GetAgentCardListByTrustModelHandler(c *gin.Context) {
 		"trust_model": trustModel,
 	}).Info("GetCardResponseByTrustModel")
 
-	agentCardList, total, err := GetCardResponseByTrustModel(pageInt, pageSizeInt, trustModel)
+	agents, total, err := GetAgentListByTrustModel(pageInt, pageSizeInt, trustModel)
 	if err != nil {
 		ErrResp(nil, "fail to get agent card list by trust model", "Internal Error", c)
 		return
 	}
 	SuccessResp(gin.H{
-		"agent_card_list": agentCardList,
-		"total":           total,
-		"current_page":    pageInt,
+		"agent_list":   agents,
+		"total":        total,
+		"current_page": pageInt,
 	}, c)
 }
 
@@ -117,7 +121,7 @@ func GetTrustModelListHandler(c *gin.Context) {
 func GetAgentCardsSearchBySkillHandler(c *gin.Context) {
 	if mock {
 		SuccessResp(gin.H{
-			"agent_card_list": []*CardResponse{mockAgentCard()},
+			"agent_list": []*AgentResponse{mockAgentCard()},
 		}, c)
 		return
 	}
@@ -137,21 +141,15 @@ func GetAgentCardsSearchBySkillHandler(c *gin.Context) {
 		return
 	}
 
-	// agentCardList, total, err := SearchCardResponseBySkill(skill, pageInt, pageSizeInt)
-	// if err != nil {
-	// 	ErrResp(nil, "fail to get agent card list by skill", "Internal Error", c)
-	// 	return
-	// }
-	//todo: change to search by skill
-	agentCardList, total, err := SearchCardResponseByName(skill, pageInt, pageSizeInt)
+	agents, total, err := SearchAgentListBySkill(skill, pageInt, pageSizeInt)
 	if err != nil {
-		ErrResp(nil, "fail to get agent card list by name", "Internal Error", c)
+		ErrResp(nil, "fail to get agent card list by skill", "Internal Error", c)
 		return
 	}
 	SuccessResp(gin.H{
-		"agent_card_list": agentCardList,
-		"total":           total,
-		"current_page":    pageInt,
+		"agent_list":   agents,
+		"total":        total,
+		"current_page": pageInt,
 	}, c)
 }
 
@@ -170,38 +168,64 @@ func GetAgentCardsSearchByNameHandler(c *gin.Context) {
 		ErrResp(nil, "fail to get page_size", "Invalid Request", c)
 		return
 	}
-	agentCardList, total, err := SearchCardResponseByName(name, pageInt, pageSizeInt)
+	agents, total, err := SearchAgentListByName(name, pageInt, pageSizeInt)
 	if err != nil {
 		ErrResp(nil, "fail to get agent card list by name", "Internal Error", c)
 		return
 	}
 	SuccessResp(gin.H{
-		"agent_card_list": agentCardList,
-		"total":           total,
-		"current_page":    pageInt,
+		"agent_list":   agents,
+		"total":        total,
+		"current_page": pageInt,
 	}, c)
 }
 
-func CheckAuthFeedbackExistsHandler(c *gin.Context) {
-	clientAddress := c.Query("address")
-	agentServerID := c.Query("agent_id")
-	authed, agentClientID, err := model.CheckAuthFeedbackExists(clientAddress, agentServerID)
+// func GetFeedbackListHandler(c *gin.Context) {
+// 	agentUID, err := strconv.ParseUint(c.Query("uid"), 10, 64)
+// 	if err != nil {
+// 		ErrResp(nil, "fail to get agent uid", "Invalid Request", c)
+// 		return
+// 	}
+// 	page := c.Query("page")
+// 	pageSize := c.Query("page_size")
+// 	pageInt, err := strconv.Atoi(page)
+// 	if err != nil {
+// 		ErrResp(nil, "fail to get page", "Invalid Request", c)
+// 		return
+// 	}
+// 	if pageInt <= 0 {
+// 		pageInt = 1
+// 	}
+// 	pageSizeInt, err := strconv.Atoi(pageSize)
+// 	if err != nil {
+// 		ErrResp(nil, "fail to get page_size", "Invalid Request", c)
+// 		return
+// 	}
+// 	if pageSizeInt <= 0 {
+// 		pageSizeInt = 10
+// 	}
+
+// 	feedbacks, total, err := model.GetFeedbackList(agentUID, pageInt, pageSizeInt)
+// 	if err != nil {
+// 		ErrResp(nil, "fail to get feedback list", "Internal Error", c)
+// 		return
+// 	}
+// 	SuccessResp(gin.H{
+// 		"feedbacks": feedbacks,
+// 		"total":     total,
+// 	}, c)
+// }
+
+func GetAgentCommentsHandler(c *gin.Context) {
+	agentUID, err := strconv.ParseUint(c.Query("uid"), 10, 64)
 	if err != nil {
-		ErrResp(nil, "fail to check auth feedback exists", "Internal Error", c)
+		ErrResp(nil, "fail to get agent uid", "Invalid Request", c)
 		return
 	}
-	SuccessResp(gin.H{
-		"authed":          authed,
-		"agent_client_id": agentClientID,
-	}, c)
-}
 
-func GetCommentListHandler(c *gin.Context) {
-	agentID := c.Query("agent_id")
 	page := c.Query("page")
 	pageSize := c.Query("page_size")
 	pageInt, err := strconv.Atoi(page)
-	isAuthorized := c.Query("type") == "authorized"
 	if err != nil {
 		ErrResp(nil, "fail to get page", "Invalid Request", c)
 		return
@@ -217,10 +241,9 @@ func GetCommentListHandler(c *gin.Context) {
 	if pageSizeInt <= 0 {
 		pageSizeInt = 10
 	}
-
-	comments, total, err := model.GetCommentList(agentID, pageInt, pageSizeInt, isAuthorized)
+	comments, total, err := model.GetCommentsByAgentUID(agentUID, pageInt, pageSizeInt)
 	if err != nil {
-		ErrResp(nil, "fail to get comment list", "Internal Error", c)
+		ErrResp(nil, "fail to get agent comments", "Internal Error", c)
 		return
 	}
 	SuccessResp(gin.H{
@@ -229,8 +252,47 @@ func GetCommentListHandler(c *gin.Context) {
 	}, c)
 }
 
-func mockAgentCard() *CardResponse {
-	return &CardResponse{
+func GetAgentFeedbacksHandler(c *gin.Context) {
+	agentUID, err := strconv.ParseUint(c.Query("uid"), 10, 64)
+	if err != nil {
+		ErrResp(nil, "fail to get agent uid", "Invalid Request", c)
+		return
+	}
+	page := c.Query("page")
+	pageSize := c.Query("page_size")
+	pageInt, err := strconv.Atoi(page)
+	if err != nil {
+		ErrResp(nil, "fail to get page", "Invalid Request", c)
+		return
+	}
+	if pageInt <= 0 {
+		pageInt = 1
+	}
+
+	pageSizeInt, err := strconv.Atoi(pageSize)
+	if err != nil {
+		ErrResp(nil, "fail to get page_size", "Invalid Request", c)
+		return
+	}
+	if pageSizeInt <= 0 {
+		pageSizeInt = 10
+	}
+
+	feedbacks, total, err := model.GetFeedbacksByAgentUID(agentUID, pageInt, pageSizeInt)
+	if err != nil {
+		ErrResp(nil, "fail to get agent feedbacks", "Internal Error", c)
+		return
+	}
+	SuccessResp(gin.H{
+		"feedbacks": feedbacks,
+		"total":     total,
+	}, c)
+
+}
+
+func mockAgentCard() *AgentResponse {
+	return &AgentResponse{
+		UID:          1,
 		AgentID:      "1",
 		AgentDomain:  "passport.bnbattest.io",
 		AgentAddress: "0x0000000000000000000000000000000000000000",
@@ -264,5 +326,75 @@ func mockAgentCard() *CardResponse {
 		TrustModels:   []string{agentcard.TrustModelFeedback, agentcard.TrustModelInferenceValidation, agentcard.TrustModelTeeAttestation},
 		UserInterface: "https://passport.bnbattest.io",
 		Score:         10.0,
+	}
+}
+
+func mockFeedback() []*model.FeedbackResp {
+	return []*model.FeedbackResp{
+		{
+			UID:                1,
+			AgentUID:           1,
+			ChainID:            "97",
+			AgentID:            "1",
+			ReputationRegistry: "0x0000000000000000000000000000000000000000",
+			ClientAddress:      "0x0000000000000000000000000000000000000000",
+			FeedbackIndex:      1,
+			Score:              10,
+			Tag1:               "1",
+			Tag2:               "1",
+			FeedbackURI:        "1",
+			FeedbackHash:       "1",
+			TxHash:             "1",
+			Timestamps:         1,
+			Name:               "1",
+			Avatar:             "https://bnbattest.s3.ap-southeast-1.amazonaws.com/logo/bas.png",
+			Passport:           true,
+		},
+		{
+			UID:                2,
+			AgentUID:           2,
+			ChainID:            "97",
+			AgentID:            "2",
+			ReputationRegistry: "0x0000000000000000000000000000000000000000",
+			ClientAddress:      "0x0000000000000000000000000000000000000000",
+			FeedbackIndex:      2,
+			Score:              10,
+			Tag1:               "2",
+			Tag2:               "2",
+			FeedbackURI:        "2",
+			FeedbackHash:       "2",
+			TxHash:             "2",
+			Timestamps:         2,
+			Name:               "2",
+			Avatar:             "https://bnbattest.s3.ap-southeast-1.amazonaws.com/logo/bas.png",
+			Passport:           true,
+		},
+	}
+}
+
+func mockComment() []*model.Comment {
+	return []*model.Comment{
+		{
+			CommentAttestationID: "1",
+			Commenter:            "0x0000000000000000000000000000000000000000",
+			AgentUID:             1,
+			CommentText:          "1",
+			Score:                10,
+			Timestamps:           1,
+			Name:                 "1",
+			Avatar:               "https://bnbattest.s3.ap-southeast-1.amazonaws.com/logo/bas.png",
+			Passport:             true,
+		},
+		{
+			CommentAttestationID: "2",
+			Commenter:            "0x0000000000000000000000000000000000000000",
+			AgentUID:             2,
+			CommentText:          "2",
+			Score:                10,
+			Timestamps:           2,
+			Name:                 "2",
+			Avatar:               "https://bnbattest.s3.ap-southeast-1.amazonaws.com/logo/bas.png",
+			Passport:             true,
+		},
 	}
 }

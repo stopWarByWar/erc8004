@@ -1,35 +1,14 @@
 package agentcard
 
 import (
-	"fmt"
-	"os"
 	"testing"
 )
 
-func Test_unmarshalAgentCard(t *testing.T) {
-	data, err := os.ReadFile("agentCard_example.json")
-	if err != nil {
-		t.Fatalf("failed to read agent card example: %v", err)
-	}
-	agentCard, err := unmarshalAgentCard(data)
-	if err != nil {
-		t.Fatalf("failed to unmarshal agent card: %v", err)
-	}
-	fmt.Printf("agent card: %v", agentCard)
-}
+func TestGetAgentCardFromTokenURL(t *testing.T) {
 
-func Test_ValidateAgentCard(t *testing.T) {
-	data, err := os.ReadFile("agentCard_example.json")
+	agent, err := GetAgentCardFromTokenURL("0x10aa9ce20a1b03b18b4e2fd7b5d747add9a02030", "10", "https://bnbattest.s3.ap-southeast-1.amazonaws.com/agentCard/token_url.json", "1", "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb7", 1731196800)
 	if err != nil {
-		t.Fatalf("failed to read agent card example: %v", err)
+		t.Fatal(err)
 	}
-	agentCard, err := unmarshalAgentCard(data)
-	if err != nil {
-		t.Fatalf("failed to unmarshal agent card: %v", err)
-	}
-
-	agentCardList := ValidateAgentCard("agent_id", "0x1234567890123456789012345678901234567890", agentCard)
-	for _, card := range agentCardList {
-		fmt.Printf("agent card: %v", card)
-	}
+	t.Log(agent.AgentCard)
 }

@@ -4,9 +4,11 @@ import (
 	"agent_identity/indexer/processor"
 	"agent_identity/logger"
 	"agent_identity/model"
+	"context"
 	"flag"
 	"os"
 
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
@@ -32,27 +34,47 @@ func main() {
 		panic(err)
 	}
 
+	ethClient, err := ethclient.Dial(config.RpcURL)
+	if err != nil {
+		panic(err)
+	}
+
+	chainID, err := ethClient.ChainID(context.Background())
+	if err != nil {
+		panic(err)
+	}
+
 	model.InitDB(config.Dns)
 
-	createAgentIdx := processor.NewCreateAgentProcessor(config.IdentityAddr, config.ReputationAddr, config.ValidationAddr, config.CommentAddr, config.RpcURL, config.FetchBlockInterval, config.StartBlock, _logger)
+	createAgentIdx := processor.NewCreateAgentProcessor(config.Identity.Addr, ethClient, config.Identity.FetchBlockInterval, config.Identity.StartBlock, _logger)
 	go createAgentIdx.Process()
 
-	commentIdx := processor.NewCommentProcessor(config.StartBlock, config.FetchCommentLimit, config.FetchCommentInterval, config.CommentAttestor, _logger)
+	reputationIdx := processor.NewReputationProcessor(config.Reputation.Addr, ethClient, config.Reputation.FetchBlockInterval, config.Reputation.StartBlock, _logger)
+	go reputationIdx.Process()
+
+	commentIdx := processor.NewCommentProcessor(chainID.String(), config.Comment.StartBlock, config.Comment.Limit, config.Comment.FetchBlockInterval, _logger)
 	commentIdx.Process()
 }
 
 type Config struct {
-	IdentityAddr         string `yaml:"identity_addr"`
-	ReputationAddr       string `yaml:"reputation_addr"`
-	ValidationAddr       string `yaml:"validation_addr"`
-	CommentAddr          string `yaml:"comment_addr"`
-	CommentAttestor      string `yaml:"comment_attestor"`
-	RpcURL               string `yaml:"rpc_url"`
-	FetchBlockInterval   int64  `yaml:"fetch_block_interval"`
-	FetchCommentInterval int64  `yaml:"fetch_comment_interval"`
-	FetchCommentLimit    int    `yaml:"fetch_comment_limit"`
-	Dns                  string `yaml:"dns"`
-	StartBlock           uint64 `yaml:"start_block"`
+	RpcURL     string `yaml:"rpc_url"`
+	Dns        string `yaml:"dns"`
+	Reputation struct {
+		Addr               string `yaml:"addr"`
+		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
+		StartBlock         uint64 `yaml:"start_block"`
+	} `yaml:"reputation"`
+
+	Identity struct {
+		Addr               string `yaml:"addr"`
+		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
+		StartBlock         uint64 `yaml:"start_block"`
+	} `yaml:"identity"`
+	Comment struct {
+		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
+		StartBlock         uint64 `yaml:"start_block"`
+		Limit              int    `yaml:"limit"`
+	} `yaml:"comment"`
 }
 
 func initConf(confPath string) (*Config, error) {

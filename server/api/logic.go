@@ -5,32 +5,32 @@ import (
 	"math"
 )
 
-func GetCardResponse(agentID string) (*CardResponse, error) {
-	agentCard, err := model.GetAgentCard(agentID)
+func GetCardResponse(agentUID uint64) (*AgentResponse, error) {
+	agent, err := model.GetAgentByUID(agentUID)
 	if err != nil {
 		return nil, err
 	}
 
-	if agentCard == nil {
+	if agent == nil {
 		return nil, nil
 	}
 
-	skills, err := model.GetSkillsByAgentID(agentID)
+	skills, err := model.GetSkillsByAgentUID(agentUID)
 	if err != nil {
 		return nil, err
 	}
 
-	skillTags, err := model.GetSkillTagsByAgentID(agentID)
+	skillTags, err := model.GetSkillTagsByAgentUID(agentUID)
 	if err != nil {
 		return nil, err
 	}
 
-	provider, err := model.GetProviderByAgentID(agentID)
+	provider, err := model.GetProviderByAgentUID(agentUID)
 	if err != nil {
 		return nil, err
 	}
 
-	trustModels, err := model.GetTrustModelsByAgentID(agentID)
+	trustModels, err := model.GetTrustModelsByAgentUID(agentUID)
 	if err != nil {
 		return nil, err
 	}
@@ -55,113 +55,116 @@ func GetCardResponse(agentID string) (*CardResponse, error) {
 	}
 
 	score := 0.0
-	if agentCard.CommentCount > 0 {
-		score = math.Round(float64(agentCard.Score)/float64(agentCard.CommentCount)*10) / 10
+	if agent.CommentCount > 0 {
+		score = math.Round(float64(agent.Score)/float64(agent.CommentCount)*10) / 10
 	}
 
-	return &CardResponse{
-		AgentID:      agentCard.AgentID,
-		AgentDomain:  agentCard.AgentDomain,
-		AgentAddress: agentCard.AgentAddress,
-		ChainID:      agentCard.ChainID,
-		Namespace:    agentCard.Namespace,
-		Name:         agentCard.Name,
-		Description:  agentCard.Description,
-		URL:          agentCard.URL,
+	return &AgentResponse{
+		UID:          agent.UID,
+		AgentID:      agent.AgentID,
+		AgentDomain:  agent.A2AEndpoint,
+		AgentAddress: agent.AgentWallet,
+		ChainID:      agent.ChainID,
+		Namespace:    agent.Namespace,
+		Name:         agent.Name,
+		Description:  agent.Description,
+		URL:          agent.URL,
 		Provider: ProviderResponse{
 			Organization: provider.Organization,
 			URL:          provider.URL,
 		},
-		IconURL:          agentCard.IconURL,
-		Version:          agentCard.Version,
-		DocumentationURL: agentCard.DocumentationURL,
+		IconURL:          agent.Image,
+		Version:          agent.Version,
+		DocumentationURL: agent.DocumentationURL,
 		Skills:           skillTagsResponse,
 		TrustModels:      trustModelsResponse,
 		Score:            score,
+		UserInterface:    agent.UserInterfaceURL,
+		IdentityRegistry: agent.IdentityRegistry,
 	}, nil
 }
 
-func GetCardList(page, pageSize int) ([]*CardResponse, int64, error) {
-	agentCards, total, err := model.GetAgentList(page, pageSize)
+func GetAgentList(page, pageSize int) ([]*AgentResponse, int64, error) {
+	agents, total, err := model.GetAgentList(page, pageSize)
 	if err != nil {
 		return nil, 0, err
 	}
-	cards, err := formatCardResponse(agentCards)
+	resp, err := formatAgentResponse(agents)
+	if err != nil {
+		return nil, 0, err
+	}
+	return resp, total, nil
+}
+
+func GetAgentListByTrustModel(page, pageSize int, trustModel []string) ([]*AgentResponse, int64, error) {
+	agents, total, err := model.GetAgentsByTrustModel(page, pageSize, trustModel)
+	if err != nil {
+		return nil, 0, err
+	}
+	resp, err := formatAgentResponse(agents)
+	if err != nil {
+		return nil, 0, err
+	}
+	return resp, total, nil
+}
+
+func SearchAgentListBySkill(skill string, page, pageSize int) ([]*AgentResponse, int, error) {
+	agents, total, err := model.SearchAgentsBySkill(skill, page, pageSize)
+	if err != nil {
+		return nil, 0, err
+	}
+	cards, err := formatAgentResponse(agents)
 	if err != nil {
 		return nil, 0, err
 	}
 	return cards, total, nil
 }
 
-func GetCardResponseByTrustModel(page, pageSize int, trustModel []string) ([]*CardResponse, int64, error) {
-	agentCards, total, err := model.GetAgentCardsByTrustModel(page, pageSize, trustModel)
+func SearchAgentListByName(name string, page, pageSize int) ([]*AgentResponse, int, error) {
+	agents, total, err := model.SearchAgentsByName(name, page, pageSize)
 	if err != nil {
 		return nil, 0, err
 	}
-	cards, err := formatCardResponse(agentCards)
-	if err != nil {
-		return nil, 0, err
-	}
-	return cards, total, nil
-}
-
-func SearchCardResponseBySkill(skill string, page, pageSize int) ([]*CardResponse, int, error) {
-	agentCards, total, err := model.SearchSkillsAgentCards(skill, page, pageSize)
-	if err != nil {
-		return nil, 0, err
-	}
-	cards, err := formatCardResponse(agentCards)
+	cards, err := formatAgentResponse(agents)
 	if err != nil {
 		return nil, 0, err
 	}
 	return cards, total, nil
 }
 
-func SearchCardResponseByName(name string, page, pageSize int) ([]*CardResponse, int, error) {
-	agentCards, total, err := model.SearchAgentCardByName(name, page, pageSize)
-	if err != nil {
-		return nil, 0, err
-	}
-	cards, err := formatCardResponse(agentCards)
-	if err != nil {
-		return nil, 0, err
-	}
-	return cards, total, nil
-}
-
-func formatCardResponse(agentCards []*model.AgentCard) ([]*CardResponse, error) {
-	agentIDs := make([]string, 0, len(agentCards))
-	for _, agentCard := range agentCards {
-		agentIDs = append(agentIDs, agentCard.AgentID)
+func formatAgentResponse(agents []*model.Agent) ([]*AgentResponse, error) {
+	agentUIDs := make([]uint64, 0, len(agents))
+	for _, agent := range agents {
+		agentUIDs = append(agentUIDs, agent.UID)
 	}
 
-	var cards []*CardResponse
+	var resp []*AgentResponse
 
-	skills, err := model.GetSkillsByAgentIDs(agentIDs)
+	skills, err := model.GetSkillsByAgentUIDs(agentUIDs)
 	if err != nil {
 		return nil, err
 	}
 
-	skillTags, err := model.GetSkillTagsByAgentIDs(agentIDs)
+	skillTags, err := model.GetSkillTagsByAgentUIDs(agentUIDs)
 	if err != nil {
 		return nil, err
 	}
 
-	provider, err := model.GetProvidersByAgentIDs(agentIDs)
+	providers, err := model.GetProvidersByAgentUIDs(agentUIDs)
 	if err != nil {
 		return nil, err
 	}
 
-	trustModels, err := model.GetTrustModelsByAgentIDs(agentIDs)
+	trustModels, err := model.GetTrustModelsByAgentUIDs(agentUIDs)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, agentCard := range agentCards {
+	for _, agent := range agents {
 		var skillTagsResponse []SkillTagResponse
-		for _, skill := range skills[agentCard.AgentID] {
+		for _, skill := range skills[agent.UID] {
 			var tags []string
-			for _, skillTag := range skillTags[agentCard.AgentID][skill.ID] {
+			for _, skillTag := range skillTags[agent.UID][skill.ID] {
 				tags = append(tags, skillTag.Tag)
 			}
 			skillTagsResponse = append(skillTagsResponse, SkillTagResponse{
@@ -173,37 +176,39 @@ func formatCardResponse(agentCards []*model.AgentCard) ([]*CardResponse, error) 
 		}
 
 		var trustModelsResponse []string
-		for _, trustModel := range trustModels[agentCard.AgentID] {
+		for _, trustModel := range trustModels[agent.UID] {
 			trustModelsResponse = append(trustModelsResponse, trustModel.TrustModel)
 		}
 
 		score := 0.0
-		if agentCard.CommentCount > 0 {
-			score = math.Round(float64(agentCard.Score)/float64(agentCard.CommentCount)*10) / 10
+		if agent.CommentCount > 0 {
+			score = math.Round(float64(agent.Score)/float64(agent.CommentCount)*10) / 10
 		}
 
-		cards = append(cards, &CardResponse{
-			AgentID:      agentCard.AgentID,
-			AgentDomain:  agentCard.AgentDomain,
-			AgentAddress: agentCard.AgentAddress,
-			ChainID:      agentCard.ChainID,
-			Namespace:    agentCard.Namespace,
-			Name:         agentCard.Name,
-			Description:  agentCard.Description,
-			URL:          agentCard.URL,
+		resp = append(resp, &AgentResponse{
+			UID:          agent.UID,
+			AgentID:      agent.AgentID,
+			AgentDomain:  agent.A2AEndpoint,
+			AgentAddress: agent.AgentWallet,
+			ChainID:      agent.ChainID,
+			Namespace:    agent.Namespace,
+			Name:         agent.Name,
+			Description:  agent.Description,
+			URL:          agent.URL,
 			Provider: ProviderResponse{
-				Organization: provider[agentCard.AgentID].Organization,
-				URL:          provider[agentCard.AgentID].URL,
+				Organization: providers[agent.UID].Organization,
+				URL:          providers[agent.UID].URL,
 			},
-			IconURL:          agentCard.IconURL,
-			Version:          agentCard.Version,
-			DocumentationURL: agentCard.DocumentationURL,
+			IconURL:          agent.Image,
+			Version:          agent.Version,
+			DocumentationURL: agent.DocumentationURL,
 			Skills:           skillTagsResponse,
 			TrustModels:      trustModelsResponse,
-			UserInterface:    agentCard.UserInterface,
 			Score:            score,
+			UserInterface:    agent.UserInterfaceURL,
+			IdentityRegistry: agent.IdentityRegistry,
 		})
 	}
 
-	return cards, nil
+	return resp, nil
 }

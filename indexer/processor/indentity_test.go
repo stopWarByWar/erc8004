@@ -6,6 +6,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
@@ -29,15 +30,20 @@ func TestProcessor(t *testing.T) {
 
 	model.InitDB(config.Dns)
 
-	idx := NewCreateAgentProcessor(config.IdentityAddr, config.ReputationAddr, config.ValidationAddr, config.CommentAddr, config.RpcURL, config.FetchBlockInterval, config.StartBlock, _logger)
-	idx.Process()
+	ethClient, err := ethclient.Dial(config.RpcURL)
+	if err != nil {
+		panic(err)
+	}
+
+	idx := NewCreateAgentProcessor(config.IdentityAddr, ethClient, config.FetchBlockInterval, config.StartBlock, _logger)
+	// idx.Process()
+
+	idx.setAgentCardInserted()
 }
 
 type Config struct {
 	IdentityAddr       string `yaml:"identity_addr"`
 	ReputationAddr     string `yaml:"reputation_addr"`
-	ValidationAddr     string `yaml:"validation_addr"`
-	CommentAddr        string `yaml:"comment_addr"`
 	RpcURL             string `yaml:"rpc_url"`
 	FetchBlockInterval int64  `yaml:"fetch_block_interval"`
 	Dns                string `yaml:"dns"`

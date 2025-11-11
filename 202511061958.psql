@@ -1,0 +1,203 @@
+CREATE TABLE IF NOT EXISTS agent_registries (
+  agent_id varchar(255),
+  identity_registry char(42),
+  owner varchar(255),
+  token_url text,
+
+  chain_id char(42),
+  block_number bigint NOT NULL,
+  index bigint NOT NULL,
+  tx_hash char(66) NOT NULL PRIMARY KEY,
+  timestamps bigint,
+  inserted boolean
+);
+
+create index if not exists idx_agent_registries_item on agent_registries(chain_id,identity_registry,agent_id);
+
+-- Agent 表
+CREATE TABLE IF NOT EXISTS agents (
+  uid serial PRIMARY KEY,
+  agent_id varchar(255),
+  namespace varchar(255),
+  owner varchar(255),
+  token_url text,
+  agent_wallet varchar(255),
+  identity_registry varchar(255),
+  chain_id varchar(255),
+  a2a_endpoint text,
+  type varchar(255),
+  name varchar(255),
+  description text,
+  url text,
+  image varchar(255),
+  version varchar(255),
+  documentation_url text,
+  score bigint DEFAULT 0,
+  comment_count bigint DEFAULT 0,
+  timestamps bigint,
+  user_interface_url varchar(500)
+);
+
+CREATE INDEX IF NOT EXISTS idx_agents_owner ON agents(owner);
+CREATE INDEX IF NOT EXISTS idx_agents_chain_id ON agents(chain_id);
+CREATE INDEX IF NOT EXISTS idx_agents_identity_registry ON agents(identity_registry);
+CREATE INDEX IF NOT EXISTS idx_agents_item ON agents(chain_id,identity_registry,agent_id);
+CREATE INDEX IF NOT EXISTS idx_agents_agent_wallet ON agents(agent_wallet);
+
+
+CREATE TABLE IF NOT EXISTS capabilities (
+  agent_uid bigint PRIMARY KEY,
+  streaming boolean,
+  push_notifications boolean,
+  state_transition_history boolean
+);  
+
+CREATE TABLE IF NOT EXISTS skills (
+  agent_uid bigint NOT NULL,
+  id varchar(255) NOT NULL,
+  name varchar(255),
+  description text,
+  PRIMARY KEY (agent_uid, id)
+);
+CREATE INDEX IF NOT EXISTS idx_skills_agent_uid ON skills(agent_uid);
+
+CREATE TABLE IF NOT EXISTS skill_tags (
+  agent_uid bigint NOT NULL,
+  id varchar(255) NOT NULL,
+  tag varchar(255) NOT NULL,
+  PRIMARY KEY (agent_uid, id, tag)
+);
+CREATE INDEX IF NOT EXISTS idx_skill_tags_agent_uid ON skill_tags(agent_uid);
+
+CREATE TABLE IF NOT EXISTS providers (
+  agent_uid bigint NOT NULL,
+  organization varchar(255) NOT NULL,
+  url varchar(255),
+  PRIMARY KEY (agent_uid, organization)
+);
+
+CREATE TABLE IF NOT EXISTS trust_models (
+  agent_uid bigint NOT NULL,
+  trust_model varchar(255) NOT NULL,
+  PRIMARY KEY (agent_uid, trust_model)
+);
+CREATE INDEX IF NOT EXISTS idx_trust_models_agent_uid ON trust_models(agent_uid);
+
+CREATE TABLE IF NOT EXISTS extensions (
+  agent_uid bigint NOT NULL,
+  uri text NOT NULL,
+  required boolean,
+  description text,
+  PRIMARY KEY (agent_uid, uri)
+);
+CREATE INDEX IF NOT EXISTS idx_extensions_agent_uid ON extensions(agent_uid);
+
+
+
+-- Feedback 表
+CREATE TABLE IF NOT EXISTS feedbacks (
+  uid serial PRIMARY KEY,
+  agent_uid bigint NOT NULL,
+  chain_id varchar(255) NOT NULL,
+  agent_id varchar(255) NOT NULL,
+  reputation_registry varchar(255) NOT NULL,
+  client_address varchar(255) NOT NULL,
+  feedback_index bigint NOT NULL,
+  score smallint,
+  tag1 varchar(255),
+  tag2 varchar(255),
+  feedback_uri text,
+  feedback_hash varchar(255),
+  block_number bigint,
+  index bigint,
+  tx_hash varchar(255),
+  revoked boolean DEFAULT false,
+  fetched boolean DEFAULT false,
+  timestamps bigint
+);
+
+CREATE INDEX IF NOT EXISTS idx_feedbacks_agent_id ON feedbacks(agent_id);
+CREATE INDEX IF NOT EXISTS idx_feedbacks_client_address ON feedbacks(client_address);
+CREATE INDEX IF NOT EXISTS idx_feedbacks_reputation_registry ON feedbacks(reputation_registry);
+CREATE INDEX IF NOT EXISTS idx_feedbacks_block_number ON feedbacks(block_number);
+CREATE INDEX IF NOT EXISTS idx_feedbacks_revoked ON feedbacks(revoked);
+
+-- Response 表
+CREATE TABLE IF NOT EXISTS responses (
+  uid serial PRIMARY KEY,
+  agent_uid bigint NOT NULL,
+  feedback_uid bigint NOT NULL,
+  chain_id varchar(255) NOT NULL,
+  agent_id varchar(255) NOT NULL,
+  reputation_registry varchar(255) NOT NULL,
+  client_address varchar(255) NOT NULL,
+  feedback_index bigint NOT NULL,
+  responder varchar(255),
+  response_uri text,
+  response_hash varchar(255),
+  block_number bigint,
+  index bigint,
+  tx_hash varchar(255),
+  fetched boolean DEFAULT false,
+  timestamps bigint
+);
+
+CREATE INDEX IF NOT EXISTS idx_responses_agent_id ON responses(agent_id);
+CREATE INDEX IF NOT EXISTS idx_responses_client_address ON responses(client_address);
+CREATE INDEX IF NOT EXISTS idx_responses_responder ON responses(responder);
+CREATE INDEX IF NOT EXISTS idx_responses_reputation_registry ON responses(reputation_registry);
+CREATE INDEX IF NOT EXISTS idx_responses_block_number ON responses(block_number);
+
+
+CREATE or replace FUNCTION update_agent_score_and_comment_count() RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.score > 0 THEN
+    UPDATE agents 
+    SET 
+    score = score + NEW.score,
+    comment_count = comment_count + 1
+    WHERE agents.uid = NEW.agent_uid;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_score_and_cnt_trigger AFTER INSERT ON feedbacks FOR EACH ROW EXECUTE FUNCTION update_agent_score_and_comment_count();
+
+
+CREATE or replace FUNCTION update_agent_score_and_comment_count_on_feedback_revoked() RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE agents 
+  SET 
+  score = score - NEW.score,
+  comment_count = comment_count - 1
+  WHERE agents.uid = NEW.agent_uid;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+CREATE TRIGGER update_agent_score_and_cnt_on_revoked_trigger AFTER UPDATE ON feedbacks FOR EACH ROW EXECUTE FUNCTION update_agent_score_and_comment_count_on_feedback_revoked();
+
+
+CREATE TABLE IF NOT EXISTS agent_comments (
+  comment_attestation_id char(66) PRIMARY KEY,
+  agent_uid bigint NOT NULL,
+  chain_id char(42) NOT NULL,
+  identity_registry char(42) NOT NULL,
+  agent_id varchar(255) NOT NULL,
+  commenter char(42) NOT NULL,
+  comment_text text NOT NULL,
+  score int NOT NULL,
+  timestamps bigint NOT NULL,
+  block bigint NOT NULL,
+  index bigint NOT NULL,
+  tx_hash char(66) NOT NULL,
+  revoked boolean NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_agent_comments_agent_uid ON agent_comments(agent_uid);
+CREATE INDEX IF NOT EXISTS idx_agent_comments_chain_id ON agent_comments(chain_id);
+CREATE INDEX IF NOT EXISTS idx_agent_comments_identity_registry ON agent_comments(identity_registry);
+CREATE INDEX IF NOT EXISTS idx_agent_comments_agent_id ON agent_comments(agent_id);
+CREATE INDEX IF NOT EXISTS idx_agent_comments_commenter ON agent_comments(commenter);
+CREATE INDEX IF NOT EXISTS idx_agent_comments_tx_hash ON agent_comments(tx_hash);
+CREATE INDEX IF NOT EXISTS idx_agent_comments_revoked ON agent_comments(revoked);

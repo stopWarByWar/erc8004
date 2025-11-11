@@ -9,129 +9,135 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
 	"trpc.group/trpc-go/trpc-a2a-go/server"
 )
 
-func GetAgentCard(address, agentID, domain string) ([]*AgentCard, error) {
-	agentCard, err := GetAgentCardFromDomain(domain)
+func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistryAddr string, timestamps uint64) (*Agent, error) {
+	response, err := http.Get(tokenURL)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("network error: failed to get token URL response: %v", err)
 	}
-	return ValidateAgentCard(agentID, address, agentCard), nil
-}
 
-func ValidateAgentCard(agentID string, address string, agentCard *AgentCard) []*AgentCard {
-	var agentCards []*AgentCard
-	for _, agentRegistration := range agentCard.Registrations {
-		namespace, chainID, _address, err := formatAddress(agentRegistration.AgentAddress)
-		if err != nil {
-			continue
-		}
-		if agentRegistration.AgentID == agentID && common.HexToAddress(_address).String() == common.HexToAddress(address).String() {
-			if !validateSignature(agentRegistration.Signature, address) {
-				continue
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return nil, fmt.Errorf("HTTP request failed, status: %s, status code: %d", response.Status, response.StatusCode)
+	}
+
+	defer response.Body.Close()
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("network error: failed to read token URL response body: %v", err)
+	}
+	var tokenURLResponse TokenURLResponse
+	err = json.Unmarshal(body, &tokenURLResponse)
+	if err != nil {
+		return nil, fmt.Errorf("data error: failed to unmarshal token URL response body: %v", err)
+	}
+
+	var agent = &Agent{
+		Type:             tokenURLResponse.Type,
+		Name:             tokenURLResponse.Name,
+		Description:      tokenURLResponse.Description,
+		Image:            tokenURLResponse.Image,
+		SupportedTrust:   tokenURLResponse.SupportedTrust,
+		AgentID:          tokenId,
+		TokenURL:         tokenURL,
+		ChainID:          chainID,
+		Owner:            owner,
+		Timestamps:       timestamps,
+		UserInterfaceURL: tokenURLResponse.UserInterfaceURL,
+	}
+
+	var agentCard *server.AgentCard
+
+	for _, endpoint := range tokenURLResponse.Endpoints {
+		if endpoint.Name == "A2A" {
+			agentCard, err = getAgentCardFromA2AEndpoint(endpoint.Endpoint)
+			if err != nil {
+				return nil, err
 			}
-			newCard := formatAgentCard(agentCard)
-			newCard.ChainID = chainID
-			newCard.Namespace = namespace
-			newCard.Signature = agentRegistration.Signature
-			newCard.AgentID = agentRegistration.AgentID
-			newCard.AgentAddress = _address
-			agentCards = append(agentCards, newCard)
+			agent.AgentCard = agentCard
+			agent.Endpoint = endpoint.Endpoint
+		}
+
+		if endpoint.Name == "agentWallet" {
+			namespace, _chainID, agentWallet, err := formatAddress(endpoint.Endpoint)
+			if err != nil {
+				return nil, fmt.Errorf("data error: failed to format address: %v", err)
+			}
+			if namespace == "eip155" && _chainID == chainID {
+				agent.Namespace = namespace
+				agent.AgentWallet = agentWallet
+			}
 		}
 	}
-	return agentCards
+
+	if tokenURLResponse.Registrations != nil {
+		for _, registration := range tokenURLResponse.Registrations {
+			if strconv.FormatUint(registration.AgentID, 10) == tokenId {
+				namespace, _chainID, registryAddr, err := formatAddress(registration.AgentRegistry)
+				if err != nil {
+					return nil, fmt.Errorf("data error: failed to format address: %v", err)
+				}
+				if namespace == "eip155" && _chainID == chainID && registryAddr == identityRegistryAddr {
+					agent.IdentityRegistry = registryAddr
+					agent.Namespace = namespace
+				}
+			}
+		}
+	}
+
+	return agent, nil
 }
 
-func GetAgentCardFromDomain(domain string) (*AgentCard, error) {
-	if !strings.HasSuffix(domain, ".well-known/agent-card.json") {
-		return nil, fmt.Errorf("invalid domain: %s", domain)
+func getAgentCardFromA2AEndpoint(endpoint string) (*server.AgentCard, error) {
+	if !validateA2AEndpoint(endpoint) {
+		return nil, fmt.Errorf("invalid A2A endpoint: %s", endpoint)
 	}
-	response, err := http.Get(domain)
+
+	response, err := http.Get(endpoint)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("network error: failed to get A2A endpoint response: %v", err)
 	}
 	defer response.Body.Close()
 
-	// Add HTTP error handling with English error message
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		return nil, errors.New("HTTP request failed, status: " + response.Status + ", status code: " + strconv.Itoa(response.StatusCode))
+		return nil, fmt.Errorf("HTTP request failed, status: %s, status code: %d", response.Status, response.StatusCode)
 	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("network error: failed to read A2A endpoint response body: %v", err)
+	}
+	if len(body) == 0 {
+		return nil, fmt.Errorf("empty response body")
 	}
 	agentCard, err := unmarshalAgentCard(body)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("data error: failed to unmarshal A2A endpoint response body: %v", err)
 	}
-	agentCard.Domain = domain
 	return agentCard, nil
 }
 
-func unmarshalAgentCard(body []byte) (*AgentCard, error) {
-	var agentCard *AgentCard
+func unmarshalAgentCard(body []byte) (*server.AgentCard, error) {
+	var agentCard *server.AgentCard
 	err := json.Unmarshal(body, &agentCard)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("data error: failed to unmarshal A2A endpoint response body: %v", err)
 	}
 	return agentCard, nil
 }
-
-var errInvalidAddressFormat = errors.New("invalid address format")
 
 func formatAddress(address string) (string, string, string, error) {
 	addressSlice := strings.Split(address, ":")
 	if len(addressSlice) != 3 {
-		return "", "", "", errInvalidAddressFormat
+		return "", "", "", errors.New("invalid address format")
 	}
 	return addressSlice[0], addressSlice[1], addressSlice[2], nil
 }
-
-// todo: validate signature
-func validateSignature(signature string, address string) bool {
+func validateA2AEndpoint(endpoint string) bool {
+	//检查https://agent.example/.well-known/agent-card.json这个格式
+	if !strings.HasSuffix(endpoint, "/.well-known/agent-card.json") || !strings.HasPrefix(endpoint, "https://") {
+		return false
+	}
 	return true
-}
-
-func formatAgentCard(agentCard *AgentCard) *AgentCard {
-	if agentCard == nil {
-		return nil
-	}
-
-	// Deep copy embedded server.AgentCard via JSON round-trip to handle maps/slices/pointers safely.
-	var embeddedCopy server.AgentCard
-	if data, err := json.Marshal(agentCard.AgentCard); err == nil {
-		if err := json.Unmarshal(data, &embeddedCopy); err != nil {
-			// Fallback to shallow copy if JSON unmarshal fails.
-			embeddedCopy = agentCard.AgentCard
-		}
-	} else {
-		// Fallback to shallow copy if JSON marshal fails.
-		embeddedCopy = agentCard.AgentCard
-	}
-
-	// Deep copy simple slices/structs defined in this package.
-	var trustModelsCopy []string
-	if len(agentCard.TrustModels) > 0 {
-		trustModelsCopy = append(make([]string, 0, len(agentCard.TrustModels)), agentCard.TrustModels...)
-	}
-
-	var registrationsCopy []Registration
-	if len(agentCard.Registrations) > 0 {
-		registrationsCopy = make([]Registration, len(agentCard.Registrations))
-		copy(registrationsCopy, agentCard.Registrations)
-	}
-
-	return &AgentCard{
-		Domain:          agentCard.Domain,
-		AgentCard:       embeddedCopy,
-		TrustModels:     trustModelsCopy,
-		Registrations:   registrationsCopy,
-		FeedbackDataURI: agentCard.FeedbackDataURI,
-		ChainID:         agentCard.ChainID,
-		Namespace:       agentCard.Namespace,
-		UserInterface:   agentCard.UserInterface,
-	}
 }

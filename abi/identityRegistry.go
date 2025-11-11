@@ -29,16 +29,15 @@ var (
 	_ = abi.ConvertType
 )
 
-// IIdentityRegistryAgentInfo is an auto generated low-level Go binding around an user-defined struct.
-type IIdentityRegistryAgentInfo struct {
-	AgentId      *big.Int
-	AgentDomain  string
-	AgentAddress common.Address
+// IdentityRegistryMetadataEntry is an auto generated low-level Go binding around an user-defined struct.
+type IdentityRegistryMetadataEntry struct {
+	Key   string
+	Value []byte
 }
 
 // IdentityRegistryMetaData contains all meta data concerning the IdentityRegistry contract.
 var IdentityRegistryMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"AddressAlreadyRegistered\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"AgentNotFound\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"DomainAlreadyRegistered\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidDomain\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UnauthorizedRegistration\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UnauthorizedUpdate\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"agentDomain\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"agentAddress\",\"type\":\"address\"}],\"name\":\"AgentRegistered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"agentDomain\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"agentAddress\",\"type\":\"address\"}],\"name\":\"AgentUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"version\",\"type\":\"uint8\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"}],\"name\":\"agentExists\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"exists\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"}],\"name\":\"getAgent\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"agentDomain\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"agentAddress\",\"type\":\"address\"}],\"internalType\":\"structIIdentityRegistry.AgentInfo\",\"name\":\"agentInfo\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAgentCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"count\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"agentDomain\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"agentAddress\",\"type\":\"address\"}],\"name\":\"newAgent\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"agentAddress\",\"type\":\"address\"}],\"name\":\"resolveByAddress\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"agentDomain\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"agentAddress\",\"type\":\"address\"}],\"internalType\":\"structIIdentityRegistry.AgentInfo\",\"name\":\"agentInfo\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"agentDomain\",\"type\":\"string\"}],\"name\":\"resolveByDomain\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"agentDomain\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"agentAddress\",\"type\":\"address\"}],\"internalType\":\"structIIdentityRegistry.AgentInfo\",\"name\":\"agentInfo\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"newAgentDomain\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"newAgentAddress\",\"type\":\"address\"}],\"name\":\"updateAgent\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"success\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"ERC721IncorrectOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"ERC721InsufficientApproval\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"approver\",\"type\":\"address\"}],\"name\":\"ERC721InvalidApprover\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"ERC721InvalidOperator\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"ERC721InvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"receiver\",\"type\":\"address\"}],\"name\":\"ERC721InvalidReceiver\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"ERC721InvalidSender\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"ERC721NonexistentToken\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"approved\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"approved\",\"type\":\"bool\"}],\"name\":\"ApprovalForAll\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_fromTokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_toTokenId\",\"type\":\"uint256\"}],\"name\":\"BatchMetadataUpdate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"string\",\"name\":\"indexedKey\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"key\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"value\",\"type\":\"bytes\"}],\"name\":\"MetadataSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"MetadataUpdate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenURI\",\"type\":\"string\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"Registered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"newUri\",\"type\":\"string\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"updatedBy\",\"type\":\"address\"}],\"name\":\"UriUpdated\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getApproved\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"key\",\"type\":\"string\"}],\"name\":\"getMetadata\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"isApprovedForAll\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"ownerOf\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"register\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenUri\",\"type\":\"string\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"key\",\"type\":\"string\"},{\"internalType\":\"bytes\",\"name\":\"value\",\"type\":\"bytes\"}],\"internalType\":\"structIdentityRegistry.MetadataEntry[]\",\"name\":\"metadata\",\"type\":\"tuple[]\"}],\"name\":\"register\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenUri\",\"type\":\"string\"}],\"name\":\"register\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"safeTransferFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"safeTransferFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"newUri\",\"type\":\"string\"}],\"name\":\"setAgentUri\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"approved\",\"type\":\"bool\"}],\"name\":\"setApprovalForAll\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"key\",\"type\":\"string\"},{\"internalType\":\"bytes\",\"name\":\"value\",\"type\":\"bytes\"}],\"name\":\"setMetadata\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"tokenURI\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // IdentityRegistryABI is the input ABI used to generate the binding from.
@@ -187,105 +186,12 @@ func (_IdentityRegistry *IdentityRegistryTransactorRaw) Transact(opts *bind.Tran
 	return _IdentityRegistry.Contract.contract.Transact(opts, method, params...)
 }
 
-// VERSION is a free data retrieval call binding the contract method 0xffa1ad74.
+// BalanceOf is a free data retrieval call binding the contract method 0x70a08231.
 //
-// Solidity: function VERSION() view returns(string)
-func (_IdentityRegistry *IdentityRegistryCaller) VERSION(opts *bind.CallOpts) (string, error) {
+// Solidity: function balanceOf(address owner) view returns(uint256)
+func (_IdentityRegistry *IdentityRegistryCaller) BalanceOf(opts *bind.CallOpts, owner common.Address) (*big.Int, error) {
 	var out []interface{}
-	err := _IdentityRegistry.contract.Call(opts, &out, "VERSION")
-
-	if err != nil {
-		return *new(string), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(string)).(*string)
-
-	return out0, err
-
-}
-
-// VERSION is a free data retrieval call binding the contract method 0xffa1ad74.
-//
-// Solidity: function VERSION() view returns(string)
-func (_IdentityRegistry *IdentityRegistrySession) VERSION() (string, error) {
-	return _IdentityRegistry.Contract.VERSION(&_IdentityRegistry.CallOpts)
-}
-
-// VERSION is a free data retrieval call binding the contract method 0xffa1ad74.
-//
-// Solidity: function VERSION() view returns(string)
-func (_IdentityRegistry *IdentityRegistryCallerSession) VERSION() (string, error) {
-	return _IdentityRegistry.Contract.VERSION(&_IdentityRegistry.CallOpts)
-}
-
-// AgentExists is a free data retrieval call binding the contract method 0xde99f157.
-//
-// Solidity: function agentExists(uint256 agentId) view returns(bool exists)
-func (_IdentityRegistry *IdentityRegistryCaller) AgentExists(opts *bind.CallOpts, agentId *big.Int) (bool, error) {
-	var out []interface{}
-	err := _IdentityRegistry.contract.Call(opts, &out, "agentExists", agentId)
-
-	if err != nil {
-		return *new(bool), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
-
-	return out0, err
-
-}
-
-// AgentExists is a free data retrieval call binding the contract method 0xde99f157.
-//
-// Solidity: function agentExists(uint256 agentId) view returns(bool exists)
-func (_IdentityRegistry *IdentityRegistrySession) AgentExists(agentId *big.Int) (bool, error) {
-	return _IdentityRegistry.Contract.AgentExists(&_IdentityRegistry.CallOpts, agentId)
-}
-
-// AgentExists is a free data retrieval call binding the contract method 0xde99f157.
-//
-// Solidity: function agentExists(uint256 agentId) view returns(bool exists)
-func (_IdentityRegistry *IdentityRegistryCallerSession) AgentExists(agentId *big.Int) (bool, error) {
-	return _IdentityRegistry.Contract.AgentExists(&_IdentityRegistry.CallOpts, agentId)
-}
-
-// GetAgent is a free data retrieval call binding the contract method 0x2de5aaf7.
-//
-// Solidity: function getAgent(uint256 agentId) view returns((uint256,string,address) agentInfo)
-func (_IdentityRegistry *IdentityRegistryCaller) GetAgent(opts *bind.CallOpts, agentId *big.Int) (IIdentityRegistryAgentInfo, error) {
-	var out []interface{}
-	err := _IdentityRegistry.contract.Call(opts, &out, "getAgent", agentId)
-
-	if err != nil {
-		return *new(IIdentityRegistryAgentInfo), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(IIdentityRegistryAgentInfo)).(*IIdentityRegistryAgentInfo)
-
-	return out0, err
-
-}
-
-// GetAgent is a free data retrieval call binding the contract method 0x2de5aaf7.
-//
-// Solidity: function getAgent(uint256 agentId) view returns((uint256,string,address) agentInfo)
-func (_IdentityRegistry *IdentityRegistrySession) GetAgent(agentId *big.Int) (IIdentityRegistryAgentInfo, error) {
-	return _IdentityRegistry.Contract.GetAgent(&_IdentityRegistry.CallOpts, agentId)
-}
-
-// GetAgent is a free data retrieval call binding the contract method 0x2de5aaf7.
-//
-// Solidity: function getAgent(uint256 agentId) view returns((uint256,string,address) agentInfo)
-func (_IdentityRegistry *IdentityRegistryCallerSession) GetAgent(agentId *big.Int) (IIdentityRegistryAgentInfo, error) {
-	return _IdentityRegistry.Contract.GetAgent(&_IdentityRegistry.CallOpts, agentId)
-}
-
-// GetAgentCount is a free data retrieval call binding the contract method 0x91cab63e.
-//
-// Solidity: function getAgentCount() view returns(uint256 count)
-func (_IdentityRegistry *IdentityRegistryCaller) GetAgentCount(opts *bind.CallOpts) (*big.Int, error) {
-	var out []interface{}
-	err := _IdentityRegistry.contract.Call(opts, &out, "getAgentCount")
+	err := _IdentityRegistry.contract.Call(opts, &out, "balanceOf", owner)
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -297,18 +203,142 @@ func (_IdentityRegistry *IdentityRegistryCaller) GetAgentCount(opts *bind.CallOp
 
 }
 
-// GetAgentCount is a free data retrieval call binding the contract method 0x91cab63e.
+// BalanceOf is a free data retrieval call binding the contract method 0x70a08231.
 //
-// Solidity: function getAgentCount() view returns(uint256 count)
-func (_IdentityRegistry *IdentityRegistrySession) GetAgentCount() (*big.Int, error) {
-	return _IdentityRegistry.Contract.GetAgentCount(&_IdentityRegistry.CallOpts)
+// Solidity: function balanceOf(address owner) view returns(uint256)
+func (_IdentityRegistry *IdentityRegistrySession) BalanceOf(owner common.Address) (*big.Int, error) {
+	return _IdentityRegistry.Contract.BalanceOf(&_IdentityRegistry.CallOpts, owner)
 }
 
-// GetAgentCount is a free data retrieval call binding the contract method 0x91cab63e.
+// BalanceOf is a free data retrieval call binding the contract method 0x70a08231.
 //
-// Solidity: function getAgentCount() view returns(uint256 count)
-func (_IdentityRegistry *IdentityRegistryCallerSession) GetAgentCount() (*big.Int, error) {
-	return _IdentityRegistry.Contract.GetAgentCount(&_IdentityRegistry.CallOpts)
+// Solidity: function balanceOf(address owner) view returns(uint256)
+func (_IdentityRegistry *IdentityRegistryCallerSession) BalanceOf(owner common.Address) (*big.Int, error) {
+	return _IdentityRegistry.Contract.BalanceOf(&_IdentityRegistry.CallOpts, owner)
+}
+
+// GetApproved is a free data retrieval call binding the contract method 0x081812fc.
+//
+// Solidity: function getApproved(uint256 tokenId) view returns(address)
+func (_IdentityRegistry *IdentityRegistryCaller) GetApproved(opts *bind.CallOpts, tokenId *big.Int) (common.Address, error) {
+	var out []interface{}
+	err := _IdentityRegistry.contract.Call(opts, &out, "getApproved", tokenId)
+
+	if err != nil {
+		return *new(common.Address), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
+
+	return out0, err
+
+}
+
+// GetApproved is a free data retrieval call binding the contract method 0x081812fc.
+//
+// Solidity: function getApproved(uint256 tokenId) view returns(address)
+func (_IdentityRegistry *IdentityRegistrySession) GetApproved(tokenId *big.Int) (common.Address, error) {
+	return _IdentityRegistry.Contract.GetApproved(&_IdentityRegistry.CallOpts, tokenId)
+}
+
+// GetApproved is a free data retrieval call binding the contract method 0x081812fc.
+//
+// Solidity: function getApproved(uint256 tokenId) view returns(address)
+func (_IdentityRegistry *IdentityRegistryCallerSession) GetApproved(tokenId *big.Int) (common.Address, error) {
+	return _IdentityRegistry.Contract.GetApproved(&_IdentityRegistry.CallOpts, tokenId)
+}
+
+// GetMetadata is a free data retrieval call binding the contract method 0xcb4799f2.
+//
+// Solidity: function getMetadata(uint256 agentId, string key) view returns(bytes)
+func (_IdentityRegistry *IdentityRegistryCaller) GetMetadata(opts *bind.CallOpts, agentId *big.Int, key string) ([]byte, error) {
+	var out []interface{}
+	err := _IdentityRegistry.contract.Call(opts, &out, "getMetadata", agentId, key)
+
+	if err != nil {
+		return *new([]byte), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new([]byte)).(*[]byte)
+
+	return out0, err
+
+}
+
+// GetMetadata is a free data retrieval call binding the contract method 0xcb4799f2.
+//
+// Solidity: function getMetadata(uint256 agentId, string key) view returns(bytes)
+func (_IdentityRegistry *IdentityRegistrySession) GetMetadata(agentId *big.Int, key string) ([]byte, error) {
+	return _IdentityRegistry.Contract.GetMetadata(&_IdentityRegistry.CallOpts, agentId, key)
+}
+
+// GetMetadata is a free data retrieval call binding the contract method 0xcb4799f2.
+//
+// Solidity: function getMetadata(uint256 agentId, string key) view returns(bytes)
+func (_IdentityRegistry *IdentityRegistryCallerSession) GetMetadata(agentId *big.Int, key string) ([]byte, error) {
+	return _IdentityRegistry.Contract.GetMetadata(&_IdentityRegistry.CallOpts, agentId, key)
+}
+
+// IsApprovedForAll is a free data retrieval call binding the contract method 0xe985e9c5.
+//
+// Solidity: function isApprovedForAll(address owner, address operator) view returns(bool)
+func (_IdentityRegistry *IdentityRegistryCaller) IsApprovedForAll(opts *bind.CallOpts, owner common.Address, operator common.Address) (bool, error) {
+	var out []interface{}
+	err := _IdentityRegistry.contract.Call(opts, &out, "isApprovedForAll", owner, operator)
+
+	if err != nil {
+		return *new(bool), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
+
+	return out0, err
+
+}
+
+// IsApprovedForAll is a free data retrieval call binding the contract method 0xe985e9c5.
+//
+// Solidity: function isApprovedForAll(address owner, address operator) view returns(bool)
+func (_IdentityRegistry *IdentityRegistrySession) IsApprovedForAll(owner common.Address, operator common.Address) (bool, error) {
+	return _IdentityRegistry.Contract.IsApprovedForAll(&_IdentityRegistry.CallOpts, owner, operator)
+}
+
+// IsApprovedForAll is a free data retrieval call binding the contract method 0xe985e9c5.
+//
+// Solidity: function isApprovedForAll(address owner, address operator) view returns(bool)
+func (_IdentityRegistry *IdentityRegistryCallerSession) IsApprovedForAll(owner common.Address, operator common.Address) (bool, error) {
+	return _IdentityRegistry.Contract.IsApprovedForAll(&_IdentityRegistry.CallOpts, owner, operator)
+}
+
+// Name is a free data retrieval call binding the contract method 0x06fdde03.
+//
+// Solidity: function name() view returns(string)
+func (_IdentityRegistry *IdentityRegistryCaller) Name(opts *bind.CallOpts) (string, error) {
+	var out []interface{}
+	err := _IdentityRegistry.contract.Call(opts, &out, "name")
+
+	if err != nil {
+		return *new(string), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(string)).(*string)
+
+	return out0, err
+
+}
+
+// Name is a free data retrieval call binding the contract method 0x06fdde03.
+//
+// Solidity: function name() view returns(string)
+func (_IdentityRegistry *IdentityRegistrySession) Name() (string, error) {
+	return _IdentityRegistry.Contract.Name(&_IdentityRegistry.CallOpts)
+}
+
+// Name is a free data retrieval call binding the contract method 0x06fdde03.
+//
+// Solidity: function name() view returns(string)
+func (_IdentityRegistry *IdentityRegistryCallerSession) Name() (string, error) {
+	return _IdentityRegistry.Contract.Name(&_IdentityRegistry.CallOpts)
 }
 
 // Owner is a free data retrieval call binding the contract method 0x8da5cb5b.
@@ -342,108 +372,212 @@ func (_IdentityRegistry *IdentityRegistryCallerSession) Owner() (common.Address,
 	return _IdentityRegistry.Contract.Owner(&_IdentityRegistry.CallOpts)
 }
 
-// ResolveByAddress is a free data retrieval call binding the contract method 0x0c638107.
+// OwnerOf is a free data retrieval call binding the contract method 0x6352211e.
 //
-// Solidity: function resolveByAddress(address agentAddress) view returns((uint256,string,address) agentInfo)
-func (_IdentityRegistry *IdentityRegistryCaller) ResolveByAddress(opts *bind.CallOpts, agentAddress common.Address) (IIdentityRegistryAgentInfo, error) {
+// Solidity: function ownerOf(uint256 tokenId) view returns(address)
+func (_IdentityRegistry *IdentityRegistryCaller) OwnerOf(opts *bind.CallOpts, tokenId *big.Int) (common.Address, error) {
 	var out []interface{}
-	err := _IdentityRegistry.contract.Call(opts, &out, "resolveByAddress", agentAddress)
+	err := _IdentityRegistry.contract.Call(opts, &out, "ownerOf", tokenId)
 
 	if err != nil {
-		return *new(IIdentityRegistryAgentInfo), err
+		return *new(common.Address), err
 	}
 
-	out0 := *abi.ConvertType(out[0], new(IIdentityRegistryAgentInfo)).(*IIdentityRegistryAgentInfo)
+	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
 
 	return out0, err
 
 }
 
-// ResolveByAddress is a free data retrieval call binding the contract method 0x0c638107.
+// OwnerOf is a free data retrieval call binding the contract method 0x6352211e.
 //
-// Solidity: function resolveByAddress(address agentAddress) view returns((uint256,string,address) agentInfo)
-func (_IdentityRegistry *IdentityRegistrySession) ResolveByAddress(agentAddress common.Address) (IIdentityRegistryAgentInfo, error) {
-	return _IdentityRegistry.Contract.ResolveByAddress(&_IdentityRegistry.CallOpts, agentAddress)
+// Solidity: function ownerOf(uint256 tokenId) view returns(address)
+func (_IdentityRegistry *IdentityRegistrySession) OwnerOf(tokenId *big.Int) (common.Address, error) {
+	return _IdentityRegistry.Contract.OwnerOf(&_IdentityRegistry.CallOpts, tokenId)
 }
 
-// ResolveByAddress is a free data retrieval call binding the contract method 0x0c638107.
+// OwnerOf is a free data retrieval call binding the contract method 0x6352211e.
 //
-// Solidity: function resolveByAddress(address agentAddress) view returns((uint256,string,address) agentInfo)
-func (_IdentityRegistry *IdentityRegistryCallerSession) ResolveByAddress(agentAddress common.Address) (IIdentityRegistryAgentInfo, error) {
-	return _IdentityRegistry.Contract.ResolveByAddress(&_IdentityRegistry.CallOpts, agentAddress)
+// Solidity: function ownerOf(uint256 tokenId) view returns(address)
+func (_IdentityRegistry *IdentityRegistryCallerSession) OwnerOf(tokenId *big.Int) (common.Address, error) {
+	return _IdentityRegistry.Contract.OwnerOf(&_IdentityRegistry.CallOpts, tokenId)
 }
 
-// ResolveByDomain is a free data retrieval call binding the contract method 0x78ddad12.
+// SupportsInterface is a free data retrieval call binding the contract method 0x01ffc9a7.
 //
-// Solidity: function resolveByDomain(string agentDomain) view returns((uint256,string,address) agentInfo)
-func (_IdentityRegistry *IdentityRegistryCaller) ResolveByDomain(opts *bind.CallOpts, agentDomain string) (IIdentityRegistryAgentInfo, error) {
+// Solidity: function supportsInterface(bytes4 interfaceId) view returns(bool)
+func (_IdentityRegistry *IdentityRegistryCaller) SupportsInterface(opts *bind.CallOpts, interfaceId [4]byte) (bool, error) {
 	var out []interface{}
-	err := _IdentityRegistry.contract.Call(opts, &out, "resolveByDomain", agentDomain)
+	err := _IdentityRegistry.contract.Call(opts, &out, "supportsInterface", interfaceId)
 
 	if err != nil {
-		return *new(IIdentityRegistryAgentInfo), err
+		return *new(bool), err
 	}
 
-	out0 := *abi.ConvertType(out[0], new(IIdentityRegistryAgentInfo)).(*IIdentityRegistryAgentInfo)
+	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
 
 	return out0, err
 
 }
 
-// ResolveByDomain is a free data retrieval call binding the contract method 0x78ddad12.
+// SupportsInterface is a free data retrieval call binding the contract method 0x01ffc9a7.
 //
-// Solidity: function resolveByDomain(string agentDomain) view returns((uint256,string,address) agentInfo)
-func (_IdentityRegistry *IdentityRegistrySession) ResolveByDomain(agentDomain string) (IIdentityRegistryAgentInfo, error) {
-	return _IdentityRegistry.Contract.ResolveByDomain(&_IdentityRegistry.CallOpts, agentDomain)
+// Solidity: function supportsInterface(bytes4 interfaceId) view returns(bool)
+func (_IdentityRegistry *IdentityRegistrySession) SupportsInterface(interfaceId [4]byte) (bool, error) {
+	return _IdentityRegistry.Contract.SupportsInterface(&_IdentityRegistry.CallOpts, interfaceId)
 }
 
-// ResolveByDomain is a free data retrieval call binding the contract method 0x78ddad12.
+// SupportsInterface is a free data retrieval call binding the contract method 0x01ffc9a7.
 //
-// Solidity: function resolveByDomain(string agentDomain) view returns((uint256,string,address) agentInfo)
-func (_IdentityRegistry *IdentityRegistryCallerSession) ResolveByDomain(agentDomain string) (IIdentityRegistryAgentInfo, error) {
-	return _IdentityRegistry.Contract.ResolveByDomain(&_IdentityRegistry.CallOpts, agentDomain)
+// Solidity: function supportsInterface(bytes4 interfaceId) view returns(bool)
+func (_IdentityRegistry *IdentityRegistryCallerSession) SupportsInterface(interfaceId [4]byte) (bool, error) {
+	return _IdentityRegistry.Contract.SupportsInterface(&_IdentityRegistry.CallOpts, interfaceId)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0x8129fc1c.
+// Symbol is a free data retrieval call binding the contract method 0x95d89b41.
 //
-// Solidity: function initialize() returns()
-func (_IdentityRegistry *IdentityRegistryTransactor) Initialize(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _IdentityRegistry.contract.Transact(opts, "initialize")
+// Solidity: function symbol() view returns(string)
+func (_IdentityRegistry *IdentityRegistryCaller) Symbol(opts *bind.CallOpts) (string, error) {
+	var out []interface{}
+	err := _IdentityRegistry.contract.Call(opts, &out, "symbol")
+
+	if err != nil {
+		return *new(string), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(string)).(*string)
+
+	return out0, err
+
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0x8129fc1c.
+// Symbol is a free data retrieval call binding the contract method 0x95d89b41.
 //
-// Solidity: function initialize() returns()
-func (_IdentityRegistry *IdentityRegistrySession) Initialize() (*types.Transaction, error) {
-	return _IdentityRegistry.Contract.Initialize(&_IdentityRegistry.TransactOpts)
+// Solidity: function symbol() view returns(string)
+func (_IdentityRegistry *IdentityRegistrySession) Symbol() (string, error) {
+	return _IdentityRegistry.Contract.Symbol(&_IdentityRegistry.CallOpts)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0x8129fc1c.
+// Symbol is a free data retrieval call binding the contract method 0x95d89b41.
 //
-// Solidity: function initialize() returns()
-func (_IdentityRegistry *IdentityRegistryTransactorSession) Initialize() (*types.Transaction, error) {
-	return _IdentityRegistry.Contract.Initialize(&_IdentityRegistry.TransactOpts)
+// Solidity: function symbol() view returns(string)
+func (_IdentityRegistry *IdentityRegistryCallerSession) Symbol() (string, error) {
+	return _IdentityRegistry.Contract.Symbol(&_IdentityRegistry.CallOpts)
 }
 
-// NewAgent is a paid mutator transaction binding the contract method 0x4750d0fa.
+// TokenURI is a free data retrieval call binding the contract method 0xc87b56dd.
 //
-// Solidity: function newAgent(string agentDomain, address agentAddress) returns(uint256 agentId)
-func (_IdentityRegistry *IdentityRegistryTransactor) NewAgent(opts *bind.TransactOpts, agentDomain string, agentAddress common.Address) (*types.Transaction, error) {
-	return _IdentityRegistry.contract.Transact(opts, "newAgent", agentDomain, agentAddress)
+// Solidity: function tokenURI(uint256 tokenId) view returns(string)
+func (_IdentityRegistry *IdentityRegistryCaller) TokenURI(opts *bind.CallOpts, tokenId *big.Int) (string, error) {
+	var out []interface{}
+	err := _IdentityRegistry.contract.Call(opts, &out, "tokenURI", tokenId)
+
+	if err != nil {
+		return *new(string), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(string)).(*string)
+
+	return out0, err
+
 }
 
-// NewAgent is a paid mutator transaction binding the contract method 0x4750d0fa.
+// TokenURI is a free data retrieval call binding the contract method 0xc87b56dd.
 //
-// Solidity: function newAgent(string agentDomain, address agentAddress) returns(uint256 agentId)
-func (_IdentityRegistry *IdentityRegistrySession) NewAgent(agentDomain string, agentAddress common.Address) (*types.Transaction, error) {
-	return _IdentityRegistry.Contract.NewAgent(&_IdentityRegistry.TransactOpts, agentDomain, agentAddress)
+// Solidity: function tokenURI(uint256 tokenId) view returns(string)
+func (_IdentityRegistry *IdentityRegistrySession) TokenURI(tokenId *big.Int) (string, error) {
+	return _IdentityRegistry.Contract.TokenURI(&_IdentityRegistry.CallOpts, tokenId)
 }
 
-// NewAgent is a paid mutator transaction binding the contract method 0x4750d0fa.
+// TokenURI is a free data retrieval call binding the contract method 0xc87b56dd.
 //
-// Solidity: function newAgent(string agentDomain, address agentAddress) returns(uint256 agentId)
-func (_IdentityRegistry *IdentityRegistryTransactorSession) NewAgent(agentDomain string, agentAddress common.Address) (*types.Transaction, error) {
-	return _IdentityRegistry.Contract.NewAgent(&_IdentityRegistry.TransactOpts, agentDomain, agentAddress)
+// Solidity: function tokenURI(uint256 tokenId) view returns(string)
+func (_IdentityRegistry *IdentityRegistryCallerSession) TokenURI(tokenId *big.Int) (string, error) {
+	return _IdentityRegistry.Contract.TokenURI(&_IdentityRegistry.CallOpts, tokenId)
+}
+
+// Approve is a paid mutator transaction binding the contract method 0x095ea7b3.
+//
+// Solidity: function approve(address to, uint256 tokenId) returns()
+func (_IdentityRegistry *IdentityRegistryTransactor) Approve(opts *bind.TransactOpts, to common.Address, tokenId *big.Int) (*types.Transaction, error) {
+	return _IdentityRegistry.contract.Transact(opts, "approve", to, tokenId)
+}
+
+// Approve is a paid mutator transaction binding the contract method 0x095ea7b3.
+//
+// Solidity: function approve(address to, uint256 tokenId) returns()
+func (_IdentityRegistry *IdentityRegistrySession) Approve(to common.Address, tokenId *big.Int) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.Approve(&_IdentityRegistry.TransactOpts, to, tokenId)
+}
+
+// Approve is a paid mutator transaction binding the contract method 0x095ea7b3.
+//
+// Solidity: function approve(address to, uint256 tokenId) returns()
+func (_IdentityRegistry *IdentityRegistryTransactorSession) Approve(to common.Address, tokenId *big.Int) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.Approve(&_IdentityRegistry.TransactOpts, to, tokenId)
+}
+
+// Register is a paid mutator transaction binding the contract method 0x1aa3a008.
+//
+// Solidity: function register() returns(uint256 agentId)
+func (_IdentityRegistry *IdentityRegistryTransactor) Register(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _IdentityRegistry.contract.Transact(opts, "register")
+}
+
+// Register is a paid mutator transaction binding the contract method 0x1aa3a008.
+//
+// Solidity: function register() returns(uint256 agentId)
+func (_IdentityRegistry *IdentityRegistrySession) Register() (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.Register(&_IdentityRegistry.TransactOpts)
+}
+
+// Register is a paid mutator transaction binding the contract method 0x1aa3a008.
+//
+// Solidity: function register() returns(uint256 agentId)
+func (_IdentityRegistry *IdentityRegistryTransactorSession) Register() (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.Register(&_IdentityRegistry.TransactOpts)
+}
+
+// Register0 is a paid mutator transaction binding the contract method 0x8ea42286.
+//
+// Solidity: function register(string tokenUri, (string,bytes)[] metadata) returns(uint256 agentId)
+func (_IdentityRegistry *IdentityRegistryTransactor) Register0(opts *bind.TransactOpts, tokenUri string, metadata []IdentityRegistryMetadataEntry) (*types.Transaction, error) {
+	return _IdentityRegistry.contract.Transact(opts, "register0", tokenUri, metadata)
+}
+
+// Register0 is a paid mutator transaction binding the contract method 0x8ea42286.
+//
+// Solidity: function register(string tokenUri, (string,bytes)[] metadata) returns(uint256 agentId)
+func (_IdentityRegistry *IdentityRegistrySession) Register0(tokenUri string, metadata []IdentityRegistryMetadataEntry) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.Register0(&_IdentityRegistry.TransactOpts, tokenUri, metadata)
+}
+
+// Register0 is a paid mutator transaction binding the contract method 0x8ea42286.
+//
+// Solidity: function register(string tokenUri, (string,bytes)[] metadata) returns(uint256 agentId)
+func (_IdentityRegistry *IdentityRegistryTransactorSession) Register0(tokenUri string, metadata []IdentityRegistryMetadataEntry) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.Register0(&_IdentityRegistry.TransactOpts, tokenUri, metadata)
+}
+
+// Register1 is a paid mutator transaction binding the contract method 0xf2c298be.
+//
+// Solidity: function register(string tokenUri) returns(uint256 agentId)
+func (_IdentityRegistry *IdentityRegistryTransactor) Register1(opts *bind.TransactOpts, tokenUri string) (*types.Transaction, error) {
+	return _IdentityRegistry.contract.Transact(opts, "register1", tokenUri)
+}
+
+// Register1 is a paid mutator transaction binding the contract method 0xf2c298be.
+//
+// Solidity: function register(string tokenUri) returns(uint256 agentId)
+func (_IdentityRegistry *IdentityRegistrySession) Register1(tokenUri string) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.Register1(&_IdentityRegistry.TransactOpts, tokenUri)
+}
+
+// Register1 is a paid mutator transaction binding the contract method 0xf2c298be.
+//
+// Solidity: function register(string tokenUri) returns(uint256 agentId)
+func (_IdentityRegistry *IdentityRegistryTransactorSession) Register1(tokenUri string) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.Register1(&_IdentityRegistry.TransactOpts, tokenUri)
 }
 
 // RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
@@ -467,6 +601,132 @@ func (_IdentityRegistry *IdentityRegistryTransactorSession) RenounceOwnership() 
 	return _IdentityRegistry.Contract.RenounceOwnership(&_IdentityRegistry.TransactOpts)
 }
 
+// SafeTransferFrom is a paid mutator transaction binding the contract method 0x42842e0e.
+//
+// Solidity: function safeTransferFrom(address from, address to, uint256 tokenId) returns()
+func (_IdentityRegistry *IdentityRegistryTransactor) SafeTransferFrom(opts *bind.TransactOpts, from common.Address, to common.Address, tokenId *big.Int) (*types.Transaction, error) {
+	return _IdentityRegistry.contract.Transact(opts, "safeTransferFrom", from, to, tokenId)
+}
+
+// SafeTransferFrom is a paid mutator transaction binding the contract method 0x42842e0e.
+//
+// Solidity: function safeTransferFrom(address from, address to, uint256 tokenId) returns()
+func (_IdentityRegistry *IdentityRegistrySession) SafeTransferFrom(from common.Address, to common.Address, tokenId *big.Int) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.SafeTransferFrom(&_IdentityRegistry.TransactOpts, from, to, tokenId)
+}
+
+// SafeTransferFrom is a paid mutator transaction binding the contract method 0x42842e0e.
+//
+// Solidity: function safeTransferFrom(address from, address to, uint256 tokenId) returns()
+func (_IdentityRegistry *IdentityRegistryTransactorSession) SafeTransferFrom(from common.Address, to common.Address, tokenId *big.Int) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.SafeTransferFrom(&_IdentityRegistry.TransactOpts, from, to, tokenId)
+}
+
+// SafeTransferFrom0 is a paid mutator transaction binding the contract method 0xb88d4fde.
+//
+// Solidity: function safeTransferFrom(address from, address to, uint256 tokenId, bytes data) returns()
+func (_IdentityRegistry *IdentityRegistryTransactor) SafeTransferFrom0(opts *bind.TransactOpts, from common.Address, to common.Address, tokenId *big.Int, data []byte) (*types.Transaction, error) {
+	return _IdentityRegistry.contract.Transact(opts, "safeTransferFrom0", from, to, tokenId, data)
+}
+
+// SafeTransferFrom0 is a paid mutator transaction binding the contract method 0xb88d4fde.
+//
+// Solidity: function safeTransferFrom(address from, address to, uint256 tokenId, bytes data) returns()
+func (_IdentityRegistry *IdentityRegistrySession) SafeTransferFrom0(from common.Address, to common.Address, tokenId *big.Int, data []byte) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.SafeTransferFrom0(&_IdentityRegistry.TransactOpts, from, to, tokenId, data)
+}
+
+// SafeTransferFrom0 is a paid mutator transaction binding the contract method 0xb88d4fde.
+//
+// Solidity: function safeTransferFrom(address from, address to, uint256 tokenId, bytes data) returns()
+func (_IdentityRegistry *IdentityRegistryTransactorSession) SafeTransferFrom0(from common.Address, to common.Address, tokenId *big.Int, data []byte) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.SafeTransferFrom0(&_IdentityRegistry.TransactOpts, from, to, tokenId, data)
+}
+
+// SetAgentUri is a paid mutator transaction binding the contract method 0x5a753149.
+//
+// Solidity: function setAgentUri(uint256 agentId, string newUri) returns()
+func (_IdentityRegistry *IdentityRegistryTransactor) SetAgentUri(opts *bind.TransactOpts, agentId *big.Int, newUri string) (*types.Transaction, error) {
+	return _IdentityRegistry.contract.Transact(opts, "setAgentUri", agentId, newUri)
+}
+
+// SetAgentUri is a paid mutator transaction binding the contract method 0x5a753149.
+//
+// Solidity: function setAgentUri(uint256 agentId, string newUri) returns()
+func (_IdentityRegistry *IdentityRegistrySession) SetAgentUri(agentId *big.Int, newUri string) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.SetAgentUri(&_IdentityRegistry.TransactOpts, agentId, newUri)
+}
+
+// SetAgentUri is a paid mutator transaction binding the contract method 0x5a753149.
+//
+// Solidity: function setAgentUri(uint256 agentId, string newUri) returns()
+func (_IdentityRegistry *IdentityRegistryTransactorSession) SetAgentUri(agentId *big.Int, newUri string) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.SetAgentUri(&_IdentityRegistry.TransactOpts, agentId, newUri)
+}
+
+// SetApprovalForAll is a paid mutator transaction binding the contract method 0xa22cb465.
+//
+// Solidity: function setApprovalForAll(address operator, bool approved) returns()
+func (_IdentityRegistry *IdentityRegistryTransactor) SetApprovalForAll(opts *bind.TransactOpts, operator common.Address, approved bool) (*types.Transaction, error) {
+	return _IdentityRegistry.contract.Transact(opts, "setApprovalForAll", operator, approved)
+}
+
+// SetApprovalForAll is a paid mutator transaction binding the contract method 0xa22cb465.
+//
+// Solidity: function setApprovalForAll(address operator, bool approved) returns()
+func (_IdentityRegistry *IdentityRegistrySession) SetApprovalForAll(operator common.Address, approved bool) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.SetApprovalForAll(&_IdentityRegistry.TransactOpts, operator, approved)
+}
+
+// SetApprovalForAll is a paid mutator transaction binding the contract method 0xa22cb465.
+//
+// Solidity: function setApprovalForAll(address operator, bool approved) returns()
+func (_IdentityRegistry *IdentityRegistryTransactorSession) SetApprovalForAll(operator common.Address, approved bool) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.SetApprovalForAll(&_IdentityRegistry.TransactOpts, operator, approved)
+}
+
+// SetMetadata is a paid mutator transaction binding the contract method 0x466648da.
+//
+// Solidity: function setMetadata(uint256 agentId, string key, bytes value) returns()
+func (_IdentityRegistry *IdentityRegistryTransactor) SetMetadata(opts *bind.TransactOpts, agentId *big.Int, key string, value []byte) (*types.Transaction, error) {
+	return _IdentityRegistry.contract.Transact(opts, "setMetadata", agentId, key, value)
+}
+
+// SetMetadata is a paid mutator transaction binding the contract method 0x466648da.
+//
+// Solidity: function setMetadata(uint256 agentId, string key, bytes value) returns()
+func (_IdentityRegistry *IdentityRegistrySession) SetMetadata(agentId *big.Int, key string, value []byte) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.SetMetadata(&_IdentityRegistry.TransactOpts, agentId, key, value)
+}
+
+// SetMetadata is a paid mutator transaction binding the contract method 0x466648da.
+//
+// Solidity: function setMetadata(uint256 agentId, string key, bytes value) returns()
+func (_IdentityRegistry *IdentityRegistryTransactorSession) SetMetadata(agentId *big.Int, key string, value []byte) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.SetMetadata(&_IdentityRegistry.TransactOpts, agentId, key, value)
+}
+
+// TransferFrom is a paid mutator transaction binding the contract method 0x23b872dd.
+//
+// Solidity: function transferFrom(address from, address to, uint256 tokenId) returns()
+func (_IdentityRegistry *IdentityRegistryTransactor) TransferFrom(opts *bind.TransactOpts, from common.Address, to common.Address, tokenId *big.Int) (*types.Transaction, error) {
+	return _IdentityRegistry.contract.Transact(opts, "transferFrom", from, to, tokenId)
+}
+
+// TransferFrom is a paid mutator transaction binding the contract method 0x23b872dd.
+//
+// Solidity: function transferFrom(address from, address to, uint256 tokenId) returns()
+func (_IdentityRegistry *IdentityRegistrySession) TransferFrom(from common.Address, to common.Address, tokenId *big.Int) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.TransferFrom(&_IdentityRegistry.TransactOpts, from, to, tokenId)
+}
+
+// TransferFrom is a paid mutator transaction binding the contract method 0x23b872dd.
+//
+// Solidity: function transferFrom(address from, address to, uint256 tokenId) returns()
+func (_IdentityRegistry *IdentityRegistryTransactorSession) TransferFrom(from common.Address, to common.Address, tokenId *big.Int) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.TransferFrom(&_IdentityRegistry.TransactOpts, from, to, tokenId)
+}
+
 // TransferOwnership is a paid mutator transaction binding the contract method 0xf2fde38b.
 //
 // Solidity: function transferOwnership(address newOwner) returns()
@@ -488,30 +748,9 @@ func (_IdentityRegistry *IdentityRegistryTransactorSession) TransferOwnership(ne
 	return _IdentityRegistry.Contract.TransferOwnership(&_IdentityRegistry.TransactOpts, newOwner)
 }
 
-// UpdateAgent is a paid mutator transaction binding the contract method 0x3bfbbad7.
-//
-// Solidity: function updateAgent(uint256 agentId, string newAgentDomain, address newAgentAddress) returns(bool success)
-func (_IdentityRegistry *IdentityRegistryTransactor) UpdateAgent(opts *bind.TransactOpts, agentId *big.Int, newAgentDomain string, newAgentAddress common.Address) (*types.Transaction, error) {
-	return _IdentityRegistry.contract.Transact(opts, "updateAgent", agentId, newAgentDomain, newAgentAddress)
-}
-
-// UpdateAgent is a paid mutator transaction binding the contract method 0x3bfbbad7.
-//
-// Solidity: function updateAgent(uint256 agentId, string newAgentDomain, address newAgentAddress) returns(bool success)
-func (_IdentityRegistry *IdentityRegistrySession) UpdateAgent(agentId *big.Int, newAgentDomain string, newAgentAddress common.Address) (*types.Transaction, error) {
-	return _IdentityRegistry.Contract.UpdateAgent(&_IdentityRegistry.TransactOpts, agentId, newAgentDomain, newAgentAddress)
-}
-
-// UpdateAgent is a paid mutator transaction binding the contract method 0x3bfbbad7.
-//
-// Solidity: function updateAgent(uint256 agentId, string newAgentDomain, address newAgentAddress) returns(bool success)
-func (_IdentityRegistry *IdentityRegistryTransactorSession) UpdateAgent(agentId *big.Int, newAgentDomain string, newAgentAddress common.Address) (*types.Transaction, error) {
-	return _IdentityRegistry.Contract.UpdateAgent(&_IdentityRegistry.TransactOpts, agentId, newAgentDomain, newAgentAddress)
-}
-
-// IdentityRegistryAgentRegisteredIterator is returned from FilterAgentRegistered and is used to iterate over the raw logs and unpacked data for AgentRegistered events raised by the IdentityRegistry contract.
-type IdentityRegistryAgentRegisteredIterator struct {
-	Event *IdentityRegistryAgentRegistered // Event containing the contract specifics and raw log
+// IdentityRegistryApprovalIterator is returned from FilterApproval and is used to iterate over the raw logs and unpacked data for Approval events raised by the IdentityRegistry contract.
+type IdentityRegistryApprovalIterator struct {
+	Event *IdentityRegistryApproval // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -525,7 +764,7 @@ type IdentityRegistryAgentRegisteredIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *IdentityRegistryAgentRegisteredIterator) Next() bool {
+func (it *IdentityRegistryApprovalIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -534,7 +773,7 @@ func (it *IdentityRegistryAgentRegisteredIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(IdentityRegistryAgentRegistered)
+			it.Event = new(IdentityRegistryApproval)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -549,7 +788,7 @@ func (it *IdentityRegistryAgentRegisteredIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(IdentityRegistryAgentRegistered)
+		it.Event = new(IdentityRegistryApproval)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -565,53 +804,69 @@ func (it *IdentityRegistryAgentRegisteredIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *IdentityRegistryAgentRegisteredIterator) Error() error {
+func (it *IdentityRegistryApprovalIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *IdentityRegistryAgentRegisteredIterator) Close() error {
+func (it *IdentityRegistryApprovalIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// IdentityRegistryAgentRegistered represents a AgentRegistered event raised by the IdentityRegistry contract.
-type IdentityRegistryAgentRegistered struct {
-	AgentId      *big.Int
-	AgentDomain  string
-	AgentAddress common.Address
-	Raw          types.Log // Blockchain specific contextual infos
+// IdentityRegistryApproval represents a Approval event raised by the IdentityRegistry contract.
+type IdentityRegistryApproval struct {
+	Owner    common.Address
+	Approved common.Address
+	TokenId  *big.Int
+	Raw      types.Log // Blockchain specific contextual infos
 }
 
-// FilterAgentRegistered is a free log retrieval operation binding the contract event 0xaef1fcdf962a03943b677ae3b92ef1b34c972aeef794ed6e9ba5f599b461883b.
+// FilterApproval is a free log retrieval operation binding the contract event 0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925.
 //
-// Solidity: event AgentRegistered(uint256 indexed agentId, string agentDomain, address agentAddress)
-func (_IdentityRegistry *IdentityRegistryFilterer) FilterAgentRegistered(opts *bind.FilterOpts, agentId []*big.Int) (*IdentityRegistryAgentRegisteredIterator, error) {
+// Solidity: event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId)
+func (_IdentityRegistry *IdentityRegistryFilterer) FilterApproval(opts *bind.FilterOpts, owner []common.Address, approved []common.Address, tokenId []*big.Int) (*IdentityRegistryApprovalIterator, error) {
 
-	var agentIdRule []interface{}
-	for _, agentIdItem := range agentId {
-		agentIdRule = append(agentIdRule, agentIdItem)
+	var ownerRule []interface{}
+	for _, ownerItem := range owner {
+		ownerRule = append(ownerRule, ownerItem)
+	}
+	var approvedRule []interface{}
+	for _, approvedItem := range approved {
+		approvedRule = append(approvedRule, approvedItem)
+	}
+	var tokenIdRule []interface{}
+	for _, tokenIdItem := range tokenId {
+		tokenIdRule = append(tokenIdRule, tokenIdItem)
 	}
 
-	logs, sub, err := _IdentityRegistry.contract.FilterLogs(opts, "AgentRegistered", agentIdRule)
+	logs, sub, err := _IdentityRegistry.contract.FilterLogs(opts, "Approval", ownerRule, approvedRule, tokenIdRule)
 	if err != nil {
 		return nil, err
 	}
-	return &IdentityRegistryAgentRegisteredIterator{contract: _IdentityRegistry.contract, event: "AgentRegistered", logs: logs, sub: sub}, nil
+	return &IdentityRegistryApprovalIterator{contract: _IdentityRegistry.contract, event: "Approval", logs: logs, sub: sub}, nil
 }
 
-// WatchAgentRegistered is a free log subscription operation binding the contract event 0xaef1fcdf962a03943b677ae3b92ef1b34c972aeef794ed6e9ba5f599b461883b.
+// WatchApproval is a free log subscription operation binding the contract event 0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925.
 //
-// Solidity: event AgentRegistered(uint256 indexed agentId, string agentDomain, address agentAddress)
-func (_IdentityRegistry *IdentityRegistryFilterer) WatchAgentRegistered(opts *bind.WatchOpts, sink chan<- *IdentityRegistryAgentRegistered, agentId []*big.Int) (event.Subscription, error) {
+// Solidity: event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId)
+func (_IdentityRegistry *IdentityRegistryFilterer) WatchApproval(opts *bind.WatchOpts, sink chan<- *IdentityRegistryApproval, owner []common.Address, approved []common.Address, tokenId []*big.Int) (event.Subscription, error) {
 
-	var agentIdRule []interface{}
-	for _, agentIdItem := range agentId {
-		agentIdRule = append(agentIdRule, agentIdItem)
+	var ownerRule []interface{}
+	for _, ownerItem := range owner {
+		ownerRule = append(ownerRule, ownerItem)
+	}
+	var approvedRule []interface{}
+	for _, approvedItem := range approved {
+		approvedRule = append(approvedRule, approvedItem)
+	}
+	var tokenIdRule []interface{}
+	for _, tokenIdItem := range tokenId {
+		tokenIdRule = append(tokenIdRule, tokenIdItem)
 	}
 
-	logs, sub, err := _IdentityRegistry.contract.WatchLogs(opts, "AgentRegistered", agentIdRule)
+	logs, sub, err := _IdentityRegistry.contract.WatchLogs(opts, "Approval", ownerRule, approvedRule, tokenIdRule)
 	if err != nil {
 		return nil, err
 	}
@@ -621,8 +876,8 @@ func (_IdentityRegistry *IdentityRegistryFilterer) WatchAgentRegistered(opts *bi
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(IdentityRegistryAgentRegistered)
-				if err := _IdentityRegistry.contract.UnpackLog(event, "AgentRegistered", log); err != nil {
+				event := new(IdentityRegistryApproval)
+				if err := _IdentityRegistry.contract.UnpackLog(event, "Approval", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -643,21 +898,21 @@ func (_IdentityRegistry *IdentityRegistryFilterer) WatchAgentRegistered(opts *bi
 	}), nil
 }
 
-// ParseAgentRegistered is a log parse operation binding the contract event 0xaef1fcdf962a03943b677ae3b92ef1b34c972aeef794ed6e9ba5f599b461883b.
+// ParseApproval is a log parse operation binding the contract event 0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925.
 //
-// Solidity: event AgentRegistered(uint256 indexed agentId, string agentDomain, address agentAddress)
-func (_IdentityRegistry *IdentityRegistryFilterer) ParseAgentRegistered(log types.Log) (*IdentityRegistryAgentRegistered, error) {
-	event := new(IdentityRegistryAgentRegistered)
-	if err := _IdentityRegistry.contract.UnpackLog(event, "AgentRegistered", log); err != nil {
+// Solidity: event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId)
+func (_IdentityRegistry *IdentityRegistryFilterer) ParseApproval(log types.Log) (*IdentityRegistryApproval, error) {
+	event := new(IdentityRegistryApproval)
+	if err := _IdentityRegistry.contract.UnpackLog(event, "Approval", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// IdentityRegistryAgentUpdatedIterator is returned from FilterAgentUpdated and is used to iterate over the raw logs and unpacked data for AgentUpdated events raised by the IdentityRegistry contract.
-type IdentityRegistryAgentUpdatedIterator struct {
-	Event *IdentityRegistryAgentUpdated // Event containing the contract specifics and raw log
+// IdentityRegistryApprovalForAllIterator is returned from FilterApprovalForAll and is used to iterate over the raw logs and unpacked data for ApprovalForAll events raised by the IdentityRegistry contract.
+type IdentityRegistryApprovalForAllIterator struct {
+	Event *IdentityRegistryApprovalForAll // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -671,7 +926,7 @@ type IdentityRegistryAgentUpdatedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *IdentityRegistryAgentUpdatedIterator) Next() bool {
+func (it *IdentityRegistryApprovalForAllIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -680,7 +935,7 @@ func (it *IdentityRegistryAgentUpdatedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(IdentityRegistryAgentUpdated)
+			it.Event = new(IdentityRegistryApprovalForAll)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -695,7 +950,7 @@ func (it *IdentityRegistryAgentUpdatedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(IdentityRegistryAgentUpdated)
+		it.Event = new(IdentityRegistryApprovalForAll)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -711,53 +966,61 @@ func (it *IdentityRegistryAgentUpdatedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *IdentityRegistryAgentUpdatedIterator) Error() error {
+func (it *IdentityRegistryApprovalForAllIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *IdentityRegistryAgentUpdatedIterator) Close() error {
+func (it *IdentityRegistryApprovalForAllIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// IdentityRegistryAgentUpdated represents a AgentUpdated event raised by the IdentityRegistry contract.
-type IdentityRegistryAgentUpdated struct {
-	AgentId      *big.Int
-	AgentDomain  string
-	AgentAddress common.Address
-	Raw          types.Log // Blockchain specific contextual infos
+// IdentityRegistryApprovalForAll represents a ApprovalForAll event raised by the IdentityRegistry contract.
+type IdentityRegistryApprovalForAll struct {
+	Owner    common.Address
+	Operator common.Address
+	Approved bool
+	Raw      types.Log // Blockchain specific contextual infos
 }
 
-// FilterAgentUpdated is a free log retrieval operation binding the contract event 0x1b37db56c92268433e33fda6783791cb9e5f8ffababd3952ab40716443f1bf89.
+// FilterApprovalForAll is a free log retrieval operation binding the contract event 0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31.
 //
-// Solidity: event AgentUpdated(uint256 indexed agentId, string agentDomain, address agentAddress)
-func (_IdentityRegistry *IdentityRegistryFilterer) FilterAgentUpdated(opts *bind.FilterOpts, agentId []*big.Int) (*IdentityRegistryAgentUpdatedIterator, error) {
+// Solidity: event ApprovalForAll(address indexed owner, address indexed operator, bool approved)
+func (_IdentityRegistry *IdentityRegistryFilterer) FilterApprovalForAll(opts *bind.FilterOpts, owner []common.Address, operator []common.Address) (*IdentityRegistryApprovalForAllIterator, error) {
 
-	var agentIdRule []interface{}
-	for _, agentIdItem := range agentId {
-		agentIdRule = append(agentIdRule, agentIdItem)
+	var ownerRule []interface{}
+	for _, ownerItem := range owner {
+		ownerRule = append(ownerRule, ownerItem)
+	}
+	var operatorRule []interface{}
+	for _, operatorItem := range operator {
+		operatorRule = append(operatorRule, operatorItem)
 	}
 
-	logs, sub, err := _IdentityRegistry.contract.FilterLogs(opts, "AgentUpdated", agentIdRule)
+	logs, sub, err := _IdentityRegistry.contract.FilterLogs(opts, "ApprovalForAll", ownerRule, operatorRule)
 	if err != nil {
 		return nil, err
 	}
-	return &IdentityRegistryAgentUpdatedIterator{contract: _IdentityRegistry.contract, event: "AgentUpdated", logs: logs, sub: sub}, nil
+	return &IdentityRegistryApprovalForAllIterator{contract: _IdentityRegistry.contract, event: "ApprovalForAll", logs: logs, sub: sub}, nil
 }
 
-// WatchAgentUpdated is a free log subscription operation binding the contract event 0x1b37db56c92268433e33fda6783791cb9e5f8ffababd3952ab40716443f1bf89.
+// WatchApprovalForAll is a free log subscription operation binding the contract event 0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31.
 //
-// Solidity: event AgentUpdated(uint256 indexed agentId, string agentDomain, address agentAddress)
-func (_IdentityRegistry *IdentityRegistryFilterer) WatchAgentUpdated(opts *bind.WatchOpts, sink chan<- *IdentityRegistryAgentUpdated, agentId []*big.Int) (event.Subscription, error) {
+// Solidity: event ApprovalForAll(address indexed owner, address indexed operator, bool approved)
+func (_IdentityRegistry *IdentityRegistryFilterer) WatchApprovalForAll(opts *bind.WatchOpts, sink chan<- *IdentityRegistryApprovalForAll, owner []common.Address, operator []common.Address) (event.Subscription, error) {
 
-	var agentIdRule []interface{}
-	for _, agentIdItem := range agentId {
-		agentIdRule = append(agentIdRule, agentIdItem)
+	var ownerRule []interface{}
+	for _, ownerItem := range owner {
+		ownerRule = append(ownerRule, ownerItem)
+	}
+	var operatorRule []interface{}
+	for _, operatorItem := range operator {
+		operatorRule = append(operatorRule, operatorItem)
 	}
 
-	logs, sub, err := _IdentityRegistry.contract.WatchLogs(opts, "AgentUpdated", agentIdRule)
+	logs, sub, err := _IdentityRegistry.contract.WatchLogs(opts, "ApprovalForAll", ownerRule, operatorRule)
 	if err != nil {
 		return nil, err
 	}
@@ -767,8 +1030,8 @@ func (_IdentityRegistry *IdentityRegistryFilterer) WatchAgentUpdated(opts *bind.
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(IdentityRegistryAgentUpdated)
-				if err := _IdentityRegistry.contract.UnpackLog(event, "AgentUpdated", log); err != nil {
+				event := new(IdentityRegistryApprovalForAll)
+				if err := _IdentityRegistry.contract.UnpackLog(event, "ApprovalForAll", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -789,21 +1052,21 @@ func (_IdentityRegistry *IdentityRegistryFilterer) WatchAgentUpdated(opts *bind.
 	}), nil
 }
 
-// ParseAgentUpdated is a log parse operation binding the contract event 0x1b37db56c92268433e33fda6783791cb9e5f8ffababd3952ab40716443f1bf89.
+// ParseApprovalForAll is a log parse operation binding the contract event 0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31.
 //
-// Solidity: event AgentUpdated(uint256 indexed agentId, string agentDomain, address agentAddress)
-func (_IdentityRegistry *IdentityRegistryFilterer) ParseAgentUpdated(log types.Log) (*IdentityRegistryAgentUpdated, error) {
-	event := new(IdentityRegistryAgentUpdated)
-	if err := _IdentityRegistry.contract.UnpackLog(event, "AgentUpdated", log); err != nil {
+// Solidity: event ApprovalForAll(address indexed owner, address indexed operator, bool approved)
+func (_IdentityRegistry *IdentityRegistryFilterer) ParseApprovalForAll(log types.Log) (*IdentityRegistryApprovalForAll, error) {
+	event := new(IdentityRegistryApprovalForAll)
+	if err := _IdentityRegistry.contract.UnpackLog(event, "ApprovalForAll", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
 	return event, nil
 }
 
-// IdentityRegistryInitializedIterator is returned from FilterInitialized and is used to iterate over the raw logs and unpacked data for Initialized events raised by the IdentityRegistry contract.
-type IdentityRegistryInitializedIterator struct {
-	Event *IdentityRegistryInitialized // Event containing the contract specifics and raw log
+// IdentityRegistryBatchMetadataUpdateIterator is returned from FilterBatchMetadataUpdate and is used to iterate over the raw logs and unpacked data for BatchMetadataUpdate events raised by the IdentityRegistry contract.
+type IdentityRegistryBatchMetadataUpdateIterator struct {
+	Event *IdentityRegistryBatchMetadataUpdate // Event containing the contract specifics and raw log
 
 	contract *bind.BoundContract // Generic contract to use for unpacking event data
 	event    string              // Event name to use for unpacking event data
@@ -817,7 +1080,7 @@ type IdentityRegistryInitializedIterator struct {
 // Next advances the iterator to the subsequent event, returning whether there
 // are any more events found. In case of a retrieval or parsing error, false is
 // returned and Error() can be queried for the exact failure.
-func (it *IdentityRegistryInitializedIterator) Next() bool {
+func (it *IdentityRegistryBatchMetadataUpdateIterator) Next() bool {
 	// If the iterator failed, stop iterating
 	if it.fail != nil {
 		return false
@@ -826,7 +1089,7 @@ func (it *IdentityRegistryInitializedIterator) Next() bool {
 	if it.done {
 		select {
 		case log := <-it.logs:
-			it.Event = new(IdentityRegistryInitialized)
+			it.Event = new(IdentityRegistryBatchMetadataUpdate)
 			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 				it.fail = err
 				return false
@@ -841,7 +1104,7 @@ func (it *IdentityRegistryInitializedIterator) Next() bool {
 	// Iterator still in progress, wait for either a data or an error event
 	select {
 	case log := <-it.logs:
-		it.Event = new(IdentityRegistryInitialized)
+		it.Event = new(IdentityRegistryBatchMetadataUpdate)
 		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
 			it.fail = err
 			return false
@@ -857,41 +1120,331 @@ func (it *IdentityRegistryInitializedIterator) Next() bool {
 }
 
 // Error returns any retrieval or parsing error occurred during filtering.
-func (it *IdentityRegistryInitializedIterator) Error() error {
+func (it *IdentityRegistryBatchMetadataUpdateIterator) Error() error {
 	return it.fail
 }
 
 // Close terminates the iteration process, releasing any pending underlying
 // resources.
-func (it *IdentityRegistryInitializedIterator) Close() error {
+func (it *IdentityRegistryBatchMetadataUpdateIterator) Close() error {
 	it.sub.Unsubscribe()
 	return nil
 }
 
-// IdentityRegistryInitialized represents a Initialized event raised by the IdentityRegistry contract.
-type IdentityRegistryInitialized struct {
-	Version uint8
+// IdentityRegistryBatchMetadataUpdate represents a BatchMetadataUpdate event raised by the IdentityRegistry contract.
+type IdentityRegistryBatchMetadataUpdate struct {
+	FromTokenId *big.Int
+	ToTokenId   *big.Int
+	Raw         types.Log // Blockchain specific contextual infos
+}
+
+// FilterBatchMetadataUpdate is a free log retrieval operation binding the contract event 0x6bd5c950a8d8df17f772f5af37cb3655737899cbf903264b9795592da439661c.
+//
+// Solidity: event BatchMetadataUpdate(uint256 _fromTokenId, uint256 _toTokenId)
+func (_IdentityRegistry *IdentityRegistryFilterer) FilterBatchMetadataUpdate(opts *bind.FilterOpts) (*IdentityRegistryBatchMetadataUpdateIterator, error) {
+
+	logs, sub, err := _IdentityRegistry.contract.FilterLogs(opts, "BatchMetadataUpdate")
+	if err != nil {
+		return nil, err
+	}
+	return &IdentityRegistryBatchMetadataUpdateIterator{contract: _IdentityRegistry.contract, event: "BatchMetadataUpdate", logs: logs, sub: sub}, nil
+}
+
+// WatchBatchMetadataUpdate is a free log subscription operation binding the contract event 0x6bd5c950a8d8df17f772f5af37cb3655737899cbf903264b9795592da439661c.
+//
+// Solidity: event BatchMetadataUpdate(uint256 _fromTokenId, uint256 _toTokenId)
+func (_IdentityRegistry *IdentityRegistryFilterer) WatchBatchMetadataUpdate(opts *bind.WatchOpts, sink chan<- *IdentityRegistryBatchMetadataUpdate) (event.Subscription, error) {
+
+	logs, sub, err := _IdentityRegistry.contract.WatchLogs(opts, "BatchMetadataUpdate")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(IdentityRegistryBatchMetadataUpdate)
+				if err := _IdentityRegistry.contract.UnpackLog(event, "BatchMetadataUpdate", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseBatchMetadataUpdate is a log parse operation binding the contract event 0x6bd5c950a8d8df17f772f5af37cb3655737899cbf903264b9795592da439661c.
+//
+// Solidity: event BatchMetadataUpdate(uint256 _fromTokenId, uint256 _toTokenId)
+func (_IdentityRegistry *IdentityRegistryFilterer) ParseBatchMetadataUpdate(log types.Log) (*IdentityRegistryBatchMetadataUpdate, error) {
+	event := new(IdentityRegistryBatchMetadataUpdate)
+	if err := _IdentityRegistry.contract.UnpackLog(event, "BatchMetadataUpdate", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// IdentityRegistryMetadataSetIterator is returned from FilterMetadataSet and is used to iterate over the raw logs and unpacked data for MetadataSet events raised by the IdentityRegistry contract.
+type IdentityRegistryMetadataSetIterator struct {
+	Event *IdentityRegistryMetadataSet // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *IdentityRegistryMetadataSetIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(IdentityRegistryMetadataSet)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(IdentityRegistryMetadataSet)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *IdentityRegistryMetadataSetIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *IdentityRegistryMetadataSetIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// IdentityRegistryMetadataSet represents a MetadataSet event raised by the IdentityRegistry contract.
+type IdentityRegistryMetadataSet struct {
+	AgentId    *big.Int
+	IndexedKey common.Hash
+	Key        string
+	Value      []byte
+	Raw        types.Log // Blockchain specific contextual infos
+}
+
+// FilterMetadataSet is a free log retrieval operation binding the contract event 0x2c149ed548c6d2993cd73efe187df6eccabe4538091b33adbd25fafdb8a1468b.
+//
+// Solidity: event MetadataSet(uint256 indexed agentId, string indexed indexedKey, string key, bytes value)
+func (_IdentityRegistry *IdentityRegistryFilterer) FilterMetadataSet(opts *bind.FilterOpts, agentId []*big.Int, indexedKey []string) (*IdentityRegistryMetadataSetIterator, error) {
+
+	var agentIdRule []interface{}
+	for _, agentIdItem := range agentId {
+		agentIdRule = append(agentIdRule, agentIdItem)
+	}
+	var indexedKeyRule []interface{}
+	for _, indexedKeyItem := range indexedKey {
+		indexedKeyRule = append(indexedKeyRule, indexedKeyItem)
+	}
+
+	logs, sub, err := _IdentityRegistry.contract.FilterLogs(opts, "MetadataSet", agentIdRule, indexedKeyRule)
+	if err != nil {
+		return nil, err
+	}
+	return &IdentityRegistryMetadataSetIterator{contract: _IdentityRegistry.contract, event: "MetadataSet", logs: logs, sub: sub}, nil
+}
+
+// WatchMetadataSet is a free log subscription operation binding the contract event 0x2c149ed548c6d2993cd73efe187df6eccabe4538091b33adbd25fafdb8a1468b.
+//
+// Solidity: event MetadataSet(uint256 indexed agentId, string indexed indexedKey, string key, bytes value)
+func (_IdentityRegistry *IdentityRegistryFilterer) WatchMetadataSet(opts *bind.WatchOpts, sink chan<- *IdentityRegistryMetadataSet, agentId []*big.Int, indexedKey []string) (event.Subscription, error) {
+
+	var agentIdRule []interface{}
+	for _, agentIdItem := range agentId {
+		agentIdRule = append(agentIdRule, agentIdItem)
+	}
+	var indexedKeyRule []interface{}
+	for _, indexedKeyItem := range indexedKey {
+		indexedKeyRule = append(indexedKeyRule, indexedKeyItem)
+	}
+
+	logs, sub, err := _IdentityRegistry.contract.WatchLogs(opts, "MetadataSet", agentIdRule, indexedKeyRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(IdentityRegistryMetadataSet)
+				if err := _IdentityRegistry.contract.UnpackLog(event, "MetadataSet", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseMetadataSet is a log parse operation binding the contract event 0x2c149ed548c6d2993cd73efe187df6eccabe4538091b33adbd25fafdb8a1468b.
+//
+// Solidity: event MetadataSet(uint256 indexed agentId, string indexed indexedKey, string key, bytes value)
+func (_IdentityRegistry *IdentityRegistryFilterer) ParseMetadataSet(log types.Log) (*IdentityRegistryMetadataSet, error) {
+	event := new(IdentityRegistryMetadataSet)
+	if err := _IdentityRegistry.contract.UnpackLog(event, "MetadataSet", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// IdentityRegistryMetadataUpdateIterator is returned from FilterMetadataUpdate and is used to iterate over the raw logs and unpacked data for MetadataUpdate events raised by the IdentityRegistry contract.
+type IdentityRegistryMetadataUpdateIterator struct {
+	Event *IdentityRegistryMetadataUpdate // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *IdentityRegistryMetadataUpdateIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(IdentityRegistryMetadataUpdate)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(IdentityRegistryMetadataUpdate)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *IdentityRegistryMetadataUpdateIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *IdentityRegistryMetadataUpdateIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// IdentityRegistryMetadataUpdate represents a MetadataUpdate event raised by the IdentityRegistry contract.
+type IdentityRegistryMetadataUpdate struct {
+	TokenId *big.Int
 	Raw     types.Log // Blockchain specific contextual infos
 }
 
-// FilterInitialized is a free log retrieval operation binding the contract event 0x7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb3847402498.
+// FilterMetadataUpdate is a free log retrieval operation binding the contract event 0xf8e1a15aba9398e019f0b49df1a4fde98ee17ae345cb5f6b5e2c27f5033e8ce7.
 //
-// Solidity: event Initialized(uint8 version)
-func (_IdentityRegistry *IdentityRegistryFilterer) FilterInitialized(opts *bind.FilterOpts) (*IdentityRegistryInitializedIterator, error) {
+// Solidity: event MetadataUpdate(uint256 _tokenId)
+func (_IdentityRegistry *IdentityRegistryFilterer) FilterMetadataUpdate(opts *bind.FilterOpts) (*IdentityRegistryMetadataUpdateIterator, error) {
 
-	logs, sub, err := _IdentityRegistry.contract.FilterLogs(opts, "Initialized")
+	logs, sub, err := _IdentityRegistry.contract.FilterLogs(opts, "MetadataUpdate")
 	if err != nil {
 		return nil, err
 	}
-	return &IdentityRegistryInitializedIterator{contract: _IdentityRegistry.contract, event: "Initialized", logs: logs, sub: sub}, nil
+	return &IdentityRegistryMetadataUpdateIterator{contract: _IdentityRegistry.contract, event: "MetadataUpdate", logs: logs, sub: sub}, nil
 }
 
-// WatchInitialized is a free log subscription operation binding the contract event 0x7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb3847402498.
+// WatchMetadataUpdate is a free log subscription operation binding the contract event 0xf8e1a15aba9398e019f0b49df1a4fde98ee17ae345cb5f6b5e2c27f5033e8ce7.
 //
-// Solidity: event Initialized(uint8 version)
-func (_IdentityRegistry *IdentityRegistryFilterer) WatchInitialized(opts *bind.WatchOpts, sink chan<- *IdentityRegistryInitialized) (event.Subscription, error) {
+// Solidity: event MetadataUpdate(uint256 _tokenId)
+func (_IdentityRegistry *IdentityRegistryFilterer) WatchMetadataUpdate(opts *bind.WatchOpts, sink chan<- *IdentityRegistryMetadataUpdate) (event.Subscription, error) {
 
-	logs, sub, err := _IdentityRegistry.contract.WatchLogs(opts, "Initialized")
+	logs, sub, err := _IdentityRegistry.contract.WatchLogs(opts, "MetadataUpdate")
 	if err != nil {
 		return nil, err
 	}
@@ -901,8 +1454,8 @@ func (_IdentityRegistry *IdentityRegistryFilterer) WatchInitialized(opts *bind.W
 			select {
 			case log := <-logs:
 				// New log arrived, parse the event and forward to the user
-				event := new(IdentityRegistryInitialized)
-				if err := _IdentityRegistry.contract.UnpackLog(event, "Initialized", log); err != nil {
+				event := new(IdentityRegistryMetadataUpdate)
+				if err := _IdentityRegistry.contract.UnpackLog(event, "MetadataUpdate", log); err != nil {
 					return err
 				}
 				event.Raw = log
@@ -923,12 +1476,12 @@ func (_IdentityRegistry *IdentityRegistryFilterer) WatchInitialized(opts *bind.W
 	}), nil
 }
 
-// ParseInitialized is a log parse operation binding the contract event 0x7f26b83ff96e1f2b6a682f133852f6798a09c465da95921460cefb3847402498.
+// ParseMetadataUpdate is a log parse operation binding the contract event 0xf8e1a15aba9398e019f0b49df1a4fde98ee17ae345cb5f6b5e2c27f5033e8ce7.
 //
-// Solidity: event Initialized(uint8 version)
-func (_IdentityRegistry *IdentityRegistryFilterer) ParseInitialized(log types.Log) (*IdentityRegistryInitialized, error) {
-	event := new(IdentityRegistryInitialized)
-	if err := _IdentityRegistry.contract.UnpackLog(event, "Initialized", log); err != nil {
+// Solidity: event MetadataUpdate(uint256 _tokenId)
+func (_IdentityRegistry *IdentityRegistryFilterer) ParseMetadataUpdate(log types.Log) (*IdentityRegistryMetadataUpdate, error) {
+	event := new(IdentityRegistryMetadataUpdate)
+	if err := _IdentityRegistry.contract.UnpackLog(event, "MetadataUpdate", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
@@ -1082,6 +1635,480 @@ func (_IdentityRegistry *IdentityRegistryFilterer) WatchOwnershipTransferred(opt
 func (_IdentityRegistry *IdentityRegistryFilterer) ParseOwnershipTransferred(log types.Log) (*IdentityRegistryOwnershipTransferred, error) {
 	event := new(IdentityRegistryOwnershipTransferred)
 	if err := _IdentityRegistry.contract.UnpackLog(event, "OwnershipTransferred", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// IdentityRegistryRegisteredIterator is returned from FilterRegistered and is used to iterate over the raw logs and unpacked data for Registered events raised by the IdentityRegistry contract.
+type IdentityRegistryRegisteredIterator struct {
+	Event *IdentityRegistryRegistered // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *IdentityRegistryRegisteredIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(IdentityRegistryRegistered)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(IdentityRegistryRegistered)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *IdentityRegistryRegisteredIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *IdentityRegistryRegisteredIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// IdentityRegistryRegistered represents a Registered event raised by the IdentityRegistry contract.
+type IdentityRegistryRegistered struct {
+	AgentId  *big.Int
+	TokenURI string
+	Owner    common.Address
+	Raw      types.Log // Blockchain specific contextual infos
+}
+
+// FilterRegistered is a free log retrieval operation binding the contract event 0xca52e62c367d81bb2e328eb795f7c7ba24afb478408a26c0e201d155c449bc4a.
+//
+// Solidity: event Registered(uint256 indexed agentId, string tokenURI, address indexed owner)
+func (_IdentityRegistry *IdentityRegistryFilterer) FilterRegistered(opts *bind.FilterOpts, agentId []*big.Int, owner []common.Address) (*IdentityRegistryRegisteredIterator, error) {
+
+	var agentIdRule []interface{}
+	for _, agentIdItem := range agentId {
+		agentIdRule = append(agentIdRule, agentIdItem)
+	}
+
+	var ownerRule []interface{}
+	for _, ownerItem := range owner {
+		ownerRule = append(ownerRule, ownerItem)
+	}
+
+	logs, sub, err := _IdentityRegistry.contract.FilterLogs(opts, "Registered", agentIdRule, ownerRule)
+	if err != nil {
+		return nil, err
+	}
+	return &IdentityRegistryRegisteredIterator{contract: _IdentityRegistry.contract, event: "Registered", logs: logs, sub: sub}, nil
+}
+
+// WatchRegistered is a free log subscription operation binding the contract event 0xca52e62c367d81bb2e328eb795f7c7ba24afb478408a26c0e201d155c449bc4a.
+//
+// Solidity: event Registered(uint256 indexed agentId, string tokenURI, address indexed owner)
+func (_IdentityRegistry *IdentityRegistryFilterer) WatchRegistered(opts *bind.WatchOpts, sink chan<- *IdentityRegistryRegistered, agentId []*big.Int, owner []common.Address) (event.Subscription, error) {
+
+	var agentIdRule []interface{}
+	for _, agentIdItem := range agentId {
+		agentIdRule = append(agentIdRule, agentIdItem)
+	}
+
+	var ownerRule []interface{}
+	for _, ownerItem := range owner {
+		ownerRule = append(ownerRule, ownerItem)
+	}
+
+	logs, sub, err := _IdentityRegistry.contract.WatchLogs(opts, "Registered", agentIdRule, ownerRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(IdentityRegistryRegistered)
+				if err := _IdentityRegistry.contract.UnpackLog(event, "Registered", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseRegistered is a log parse operation binding the contract event 0xca52e62c367d81bb2e328eb795f7c7ba24afb478408a26c0e201d155c449bc4a.
+//
+// Solidity: event Registered(uint256 indexed agentId, string tokenURI, address indexed owner)
+func (_IdentityRegistry *IdentityRegistryFilterer) ParseRegistered(log types.Log) (*IdentityRegistryRegistered, error) {
+	event := new(IdentityRegistryRegistered)
+	if err := _IdentityRegistry.contract.UnpackLog(event, "Registered", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// IdentityRegistryTransferIterator is returned from FilterTransfer and is used to iterate over the raw logs and unpacked data for Transfer events raised by the IdentityRegistry contract.
+type IdentityRegistryTransferIterator struct {
+	Event *IdentityRegistryTransfer // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *IdentityRegistryTransferIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(IdentityRegistryTransfer)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(IdentityRegistryTransfer)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *IdentityRegistryTransferIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *IdentityRegistryTransferIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// IdentityRegistryTransfer represents a Transfer event raised by the IdentityRegistry contract.
+type IdentityRegistryTransfer struct {
+	From    common.Address
+	To      common.Address
+	TokenId *big.Int
+	Raw     types.Log // Blockchain specific contextual infos
+}
+
+// FilterTransfer is a free log retrieval operation binding the contract event 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef.
+//
+// Solidity: event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)
+func (_IdentityRegistry *IdentityRegistryFilterer) FilterTransfer(opts *bind.FilterOpts, from []common.Address, to []common.Address, tokenId []*big.Int) (*IdentityRegistryTransferIterator, error) {
+
+	var fromRule []interface{}
+	for _, fromItem := range from {
+		fromRule = append(fromRule, fromItem)
+	}
+	var toRule []interface{}
+	for _, toItem := range to {
+		toRule = append(toRule, toItem)
+	}
+	var tokenIdRule []interface{}
+	for _, tokenIdItem := range tokenId {
+		tokenIdRule = append(tokenIdRule, tokenIdItem)
+	}
+
+	logs, sub, err := _IdentityRegistry.contract.FilterLogs(opts, "Transfer", fromRule, toRule, tokenIdRule)
+	if err != nil {
+		return nil, err
+	}
+	return &IdentityRegistryTransferIterator{contract: _IdentityRegistry.contract, event: "Transfer", logs: logs, sub: sub}, nil
+}
+
+// WatchTransfer is a free log subscription operation binding the contract event 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef.
+//
+// Solidity: event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)
+func (_IdentityRegistry *IdentityRegistryFilterer) WatchTransfer(opts *bind.WatchOpts, sink chan<- *IdentityRegistryTransfer, from []common.Address, to []common.Address, tokenId []*big.Int) (event.Subscription, error) {
+
+	var fromRule []interface{}
+	for _, fromItem := range from {
+		fromRule = append(fromRule, fromItem)
+	}
+	var toRule []interface{}
+	for _, toItem := range to {
+		toRule = append(toRule, toItem)
+	}
+	var tokenIdRule []interface{}
+	for _, tokenIdItem := range tokenId {
+		tokenIdRule = append(tokenIdRule, tokenIdItem)
+	}
+
+	logs, sub, err := _IdentityRegistry.contract.WatchLogs(opts, "Transfer", fromRule, toRule, tokenIdRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(IdentityRegistryTransfer)
+				if err := _IdentityRegistry.contract.UnpackLog(event, "Transfer", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseTransfer is a log parse operation binding the contract event 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef.
+//
+// Solidity: event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)
+func (_IdentityRegistry *IdentityRegistryFilterer) ParseTransfer(log types.Log) (*IdentityRegistryTransfer, error) {
+	event := new(IdentityRegistryTransfer)
+	if err := _IdentityRegistry.contract.UnpackLog(event, "Transfer", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// IdentityRegistryUriUpdatedIterator is returned from FilterUriUpdated and is used to iterate over the raw logs and unpacked data for UriUpdated events raised by the IdentityRegistry contract.
+type IdentityRegistryUriUpdatedIterator struct {
+	Event *IdentityRegistryUriUpdated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *IdentityRegistryUriUpdatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(IdentityRegistryUriUpdated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(IdentityRegistryUriUpdated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *IdentityRegistryUriUpdatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *IdentityRegistryUriUpdatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// IdentityRegistryUriUpdated represents a UriUpdated event raised by the IdentityRegistry contract.
+type IdentityRegistryUriUpdated struct {
+	AgentId   *big.Int
+	NewUri    string
+	UpdatedBy common.Address
+	Raw       types.Log // Blockchain specific contextual infos
+}
+
+// FilterUriUpdated is a free log retrieval operation binding the contract event 0xb41beef75d9f8d55b985319b459e96f82453580af381391f1ad531eb8f8b5a3a.
+//
+// Solidity: event UriUpdated(uint256 indexed agentId, string newUri, address indexed updatedBy)
+func (_IdentityRegistry *IdentityRegistryFilterer) FilterUriUpdated(opts *bind.FilterOpts, agentId []*big.Int, updatedBy []common.Address) (*IdentityRegistryUriUpdatedIterator, error) {
+
+	var agentIdRule []interface{}
+	for _, agentIdItem := range agentId {
+		agentIdRule = append(agentIdRule, agentIdItem)
+	}
+
+	var updatedByRule []interface{}
+	for _, updatedByItem := range updatedBy {
+		updatedByRule = append(updatedByRule, updatedByItem)
+	}
+
+	logs, sub, err := _IdentityRegistry.contract.FilterLogs(opts, "UriUpdated", agentIdRule, updatedByRule)
+	if err != nil {
+		return nil, err
+	}
+	return &IdentityRegistryUriUpdatedIterator{contract: _IdentityRegistry.contract, event: "UriUpdated", logs: logs, sub: sub}, nil
+}
+
+// WatchUriUpdated is a free log subscription operation binding the contract event 0xb41beef75d9f8d55b985319b459e96f82453580af381391f1ad531eb8f8b5a3a.
+//
+// Solidity: event UriUpdated(uint256 indexed agentId, string newUri, address indexed updatedBy)
+func (_IdentityRegistry *IdentityRegistryFilterer) WatchUriUpdated(opts *bind.WatchOpts, sink chan<- *IdentityRegistryUriUpdated, agentId []*big.Int, updatedBy []common.Address) (event.Subscription, error) {
+
+	var agentIdRule []interface{}
+	for _, agentIdItem := range agentId {
+		agentIdRule = append(agentIdRule, agentIdItem)
+	}
+
+	var updatedByRule []interface{}
+	for _, updatedByItem := range updatedBy {
+		updatedByRule = append(updatedByRule, updatedByItem)
+	}
+
+	logs, sub, err := _IdentityRegistry.contract.WatchLogs(opts, "UriUpdated", agentIdRule, updatedByRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(IdentityRegistryUriUpdated)
+				if err := _IdentityRegistry.contract.UnpackLog(event, "UriUpdated", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseUriUpdated is a log parse operation binding the contract event 0xb41beef75d9f8d55b985319b459e96f82453580af381391f1ad531eb8f8b5a3a.
+//
+// Solidity: event UriUpdated(uint256 indexed agentId, string newUri, address indexed updatedBy)
+func (_IdentityRegistry *IdentityRegistryFilterer) ParseUriUpdated(log types.Log) (*IdentityRegistryUriUpdated, error) {
+	event := new(IdentityRegistryUriUpdated)
+	if err := _IdentityRegistry.contract.UnpackLog(event, "UriUpdated", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

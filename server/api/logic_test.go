@@ -33,7 +33,7 @@ func initTest() {
 
 func TestGetCardResponse(t *testing.T) {
 	initTest()
-	CardResponse, err := GetCardResponse("4")
+	CardResponse, err := GetCardResponse(4)
 	if err != nil {
 		t.Errorf("GetCardResponse error: %v", err)
 	}
@@ -42,36 +42,36 @@ func TestGetCardResponse(t *testing.T) {
 
 func TestGetCardList(t *testing.T) {
 	initTest()
-	CardList, total, err := GetCardList(1, 10)
+	agents, total, err := GetAgentList(1, 10)
 	if err != nil {
-		t.Errorf("GetCardList error: %v", err)
+		t.Errorf("GetAgentList error: %v", err)
 	}
-	for _, card := range CardList {
-		fmt.Println(card)
+	for _, agent := range agents {
+		fmt.Println(agent)
 	}
 	fmt.Println(total)
 }
 
 func TestGetCardResponseByTrustModel(t *testing.T) {
 	initTest()
-	CardList, total, err := GetCardResponseByTrustModel(1, 10, []string{"feedback", "inference-validation"})
+	agents, total, err := GetAgentListByTrustModel(1, 10, []string{"feedback", "inference-validation"})
 	if err != nil {
 		t.Errorf("GetCardResponseByTrustModel error: %v", err)
 	}
-	for _, card := range CardList {
-		fmt.Println(card)
+	for _, agent := range agents {
+		fmt.Println(agent)
 	}
 	fmt.Println(total)
 }
 
 func TestSearchCardResponseBySkill(t *testing.T) {
 	initTest()
-	CardList, total, err := SearchCardResponseBySkill("traffic", 1, 10)
+	agents, total, err := SearchAgentListBySkill("traffic", 1, 10)
 	if err != nil {
-		t.Errorf("SearchCardResponseBySkill error: %v", err)
+		t.Errorf("SearchAgentListBySkill error: %v", err)
 	}
-	for _, card := range CardList {
-		fmt.Println(card)
+	for _, agent := range agents {
+		fmt.Println(agent)
 	}
 	fmt.Println(total)
 }
