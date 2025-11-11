@@ -12,7 +12,7 @@ type TokenURLResponse struct {
 	Endpoints        []Endpoint     `json:"endpoints"`
 	Registrations    []Registration `json:"registrations"`
 	SupportedTrust   []string       `json:"supportedTrust"`
-	UserInterfaceURL string         `json:"userInterfaceURL"`
+	UserInterfaceURL string         `json:"userInterface"`
 }
 type Registration struct {
 	AgentID       uint64 `json:"agentId"`
