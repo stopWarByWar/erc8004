@@ -12,6 +12,7 @@ type CommentProcessor struct {
 	execBlock          uint64
 	execIndex          uint64
 	fetchBlockInterval int64
+	commentSchemaID    string
 
 	chainID string
 
@@ -19,7 +20,7 @@ type CommentProcessor struct {
 	logger *logger.Logger
 }
 
-func NewCommentProcessor(chainID string, startBlock uint64, limit int, fetchBlockInterval int64, _logger *logger.Logger) *CommentProcessor {
+func NewCommentProcessor(chainID string, commentSchemaID string, startBlock uint64, limit int, fetchBlockInterval int64, _logger *logger.Logger) *CommentProcessor {
 	execBlock, execIndex, err := model.GetLatestAgentComment(chainID)
 	if err != nil {
 		panic(err)
@@ -33,15 +34,13 @@ func NewCommentProcessor(chainID string, startBlock uint64, limit int, fetchBloc
 	return &CommentProcessor{
 		execBlock:          execBlock,
 		execIndex:          execIndex,
+		commentSchemaID:    commentSchemaID,
 		limit:              limit,
 		fetchBlockInterval: fetchBlockInterval,
 		logger:             _logger,
 		chainID:            chainID,
 	}
 }
-
-// todo: new comment schema ID
-const commentSchemaID = ""
 
 func (p *CommentProcessor) Process() {
 	p.logger.WithFields(logrus.Fields{
@@ -50,7 +49,7 @@ func (p *CommentProcessor) Process() {
 	}).Info("start run comment processor")
 
 	for {
-		commentAttestations, err := model.GetUnInsertedCommentAttestation(p.execBlock, p.execIndex, p.limit, commentSchemaID)
+		commentAttestations, err := model.GetUnInsertedCommentAttestation(p.execBlock, p.execIndex, p.limit, p.commentSchemaID)
 		if err != nil {
 			p.logger.WithFields(logrus.Fields{
 				"error": err,

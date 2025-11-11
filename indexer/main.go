@@ -52,7 +52,7 @@ func main() {
 	// reputationIdx := processor.NewReputationProcessor(config.Reputation.Addr, ethClient, config.Reputation.FetchBlockInterval, config.Reputation.StartBlock, _logger)
 	// go reputationIdx.Process()
 
-	commentIdx := processor.NewCommentProcessor(chainID.String(), config.Comment.StartBlock, config.Comment.Limit, config.Comment.FetchBlockInterval, _logger)
+	commentIdx := processor.NewCommentProcessor(chainID.String(), config.Comment.CommentSchemaID, config.Comment.StartBlock, config.Comment.Limit, config.Comment.FetchBlockInterval, _logger)
 	commentIdx.Process()
 }
 
@@ -74,6 +74,7 @@ type Config struct {
 		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
 		StartBlock         uint64 `yaml:"start_block"`
 		Limit              int    `yaml:"limit"`
+		CommentSchemaID    string `yaml:"comment_schema_id"`
 	} `yaml:"comment"`
 }
 
