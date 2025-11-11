@@ -633,7 +633,9 @@ type SimplePassportAccount struct {
 func GetLatestAgentComment(chainID string) (uint64, uint64, error) {
 	var agentComment *AgentComment
 	err := db.Where("chain_id = ?", chainID).Order("block DESC, index DESC").First(&agentComment).Error
-	if err != nil {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return 0, 0, nil
+	} else if err != nil {
 		return 0, 0, err
 	}
 	return agentComment.Block, agentComment.Index, nil

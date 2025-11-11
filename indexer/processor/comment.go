@@ -20,7 +20,6 @@ type CommentProcessor struct {
 }
 
 func NewCommentProcessor(chainID string, startBlock uint64, limit int, fetchBlockInterval int64, _logger *logger.Logger) *CommentProcessor {
-
 	execBlock, execIndex, err := model.GetLatestAgentComment(chainID)
 	if err != nil {
 		panic(err)

@@ -46,11 +46,11 @@ func main() {
 
 	model.InitDB(config.Dns)
 
-	createAgentIdx := processor.NewCreateAgentProcessor(config.Identity.Addr, ethClient, config.Identity.FetchBlockInterval, config.Identity.StartBlock, _logger)
-	go createAgentIdx.Process()
+	// createAgentIdx := processor.NewCreateAgentProcessor(config.Identity.Addr, ethClient, config.Identity.FetchBlockInterval, config.Identity.StartBlock, _logger)
+	// go createAgentIdx.Process()
 
-	reputationIdx := processor.NewReputationProcessor(config.Reputation.Addr, ethClient, config.Reputation.FetchBlockInterval, config.Reputation.StartBlock, _logger)
-	go reputationIdx.Process()
+	// reputationIdx := processor.NewReputationProcessor(config.Reputation.Addr, ethClient, config.Reputation.FetchBlockInterval, config.Reputation.StartBlock, _logger)
+	// go reputationIdx.Process()
 
 	commentIdx := processor.NewCommentProcessor(chainID.String(), config.Comment.StartBlock, config.Comment.Limit, config.Comment.FetchBlockInterval, _logger)
 	commentIdx.Process()
