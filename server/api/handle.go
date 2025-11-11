@@ -13,10 +13,23 @@ var mock = false
 
 func GetAgentCardListHandler(c *gin.Context) {
 	if mock {
+		page := c.Query("page")
+		pageSize := c.Query("page_size")
+
+		pageInt, err := strconv.Atoi(page)
+		if err != nil {
+			ErrResp(nil, "fail to get page", "Invalid Request", c)
+			return
+		}
+		pageSizeInt, err := strconv.Atoi(pageSize)
+		if err != nil {
+			ErrResp(nil, "fail to get page_size", "Invalid Request", c)
+			return
+		}
 		SuccessResp(gin.H{
-			"agent_card_list": []*AgentResponse{mockAgentCard()},
-			"total":           1,
-			"current_page":    1,
+			"agent_list":   mockAgents(pageSizeInt),
+			"total":        int64(len(mockAgents(pageSizeInt))),
+			"current_page": pageInt,
 		}, c)
 		return
 	}
@@ -41,16 +54,16 @@ func GetAgentCardListHandler(c *gin.Context) {
 	}
 
 	SuccessResp(gin.H{
-		"agent_card_list": resp,
-		"total":           total,
-		"current_page":    pageInt,
+		"agent_list":   resp,
+		"total":        total,
+		"current_page": pageInt,
 	}, c)
 }
 
 func GetAgentCardDetailHandler(c *gin.Context) {
 	if mock {
 		SuccessResp(gin.H{
-			"agent_card": mockAgentCard(),
+			"agent": mockAgent(),
 		}, c)
 		return
 	}
@@ -66,16 +79,29 @@ func GetAgentCardDetailHandler(c *gin.Context) {
 		return
 	}
 	SuccessResp(gin.H{
-		"agent_card": agentCard,
+		"agent": agentCard,
 	}, c)
 }
 
 func GetAgentCardListByTrustModelHandler(c *gin.Context) {
 	if mock {
+		page := c.Query("page")
+		pageSize := c.Query("page_size")
+
+		pageInt, err := strconv.Atoi(page)
+		if err != nil {
+			ErrResp(nil, "fail to get page", "Invalid Request", c)
+			return
+		}
+		pageSizeInt, err := strconv.Atoi(pageSize)
+		if err != nil {
+			ErrResp(nil, "fail to get page_size", "Invalid Request", c)
+			return
+		}
 		SuccessResp(gin.H{
-			"agent_card_list": []*AgentResponse{mockAgentCard()},
-			"total":           1,
-			"current_page":    1,
+			"agent_list":   mockAgents(pageSizeInt),
+			"total":        int64(len(mockAgents(pageSizeInt))),
+			"current_page": pageInt,
 		}, c)
 		return
 	}
@@ -120,8 +146,23 @@ func GetTrustModelListHandler(c *gin.Context) {
 
 func GetAgentCardsSearchBySkillHandler(c *gin.Context) {
 	if mock {
+		page := c.Query("page")
+		pageSize := c.Query("page_size")
+
+		pageInt, err := strconv.Atoi(page)
+		if err != nil {
+			ErrResp(nil, "fail to get page", "Invalid Request", c)
+			return
+		}
+		pageSizeInt, err := strconv.Atoi(pageSize)
+		if err != nil {
+			ErrResp(nil, "fail to get page_size", "Invalid Request", c)
+			return
+		}
 		SuccessResp(gin.H{
-			"agent_list": []*AgentResponse{mockAgentCard()},
+			"agent_list":   mockAgents(pageSizeInt),
+			"total":        int64(len(mockAgents(pageSizeInt))),
+			"current_page": pageInt,
 		}, c)
 		return
 	}
@@ -154,7 +195,27 @@ func GetAgentCardsSearchBySkillHandler(c *gin.Context) {
 }
 
 func GetAgentCardsSearchByNameHandler(c *gin.Context) {
+	if mock {
+		page := c.Query("page")
+		pageSize := c.Query("page_size")
 
+		pageInt, err := strconv.Atoi(page)
+		if err != nil {
+			ErrResp(nil, "fail to get page", "Invalid Request", c)
+			return
+		}
+		pageSizeInt, err := strconv.Atoi(pageSize)
+		if err != nil {
+			ErrResp(nil, "fail to get page_size", "Invalid Request", c)
+			return
+		}
+		SuccessResp(gin.H{
+			"agent_list":   mockAgents(pageSizeInt),
+			"total":        int64(len(mockAgents(pageSizeInt))),
+			"current_page": pageInt,
+		}, c)
+		return
+	}
 	name := c.Query("name")
 	page := c.Query("page")
 	pageSize := c.Query("page_size")
@@ -180,43 +241,14 @@ func GetAgentCardsSearchByNameHandler(c *gin.Context) {
 	}, c)
 }
 
-// func GetFeedbackListHandler(c *gin.Context) {
-// 	agentUID, err := strconv.ParseUint(c.Query("uid"), 10, 64)
-// 	if err != nil {
-// 		ErrResp(nil, "fail to get agent uid", "Invalid Request", c)
-// 		return
-// 	}
-// 	page := c.Query("page")
-// 	pageSize := c.Query("page_size")
-// 	pageInt, err := strconv.Atoi(page)
-// 	if err != nil {
-// 		ErrResp(nil, "fail to get page", "Invalid Request", c)
-// 		return
-// 	}
-// 	if pageInt <= 0 {
-// 		pageInt = 1
-// 	}
-// 	pageSizeInt, err := strconv.Atoi(pageSize)
-// 	if err != nil {
-// 		ErrResp(nil, "fail to get page_size", "Invalid Request", c)
-// 		return
-// 	}
-// 	if pageSizeInt <= 0 {
-// 		pageSizeInt = 10
-// 	}
-
-// 	feedbacks, total, err := model.GetFeedbackList(agentUID, pageInt, pageSizeInt)
-// 	if err != nil {
-// 		ErrResp(nil, "fail to get feedback list", "Internal Error", c)
-// 		return
-// 	}
-// 	SuccessResp(gin.H{
-// 		"feedbacks": feedbacks,
-// 		"total":     total,
-// 	}, c)
-// }
-
 func GetAgentCommentsHandler(c *gin.Context) {
+	if mock {
+		SuccessResp(gin.H{
+			"comments": mockComments(),
+			"total":    int64(len(mockComments())),
+		}, c)
+		return
+	}
 	agentUID, err := strconv.ParseUint(c.Query("uid"), 10, 64)
 	if err != nil {
 		ErrResp(nil, "fail to get agent uid", "Invalid Request", c)
@@ -253,6 +285,13 @@ func GetAgentCommentsHandler(c *gin.Context) {
 }
 
 func GetAgentFeedbacksHandler(c *gin.Context) {
+	if mock {
+		SuccessResp(gin.H{
+			"feedbacks": mockFeedbacks(),
+			"total":     int64(len(mockFeedbacks())),
+		}, c)
+		return
+	}
 	agentUID, err := strconv.ParseUint(c.Query("uid"), 10, 64)
 	if err != nil {
 		ErrResp(nil, "fail to get agent uid", "Invalid Request", c)
@@ -290,18 +329,28 @@ func GetAgentFeedbacksHandler(c *gin.Context) {
 
 }
 
-func mockAgentCard() *AgentResponse {
-	return &AgentResponse{
-		UID:          1,
-		AgentID:      "1",
-		AgentDomain:  "passport.bnbattest.io",
-		AgentAddress: "0x0000000000000000000000000000000000000000",
-		ChainID:      "97",
-		Namespace:    "eip:155",
+func mockAgents(pageSizeInt int) []*AgentResponse {
+	agents := make([]*AgentResponse, 0)
+	for i := 0; i < pageSizeInt; i++ {
+		agent := mockAgent()
+		agent.UID = uint64(i + 1)
+		agents = append(agents, agent)
+	}
+	return agents
+}
 
-		Name:        "Test-Agent",
-		Description: "This is a test for the agent card. It is used to test the agent card API. This is a test for the agent card. This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.",
-		URL:         "https://passport.bnbattest.io",
+func mockAgent() *AgentResponse {
+	return &AgentResponse{
+		UID:              1,
+		AgentID:          "1",
+		AgentDomain:      "passport.bnbattest.io",
+		AgentAddress:     "0x0000000000000000000000000000000000000000",
+		ChainID:          "97",
+		Namespace:        "eip:155",
+		IdentityRegistry: "0xa98a5542a1aab336397d487e32021e0e48bef717",
+		Name:             "Test-Agent",
+		Description:      "This is a test for the agent card. It is used to test the agent card API. This is a test for the agent card. This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.This is a test for the agent card.",
+		URL:              "https://passport.bnbattest.io",
 		Provider: ProviderResponse{
 			Organization: "BAS",
 			URL:          "https://passport.bnbattest.io",
@@ -329,72 +378,72 @@ func mockAgentCard() *AgentResponse {
 	}
 }
 
-func mockFeedback() []*model.FeedbackResp {
+func mockFeedbacks() []*model.FeedbackResp {
 	return []*model.FeedbackResp{
 		{
-			UID:                1,
-			AgentUID:           1,
+			UID:                1001,
+			AgentUID:           9001,
 			ChainID:            "97",
-			AgentID:            "1",
-			ReputationRegistry: "0x0000000000000000000000000000000000000000",
-			ClientAddress:      "0x0000000000000000000000000000000000000000",
+			AgentID:            "224",
+			ReputationRegistry: "0x5f4b38ae73d1f17c39f93a07c11d36f5a8a9c011",
+			ClientAddress:      "0xc2b4d2a115d5c9c82ba4f54aafaef47de7b8a2a5",
 			FeedbackIndex:      1,
-			Score:              10,
-			Tag1:               "1",
-			Tag2:               "1",
-			FeedbackURI:        "1",
-			FeedbackHash:       "1",
-			TxHash:             "1",
-			Timestamps:         1,
-			Name:               "1",
-			Avatar:             "https://bnbattest.s3.ap-southeast-1.amazonaws.com/logo/bas.png",
+			Score:              9,
+			Tag1:               "响应速度",
+			Tag2:               "服务态度",
+			FeedbackURI:        "https://feedback.bitagent.test/agents/224/entries/1001",
+			FeedbackHash:       "0x41f5dd7f78b498c4d84f9ef3c3e94d89f3c0a907bfae27c34dbe61308bb94f01",
+			TxHash:             "0x8c40ce54f17f7b8b9f71d0b7dd93e9f66d37cbf3f6a4a5dd0f934e2b8700e501",
+			Timestamps:         1728105600,
+			Name:               "Alice Chen",
+			Avatar:             "https://cdn.bitagent.test/avatars/alice.png",
 			Passport:           true,
 		},
 		{
-			UID:                2,
-			AgentUID:           2,
+			UID:                1002,
+			AgentUID:           9001,
 			ChainID:            "97",
-			AgentID:            "2",
-			ReputationRegistry: "0x0000000000000000000000000000000000000000",
-			ClientAddress:      "0x0000000000000000000000000000000000000000",
+			AgentID:            "224",
+			ReputationRegistry: "0x5f4b38ae73d1f17c39f93a07c11d36f5a8a9c011",
+			ClientAddress:      "0x5a07c82bc1dd3642c1f13e2c21b40c60d2837a60",
 			FeedbackIndex:      2,
-			Score:              10,
-			Tag1:               "2",
-			Tag2:               "2",
-			FeedbackURI:        "2",
-			FeedbackHash:       "2",
-			TxHash:             "2",
-			Timestamps:         2,
-			Name:               "2",
-			Avatar:             "https://bnbattest.s3.ap-southeast-1.amazonaws.com/logo/bas.png",
-			Passport:           true,
+			Score:              8,
+			Tag1:               "功能完整",
+			Tag2:               "易用性",
+			FeedbackURI:        "https://feedback.bitagent.test/agents/224/entries/1002",
+			FeedbackHash:       "0x59e3cfb6c1a329be461b7d98a4f4cb6ccf5dce1db02dbe1cb05eae8cf7d246d8",
+			TxHash:             "0x6be49fdf792d6f0c0b095499f917f6579c42b9d0e751fa035d13dbfba3a5d7c4",
+			Timestamps:         1728019200,
+			Name:               "Marco Li",
+			Avatar:             "https://cdn.bitagent.test/avatars/marco.png",
+			Passport:           false,
 		},
 	}
 }
 
-func mockComment() []*model.Comment {
+func mockComments() []*model.Comment {
 	return []*model.Comment{
 		{
-			CommentAttestationID: "1",
-			Commenter:            "0x0000000000000000000000000000000000000000",
-			AgentUID:             1,
-			CommentText:          "1",
-			Score:                10,
-			Timestamps:           1,
-			Name:                 "1",
-			Avatar:               "https://bnbattest.s3.ap-southeast-1.amazonaws.com/logo/bas.png",
+			CommentAttestationID: "0x9a4ddf4c0d4d4c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f60718293a4b5c6d7e8f9",
+			Commenter:            "0xc2b4d2a115d5c9c82ba4f54aafaef47de7b8a2a5",
+			AgentUID:             9001,
+			CommentText:          "客服响应很快，问题当日就解决了。",
+			Score:                5,
+			Timestamps:           1728109200,
+			Name:                 "Alice Chen",
+			Avatar:               "https://cdn.bitagent.test/avatars/alice.png",
 			Passport:             true,
 		},
 		{
-			CommentAttestationID: "2",
-			Commenter:            "0x0000000000000000000000000000000000000000",
-			AgentUID:             2,
-			CommentText:          "2",
-			Score:                10,
-			Timestamps:           2,
-			Name:                 "2",
-			Avatar:               "https://bnbattest.s3.ap-southeast-1.amazonaws.com/logo/bas.png",
-			Passport:             true,
+			CommentAttestationID: "0x7be42a9f52f4bc0ad6c1cddf38f0a7f2bb1932c4d0f1a2b3c4d5e6f708192a3b",
+			Commenter:            "0x5a07c82bc1dd3642c1f13e2c21b40c60d2837a60",
+			AgentUID:             9001,
+			CommentText:          "功能覆盖了我们的大部分需求，希望文档再细致一些。",
+			Score:                4,
+			Timestamps:           1728022800,
+			Name:                 "Marco Li",
+			Avatar:               "https://cdn.bitagent.test/avatars/marco.png",
+			Passport:             false,
 		},
 	}
 }

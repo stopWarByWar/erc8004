@@ -1,3 +1,21 @@
+Drop table if exists agent_registries;
+Drop table if exists agents;
+Drop table if exists capabilities;
+Drop table if exists skills;
+Drop table if exists skill_tags;
+Drop table if exists providers;
+Drop table if exists trust_models;
+Drop table if exists extensions;
+Drop table if exists feedbacks;
+Drop table if exists responses;
+Drop table if exists agent_comments;
+
+Drop TRIGGER IF EXISTS update_score_and_cnt_trigger ON feedbacks;
+Drop TRIGGER IF EXISTS update_agent_score_and_cnt_on_revoked_trigger ON feedbacks;
+
+Drop FUNCTION IF EXISTS update_agent_score_and_comment_count();
+Drop FUNCTION IF EXISTS update_agent_score_and_comment_count_on_feedback_revoked();
+
 CREATE TABLE IF NOT EXISTS agent_registries (
   agent_id varchar(255),
   identity_registry char(42),

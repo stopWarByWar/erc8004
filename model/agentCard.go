@@ -546,30 +546,46 @@ func TransferOwnerShip(chainID, identityRegistry, agentID, newOwner string, bloc
 }
 
 func SearchAgentsByName(name string, page, pageSize int) ([]*Agent, int, error) {
-	var agentIDs []string
-	if err := db.Model(&Agent{}).Select("DISTINCT agent_id").Where("LOWER(name) LIKE LOWER(?)", "%"+name+"%").Offset((page - 1) * pageSize).Limit(pageSize).Scan(&agentIDs).Error; err != nil {
+	var agents []*Agent
+	query := db.Where("LOWER(name) LIKE LOWER(?)", "%"+name+"%").Offset((page - 1) * pageSize).Limit(pageSize)
+
+	if err := query.Find(&agents).Error; err != nil {
 		return nil, 0, err
 	}
 
-	var agentCards []*Agent
-	if err := db.Where("agent_id IN (?)", agentIDs).Find(&agentCards).Error; err != nil {
+	var count int64
+	if err := query.Count(&count).Error; err != nil {
 		return nil, 0, err
 	}
-	return agentCards, len(agentIDs), nil
+	return agents, int(count), nil
 }
 
 func SearchAgentsBySkill(skill string, page, pageSize int) ([]*Agent, int, error) {
-	var agentIDs []uint64
-	// 使用ILIKE（PostgreSQL）或LOWER函数实现不区分大小写的检索
-	if err := db.Model(&Skill{}).Select("DISTINCT agent_uid").Where("LOWER(name) LIKE LOWER(?)", "%"+skill+"%").Offset((page - 1) * pageSize).Limit(pageSize).Scan(&agentIDs).Error; err != nil {
+	var agentUIDs []uint64
+
+	query := db.Model(&Skill{}).
+		Select("DISTINCT agent_uid").
+		Where("LOWER(name) LIKE LOWER(?)", "%"+skill+"%")
+
+	if err := query.
+		Offset((page - 1) * pageSize).
+		Limit(pageSize).
+		Scan(&agentUIDs).
+		Error; err != nil {
 		return nil, 0, err
 	}
 
-	var agentCards []*Agent
-	if err := db.Where("agent_uid IN (?)", agentIDs).Find(&agentCards).Error; err != nil {
+	var count int64
+	if err := query.Count(&count).Error; err != nil {
 		return nil, 0, err
 	}
-	return agentCards, len(agentIDs), nil
+
+	var agents []*Agent
+	if err := db.Where("uid IN (?)", agentUIDs).Find(&agents).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return agents, int(count), nil
 }
 
 func GetUnInsertedAgentRegistry(chainID string, identityRegistry string, limit int) ([]*AgentRegistry, error) {

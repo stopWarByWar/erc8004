@@ -2,6 +2,7 @@ package api
 
 import (
 	"agent_identity/model"
+	"errors"
 	"math"
 )
 
@@ -11,8 +12,8 @@ func GetCardResponse(agentUID uint64) (*AgentResponse, error) {
 		return nil, err
 	}
 
-	if agent == nil {
-		return nil, nil
+	if agent == nil || agent.AgentID == "" {
+		return nil, errors.New("agent not found")
 	}
 
 	skills, err := model.GetSkillsByAgentUID(agentUID)
