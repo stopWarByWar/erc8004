@@ -101,20 +101,20 @@ func (p *CommentProcessor) dealWithCommentAttestation(att *model.Attestation) *m
 		return nil
 	}
 
-	agentUID, err := model.GetAgentUID(p.chainID, comment.IdentityRegistry, comment.AgentID.String())
-	if err != nil {
-		p.logger.WithFields(logrus.Fields{
-			"error":             err,
-			"chain_id":          p.chainID,
-			"agent_id":          comment.AgentID.String(),
-			"identity_registry": comment.IdentityRegistry,
-		}).Error("fail to get agent uid")
-		return nil
-	}
+	// agentUID, err := model.GetAgentUID(p.chainID, comment.IdentityRegistry, comment.AgentID.String())
+	// if err != nil {
+	// 	p.logger.WithFields(logrus.Fields{
+	// 		"error":             err,
+	// 		"chain_id":          p.chainID,
+	// 		"agent_id":          comment.AgentID.String(),
+	// 		"identity_registry": comment.IdentityRegistry,
+	// 	}).Error("fail to get agent uid")
+	// 	return nil
+	// }
 
 	return &model.AgentComment{
 		CommentAttestationID: att.UID,
-		AgentUID:             agentUID,
+		AgentUID:             0,
 		ChainID:              p.chainID,
 		IdentityRegistry:     comment.IdentityRegistry,
 		AgentID:              comment.AgentID.String(),
