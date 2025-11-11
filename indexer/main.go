@@ -46,14 +46,22 @@ func main() {
 
 	model.InitDB(config.Dns)
 
-	// createAgentIdx := processor.NewCreateAgentProcessor(config.Identity.Addr, ethClient, config.Identity.FetchBlockInterval, config.Identity.StartBlock, _logger)
-	// go createAgentIdx.Process()
+	if config.Reputation.Run {
+		reputationIdx := processor.NewReputationProcessor(config.Reputation.Addr, ethClient, config.Reputation.FetchBlockInterval, config.Reputation.StartBlock, _logger)
+		go reputationIdx.Process()
+	}
 
-	// reputationIdx := processor.NewReputationProcessor(config.Reputation.Addr, ethClient, config.Reputation.FetchBlockInterval, config.Reputation.StartBlock, _logger)
-	// go reputationIdx.Process()
+	if config.Identity.Run {
+		identityIdx := processor.NewCreateAgentProcessor(config.Identity.Addr, ethClient, config.Identity.FetchBlockInterval, config.Identity.StartBlock, _logger)
+		go identityIdx.Process()
+	}
 
-	commentIdx := processor.NewCommentProcessor(chainID.String(), config.Comment.CommentSchemaID, config.Comment.StartBlock, config.Comment.Limit, config.Comment.FetchBlockInterval, _logger)
-	commentIdx.Process()
+	if config.Comment.Run {
+		commentIdx := processor.NewCommentProcessor(chainID.String(), config.Comment.CommentSchemaID, config.Comment.StartBlock, config.Comment.Limit, config.Comment.FetchBlockInterval, _logger)
+		go commentIdx.Process()
+	}
+
+	select {}
 }
 
 type Config struct {
@@ -63,18 +71,21 @@ type Config struct {
 		Addr               string `yaml:"addr"`
 		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
 		StartBlock         uint64 `yaml:"start_block"`
+		Run                bool   `yaml:"run"`
 	} `yaml:"reputation"`
 
 	Identity struct {
 		Addr               string `yaml:"addr"`
 		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
 		StartBlock         uint64 `yaml:"start_block"`
+		Run                bool   `yaml:"run"`
 	} `yaml:"identity"`
 	Comment struct {
 		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
 		StartBlock         uint64 `yaml:"start_block"`
 		Limit              int    `yaml:"limit"`
 		CommentSchemaID    string `yaml:"comment_schema_id"`
+		Run                bool   `yaml:"run"`
 	} `yaml:"comment"`
 }
 
