@@ -10,6 +10,7 @@ import (
 )
 
 var mock = false
+var feedbackMock = false
 
 func GetAgentCardListHandler(c *gin.Context) {
 	if mock {
@@ -285,7 +286,7 @@ func GetAgentCommentsHandler(c *gin.Context) {
 }
 
 func GetAgentFeedbacksHandler(c *gin.Context) {
-	if mock {
+	if feedbackMock {
 		SuccessResp(gin.H{
 			"feedbacks": mockFeedbacks(),
 			"total":     int64(len(mockFeedbacks())),

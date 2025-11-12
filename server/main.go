@@ -33,14 +33,15 @@ func main() {
 	}
 
 	model.InitDB(config.Dns)
-	api.InitRouter(_logger, config.Mock)
+	api.InitRouter(_logger, config.Mock, config.FeedbackMock)
 	api.Run([]string{"*"}, config.Port)
 }
 
 type Config struct {
-	Dns  string `yaml:"dns"`
-	Port string `yaml:"port"`
-	Mock bool   `yaml:"mock"`
+	Dns          string `yaml:"dns"`
+	Port         string `yaml:"port"`
+	Mock         bool   `yaml:"mock"`
+	FeedbackMock bool   `yaml:"feedback_mock"`
 }
 
 func initConf(confPath string) (*Config, error) {

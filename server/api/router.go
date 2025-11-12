@@ -10,9 +10,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitRouter(nlogger *logger.Logger, _mock bool) {
+func InitRouter(nlogger *logger.Logger, _mock bool, _feedbackMock bool) {
 	_logger = nlogger
 	mock = _mock
+	feedbackMock = _feedbackMock
 }
 
 func Run(_cors []string, port string) {
