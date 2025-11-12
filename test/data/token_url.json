@@ -12,8 +12,8 @@
   ],
   "registrations": [
     {
-      "agentId": 266,
-      "agentRegistry": "eip155:97:0x3ed1ab7a5667aa8c3dd3e95600eaeba1ec07c870"
+      "agentId": 355,
+      "agentRegistry": "eip155:97:0xA98A5542a1AaB336397d487e32021E0E48BEF717"
     }
   ],
   "userInterface": "https://testnet.app.bitagent.io/agents/0xe17b48c541e03b6f5379208854219ba58518096e",

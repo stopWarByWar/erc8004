@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"math/big"
-	"strings"
 	"time"
 
 	"agent_identity/logger"
@@ -245,11 +244,7 @@ func (idx *IdentityProcessor) setAgentCardInserted() {
 					"agentID":          agentRegistry.AgentID,
 					"tokenURL":         agentRegistry.TokenURL,
 				}).Error("failed to get agent card from token url")
-				if strings.HasPrefix(err.Error(), "network error:") {
-					return
-				} else {
-					continue
-				}
+				continue
 			}
 
 			if err := model.InsertAgentCard(agent); err != nil {
@@ -260,7 +255,7 @@ func (idx *IdentityProcessor) setAgentCardInserted() {
 					"agentID":          agentRegistry.AgentID,
 					"tokenURL":         agentRegistry.TokenURL,
 				}).Error("failed to insert agent card")
-				return
+				continue
 			}
 
 			if err := model.UpdateAgentRegistryInserted([]string{agentRegistry.AgentID}); err != nil {
@@ -271,7 +266,7 @@ func (idx *IdentityProcessor) setAgentCardInserted() {
 					"agentID":          agentRegistry.AgentID,
 					"tokenURL":         agentRegistry.TokenURL,
 				}).Error("failed to update agent registry inserted")
-				return
+				continue
 			}
 		}
 

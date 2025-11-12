@@ -197,10 +197,9 @@ type Comment struct {
 	Score                uint16 `gorm:"column:score;type:uint16"`
 	Timestamps           uint64 `gorm:"column:timestamps;type:bigint"`
 
-	Avatar       string `gorm:"column:avatar;type:varchar(255)"`
-	Name         string `gorm:"column:name;type:varchar(255)"`
-	Passport     bool
-	IsAuthorized bool `gorm:"column:is_authorized;type:boolean"`
+	Avatar   string `gorm:"column:avatar;type:varchar(255)"`
+	Name     string `gorm:"column:name;type:varchar(255)"`
+	Passport bool
 }
 
 type FeedbackResp struct {

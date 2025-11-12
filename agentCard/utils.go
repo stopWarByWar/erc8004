@@ -34,12 +34,12 @@ func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistr
 	}
 
 	var agent = &Agent{
-		Type:             tokenURLResponse.Type,
-		Name:             tokenURLResponse.Name,
-		Description:      tokenURLResponse.Description,
-		Image:            tokenURLResponse.Image,
-		SupportedTrust:   tokenURLResponse.SupportedTrust,
-		AgentID:          tokenId,
+		Type:           tokenURLResponse.Type,
+		Name:           tokenURLResponse.Name,
+		Description:    tokenURLResponse.Description,
+		Image:          tokenURLResponse.Image,
+		SupportedTrust: tokenURLResponse.SupportedTrust,
+		// AgentID:          tokenId,
 		TokenURL:         tokenURL,
 		ChainID:          chainID,
 		Owner:            owner,
@@ -74,16 +74,19 @@ func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistr
 	if tokenURLResponse.Registrations != nil {
 		for _, registration := range tokenURLResponse.Registrations {
 			if strconv.FormatUint(registration.AgentID, 10) == tokenId {
+				agent.AgentID = tokenId
 				namespace, _chainID, registryAddr, err := formatAddress(registration.AgentRegistry)
 				if err != nil {
 					return nil, fmt.Errorf("data error: failed to format address: %v", err)
 				}
 				if namespace == "eip155" && _chainID == chainID && registryAddr == identityRegistryAddr {
 					agent.IdentityRegistry = registryAddr
-					agent.Namespace = namespace
 				}
 			}
 		}
+	}
+	if len(agent.AgentID) == 0 || len(agent.IdentityRegistry) == 0 || len(agent.Namespace) == 0 || len(agent.AgentWallet) == 0 {
+		return nil, fmt.Errorf("invalid agent agent id:%s, identity registry:%s, namespace:%s, agent wallet:%s", tokenId, identityRegistryAddr, agent.Namespace, agent.AgentWallet)
 	}
 
 	return agent, nil

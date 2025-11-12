@@ -5,6 +5,7 @@ type AgentResponse struct {
 	AgentID          string `json:"agentId"` // agent id in contract json file
 	AgentDomain      string //a2a endpoint
 	AgentAddress     string //wallet address
+	Owner            string `json:"owner"`
 	ChainID          string
 	Namespace        string
 	IdentityRegistry string             `json:"identityRegistry"`
