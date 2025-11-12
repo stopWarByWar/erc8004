@@ -409,7 +409,7 @@ func GetAgentsByTrustModel(page, pageSize int, trustModelIDs []string) ([]*Agent
 			}
 		}
 	}
-	if err := db.Model(&TrustModel{}).Select("uid").Where("trust_model IN ?", ids).Scan(&agentUIDs).Error; err != nil {
+	if err := db.Model(&TrustModel{}).Select("agent_uid").Where("trust_model IN ?", ids).Scan(&agentUIDs).Error; err != nil {
 		return nil, 0, err
 	}
 

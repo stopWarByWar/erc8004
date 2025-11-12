@@ -35,19 +35,35 @@ func TestProcessor(t *testing.T) {
 		panic(err)
 	}
 
-	idx := NewCreateAgentProcessor(config.IdentityAddr, ethClient, config.FetchBlockInterval, config.StartBlock, _logger)
-	// idx.Process()
+	idx := NewCreateAgentProcessor(config.Identity.Addr, ethClient, config.Identity.FetchBlockInterval, config.Identity.StartBlock, _logger)
+	idx.Process()
 
-	idx.setAgentCardInserted()
+	// idx.setAgentCardInserted()
 }
 
 type Config struct {
-	IdentityAddr       string `yaml:"identity_addr"`
-	ReputationAddr     string `yaml:"reputation_addr"`
-	RpcURL             string `yaml:"rpc_url"`
-	FetchBlockInterval int64  `yaml:"fetch_block_interval"`
-	Dns                string `yaml:"dns"`
-	StartBlock         uint64 `yaml:"start_block"`
+	RpcURL     string `yaml:"rpc_url"`
+	Dns        string `yaml:"dns"`
+	Reputation struct {
+		Addr               string `yaml:"addr"`
+		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
+		StartBlock         uint64 `yaml:"start_block"`
+		Run                bool   `yaml:"run"`
+	} `yaml:"reputation"`
+
+	Identity struct {
+		Addr               string `yaml:"addr"`
+		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
+		StartBlock         uint64 `yaml:"start_block"`
+		Run                bool   `yaml:"run"`
+	} `yaml:"identity"`
+	Comment struct {
+		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
+		StartBlock         uint64 `yaml:"start_block"`
+		Limit              int    `yaml:"limit"`
+		CommentSchemaID    string `yaml:"comment_schema_id"`
+		Run                bool   `yaml:"run"`
+	} `yaml:"comment"`
 }
 
 func initConf(confPath string) (*Config, error) {
