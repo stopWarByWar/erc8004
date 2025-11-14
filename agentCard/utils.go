@@ -6,27 +6,21 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
 	"trpc.group/trpc-go/trpc-a2a-go/server"
 )
 
+const defaultIPFSGateway = "https://ipfs.io/ipfs/"
+
 func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistryAddr string, timestamps uint64) (*Agent, error) {
-	response, err := http.Get(tokenURL)
+	body, err := fetchTokenURLBody(tokenURL)
 	if err != nil {
-		return nil, fmt.Errorf("network error: failed to get token URL response: %v", err)
+		return nil, err
 	}
 
-	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		return nil, fmt.Errorf("HTTP request failed, status: %s, status code: %d", response.Status, response.StatusCode)
-	}
-
-	defer response.Body.Close()
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, fmt.Errorf("network error: failed to read token URL response body: %v", err)
-	}
 	var tokenURLResponse TokenURLResponse
 	err = json.Unmarshal(body, &tokenURLResponse)
 	if err != nil {
@@ -143,4 +137,50 @@ func validateA2AEndpoint(endpoint string) bool {
 		return false
 	}
 	return true
+}
+
+func fetchTokenURLBody(tokenURL string) ([]byte, error) {
+	resolvedURL, err := resolveTokenURL(tokenURL)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := http.Get(resolvedURL)
+	if err != nil {
+		return nil, fmt.Errorf("network error: failed to get token URL response: %v", err)
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return nil, fmt.Errorf("HTTP request failed, status: %s, status code: %d", response.Status, response.StatusCode)
+	}
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("network error: failed to read token URL response body: %v", err)
+	}
+	if len(body) == 0 {
+		return nil, errors.New("empty token URL response body")
+	}
+	return body, nil
+}
+
+func resolveTokenURL(tokenURL string) (string, error) {
+	if strings.HasPrefix(tokenURL, "ipfs://") {
+		cidPath := strings.TrimPrefix(tokenURL, "ipfs://")
+		if len(cidPath) == 0 {
+			return "", fmt.Errorf("invalid ipfs token URL: %s", tokenURL)
+		}
+		gateway := os.Getenv("IPFS_GATEWAY_URL")
+		if len(gateway) == 0 {
+			gateway = defaultIPFSGateway
+		} else if !strings.HasSuffix(gateway, "/") {
+			gateway += "/"
+		}
+		return fmt.Sprintf("%s%s", gateway, cidPath), nil
+	}
+	if strings.HasPrefix(tokenURL, "https://") {
+		return tokenURL, nil
+	}
+	return "", fmt.Errorf("unsupported token URL scheme: %s", tokenURL)
 }
