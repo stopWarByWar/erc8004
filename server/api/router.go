@@ -40,5 +40,8 @@ func Run(_cors []string, port string) {
 	r.GET("agent/identity/detail/comments", GetAgentCommentsHandler)
 	r.GET("agent/identity/detail/feedbacks", GetAgentFeedbacksHandler)
 
+	r.POST("agent/identity/set/feedback", UploadFeedbackHandler)
+	r.POST("agent/identity/set/profile", UploadAgentProfileHandler)
+
 	r.Run(fmt.Sprintf(":%s", port))
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"agent_identity/helper"
 	"agent_identity/logger"
 	"agent_identity/model"
 	"agent_identity/server/api"
@@ -32,6 +33,8 @@ func main() {
 		panic(err)
 	}
 
+	helper.InitHelper(config.S3Region, config.S3BucketName, config.S3AccessKey, config.S3SecretKey)
+
 	model.InitDB(config.Dns)
 	api.InitRouter(_logger, config.Mock, config.FeedbackMock)
 	api.Run([]string{"*"}, config.Port)
@@ -42,6 +45,10 @@ type Config struct {
 	Port         string `yaml:"port"`
 	Mock         bool   `yaml:"mock"`
 	FeedbackMock bool   `yaml:"feedback_mock"`
+	S3Region     string `yaml:"s3_region"`
+	S3BucketName string `yaml:"s3_bucket_name"`
+	S3AccessKey  string `yaml:"aws_access_key_id"`
+	S3SecretKey  string `yaml:"aws_secret_access_key"`
 }
 
 func initConf(confPath string) (*Config, error) {

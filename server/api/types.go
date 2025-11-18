@@ -33,3 +33,38 @@ type ProviderResponse struct {
 	Organization string
 	URL          string
 }
+
+type UploadFeedbackRequest struct {
+	UID                   uint64       `json:"uid"`
+	Score                 int          `json:"score"`
+	Tag1                  string       `json:"tag1"`
+	Tag2                  string       `json:"tag2"`
+	Skill                 string       `json:"skill,omitempty"`
+	Context               string       `json:"context,omitempty"`
+	Task                  string       `json:"task,omitempty"`
+	Capability            string       `json:"capability,omitempty"`
+	FeedbackAuth          FeedbackAuth `json:"feedbackAuth"`
+	FeedbackAuthSignature string       `json:"feedbackAuthSignature"`
+}
+
+type FeedbackAuth struct {
+	AgentId          string `json:"agentId"`
+	ClientAddress    string `json:"clientAddress"`
+	IndexLimit       uint64 `json:"indexLimit"`
+	Expiry           uint64 `json:"expiry"`
+	ChainId          string `json:"chainId"`
+	IdentityRegistry string `json:"identityRegistry"`
+	SignerAddress    string `json:"signerAddress"`
+}
+
+type UploadAgentProfileRequest struct {
+	AgentID            string   `json:"agentId" form:"agentId" binding:"required"`
+	ChainID            string   `json:"chainId" form:"chainId" binding:"required"`
+	Type               string   `json:"type" form:"type" binding:"required"`
+	Name               string   `json:"name" form:"name" binding:"required"`
+	Description        string   `json:"description" form:"description" binding:"required"`
+	A2AEndpoint        string   `json:"a2aEndpoint" form:"a2aEndpoint" binding:"required"`
+	IdentityRegistry   string   `json:"identityRegistry" form:"identityRegistry" binding:"required"`
+	SupportedTrust     []string `json:"supportedTrust" form:"supportedTrust"`
+	AgentWalletAddress string   `json:"agentWallet" form:"agentWallet" binding:"required"`
+}
