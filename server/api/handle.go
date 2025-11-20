@@ -4,6 +4,7 @@ import (
 	agentcard "agent_identity/agentCard"
 	"agent_identity/helper"
 	"agent_identity/model"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -415,15 +416,18 @@ func UploadFeedbackHandler(c *gin.Context) {
 		return
 	}
 
-	tokenURI, err := helper.GetHelper().UploadFeedbackToS3(request.FeedbackAuth.ChainId, agent.IdentityRegistry, agent.AgentID, feedbackAuth.ClientAddress, feedbackAuth.IndexLimit, feedbackData)
+	feedbackURI, err := helper.GetHelper().UploadFeedbackToS3(request.FeedbackAuth.ChainId, agent.IdentityRegistry, agent.AgentID, feedbackAuth.ClientAddress, feedbackAuth.IndexLimit, feedbackData)
 	if err != nil {
 		ErrResp(logrus.Fields{"error": err}, "fail to upload feedback to s3", "Internal Error", c)
 		return
 	}
 
+	feedbackHash := common.BytesToHash(sha256.New().Sum(feedbackData)).String()
+
 	SuccessResp(gin.H{
-		"tokenURI": tokenURI,
-		"authData": feedbackAuthData,
+		"feedbackURI":  feedbackURI,
+		"authData":     feedbackAuthData,
+		"feedbackHash": feedbackHash,
 	}, c)
 }
 
