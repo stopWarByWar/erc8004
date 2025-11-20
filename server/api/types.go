@@ -60,7 +60,6 @@ type FeedbackAuth struct {
 type UploadAgentProfileRequest struct {
 	AgentID            string   `json:"agentId" form:"agentId" binding:"required"`
 	ChainID            string   `json:"chainId" form:"chainId" binding:"required"`
-	Type               string   `json:"type" form:"type" binding:"required"`
 	Name               string   `json:"name" form:"name" binding:"required"`
 	Description        string   `json:"description" form:"description" binding:"required"`
 	A2AEndpoint        string   `json:"a2aEndpoint" form:"a2aEndpoint" binding:"required"`

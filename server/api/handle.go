@@ -477,7 +477,7 @@ func UploadAgentProfileHandler(c *gin.Context) {
 	}
 
 	agentProfile := &types.AgentProfile{
-		Type:        request.Type,
+		Type:        "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
 		Name:        request.Name,
 		Description: request.Description,
 		Image:       logoURI,
