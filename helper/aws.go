@@ -11,6 +11,7 @@ import (
 type awsCli struct {
 	s3SVC      *s3.S3
 	bucketName string
+	s3Region   string
 }
 
 func (h Helper) UploadAgentProfileToS3(chainId, identityRegistry, agentId string, data []byte) (string, error) {
@@ -25,7 +26,7 @@ func (h Helper) UploadAgentProfileToS3(chainId, identityRegistry, agentId string
 	if err != nil {
 		return "", err
 	}
-	return key, nil
+	return fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", h.bucketName, h.s3Region, key), nil
 }
 
 func (h Helper) UploadLogoToS3(chainId, identityRegistry, agentId string, data []byte) (string, error) {

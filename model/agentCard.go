@@ -22,6 +22,7 @@ func InitDB(dns string) {
 	if err != nil {
 		panic(err)
 	}
+
 }
 
 func InsertAgentCard(agent *agentcard.Agent) error {

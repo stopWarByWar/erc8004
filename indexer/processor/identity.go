@@ -247,6 +247,7 @@ func (idx *IdentityProcessor) setAgentCardInserted() {
 				continue
 			}
 
+			// upload agent to gemini file api
 			if err := model.InsertAgentCard(agent); err != nil {
 				idx.logger.WithFields(logrus.Fields{
 					"error":            err,

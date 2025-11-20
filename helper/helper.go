@@ -35,6 +35,7 @@ func InitHelper(s3Region, _bucketName, _awsKey, _awsSecret string) *Helper {
 		awsCli: awsCli{
 			s3SVC:      svc,
 			bucketName: _bucketName,
+			s3Region:   s3Region,
 		},
 	}
 
