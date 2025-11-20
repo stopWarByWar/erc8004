@@ -605,7 +605,7 @@ func SearchAgentsBySkill(skill string, page, pageSize int) ([]*Agent, int, error
 
 func GetUnInsertedAgentRegistry(chainID string, identityRegistry string, limit int) ([]*AgentRegistry, error) {
 	var agentRegistries []*AgentRegistry
-	if err := db.Where("chain_id = ? and identity_registry = ? and inserted = ?", chainID, identityRegistry, false).Limit(limit).Find(&agentRegistries).Error; err != nil {
+	if err := db.Where("chain_id = ? and identity_registry = ? and inserted = ? and length(token_url) <> 0", chainID, identityRegistry, false).Limit(limit).Find(&agentRegistries).Error; err != nil {
 		return nil, err
 	}
 	return agentRegistries, nil
