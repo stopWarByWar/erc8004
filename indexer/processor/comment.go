@@ -64,10 +64,16 @@ func (p *CommentProcessor) Process() {
 
 		var agentComments []*model.AgentComment
 		for _, commentAttestation := range commentAttestations {
-			agentComment := p.dealWithCommentAttestation(commentAttestation)
-			if agentComment != nil {
-				agentComments = append(agentComments, agentComment)
+			agentComment, err := p.dealWithCommentAttestation(commentAttestation)
+			if err != nil {
+				p.logger.WithFields(logrus.Fields{
+					"error": err,
+				}).Error("fail to deal with comment attestation")
+				return
 			}
+
+			agentComments = append(agentComments, agentComment)
+
 		}
 
 		if len(agentComments) > 0 {
@@ -91,14 +97,14 @@ func (p *CommentProcessor) Process() {
 
 }
 
-func (p *CommentProcessor) dealWithCommentAttestation(att *model.Attestation) *model.AgentComment {
+func (p *CommentProcessor) dealWithCommentAttestation(att *model.Attestation) (*model.AgentComment, error) {
 	comment, err := DecodeCommentEvent(att.Recipient, att.RawData)
 	if err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"attestation_id": att.UID,
 			"error":          err,
 		}).Warn("fail to decode comment event")
-		return nil
+		return nil, err
 	}
 
 	agentUID, err := model.GetAgentUID(p.chainID, comment.IdentityRegistry, comment.AgentID.String())
@@ -109,7 +115,7 @@ func (p *CommentProcessor) dealWithCommentAttestation(att *model.Attestation) *m
 			"agent_id":          comment.AgentID.String(),
 			"identity_registry": comment.IdentityRegistry,
 		}).Error("fail to get agent uid")
-		return nil
+		return nil, err
 	}
 
 	return &model.AgentComment{
@@ -126,5 +132,5 @@ func (p *CommentProcessor) dealWithCommentAttestation(att *model.Attestation) *m
 		Index:                uint64(att.Index),
 		TxHash:               att.TransactionId,
 		Revoked:              att.Revoked,
-	}
+	}, nil
 }

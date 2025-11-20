@@ -15,16 +15,16 @@ import (
 
 const defaultIPFSGateway = "https://ipfs.io/ipfs/"
 
-func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistryAddr string, timestamps uint64) (*Agent, error) {
+func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistryAddr string, timestamps uint64) (*Agent, bool, error) {
 	body, err := fetchTokenURLBody(tokenURL)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
 	var tokenURLResponse TokenURLResponse
 	err = json.Unmarshal(body, &tokenURLResponse)
 	if err != nil {
-		return nil, fmt.Errorf("data error: failed to unmarshal token URL response body: %v", err)
+		return nil, true, fmt.Errorf("data error: failed to unmarshal token URL response body: %v", err)
 	}
 
 	var agent = &Agent{
@@ -47,7 +47,7 @@ func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistr
 		if endpoint.Name == "A2A" {
 			agentCard, err = getAgentCardFromA2AEndpoint(endpoint.Endpoint)
 			if err != nil {
-				return agent, fmt.Errorf("data error: failed to get agent card from A2A endpoint: %v", err)
+				return agent, false, fmt.Errorf("data error: failed to get agent card from A2A endpoint: %v", err)
 			}
 			agent.AgentCard = agentCard
 			agent.Endpoint = endpoint.Endpoint
@@ -56,7 +56,7 @@ func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistr
 		if endpoint.Name == "agentWallet" {
 			namespace, _chainID, agentWallet, err := formatAddress(endpoint.Endpoint)
 			if err != nil {
-				return agent, fmt.Errorf("data error: failed to format address: %v", err)
+				return agent, false, fmt.Errorf("data error: failed to format address: %v", err)
 			}
 			if namespace == "eip155" && _chainID == chainID {
 				agent.Namespace = namespace
@@ -71,7 +71,7 @@ func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistr
 				agent.AgentID = tokenId
 				namespace, _chainID, registryAddr, err := formatAddress(registration.AgentRegistry)
 				if err != nil {
-					return agent, fmt.Errorf("data error: failed to format address: %v", err)
+					return agent, false, fmt.Errorf("data error: failed to format address: %v", err)
 				}
 				if namespace == "eip155" && _chainID == chainID && registryAddr == identityRegistryAddr {
 					agent.IdentityRegistry = registryAddr
@@ -80,10 +80,10 @@ func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistr
 		}
 	}
 	if len(agent.AgentID) == 0 || len(agent.IdentityRegistry) == 0 || len(agent.Namespace) == 0 || len(agent.AgentWallet) == 0 {
-		return agent, fmt.Errorf("invalid agent agent id:%s, identity registry:%s, namespace:%s, agent wallet:%s", tokenId, identityRegistryAddr, agent.Namespace, agent.AgentWallet)
+		return agent, false, fmt.Errorf("invalid agent agent id:%s, identity registry:%s, namespace:%s, agent wallet:%s", tokenId, identityRegistryAddr, agent.Namespace, agent.AgentWallet)
 	}
 
-	return agent, nil
+	return agent, true, nil
 }
 
 func getAgentCardFromA2AEndpoint(endpoint string) (*server.AgentCard, error) {
