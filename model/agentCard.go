@@ -62,7 +62,6 @@ func InsertAgentCard(agent *agentcard.Agent) error {
 		var existingAgent Agent
 		err := tx.Where("chain_id = ? AND identity_registry = ? AND agent_id = ?", agentCardModel.ChainID, agentCardModel.IdentityRegistry, agentCardModel.AgentID).First(&existingAgent).Error
 		if err == nil {
-
 			if err := tx.Where("agent_uid = ?", agentCardModel.UID).Delete(&SkillTags{}).Error; err != nil {
 				return err
 			}
@@ -454,7 +453,22 @@ func GetLatestAgentRegistry(chainID string, registryAddress string) (uint64, uin
 }
 
 func CreateAgentRegistry(agentRegistry *AgentRegistry) error {
-	return db.Clauses(clause.OnConflict{UpdateAll: true}).Create(&agentRegistry).Error
+	return db.Transaction(func(tx *gorm.DB) error {
+		agent := Agent{
+			AgentID:          agentRegistry.AgentID,
+			Owner:            agentRegistry.Owner,
+			TokenURL:         agentRegistry.TokenURL,
+			IdentityRegistry: agentRegistry.IdentityRegistry,
+			ChainID:          agentRegistry.ChainID,
+		}
+		if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&agent).Error; err != nil {
+			return err
+		}
+		if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&agentRegistry).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 }
 
 func GetLatestFeedbackAndResponse(chainID string, reputationRegistry string) (uint64, uint64, error) {
