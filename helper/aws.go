@@ -14,14 +14,15 @@ type awsCli struct {
 	s3Region   string
 }
 
+// UploadAgentProfileToS3 上传 Agent Profile 到 S3，文件设置为公开可读
 func (h Helper) UploadAgentProfileToS3(chainId, identityRegistry, agentId string, data []byte) (string, error) {
-	key := fmt.Sprintf("/erc8004/agent_profile/%s-%s-%s.json", chainId, identityRegistry, agentId)
+	key := fmt.Sprintf("erc8004/agent_profile/%s-%s-%s.json", chainId, identityRegistry, agentId)
 
 	_, err := h.s3SVC.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(h.bucketName),
 		Key:    aws.String(key),
 		Body:   bytes.NewReader(data),
-		ACL:    aws.String(s3.ObjectCannedACLPublicRead),
+		ACL:    aws.String(s3.ObjectCannedACLPublicRead), // 设置为公开可读
 	})
 	if err != nil {
 		return "", err
@@ -29,6 +30,7 @@ func (h Helper) UploadAgentProfileToS3(chainId, identityRegistry, agentId string
 	return fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", h.bucketName, h.s3Region, key), nil
 }
 
+// UploadLogoToS3 上传 Logo 图片到 S3，文件设置为公开可读
 func (h Helper) UploadLogoToS3(chainId, identityRegistry, agentId string, data []byte) (string, error) {
 	ext := ".png" // 默认后缀
 	contentType := "image/png"
@@ -47,31 +49,32 @@ func (h Helper) UploadLogoToS3(chainId, identityRegistry, agentId string, data [
 		contentType = "image/gif"
 	}
 
-	key := fmt.Sprintf("/erc8004/logo/%s-%s-%s%s", chainId, identityRegistry, agentId, ext)
+	key := fmt.Sprintf("erc8004/logo/%s-%s-%s%s", chainId, identityRegistry, agentId, ext)
 
 	_, err := h.s3SVC.PutObject(&s3.PutObjectInput{
 		Bucket:      aws.String(h.bucketName),
 		Key:         aws.String(key),
 		Body:        bytes.NewReader(data),
-		ACL:         aws.String(s3.ObjectCannedACLPublicRead),
+		ACL:         aws.String(s3.ObjectCannedACLPublicRead), // 设置为公开可读
 		ContentType: aws.String(contentType),
 	})
 	if err != nil {
 		return "", err
 	}
-	return key, nil
+	return fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", h.bucketName, h.s3Region, key), nil
 }
 
+// UploadFeedbackToS3 上传 Feedback 到 S3，文件设置为公开可读
 func (h Helper) UploadFeedbackToS3(chainId, identityRegistry, agentId, userAddress string, indexLimit uint64, data []byte) (string, error) {
-	key := fmt.Sprintf("/erc8004/feedback/%s-%s-%s-%s-%d.json", chainId, identityRegistry, agentId, userAddress, indexLimit)
+	key := fmt.Sprintf("erc8004/feedback/%s-%s-%s-%s-%d.json", chainId, identityRegistry, agentId, userAddress, indexLimit)
 	_, err := h.s3SVC.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(h.bucketName),
 		Key:    aws.String(key),
 		Body:   bytes.NewReader(data),
-		ACL:    aws.String(s3.ObjectCannedACLPublicRead),
+		ACL:    aws.String(s3.ObjectCannedACLPublicRead), // 设置为公开可读
 	})
 	if err != nil {
 		return "", err
 	}
-	return key, nil
+	return fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", h.bucketName, h.s3Region, key), nil
 }
