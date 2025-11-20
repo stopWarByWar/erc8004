@@ -9,3 +9,4 @@
 /server/api/config.yaml
 /server/server
 /indexer/indexer
+/helper/aws_test.go

@@ -14,7 +14,7 @@ type awsCli struct {
 }
 
 func (h Helper) UploadAgentProfileToS3(chainId, identityRegistry, agentId string, data []byte) (string, error) {
-	key := fmt.Sprintf("/erc8004/agent_profile/%s/%s/%s.jpg", chainId, identityRegistry, agentId)
+	key := fmt.Sprintf("/erc8004/agent_profile/%s/%s/%s.json", chainId, identityRegistry, agentId)
 
 	_, err := h.s3SVC.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(h.bucketName),
