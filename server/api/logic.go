@@ -60,21 +60,26 @@ func GetCardResponse(agentUID uint64) (*AgentResponse, error) {
 		score = math.Round(float64(agent.Score)/float64(agent.CommentCount)*10) / 10
 	}
 
-	return &AgentResponse{
-		UID:          agent.UID,
-		AgentID:      agent.AgentID,
-		AgentDomain:  agent.A2AEndpoint,
-		AgentAddress: agent.AgentWallet,
-		Owner:        agent.Owner,
-		ChainID:      agent.ChainID,
-		Namespace:    agent.Namespace,
-		Name:         agent.Name,
-		Description:  agent.Description,
-		URL:          agent.URL,
-		Provider: ProviderResponse{
+	var providerResponse ProviderResponse
+	if provider != nil {
+		providerResponse = ProviderResponse{
 			Organization: provider.Organization,
 			URL:          provider.URL,
-		},
+		}
+	}
+
+	return &AgentResponse{
+		UID:              agent.UID,
+		AgentID:          agent.AgentID,
+		AgentDomain:      agent.A2AEndpoint,
+		AgentAddress:     agent.AgentWallet,
+		Owner:            agent.Owner,
+		ChainID:          agent.ChainID,
+		Namespace:        agent.Namespace,
+		Name:             agent.Name,
+		Description:      agent.Description,
+		URL:              agent.URL,
+		Provider:         providerResponse,
 		IconURL:          agent.Image,
 		Version:          agent.Version,
 		DocumentationURL: agent.DocumentationURL,
@@ -187,21 +192,27 @@ func formatAgentResponse(agents []*model.Agent) ([]*AgentResponse, error) {
 			score = math.Round(float64(agent.Score)/float64(agent.CommentCount)*10) / 10
 		}
 
-		resp = append(resp, &AgentResponse{
-			UID:          agent.UID,
-			AgentID:      agent.AgentID,
-			AgentDomain:  agent.A2AEndpoint,
-			AgentAddress: agent.AgentWallet,
-			Owner:        agent.Owner,
-			ChainID:      agent.ChainID,
-			Namespace:    agent.Namespace,
-			Name:         agent.Name,
-			Description:  agent.Description,
-			URL:          agent.URL,
-			Provider: ProviderResponse{
+		var providerResponse ProviderResponse
+
+		if len(providers) != 0 {
+			providerResponse = ProviderResponse{
 				Organization: providers[agent.UID].Organization,
 				URL:          providers[agent.UID].URL,
-			},
+			}
+		}
+
+		resp = append(resp, &AgentResponse{
+			UID:              agent.UID,
+			AgentID:          agent.AgentID,
+			AgentDomain:      agent.A2AEndpoint,
+			AgentAddress:     agent.AgentWallet,
+			Owner:            agent.Owner,
+			ChainID:          agent.ChainID,
+			Namespace:        agent.Namespace,
+			Name:             agent.Name,
+			Description:      agent.Description,
+			URL:              agent.URL,
+			Provider:         providerResponse,
 			IconURL:          agent.Image,
 			Version:          agent.Version,
 			DocumentationURL: agent.DocumentationURL,
