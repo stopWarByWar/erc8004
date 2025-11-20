@@ -8,6 +8,7 @@ import (
 	"flag"
 	"os"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
@@ -100,5 +101,9 @@ func initConf(confPath string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	config.Reputation.Addr = common.HexToAddress(config.Reputation.Addr).String()
+	config.Identity.Addr = common.HexToAddress(config.Identity.Addr).String()
+	config.Comment.CommentSchemaID = common.HexToHash(config.Comment.CommentSchemaID).String()
 	return config, nil
 }
