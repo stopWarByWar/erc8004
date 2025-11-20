@@ -66,6 +66,8 @@ func GetCardResponse(agentUID uint64) (*AgentResponse, error) {
 			Organization: provider.Organization,
 			URL:          provider.URL,
 		}
+	} else {
+		providerResponse = ProviderResponse{}
 	}
 
 	return &AgentResponse{
@@ -194,11 +196,13 @@ func formatAgentResponse(agents []*model.Agent) ([]*AgentResponse, error) {
 
 		var providerResponse ProviderResponse
 
-		if len(providers) != 0 {
+		if providers[agent.UID] != nil {
 			providerResponse = ProviderResponse{
 				Organization: providers[agent.UID].Organization,
 				URL:          providers[agent.UID].URL,
 			}
+		} else {
+			providerResponse = ProviderResponse{}
 		}
 
 		resp = append(resp, &AgentResponse{
