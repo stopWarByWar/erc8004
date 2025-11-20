@@ -47,7 +47,7 @@ func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistr
 		if endpoint.Name == "A2A" {
 			agentCard, err = getAgentCardFromA2AEndpoint(endpoint.Endpoint)
 			if err != nil {
-				return nil, err
+				return agent, fmt.Errorf("data error: failed to get agent card from A2A endpoint: %v", err)
 			}
 			agent.AgentCard = agentCard
 			agent.Endpoint = endpoint.Endpoint
@@ -56,7 +56,7 @@ func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistr
 		if endpoint.Name == "agentWallet" {
 			namespace, _chainID, agentWallet, err := formatAddress(endpoint.Endpoint)
 			if err != nil {
-				return nil, fmt.Errorf("data error: failed to format address: %v", err)
+				return agent, fmt.Errorf("data error: failed to format address: %v", err)
 			}
 			if namespace == "eip155" && _chainID == chainID {
 				agent.Namespace = namespace
@@ -71,7 +71,7 @@ func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistr
 				agent.AgentID = tokenId
 				namespace, _chainID, registryAddr, err := formatAddress(registration.AgentRegistry)
 				if err != nil {
-					return nil, fmt.Errorf("data error: failed to format address: %v", err)
+					return agent, fmt.Errorf("data error: failed to format address: %v", err)
 				}
 				if namespace == "eip155" && _chainID == chainID && registryAddr == identityRegistryAddr {
 					agent.IdentityRegistry = registryAddr
@@ -80,7 +80,7 @@ func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistr
 		}
 	}
 	if len(agent.AgentID) == 0 || len(agent.IdentityRegistry) == 0 || len(agent.Namespace) == 0 || len(agent.AgentWallet) == 0 {
-		return nil, fmt.Errorf("invalid agent agent id:%s, identity registry:%s, namespace:%s, agent wallet:%s", tokenId, identityRegistryAddr, agent.Namespace, agent.AgentWallet)
+		return agent, fmt.Errorf("invalid agent agent id:%s, identity registry:%s, namespace:%s, agent wallet:%s", tokenId, identityRegistryAddr, agent.Namespace, agent.AgentWallet)
 	}
 
 	return agent, nil

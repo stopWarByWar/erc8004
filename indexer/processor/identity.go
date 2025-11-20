@@ -235,39 +235,42 @@ func (idx *IdentityProcessor) setAgentCardInserted() {
 		}
 
 		for _, agentRegistry := range agentRegistries {
-			agent, err := agentcard.GetAgentCardFromTokenURL(agentRegistry.Owner, agentRegistry.AgentID, agentRegistry.TokenURL, idx.chainID, idx.identityAddr.Hex(), agentRegistry.Timestamps)
-			if err != nil {
+			agent, extractErr := agentcard.GetAgentCardFromTokenURL(agentRegistry.Owner, agentRegistry.AgentID, agentRegistry.TokenURL, idx.chainID, idx.identityAddr.Hex(), agentRegistry.Timestamps)
+			if extractErr != nil {
 				idx.logger.WithFields(logrus.Fields{
-					"error":            err,
+					"error":            extractErr,
 					"chainID":          idx.chainID,
 					"identityRegistry": idx.identityAddr.Hex(),
 					"agentID":          agentRegistry.AgentID,
 					"tokenURL":         agentRegistry.TokenURL,
 				}).Error("failed to get agent card from token url")
-				continue
 			}
 
 			// upload agent to gemini file api
-			if err := model.InsertAgentCard(agent); err != nil {
-				idx.logger.WithFields(logrus.Fields{
-					"error":            err,
-					"chainID":          idx.chainID,
-					"identityRegistry": idx.identityAddr.Hex(),
-					"agentID":          agentRegistry.AgentID,
-					"tokenURL":         agentRegistry.TokenURL,
-				}).Error("failed to insert agent card")
-				continue
+			if agent != nil {
+				if err := model.InsertAgentCard(agent); err != nil {
+					idx.logger.WithFields(logrus.Fields{
+						"error":            err,
+						"chainID":          idx.chainID,
+						"identityRegistry": idx.identityAddr.Hex(),
+						"agentID":          agentRegistry.AgentID,
+						"tokenURL":         agentRegistry.TokenURL,
+					}).Error("failed to insert agent card")
+					continue
+				}
 			}
 
-			if err := model.UpdateAgentRegistryInserted([]string{agentRegistry.AgentID}); err != nil {
-				idx.logger.WithFields(logrus.Fields{
-					"error":            err,
-					"chainID":          idx.chainID,
-					"identityRegistry": idx.identityAddr.Hex(),
-					"agentID":          agentRegistry.AgentID,
-					"tokenURL":         agentRegistry.TokenURL,
-				}).Error("failed to update agent registry inserted")
-				continue
+			if extractErr == nil {
+				if err := model.UpdateAgentRegistryInserted([]string{agentRegistry.AgentID}); err != nil {
+					idx.logger.WithFields(logrus.Fields{
+						"error":            err,
+						"chainID":          idx.chainID,
+						"identityRegistry": idx.identityAddr.Hex(),
+						"agentID":          agentRegistry.AgentID,
+						"tokenURL":         agentRegistry.TokenURL,
+					}).Error("failed to update agent registry inserted")
+					continue
+				}
 			}
 		}
 

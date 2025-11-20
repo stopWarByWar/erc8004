@@ -643,7 +643,15 @@ func GetLatestAgentComment(chainID string) (uint64, uint64, error) {
 }
 
 func CreateAgentComments(agentComments []*AgentComment) error {
-	return db.Omit("uid").Create(&agentComments).Error
+	if len(agentComments) == 0 {
+		return nil
+	}
+	return db.Clauses(
+		clause.OnConflict{
+			Columns:   []clause.Column{{Name: "comment_attestation_id"}},
+			DoNothing: true,
+		},
+	).Create(&agentComments).Error
 }
 
 func GetCommentsByAgentUID(uid uint64, page, pageSize int) ([]*Comment, int64, error) {
