@@ -251,18 +251,22 @@ func SetFeedback(request UploadFeedbackRequest) (string, string, error) {
 		return "", "", fmt.Errorf("agent id mismatch")
 	}
 
+	if agent.IdentityRegistry != request.FeedbackAuth.IdentityRegistry {
+		return "", "", fmt.Errorf("identity registry mismatch")
+	}
+
 	feedbackAuthData, err := json.Marshal(request.FeedbackAuth)
 	if err != nil {
 		return "", "", fmt.Errorf("fail to marshal feedback auth: %w", err)
 	}
 
-	agentID, err := strconv.ParseUint(agent.AgentID, 10, 64)
+	agentID, err := strconv.ParseUint(request.FeedbackAuth.AgentId, 10, 64)
 	if err != nil {
 		return "", "", fmt.Errorf("fail to parse agent id: %w", err)
 	}
 
 	feedback := &types.Feedback{
-		AgentRegistry: agent.IdentityRegistry,
+		AgentRegistry: request.FeedbackAuth.IdentityRegistry,
 		AgentId:       int64(agentID),
 		ClientAddress: request.FeedbackAuth.ClientAddress,
 		CreatedAt:     strconv.FormatInt(time.Now().Unix(), 10),
@@ -280,7 +284,7 @@ func SetFeedback(request UploadFeedbackRequest) (string, string, error) {
 		return "", "", fmt.Errorf("fail to marshal feedback: %w", err)
 	}
 
-	feedbackURI, err := helper.GetHelper().UploadFeedbackToS3(request.FeedbackAuth.ChainId, agent.IdentityRegistry, agent.AgentID, request.FeedbackAuth.ClientAddress, request.FeedbackAuth.IndexLimit, feedbackData)
+	feedbackURI, err := helper.GetHelper().UploadFeedbackToS3(request.FeedbackAuth.ChainId, request.FeedbackAuth.IdentityRegistry, request.FeedbackAuth.AgentId, request.FeedbackAuth.ClientAddress, request.FeedbackAuth.IndexLimit, feedbackData)
 	if err != nil {
 		return "", "", fmt.Errorf("fail to upload feedback to s3: %w", err)
 	}
