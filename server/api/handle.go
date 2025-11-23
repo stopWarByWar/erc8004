@@ -4,18 +4,13 @@ import (
 	agentcard "agent_identity/agentCard"
 	"agent_identity/helper"
 	"agent_identity/model"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
-	"math/big"
 	"strconv"
-	"time"
 
 	"agent_identity/types"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/sirupsen/logrus"
@@ -351,82 +346,14 @@ func UploadFeedbackHandler(c *gin.Context) {
 		return
 	}
 
-	agent, err := model.GetAgentByUID(request.UID)
+	feedbackURI, feedbackHash, err := SetFeedback(request)
 	if err != nil {
-		ErrResp(logrus.Fields{"error": err}, "fail to get agent", "Internal Error", c)
+		ErrResp(logrus.Fields{"error": err.Error()}, "fail to set feedback", "Internal Error", c)
 		return
 	}
-
-	feedbackAuth := request.FeedbackAuth
-
-	agentID, err := strconv.ParseUint(agent.AgentID, 10, 64)
-	if err != nil {
-		ErrResp(logrus.Fields{"error": err}, "fail to parse agent id", "Internal Error", c)
-		return
-	}
-	chainID, err := strconv.ParseInt(feedbackAuth.ChainId, 10, 64)
-	if err != nil {
-		ErrResp(logrus.Fields{"error": err}, "fail to parse chain id", "Internal Error", c)
-		return
-	}
-	encodedFeedbackAuth, err := EncodeFeedbackAuth(
-		big.NewInt(int64(agentID)),
-		common.HexToAddress(feedbackAuth.ClientAddress),
-		feedbackAuth.IndexLimit,
-		big.NewInt(int64(feedbackAuth.Expiry)),
-		big.NewInt(chainID),
-		common.HexToAddress(feedbackAuth.IdentityRegistry),
-		common.HexToAddress(feedbackAuth.SignerAddress),
-	)
-	if err != nil {
-		ErrResp(logrus.Fields{"error": err}, "fail to encode feedback auth", "Internal Error", c)
-		return
-	}
-
-	signerAddr, err := ExtractAddressFromSignature(request.FeedbackAuthSignature, encodedFeedbackAuth)
-	if err != nil {
-		ErrResp(logrus.Fields{"error": err}, "fail to extract signer address", "Internal Error", c)
-		return
-	}
-
-	if signerAddr != common.HexToAddress(feedbackAuth.SignerAddress) {
-		ErrResp(logrus.Fields{"error": err}, "invalid signer address", "Invalid Signature", c)
-		return
-	}
-
-	feedbackAuthData := hex.EncodeToString(append(encodedFeedbackAuth, common.HexToHash(signerAddr.String()).Bytes()...))
-
-	feedback := &types.Feedback{
-		AgentRegistry: agent.IdentityRegistry,
-		AgentId:       int64(agentID),
-		ClientAddress: feedbackAuth.ClientAddress,
-		CreatedAt:     strconv.FormatInt(time.Now().Unix(), 10),
-		FeedbackAuth:  feedbackAuthData,
-		Score:         request.Score,
-		Tag1:          &request.Tag1,
-		Tag2:          &request.Tag2,
-		Context:       &request.Context,
-		Task:          &request.Task,
-		Capability:    &request.Capability,
-	}
-
-	feedbackData, err := json.Marshal(feedback)
-	if err != nil {
-		ErrResp(logrus.Fields{"error": err}, "fail to marshal feedback", "Internal Error", c)
-		return
-	}
-
-	feedbackURI, err := helper.GetHelper().UploadFeedbackToS3(request.FeedbackAuth.ChainId, agent.IdentityRegistry, agent.AgentID, feedbackAuth.ClientAddress, feedbackAuth.IndexLimit, feedbackData)
-	if err != nil {
-		ErrResp(logrus.Fields{"error": err}, "fail to upload feedback to s3", "Internal Error", c)
-		return
-	}
-
-	feedbackHash := common.BytesToHash(sha256.New().Sum(feedbackData)).String()
 
 	SuccessResp(gin.H{
 		"feedbackURI":  feedbackURI,
-		"authData":     feedbackAuthData,
 		"feedbackHash": feedbackHash,
 	}, c)
 }

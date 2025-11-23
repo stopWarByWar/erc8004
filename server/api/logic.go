@@ -1,9 +1,19 @@
 package api
 
 import (
+	"agent_identity/helper"
 	"agent_identity/model"
+	"agent_identity/types"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"math"
+	"strconv"
+	"time"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 func GetCardResponse(agentUID uint64) (*AgentResponse, error) {
@@ -229,4 +239,53 @@ func formatAgentResponse(agents []*model.Agent) ([]*AgentResponse, error) {
 	}
 
 	return resp, nil
+}
+
+func SetFeedback(request UploadFeedbackRequest) (string, string, error) {
+	agent, err := model.GetAgentByUID(request.UID)
+	if err != nil {
+		return "", "", fmt.Errorf("fail to get agent: %w", err)
+	}
+
+	if agent.AgentID != request.FeedbackAuth.AgentId {
+		return "", "", fmt.Errorf("agent id mismatch")
+	}
+
+	feedbackAuthData, err := json.Marshal(request.FeedbackAuth)
+	if err != nil {
+		return "", "", fmt.Errorf("fail to marshal feedback auth: %w", err)
+	}
+
+	agentID, err := strconv.ParseUint(agent.AgentID, 10, 64)
+	if err != nil {
+		return "", "", fmt.Errorf("fail to parse agent id: %w", err)
+	}
+
+	feedback := &types.Feedback{
+		AgentRegistry: agent.IdentityRegistry,
+		AgentId:       int64(agentID),
+		ClientAddress: request.FeedbackAuth.ClientAddress,
+		CreatedAt:     strconv.FormatInt(time.Now().Unix(), 10),
+		FeedbackAuth:  hex.EncodeToString(feedbackAuthData),
+		Score:         request.Score,
+		Tag1:          &request.Tag1,
+		Tag2:          &request.Tag2,
+		Context:       &request.Context,
+		Task:          &request.Task,
+		Capability:    &request.Capability,
+	}
+
+	feedbackData, err := json.Marshal(feedback)
+	if err != nil {
+		return "", "", fmt.Errorf("fail to marshal feedback: %w", err)
+	}
+
+	feedbackURI, err := helper.GetHelper().UploadFeedbackToS3(request.FeedbackAuth.ChainId, agent.IdentityRegistry, agent.AgentID, request.FeedbackAuth.ClientAddress, request.FeedbackAuth.IndexLimit, feedbackData)
+	if err != nil {
+		return "", "", fmt.Errorf("fail to upload feedback to s3: %w", err)
+	}
+
+	feedbackHash := common.BytesToHash(sha256.New().Sum(feedbackData)).String()
+
+	return feedbackURI, feedbackHash, nil
 }
