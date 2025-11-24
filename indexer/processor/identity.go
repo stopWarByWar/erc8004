@@ -235,10 +235,10 @@ func (idx *IdentityProcessor) setAgentCardInserted() {
 		}
 
 		for _, agentRegistry := range agentRegistries {
-			agent, inserted, extractErr := agentcard.GetAgentCardFromTokenURL(agentRegistry.Owner, agentRegistry.AgentID, agentRegistry.TokenURL, idx.chainID, idx.identityAddr.Hex(), agentRegistry.Timestamps)
-			if extractErr != nil {
+			agent, inserted, extractErrs := agentcard.GetAgentCardFromTokenURL(agentRegistry.Owner, agentRegistry.AgentID, agentRegistry.TokenURL, idx.chainID, idx.identityAddr.Hex(), agentRegistry.Timestamps)
+			if extractErrs != nil {
 				idx.logger.WithFields(logrus.Fields{
-					"error":            extractErr,
+					"error":            extractErrs,
 					"chainID":          idx.chainID,
 					"identityRegistry": idx.identityAddr.Hex(),
 					"agentID":          agentRegistry.AgentID,
@@ -260,7 +260,7 @@ func (idx *IdentityProcessor) setAgentCardInserted() {
 				}
 			}
 
-			if extractErr == nil || inserted {
+			if len(extractErrs) == 0 || inserted {
 				if err := model.UpdateAgentRegistryInserted([]string{agentRegistry.AgentID}); err != nil {
 					idx.logger.WithFields(logrus.Fields{
 						"error":            err,

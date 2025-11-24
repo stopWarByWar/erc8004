@@ -1,6 +1,7 @@
 package processor
 
 import (
+	agentcard "agent_identity/agentCard"
 	"agent_identity/logger"
 	"agent_identity/model"
 	"os"
@@ -78,4 +79,14 @@ func initConf(confPath string) (*Config, error) {
 		return nil, err
 	}
 	return config, nil
+}
+
+func Test_GetTokenURL(t *testing.T) {
+	tokenURL := "https://baspublic.s3.ap-southeast-1.amazonaws.com/erc8004/agent_profile/97-0x5C33f9bAFcC7e1347937e0E986Ee14e84A6DF345-382.json"
+	agent, provider, err := agentcard.GetAgentCardFromTokenURL("0x5C33f9bAFcC7e1347937e0E986Ee14e84A6DF345", "382", tokenURL, "97", "0xA98A5542a1AaB336397d487e32021E0E48BEF717", 1731196800)
+	if err != nil {
+		panic(err)
+	}
+	t.Log(agent)
+	t.Log(provider)
 }
