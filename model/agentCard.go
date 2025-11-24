@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/ethereum/go-ethereum/common"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -454,7 +455,7 @@ func GetAgentList(page, pageSize int) ([]*Agent, int64, error) {
 
 func GetLatestAgentRegistry(chainID string, registryAddress string) (uint64, uint64, error) {
 	var agentRegistry *AgentRegistry
-	err := db.Where("chain_id = ? and identity_registry = ?", chainID, registryAddress).Order("block_number DESC, index DESC").First(&agentRegistry).Error
+	err := db.Where("chain_id = ? and (identity_registry = ? or identity_registry = ?)", chainID, registryAddress, common.HexToAddress(registryAddress).String(), common.HexToAddress(registryAddress).Hex()).Order("block_number DESC, index DESC").First(&agentRegistry).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, 0, nil
 	} else if err != nil {
@@ -494,7 +495,7 @@ func CreateAgentRegistry(agentRegistry *AgentRegistry) error {
 
 func GetLatestFeedbackAndResponse(chainID string, reputationRegistry string) (uint64, uint64, error) {
 	var feedback *Feedback
-	err := db.Where("chain_id = ? and reputation_registry = ?", chainID, reputationRegistry).Order("block_number DESC, index DESC").First(&feedback).Error
+	err := db.Where("chain_id = ? and (reputation_registry = ? or reputation_registry = ?)", chainID, reputationRegistry, common.HexToAddress(reputationRegistry).String(), common.HexToAddress(reputationRegistry).Hex()).Order("block_number DESC, index DESC").First(&feedback).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, 0, nil
 	} else if err != nil {
@@ -502,7 +503,7 @@ func GetLatestFeedbackAndResponse(chainID string, reputationRegistry string) (ui
 	}
 
 	var response *Response
-	err = db.Where("chain_id = ? and reputation_registry = ?", chainID, reputationRegistry).Order("block_number DESC, index DESC").First(&response).Error
+	err = db.Where("chain_id = ? and (reputation_registry = ? or reputation_registry = ?)", chainID, reputationRegistry, common.HexToAddress(reputationRegistry).String(), common.HexToAddress(reputationRegistry).Hex()).Order("block_number DESC, index DESC").First(&response).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, 0, nil
 	} else if err != nil {
