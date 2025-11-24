@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ethereum/go-ethereum/common"
 	"trpc.group/trpc-go/trpc-a2a-go/server"
 )
 
@@ -79,7 +80,7 @@ func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistr
 					errors = append(errors, err)
 					inserted = false
 				}
-				if namespace == "eip155" && _chainID == chainID && registryAddr == identityRegistryAddr {
+				if namespace == "eip155" && _chainID == chainID && common.HexToAddress(registryAddr).String() == common.HexToAddress(identityRegistryAddr).String() {
 					agent.IdentityRegistry = registryAddr
 				}
 			}

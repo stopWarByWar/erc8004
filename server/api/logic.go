@@ -251,7 +251,7 @@ func SetFeedback(request UploadFeedbackRequest) (string, string, error) {
 		return "", "", fmt.Errorf("agent id mismatch")
 	}
 
-	if agent.IdentityRegistry != request.FeedbackAuth.IdentityRegistry {
+	if common.HexToAddress(agent.IdentityRegistry).String() != common.HexToAddress(request.FeedbackAuth.IdentityRegistry).String() {
 		return "", "", fmt.Errorf("identity registry mismatch")
 	}
 
@@ -266,9 +266,9 @@ func SetFeedback(request UploadFeedbackRequest) (string, string, error) {
 	}
 
 	feedback := &types.Feedback{
-		AgentRegistry: request.FeedbackAuth.IdentityRegistry,
+		AgentRegistry: common.HexToAddress(request.FeedbackAuth.IdentityRegistry).String(),
 		AgentId:       int64(agentID),
-		ClientAddress: request.FeedbackAuth.ClientAddress,
+		ClientAddress: common.HexToAddress(request.FeedbackAuth.ClientAddress).String(),
 		CreatedAt:     strconv.FormatInt(time.Now().Unix(), 10),
 		FeedbackAuth:  hex.EncodeToString(feedbackAuthData),
 		Score:         request.Score,
@@ -284,7 +284,7 @@ func SetFeedback(request UploadFeedbackRequest) (string, string, error) {
 		return "", "", fmt.Errorf("fail to marshal feedback: %w", err)
 	}
 
-	feedbackURI, err := helper.GetHelper().UploadFeedbackToS3(request.FeedbackAuth.ChainId, request.FeedbackAuth.IdentityRegistry, request.FeedbackAuth.AgentId, request.FeedbackAuth.ClientAddress, request.FeedbackAuth.IndexLimit, feedbackData)
+	feedbackURI, err := helper.GetHelper().UploadFeedbackToS3(request.FeedbackAuth.ChainId, common.HexToAddress(request.FeedbackAuth.IdentityRegistry).String(), request.FeedbackAuth.AgentId, common.HexToAddress(request.FeedbackAuth.ClientAddress).String(), request.FeedbackAuth.IndexLimit, feedbackData)
 	if err != nil {
 		return "", "", fmt.Errorf("fail to upload feedback to s3: %w", err)
 	}

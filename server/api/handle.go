@@ -11,6 +11,7 @@ import (
 
 	"agent_identity/types"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/sirupsen/logrus"
@@ -391,7 +392,7 @@ func UploadAgentProfileHandler(c *gin.Context) {
 		return
 	}
 
-	logoURI, err := helper.GetHelper().UploadLogoToS3(request.ChainID, request.IdentityRegistry, request.AgentID, logoData)
+	logoURI, err := helper.GetHelper().UploadLogoToS3(request.ChainID, common.HexToAddress(request.IdentityRegistry).String(), request.AgentID, logoData)
 	if err != nil {
 		ErrResp(logrus.Fields{"error": err.Error()}, "fail to upload logo to s3", "Internal Error", c)
 		return
@@ -415,13 +416,13 @@ func UploadAgentProfileHandler(c *gin.Context) {
 			},
 			{
 				Name:     "agentWallet",
-				Endpoint: fmt.Sprintf("eip155:%s:%s", request.ChainID, request.AgentWalletAddress),
+				Endpoint: fmt.Sprintf("eip155:%s:%s", request.ChainID, common.HexToAddress(request.AgentWalletAddress).String()),
 			},
 		},
 		Registrations: []types.Registration{
 			{
 				AgentId:       int64(agentID),
-				AgentRegistry: fmt.Sprintf("eip155:%s:%s", request.ChainID, request.IdentityRegistry),
+				AgentRegistry: fmt.Sprintf("eip155:%s:%s", request.ChainID, common.HexToAddress(request.IdentityRegistry).String()),
 			},
 		},
 		SupportedTrust: request.SupportedTrust,
@@ -433,7 +434,7 @@ func UploadAgentProfileHandler(c *gin.Context) {
 		return
 	}
 
-	tokenURI, err := helper.GetHelper().UploadAgentProfileToS3(request.ChainID, request.IdentityRegistry, request.AgentID, agentProfileData)
+	tokenURI, err := helper.GetHelper().UploadAgentProfileToS3(request.ChainID, common.HexToAddress(request.IdentityRegistry).String(), request.AgentID, agentProfileData)
 	if err != nil {
 		ErrResp(logrus.Fields{"error": err.Error()}, "fail to upload agent profile to s3", "Internal Error", c)
 		return
