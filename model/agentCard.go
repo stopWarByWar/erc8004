@@ -29,18 +29,25 @@ func InsertAgentCard(agent *agentcard.Agent) error {
 	return db.Transaction(func(tx *gorm.DB) error {
 		var documentationURL string
 		var providerURL string
+		var url string
+		var version string
 
-		if agent.AgentCard.DocumentationURL != nil {
-			documentationURL = *agent.AgentCard.DocumentationURL
-		}
+		if agent.AgentCard != nil {
+			if agent.AgentCard.DocumentationURL != nil {
+				documentationURL = *agent.AgentCard.DocumentationURL
+			}
 
-		if agent.AgentCard.Provider.URL != nil {
-			providerURL = *agent.AgentCard.Provider.URL
+			if agent.AgentCard.Provider.URL != nil {
+				providerURL = *agent.AgentCard.Provider.URL
+			}
+
+			url = agent.AgentCard.URL
+			version = agent.AgentCard.Version
 		}
 
 		agentCardModel := Agent{
 			AgentID:          agent.AgentID,
-			Owner:            agent.AgentCard.Name,
+			Owner:            agent.Owner,
 			TokenURL:         agent.TokenURL,
 			AgentWallet:      agent.AgentWallet,
 			IdentityRegistry: agent.IdentityRegistry,
@@ -49,9 +56,9 @@ func InsertAgentCard(agent *agentcard.Agent) error {
 			Type:             agent.Type,
 			Name:             agent.Name,
 			Description:      agent.Description,
-			URL:              agent.AgentCard.URL,
+			URL:              url,
 			Image:            agent.Image,
-			Version:          agent.AgentCard.Version,
+			Version:          version,
 			DocumentationURL: documentationURL,
 			Timestamps:       agent.Timestamps,
 			UserInterfaceURL: agent.UserInterfaceURL,
@@ -100,121 +107,125 @@ func InsertAgentCard(agent *agentcard.Agent) error {
 			return err
 		}
 
-		var skillTags []SkillTags
-		var skills []Skill
-		for _, skill := range agent.AgentCard.Skills {
-			var skillDescription string
-			if skill.Description != nil {
-				skillDescription = *skill.Description
-			}
+		if agent.AgentCard != nil {
+			var skillTags []SkillTags
+			var skills []Skill
+			for _, skill := range agent.AgentCard.Skills {
+				var skillDescription string
+				if skill.Description != nil {
+					skillDescription = *skill.Description
+				}
 
-			skills = append(skills, Skill{
-				AgentUID:    agentCardModel.UID,
-				ID:          skill.ID,
-				Name:        skill.Name,
-				Description: skillDescription,
-			})
-			for _, tag := range skill.Tags {
-				skillTags = append(skillTags, SkillTags{
-					AgentUID: agentCardModel.UID,
-					SkillID:  skill.ID,
-					Tag:      tag,
+				skills = append(skills, Skill{
+					AgentUID:    agentCardModel.UID,
+					ID:          skill.ID,
+					Name:        skill.Name,
+					Description: skillDescription,
 				})
-			}
-		}
-		if len(skills) > 0 {
-			if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&skills).Error; err != nil {
-				return err
-			}
-		}
-
-		if len(skillTags) > 0 {
-			uniqueSkillTagsMap := make(map[string]SkillTags)
-			for _, tag := range skillTags {
-				key := fmt.Sprintf("%d|%s|%s", tag.AgentUID, tag.SkillID, tag.Tag)
-				uniqueSkillTagsMap[key] = tag
-			}
-			uniqueSkillTags := make([]SkillTags, 0, len(uniqueSkillTagsMap))
-			for _, tag := range uniqueSkillTagsMap {
-				uniqueSkillTags = append(uniqueSkillTags, tag)
-			}
-			if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&uniqueSkillTags).Error; err != nil {
-				return err
-			}
-		}
-
-		// providerURL 已在上方声明与赋值
-
-		provider := Provider{
-			AgentUID:     agentCardModel.UID,
-			Organization: agent.AgentCard.Provider.Organization,
-			URL:          providerURL,
-		}
-		if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&provider).Error; err != nil {
-			return err
-		}
-
-		capability := Capability{
-			AgentUID: agentCardModel.UID,
-			Streaming: func() bool {
-				if agent.AgentCard.Capabilities.Streaming == nil {
-					return false
+				for _, tag := range skill.Tags {
+					skillTags = append(skillTags, SkillTags{
+						AgentUID: agentCardModel.UID,
+						SkillID:  skill.ID,
+						Tag:      tag,
+					})
 				}
-				return *agent.AgentCard.Capabilities.Streaming
-			}(),
-			PushNotifications: func() bool {
-				if agent.AgentCard.Capabilities.PushNotifications == nil {
-					return false
-				}
-				return *agent.AgentCard.Capabilities.PushNotifications
-			}(),
-			StateTransitionHistory: func() bool {
-				if agent.AgentCard.Capabilities.StateTransitionHistory == nil {
-					return false
-				}
-				return *agent.AgentCard.Capabilities.StateTransitionHistory
-			}(),
-		}
-		if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&capability).Error; err != nil {
-			return err
-		}
-
-		var trustModels []TrustModel
-		for _, trustModel := range agent.SupportedTrust {
-			trustModels = append(trustModels, TrustModel{
-				AgentUID:   agentCardModel.UID,
-				TrustModel: trustModel,
-			})
-		}
-
-		if len(trustModels) > 0 {
-			if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&trustModels).Error; err != nil {
-				return err
 			}
-		}
+			if len(skills) > 0 {
+				if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&skills).Error; err != nil {
+					return err
+				}
+			}
 
-		var extensions []Extension
-		for _, extension := range agent.AgentCard.Capabilities.Extensions {
-			extensions = append(extensions, Extension{
+			if len(skillTags) > 0 {
+				uniqueSkillTagsMap := make(map[string]SkillTags)
+				for _, tag := range skillTags {
+					key := fmt.Sprintf("%d|%s|%s", tag.AgentUID, tag.SkillID, tag.Tag)
+					uniqueSkillTagsMap[key] = tag
+				}
+				uniqueSkillTags := make([]SkillTags, 0, len(uniqueSkillTagsMap))
+				for _, tag := range uniqueSkillTagsMap {
+					uniqueSkillTags = append(uniqueSkillTags, tag)
+				}
+				if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&uniqueSkillTags).Error; err != nil {
+					return err
+				}
+			}
+
+			// providerURL 已在上方声明与赋值
+
+			if agent.AgentCard.Provider != nil {
+				provider := Provider{
+					AgentUID:     agentCardModel.UID,
+					Organization: agent.AgentCard.Provider.Organization,
+					URL:          providerURL,
+				}
+				if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&provider).Error; err != nil {
+					return err
+				}
+			}
+
+			capability := Capability{
 				AgentUID: agentCardModel.UID,
-				URI:      extension.URI,
-				Required: func() bool {
-					if extension.Required == nil {
+				Streaming: func() bool {
+					if agent.AgentCard.Capabilities.Streaming == nil {
 						return false
 					}
-					return *extension.Required
+					return *agent.AgentCard.Capabilities.Streaming
 				}(),
-				Description: func() string {
-					if extension.Description == nil {
-						return ""
+				PushNotifications: func() bool {
+					if agent.AgentCard.Capabilities.PushNotifications == nil {
+						return false
 					}
-					return *extension.Description
+					return *agent.AgentCard.Capabilities.PushNotifications
 				}(),
-			})
-		}
-		if len(extensions) > 0 {
-			if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&extensions).Error; err != nil {
+				StateTransitionHistory: func() bool {
+					if agent.AgentCard.Capabilities.StateTransitionHistory == nil {
+						return false
+					}
+					return *agent.AgentCard.Capabilities.StateTransitionHistory
+				}(),
+			}
+			if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&capability).Error; err != nil {
 				return err
+			}
+
+			var trustModels []TrustModel
+			for _, trustModel := range agent.SupportedTrust {
+				trustModels = append(trustModels, TrustModel{
+					AgentUID:   agentCardModel.UID,
+					TrustModel: trustModel,
+				})
+			}
+
+			if len(trustModels) > 0 {
+				if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&trustModels).Error; err != nil {
+					return err
+				}
+			}
+
+			var extensions []Extension
+			for _, extension := range agent.AgentCard.Capabilities.Extensions {
+				extensions = append(extensions, Extension{
+					AgentUID: agentCardModel.UID,
+					URI:      extension.URI,
+					Required: func() bool {
+						if extension.Required == nil {
+							return false
+						}
+						return *extension.Required
+					}(),
+					Description: func() string {
+						if extension.Description == nil {
+							return ""
+						}
+						return *extension.Description
+					}(),
+				})
+			}
+			if len(extensions) > 0 {
+				if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&extensions).Error; err != nil {
+					return err
+				}
 			}
 		}
 		return nil

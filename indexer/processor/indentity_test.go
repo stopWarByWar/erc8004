@@ -37,9 +37,9 @@ func TestProcessor(t *testing.T) {
 	}
 
 	idx := NewCreateAgentProcessor(config.Identity.Addr, ethClient, config.Identity.FetchBlockInterval, config.Identity.StartBlock, _logger)
-	idx.Process()
+	// idx.Process()
 
-	// idx.setAgentCardInserted()
+	idx.setAgentCardInserted()
 }
 
 type Config struct {

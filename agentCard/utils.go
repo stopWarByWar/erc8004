@@ -32,12 +32,12 @@ func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistr
 	}
 
 	var agent = &Agent{
-		Type:           tokenURLResponse.Type,
-		Name:           tokenURLResponse.Name,
-		Description:    tokenURLResponse.Description,
-		Image:          tokenURLResponse.Image,
-		SupportedTrust: tokenURLResponse.SupportedTrust,
-		// AgentID:          tokenId,
+		Type:             tokenURLResponse.Type,
+		Name:             tokenURLResponse.Name,
+		Description:      tokenURLResponse.Description,
+		Image:            tokenURLResponse.Image,
+		SupportedTrust:   tokenURLResponse.SupportedTrust,
+		AgentID:          tokenId,
 		TokenURL:         tokenURL,
 		ChainID:          chainID,
 		Owner:            owner,
