@@ -180,7 +180,7 @@ func formatAgentResponse(agents []*model.Agent) ([]*AgentResponse, error) {
 	}
 
 	for _, agent := range agents {
-		var skillTagsResponse []SkillTagResponse
+		var skillTagsResponse = make([]SkillTagResponse, 0)
 		for _, skill := range skills[agent.UID] {
 			var tags []string
 			for _, skillTag := range skillTags[agent.UID][skill.ID] {
@@ -194,7 +194,7 @@ func formatAgentResponse(agents []*model.Agent) ([]*AgentResponse, error) {
 			})
 		}
 
-		var trustModelsResponse []string
+		var trustModelsResponse = make([]string, 0)
 		for _, trustModel := range trustModels[agent.UID] {
 			trustModelsResponse = append(trustModelsResponse, trustModel.TrustModel)
 		}
