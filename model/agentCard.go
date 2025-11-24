@@ -443,7 +443,12 @@ func GetAgentsByTrustModel(page, pageSize int, trustModelIDs []string) ([]*Agent
 
 func GetAgentList(page, pageSize int) ([]*Agent, int64, error) {
 	var agentCards []*Agent
-	if err := db.Where("length(name) <> 0").Offset((page - 1) * pageSize).Limit(pageSize).Find(&agentCards).Error; err != nil {
+	if err := db.
+		Where("length(name) <> 0").
+		Order("uid DESC").
+		Offset((page - 1) * pageSize).
+		Limit(pageSize).
+		Find(&agentCards).Error; err != nil {
 		return nil, 0, err
 	}
 	var total int64
