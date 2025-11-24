@@ -7,6 +7,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
@@ -36,7 +37,7 @@ func TestProcessor(t *testing.T) {
 		panic(err)
 	}
 
-	idx := NewCreateAgentProcessor(config.Identity.Addr, ethClient, config.Identity.FetchBlockInterval, config.Identity.StartBlock, _logger)
+	idx := NewCreateAgentProcessor(common.HexToAddress(config.Identity.Addr).String(), ethClient, config.Identity.FetchBlockInterval, config.Identity.StartBlock, _logger)
 	// idx.Process()
 
 	idx.setAgentCardInserted()

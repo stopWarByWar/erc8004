@@ -465,6 +465,16 @@ func GetLatestAgentRegistry(chainID string, registryAddress string) (uint64, uin
 
 func CreateAgentRegistry(agentRegistry *AgentRegistry) error {
 	return db.Transaction(func(tx *gorm.DB) error {
+		var existingAgent Agent
+		err := tx.Where("agent_id = ? AND chain_id = ? AND identity_registry = ?",
+			agentRegistry.AgentID, agentRegistry.ChainID, agentRegistry.IdentityRegistry).
+			First(&existingAgent).Error
+		if err == nil {
+			return nil
+		} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err
+		}
+
 		agent := Agent{
 			AgentID:          agentRegistry.AgentID,
 			Owner:            agentRegistry.Owner,
@@ -472,7 +482,7 @@ func CreateAgentRegistry(agentRegistry *AgentRegistry) error {
 			IdentityRegistry: agentRegistry.IdentityRegistry,
 			ChainID:          agentRegistry.ChainID,
 		}
-		if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&agent).Error; err != nil {
+		if err := tx.Create(&agent).Error; err != nil {
 			return err
 		}
 		if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&agentRegistry).Error; err != nil {
