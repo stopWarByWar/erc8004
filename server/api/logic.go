@@ -46,9 +46,9 @@ func GetCardResponse(agentUID uint64) (*AgentResponse, error) {
 		return nil, err
 	}
 
-	var skillTagsResponse []SkillTagResponse
+	var skillTagsResponse = make([]SkillTagResponse, 0)
 	for _, skill := range skills {
-		var tags []string
+		var tags = make([]string, 0)
 		for _, skillTag := range skillTags[skill.ID] {
 			tags = append(tags, skillTag.Tag)
 		}
@@ -60,7 +60,7 @@ func GetCardResponse(agentUID uint64) (*AgentResponse, error) {
 		})
 	}
 
-	var trustModelsResponse []string
+	var trustModelsResponse = make([]string, 0)
 	for _, trustModel := range trustModels {
 		trustModelsResponse = append(trustModelsResponse, trustModel.TrustModel)
 	}
@@ -182,7 +182,7 @@ func formatAgentResponse(agents []*model.Agent) ([]*AgentResponse, error) {
 	for _, agent := range agents {
 		var skillTagsResponse = make([]SkillTagResponse, 0)
 		for _, skill := range skills[agent.UID] {
-			var tags []string
+			var tags = make([]string, 0)
 			for _, skillTag := range skillTags[agent.UID][skill.ID] {
 				tags = append(tags, skillTag.Tag)
 			}
