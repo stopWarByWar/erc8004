@@ -233,6 +233,23 @@ func InsertAgentCard(agent *agentcard.Agent) error {
 	})
 }
 
+func GetTokenURL(chainID, identityRegistry, agentID string) (string, error) {
+	var agentRegistry AgentRegistry
+	err := db.Model(&AgentRegistry{}).
+		Where("chain_id = ? AND identity_registry = ? AND agent_id = ?", chainID, identityRegistry, agentID).
+		Order("block_number DESC, index DESC").
+		First(&agentRegistry).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return "", err
+	}
+	if err != nil {
+		return "", err
+	}
+
+	return agentRegistry.TokenURL, nil
+}
+
 func GetAgentByUID(uid uint64) (*Agent, error) {
 	var agentCards *Agent
 	if err := db.Where("uid = ?", uid).Find(&agentCards).Error; err != nil {
@@ -441,6 +458,49 @@ func GetAgentsByTrustModel(page, pageSize int, trustModelIDs []string) ([]*Agent
 	return agentCards, total, nil
 }
 
+func GetAgentsByFilter(page, pageSize int, trustModelIDs, chainIDs []string) ([]*Agent, int64, error) {
+
+	query := db.Model(&Agent{}).Distinct("agents.uid")
+
+	if len(trustModelIDs) > 0 {
+		query = query.Joins("INNER JOIN trust_models ON agents.uid = trust_models.agent_uid").
+			Where("trust_models.trust_model IN (?)", trustModelIDs)
+	}
+
+	// 如果有 chain_id 过滤，添加 chain_id IN 条件
+	if len(chainIDs) > 0 {
+		query = query.Where("agents.chain_id IN (?)", chainIDs)
+	}
+
+	// 查询总数（使用 COUNT(DISTINCT) 确保正确统计）
+	var total int64
+	countQuery := query.Select("COUNT(DISTINCT agents.uid)")
+	if err := countQuery.Scan(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// 如果总数为 0，直接返回
+	if total == 0 {
+		return []*Agent{}, 0, nil
+	}
+
+	// 分页查询 agent_uid（保持 DISTINCT 和 JOIN）
+	var agentUIDs []uint64
+	if err := query.Select("agents.uid").
+		Limit(pageSize).
+		Offset((page - 1) * pageSize).
+		Scan(&agentUIDs).Error; err != nil {
+		return nil, 0, err
+	}
+
+	var agentCards []*Agent
+	if err := db.Where("uid IN (?)", agentUIDs).Find(&agentCards).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return agentCards, total, nil
+}
+
 func GetAgentList(page, pageSize int) ([]*Agent, int64, error) {
 	var agentCards []*Agent
 	if err := db.
@@ -600,6 +660,45 @@ func SearchAgentsByName(name string, page, pageSize int) ([]*Agent, int, error) 
 		return nil, 0, err
 	}
 	return agents, int(count), nil
+}
+
+func FilterSearchAgentsByName(name string, page, pageSize int, trustModelIDs, chainIDs []string) ([]*Agent, int64, error) {
+	query := db.Model(&Agent{}).Distinct("agents.uid").
+		Where("LOWER(agents.name) LIKE LOWER(?)", "%"+name+"%")
+
+	if len(trustModelIDs) > 0 {
+		query = query.Joins("INNER JOIN trust_models ON agents.uid = trust_models.agent_uid").
+			Where("trust_models.trust_model IN (?)", trustModelIDs)
+	}
+
+	if len(chainIDs) > 0 {
+		query = query.Where("agents.chain_id IN (?)", chainIDs)
+	}
+
+	var count int64
+	countQuery := query.Select("COUNT(DISTINCT agents.uid)")
+	if err := countQuery.Scan(&count).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if count == 0 {
+		return []*Agent{}, 0, nil
+	}
+
+	var agentUIDs []uint64
+	if err := query.Select("agents.uid").
+		Limit(pageSize).
+		Offset((page - 1) * pageSize).
+		Scan(&agentUIDs).Error; err != nil {
+		return nil, 0, err
+	}
+
+	var agents []*Agent
+	if err := db.Where("uid IN (?)", agentUIDs).Find(&agents).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return agents, count, nil
 }
 
 func SearchAgentsBySkill(skill string, page, pageSize int) ([]*Agent, int, error) {
@@ -778,4 +877,49 @@ func GetFeedbacksByAgentUID(uid uint64, page, pageSize int) ([]*FeedbackResp, in
 		}
 	}
 	return feedbacks, total, nil
+}
+
+func CreateMetadata(metadata *Metadata) error {
+	var existing Metadata
+	result := db.Where("chain_id = ? AND identity_registry = ? AND agent_id = ? AND key = ?",
+		metadata.ChainID, metadata.IdentityRegistry, metadata.AgentID, metadata.Key).
+		FirstOrCreate(&existing, metadata)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	// FirstOrCreate 的行为：
+	// - 如果记录存在：existing 会被填充为已存在的记录
+	// - 如果记录不存在：existing 会被填充为新创建的记录（使用 metadata 的值）
+	// 通过比较非主键字段来判断记录是否是新创建的
+	// 如果 existing 的值与 metadata 的值完全相同，说明是新创建的，直接返回
+	if existing.Value == metadata.Value &&
+		existing.Block == metadata.Block &&
+		existing.Index == metadata.Index &&
+		existing.TxHash == metadata.TxHash {
+		// 记录是新创建的，或者已存在且值完全相同，不需要更新
+		return nil
+	}
+
+	// 记录已存在但值有变化，需要更新
+	updateMap := map[string]interface{}{
+		"value":   metadata.Value,
+		"block":   metadata.Block,
+		"index":   metadata.Index,
+		"tx_hash": metadata.TxHash,
+	}
+	return db.Model(&Metadata{}).
+		Where("chain_id = ? AND identity_registry = ? AND agent_id = ? AND key = ?",
+			metadata.ChainID, metadata.IdentityRegistry, metadata.AgentID, metadata.Key).
+		Updates(updateMap).Error
+}
+
+func GetMetadata(chainID string, identityRegistry string, agentID string) ([]Metadata, error) {
+	var metadatas []Metadata
+	err := db.Where("chain_id = ? AND identity_registry = ? AND agent_id = ?", chainID, identityRegistry, agentID).Find(&metadatas).Error
+	if err != nil {
+		return nil, err
+	}
+	return metadatas, nil
 }

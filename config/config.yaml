@@ -1,0 +1,38 @@
+chain_list:
+  - chain_id: "11155111"
+    chain_name: "Ethereum Sepolia"
+    chain_logo: "https://bnbattest.s3.ap-southeast-1.amazonaws.com/agentCard/chain/eth.png"
+  - chain_id: "97"
+    chain_name: "BSC Testnet"
+    chain_logo: "https://bnbattest.s3.ap-southeast-1.amazonaws.com/agentCard/chain/bsc.png"
+  - chain_id: "84532"
+    chain_name: "Base Sepolia"
+    chain_logo: "https://bnbattest.s3.ap-southeast-1.amazonaws.com/agentCard/chain/base.png"
+
+register_list:
+  - chain_id: "84532"
+    identity_address: "0x8004AA63c570c570eBF15376c0dB199918BFe9Fb"
+    reputation_address: "0x8004bd8daB57f14Ed299135749a5CB5c42d341BF"
+    validation_address: "0x8004C269D0A5647E51E121FeB226200ECE932d55"
+    name: "ETH Foundation"
+    description: "ETH Foundation Official Registry"
+    logo_url: "https://bnbattest.s3.ap-southeast-1.amazonaws.com/agentCard/org/eth.png"
+
+  - chain_id: "97"
+    identity_address: "0xA98A5542a1AaB336397d487e32021E0E48BEF717"
+    reputation_address: "0x8602bF1BD40F1E840cADf402a2710c846c4c4AD5"
+    validation_address: ""
+    name: "BAS"
+    description: "BAS official registry"
+    logo_url: "https://bnbattest.s3.ap-southeast-1.amazonaws.com/agentCard/org/bas.png"
+
+  - chain_id: "11155111"
+    identity_address: "0x8004a6090Cd10A7288092483047B097295Fb8847"
+    reputation_address: "0x8004B8FD1A363aa02fDC07635C0c5F94f6Af5B7E"
+    validation_address: "0x8004CB39f29c09145F24Ad9dDe2A108C1A2cdfC5"
+    name: "ETH Foundation"
+    description: "ETH Foundation Official Registry"
+    logo_url: "https://bnbattest.s3.ap-southeast-1.amazonaws.com/agentCard/org/eth.png"
+    
+
+

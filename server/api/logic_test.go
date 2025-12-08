@@ -55,9 +55,9 @@ func TestGetCardList(t *testing.T) {
 
 func TestGetCardResponseByTrustModel(t *testing.T) {
 	initTest()
-	agents, total, err := GetAgentListByTrustModel(1, 10, []string{"feedback", "inference-validation"})
+	agents, total, err := GetAgentListByFilter(1, 10, []string{"feedback", "inference-validation"}, []string{"97"})
 	if err != nil {
-		t.Errorf("GetCardResponseByTrustModel error: %v", err)
+		t.Errorf("GetAgentListByFilter error: %v", err)
 	}
 	for _, agent := range agents {
 		fmt.Println(agent)

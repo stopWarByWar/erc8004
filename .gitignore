@@ -10,3 +10,5 @@
 /server/server
 /indexer/indexer
 /helper/aws_test.go
+/config/testnet/
+/config/mainnet/

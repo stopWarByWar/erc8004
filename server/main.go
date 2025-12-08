@@ -1,6 +1,7 @@
 package main
 
 import (
+	"agent_identity/config"
 	"agent_identity/helper"
 	"agent_identity/logger"
 	"agent_identity/model"
@@ -28,16 +29,17 @@ func main() {
 		panic(err)
 	}
 
-	config, err := initConf(*configFile)
+	_config, err := initConf(*configFile)
 	if err != nil {
 		panic(err)
 	}
+	config.Init("../config/config.yaml")
 
-	helper.InitHelper(config.S3Region, config.S3BucketName, config.S3AccessKey, config.S3SecretKey)
+	helper.InitHelper(_config.S3Region, _config.S3BucketName, _config.S3AccessKey, _config.S3SecretKey)
 
-	model.InitDB(config.Dns)
-	api.InitRouter(_logger, config.Mock, config.FeedbackMock)
-	api.Run([]string{"*"}, config.Port)
+	model.InitDB(_config.Dns)
+	api.InitRouter(_logger, _config.Mock, _config.FeedbackMock)
+	api.Run([]string{"*"}, _config.Port)
 }
 
 type Config struct {

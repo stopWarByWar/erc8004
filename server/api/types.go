@@ -7,6 +7,8 @@ type AgentResponse struct {
 	AgentAddress     string //wallet address
 	Owner            string `json:"owner"`
 	ChainID          string
+	ChainName        string `json:"chainName"`
+	ChainLogo        string `json:"chainLogo"`
 	Namespace        string
 	IdentityRegistry string             `json:"identityRegistry"`
 	Name             string             `json:"name"`
@@ -20,6 +22,10 @@ type AgentResponse struct {
 	TrustModels      []string           `json:"trustModels"`
 	UserInterface    string             `json:"userInterface"`
 	Score            float64            `json:"score"`
+	Metadata         []MetadataResponse `json:"metadata"`
+	TokenURL         string             `json:"tokenUrl"`
+	Deployer         string             `json:"deployer"`
+	DeployerLogo     string             `json:"deployerLogo"`
 }
 
 type SkillTagResponse struct {
@@ -66,4 +72,9 @@ type UploadAgentProfileRequest struct {
 	IdentityRegistry   string   `json:"identityRegistry" form:"identityRegistry" binding:"required"`
 	SupportedTrust     []string `json:"supportedTrust" form:"supportedTrust"`
 	AgentWalletAddress string   `json:"agentWallet" form:"agentWallet" binding:"required"`
+}
+
+type MetadataResponse struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }

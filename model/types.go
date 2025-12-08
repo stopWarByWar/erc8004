@@ -223,3 +223,16 @@ type FeedbackResp struct {
 	Avatar   string
 	Passport bool
 }
+
+type Metadata struct {
+	ChainID          string `gorm:"column:chain_id;type:char(42);primaryKey"`
+	IdentityRegistry string `gorm:"column:identity_registry;type:char(42);primaryKey"`
+	AgentID          string `gorm:"column:agent_id;type:varchar(255);primaryKey"`
+	Key              string `gorm:"column:key;type:varchar(255);primaryKey"`
+	Value            string `gorm:"column:value;type:text"`
+	Block            uint64 `gorm:"column:block;type:bigint"`
+	Index            uint64 `gorm:"column:index;type:bigint"`
+	TxHash           string `gorm:"column:tx_hash;type:char(66)"`
+}
+
+func (Metadata) TableName() string { return "metadata" }

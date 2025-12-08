@@ -1,11 +1,13 @@
 package main
 
 import (
+	"agent_identity/config"
 	"agent_identity/indexer/processor"
 	"agent_identity/logger"
 	"agent_identity/model"
 	"context"
 	"flag"
+	"fmt"
 	"os"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -14,21 +16,10 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var configFile = flag.String("f", "./conf.yaml", "the config file")
+var configFile = flag.String("f", "./config/testnet/base_sepolia.yaml", "the config file")
 
 func main() {
 	flag.Parse()
-
-	logConf := &logger.Config{
-		Level:        logrus.DebugLevel,
-		ReportCaller: true,
-		FilePath:     "./log/server",
-	}
-
-	_logger, err := logger.New(logConf)
-	if err != nil {
-		panic(err)
-	}
 
 	config, err := initConf(*configFile)
 	if err != nil {
@@ -36,6 +27,17 @@ func main() {
 	}
 
 	ethClient, err := ethclient.Dial(config.RpcURL)
+	if err != nil {
+		panic(err)
+	}
+
+	logConf := &logger.Config{
+		Level:        logrus.DebugLevel,
+		ReportCaller: true,
+		FilePath:     fmt.Sprintf("./allLogger/indexer/%s", config.Name),
+	}
+
+	_logger, err := logger.New(logConf)
 	if err != nil {
 		panic(err)
 	}
@@ -65,33 +67,8 @@ func main() {
 	select {}
 }
 
-type Config struct {
-	RpcURL     string `yaml:"rpc_url"`
-	Dns        string `yaml:"dns"`
-	Reputation struct {
-		Addr               string `yaml:"addr"`
-		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
-		StartBlock         uint64 `yaml:"start_block"`
-		Run                bool   `yaml:"run"`
-	} `yaml:"reputation"`
-
-	Identity struct {
-		Addr               string `yaml:"addr"`
-		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
-		StartBlock         uint64 `yaml:"start_block"`
-		Run                bool   `yaml:"run"`
-	} `yaml:"identity"`
-	Comment struct {
-		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
-		StartBlock         uint64 `yaml:"start_block"`
-		Limit              int    `yaml:"limit"`
-		CommentSchemaID    string `yaml:"comment_schema_id"`
-		Run                bool   `yaml:"run"`
-	} `yaml:"comment"`
-}
-
-func initConf(confPath string) (*Config, error) {
-	config := &Config{}
+func initConf(confPath string) (*config.IndexerConfig, error) {
+	config := &config.IndexerConfig{}
 	dataBytes, err := os.ReadFile(confPath)
 	if err != nil {
 		return nil, err

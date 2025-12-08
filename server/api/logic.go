@@ -1,6 +1,7 @@
 package api
 
 import (
+	"agent_identity/config"
 	"agent_identity/helper"
 	"agent_identity/model"
 	"agent_identity/types"
@@ -46,6 +47,24 @@ func GetCardResponse(agentUID uint64) (*AgentResponse, error) {
 		return nil, err
 	}
 
+	metadataRaw, err := model.GetMetadata(agent.ChainID, agent.IdentityRegistry, agent.AgentID)
+	if err != nil {
+		return nil, err
+	}
+
+	tokenURL, err := model.GetTokenURL(agent.ChainID, agent.IdentityRegistry, agent.AgentID)
+	if err != nil {
+		return nil, err
+	}
+
+	var metadataResponse = make([]MetadataResponse, 0)
+	for _, metadata := range metadataRaw {
+		metadataResponse = append(metadataResponse, MetadataResponse{
+			Key:   metadata.Key,
+			Value: metadata.Value,
+		})
+	}
+
 	var skillTagsResponse = make([]SkillTagResponse, 0)
 	for _, skill := range skills {
 		var tags = make([]string, 0)
@@ -80,6 +99,10 @@ func GetCardResponse(agentUID uint64) (*AgentResponse, error) {
 		providerResponse = ProviderResponse{}
 	}
 
+	chainInfo := config.GetChainInfo(agent.ChainID)
+
+	deployerInfo := config.GetDeployerInfo(agent.ChainID, common.HexToAddress(agent.IdentityRegistry).String())
+
 	return &AgentResponse{
 		UID:              agent.UID,
 		AgentID:          agent.AgentID,
@@ -87,6 +110,8 @@ func GetCardResponse(agentUID uint64) (*AgentResponse, error) {
 		AgentAddress:     agent.AgentWallet,
 		Owner:            agent.Owner,
 		ChainID:          agent.ChainID,
+		ChainName:        chainInfo.ChainName,
+		ChainLogo:        chainInfo.ChainLogo,
 		Namespace:        agent.Namespace,
 		Name:             agent.Name,
 		Description:      agent.Description,
@@ -100,6 +125,10 @@ func GetCardResponse(agentUID uint64) (*AgentResponse, error) {
 		Score:            score,
 		UserInterface:    agent.UserInterfaceURL,
 		IdentityRegistry: agent.IdentityRegistry,
+		Metadata:         metadataResponse,
+		TokenURL:         tokenURL,
+		Deployer:         deployerInfo.Deployer,
+		DeployerLogo:     deployerInfo.LogoURL,
 	}, nil
 }
 
@@ -115,8 +144,8 @@ func GetAgentList(page, pageSize int) ([]*AgentResponse, int64, error) {
 	return resp, total, nil
 }
 
-func GetAgentListByTrustModel(page, pageSize int, trustModel []string) ([]*AgentResponse, int64, error) {
-	agents, total, err := model.GetAgentsByTrustModel(page, pageSize, trustModel)
+func GetAgentListByFilter(page, pageSize int, trustModel []string, chains []string) ([]*AgentResponse, int64, error) {
+	agents, total, err := model.GetAgentsByFilter(page, pageSize, trustModel, chains)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -141,6 +170,18 @@ func SearchAgentListBySkill(skill string, page, pageSize int) ([]*AgentResponse,
 
 func SearchAgentListByName(name string, page, pageSize int) ([]*AgentResponse, int, error) {
 	agents, total, err := model.SearchAgentsByName(name, page, pageSize)
+	if err != nil {
+		return nil, 0, err
+	}
+	cards, err := formatAgentResponse(agents)
+	if err != nil {
+		return nil, 0, err
+	}
+	return cards, total, nil
+}
+
+func FilterSearchAgentListByFilter(name string, page, pageSize int, trustModelIDs, chainIDs []string) ([]*AgentResponse, int64, error) {
+	agents, total, err := model.FilterSearchAgentsByName(name, page, pageSize, trustModelIDs, chainIDs)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -215,6 +256,8 @@ func formatAgentResponse(agents []*model.Agent) ([]*AgentResponse, error) {
 			providerResponse = ProviderResponse{}
 		}
 
+		chainInfo := config.GetChainInfo(agent.ChainID)
+
 		resp = append(resp, &AgentResponse{
 			UID:              agent.UID,
 			AgentID:          agent.AgentID,
@@ -222,6 +265,8 @@ func formatAgentResponse(agents []*model.Agent) ([]*AgentResponse, error) {
 			AgentAddress:     agent.AgentWallet,
 			Owner:            agent.Owner,
 			ChainID:          agent.ChainID,
+			ChainName:        chainInfo.ChainName,
+			ChainLogo:        chainInfo.ChainLogo,
 			Namespace:        agent.Namespace,
 			Name:             agent.Name,
 			Description:      agent.Description,

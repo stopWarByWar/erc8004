@@ -21,6 +21,7 @@ import (
 var RegisteredTopic = common.HexToHash("0xca52e62c367d81bb2e328eb795f7c7ba24afb478408a26c0e201d155c449bc4a")
 var UriUpdatedTopic = common.HexToHash("0xb41beef75d9f8d55b985319b459e96f82453580af381391f1ad531eb8f8b5a3a")
 var TransferOwnerShipTopic = common.HexToHash("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef")
+var SetMetaDataTopic = common.HexToHash("0x2c149ed548c6d2993cd73efe187df6eccabe4538091b33adbd25fafdb8a1468b")
 
 type IdentityProcessor struct {
 	execBlock uint64
@@ -111,7 +112,7 @@ loop:
 			FromBlock: big.NewInt(fromBlock),
 			ToBlock:   big.NewInt(toBlock),
 			Addresses: []common.Address{idx.identityAddr},
-			Topics:    [][]common.Hash{{RegisteredTopic, UriUpdatedTopic, TransferOwnerShipTopic}},
+			Topics:    [][]common.Hash{{RegisteredTopic, UriUpdatedTopic, TransferOwnerShipTopic, SetMetaDataTopic}},
 		})
 		if err != nil {
 			idx.logger.WithFields(logrus.Fields{
@@ -162,9 +163,31 @@ func (idx *IdentityProcessor) dealWithEvent(e types.Log) error {
 		return idx.dealWithUriUpdatedEvent(e)
 	case TransferOwnerShipTopic:
 		return idx.dealWithTransferOwnerShipEvent(e)
+	case SetMetaDataTopic:
+		return idx.dealWithSetMetaDataEvent(e)
 	default:
 		return fmt.Errorf("unknown event topic: %s", e.Topics[0])
 	}
+}
+
+func (idx *IdentityProcessor) dealWithSetMetaDataEvent(e types.Log) error {
+	event, err := idx.identityRegistry.ParseMetadataSet(e)
+	if err != nil {
+		return fmt.Errorf("failed to parse set meta data event: %w", err)
+	}
+
+	metadata := &model.Metadata{
+		ChainID:          idx.chainID,
+		IdentityRegistry: idx.identityAddr.Hex(),
+		AgentID:          event.AgentId.String(),
+		Key:              event.Key,
+		Value:            string(event.Value),
+		Block:            uint64(e.BlockNumber),
+		Index:            uint64(e.Index),
+		TxHash:           e.TxHash.String(),
+	}
+	return model.CreateMetadata(metadata)
+
 }
 
 func (idx *IdentityProcessor) dealWithAgentRegisteredEvent(e types.Log) error {
@@ -173,7 +196,6 @@ func (idx *IdentityProcessor) dealWithAgentRegisteredEvent(e types.Log) error {
 		return fmt.Errorf("failed to parse agent registered event: %w", err)
 	}
 
-	// 创建 agent registry 记录
 	registry := &model.AgentRegistry{
 		AgentID:          agentRegisteredEvent.AgentId.String(),
 		IdentityRegistry: idx.identityAddr.Hex(),
