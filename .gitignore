@@ -12,3 +12,4 @@
 /helper/aws_test.go
 /config/testnet/
 /config/mainnet/
+/bin/
