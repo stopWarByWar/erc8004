@@ -258,6 +258,8 @@ func formatAgentResponse(agents []*model.Agent) ([]*AgentResponse, error) {
 
 		chainInfo := config.GetChainInfo(agent.ChainID)
 
+		deployerInfo := config.GetDeployerInfo(agent.ChainID, common.HexToAddress(agent.IdentityRegistry).String())
+
 		resp = append(resp, &AgentResponse{
 			UID:              agent.UID,
 			AgentID:          agent.AgentID,
@@ -280,6 +282,8 @@ func formatAgentResponse(agents []*model.Agent) ([]*AgentResponse, error) {
 			Score:            score,
 			UserInterface:    agent.UserInterfaceURL,
 			IdentityRegistry: agent.IdentityRegistry,
+			Deployer:         deployerInfo.Deployer,
+			DeployerLogo:     deployerInfo.LogoURL,
 		})
 	}
 

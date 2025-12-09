@@ -129,6 +129,7 @@ func GetAgentCardListByFilterHandler(c *gin.Context) {
 				trustModelIDs = append(trustModelIDs, id)
 			}
 		}
+		fmt.Println(v)
 	}
 
 	chainIDs := make([]string, 0)
@@ -138,6 +139,7 @@ func GetAgentCardListByFilterHandler(c *gin.Context) {
 				chainIDs = append(chainIDs, id)
 			}
 		}
+		fmt.Println(v)
 	}
 
 	page := c.Query("page")

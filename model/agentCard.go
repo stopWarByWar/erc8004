@@ -18,7 +18,7 @@ var db *gorm.DB
 func InitDB(dns string) {
 	var err error
 	db, err = gorm.Open(postgres.Open(dns), &gorm.Config{
-		Logger: gormLogger.Default.LogMode(gormLogger.Error),
+		Logger: gormLogger.Default.LogMode(gormLogger.Info),
 	})
 	if err != nil {
 		panic(err)
@@ -459,23 +459,23 @@ func GetAgentsByTrustModel(page, pageSize int, trustModelIDs []string) ([]*Agent
 }
 
 func GetAgentsByFilter(page, pageSize int, trustModelIDs, chainIDs []string) ([]*Agent, int64, error) {
-
-	query := db.Model(&Agent{}).Distinct("agents.uid")
-
-	if len(trustModelIDs) > 0 {
-		query = query.Joins("INNER JOIN trust_models ON agents.uid = trust_models.agent_uid").
-			Where("trust_models.trust_model IN (?)", trustModelIDs)
+	// 构建基础查询的辅助函数
+	buildBaseQuery := func() *gorm.DB {
+		query := db.Model(&Agent{}).Distinct("agents.uid")
+		if len(trustModelIDs) > 0 {
+			query = query.Joins("INNER JOIN trust_models ON agents.uid = trust_models.agent_uid").
+				Where("trust_models.trust_model IN (?)", trustModelIDs)
+		}
+		if len(chainIDs) > 0 {
+			query = query.Where("agents.chain_id IN (?)", chainIDs)
+		}
+		return query
 	}
 
-	// 如果有 chain_id 过滤，添加 chain_id IN 条件
-	if len(chainIDs) > 0 {
-		query = query.Where("agents.chain_id IN (?)", chainIDs)
-	}
-
-	// 查询总数（使用 COUNT(DISTINCT) 确保正确统计）
+	// 查询总数（创建新的查询对象）
 	var total int64
-	countQuery := query.Select("COUNT(DISTINCT agents.uid)")
-	if err := countQuery.Scan(&total).Error; err != nil {
+	countQuery := buildBaseQuery()
+	if err := countQuery.Select("COUNT(DISTINCT agents.uid)").Scan(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -484,9 +484,10 @@ func GetAgentsByFilter(page, pageSize int, trustModelIDs, chainIDs []string) ([]
 		return []*Agent{}, 0, nil
 	}
 
-	// 分页查询 agent_uid（保持 DISTINCT 和 JOIN）
+	// 分页查询 agent_uid（创建新的查询对象）
 	var agentUIDs []uint64
-	if err := query.Select("agents.uid").
+	dataQuery := buildBaseQuery()
+	if err := dataQuery.Select("agents.uid").
 		Limit(pageSize).
 		Offset((page - 1) * pageSize).
 		Scan(&agentUIDs).Error; err != nil {
@@ -663,21 +664,24 @@ func SearchAgentsByName(name string, page, pageSize int) ([]*Agent, int, error) 
 }
 
 func FilterSearchAgentsByName(name string, page, pageSize int, trustModelIDs, chainIDs []string) ([]*Agent, int64, error) {
-	query := db.Model(&Agent{}).Distinct("agents.uid").
-		Where("LOWER(agents.name) LIKE LOWER(?)", "%"+name+"%")
 
-	if len(trustModelIDs) > 0 {
-		query = query.Joins("INNER JOIN trust_models ON agents.uid = trust_models.agent_uid").
-			Where("trust_models.trust_model IN (?)", trustModelIDs)
+	buildBaseQuery := func() *gorm.DB {
+		query := db.Model(&Agent{}).Distinct("agents.uid").
+			Where("LOWER(agents.name) LIKE LOWER(?)", "%"+name+"%")
+		if len(trustModelIDs) > 0 {
+			query = query.Joins("INNER JOIN trust_models ON agents.uid = trust_models.agent_uid").
+				Where("trust_models.trust_model IN (?)", trustModelIDs)
+		}
+		if len(chainIDs) > 0 {
+			query = query.Where("agents.chain_id IN (?)", chainIDs)
+		}
+		return query
 	}
 
-	if len(chainIDs) > 0 {
-		query = query.Where("agents.chain_id IN (?)", chainIDs)
-	}
-
+	// 查询总数（创建新的查询对象）
 	var count int64
-	countQuery := query.Select("COUNT(DISTINCT agents.uid)")
-	if err := countQuery.Scan(&count).Error; err != nil {
+	countQuery := buildBaseQuery()
+	if err := countQuery.Select("COUNT(DISTINCT agents.uid)").Scan(&count).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -685,8 +689,10 @@ func FilterSearchAgentsByName(name string, page, pageSize int, trustModelIDs, ch
 		return []*Agent{}, 0, nil
 	}
 
+	// 分页查询 agent_uid（创建新的查询对象）
 	var agentUIDs []uint64
-	if err := query.Select("agents.uid").
+	dataQuery := buildBaseQuery()
+	if err := dataQuery.Select("agents.uid").
 		Limit(pageSize).
 		Offset((page - 1) * pageSize).
 		Scan(&agentUIDs).Error; err != nil {
