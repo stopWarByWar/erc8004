@@ -886,29 +886,42 @@ func GetFeedbacksByAgentUID(uid uint64, page, pageSize int) ([]*FeedbackResp, in
 }
 
 func CreateMetadata(metadata *Metadata) error {
-	var existing Metadata
-	result := db.Where("chain_id = ? AND identity_registry = ? AND agent_id = ? AND key = ?",
-		metadata.ChainID, metadata.IdentityRegistry, metadata.AgentID, metadata.Key).
-		FirstOrCreate(&existing, metadata)
+	err := db.Clauses(clause.OnConflict{
+		Columns: []clause.Column{
+			{Name: "chain_id"},
+			{Name: "identity_registry"},
+			{Name: "agent_id"},
+			{Name: "key"},
+		},
+		DoNothing: true,
+	}).Create(metadata).Error
 
-	if result.Error != nil {
-		return result.Error
+	if err != nil {
+		return err
 	}
 
-	// FirstOrCreate 的行为：
-	// - 如果记录存在：existing 会被填充为已存在的记录
-	// - 如果记录不存在：existing 会被填充为新创建的记录（使用 metadata 的值）
-	// 通过比较非主键字段来判断记录是否是新创建的
-	// 如果 existing 的值与 metadata 的值完全相同，说明是新创建的，直接返回
-	if existing.Value == metadata.Value &&
-		existing.Block == metadata.Block &&
-		existing.Index == metadata.Index &&
-		existing.TxHash == metadata.TxHash {
-		// 记录是新创建的，或者已存在且值完全相同，不需要更新
+	// 查询记录（无论是新插入的还是已存在的）
+	var existing Metadata
+	err = db.Where("chain_id = ? AND identity_registry = ? AND agent_id = ? AND key = ?",
+		metadata.ChainID, metadata.IdentityRegistry, metadata.AgentID, metadata.Key).
+		First(&existing).Error
+
+	if err != nil {
+		return err
+	}
+
+	// 检查是否有变化
+	hasChange := existing.Value != metadata.Value ||
+		existing.Block != metadata.Block ||
+		existing.Index != metadata.Index ||
+		existing.TxHash != metadata.TxHash
+
+	if !hasChange {
+		// 没有变化，什么都不做
 		return nil
 	}
 
-	// 记录已存在但值有变化，需要更新
+	// 有变化，更新记录
 	updateMap := map[string]interface{}{
 		"value":   metadata.Value,
 		"block":   metadata.Block,

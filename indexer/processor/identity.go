@@ -5,6 +5,7 @@ import (
 	agentcard "agent_identity/agentCard"
 	"agent_identity/model"
 	"context"
+	"encoding/hex"
 	"fmt"
 	"math/big"
 	"time"
@@ -181,7 +182,7 @@ func (idx *IdentityProcessor) dealWithSetMetaDataEvent(e types.Log) error {
 		IdentityRegistry: idx.identityAddr.Hex(),
 		AgentID:          event.AgentId.String(),
 		Key:              event.Key,
-		Value:            string(event.Value),
+		Value:            hex.EncodeToString(event.Value),
 		Block:            uint64(e.BlockNumber),
 		Index:            uint64(e.Index),
 		TxHash:           e.TxHash.String(),
@@ -282,17 +283,28 @@ func (idx *IdentityProcessor) setAgentCardInserted() {
 				}
 			}
 
-			if len(extractErrs) == 0 || inserted {
-				if err := model.UpdateAgentRegistryInserted([]string{agentRegistry.AgentID}); err != nil {
-					idx.logger.WithFields(logrus.Fields{
-						"error":            err,
-						"chainID":          idx.chainID,
-						"identityRegistry": idx.identityAddr.Hex(),
-						"agentID":          agentRegistry.AgentID,
-						"tokenURL":         agentRegistry.TokenURL,
-					}).Error("failed to update agent registry inserted")
-					continue
-				}
+			// if len(extractErrs) == 0 || inserted {
+			// 	if err := model.UpdateAgentRegistryInserted([]string{agentRegistry.AgentID}); err != nil {
+			// 		idx.logger.WithFields(logrus.Fields{
+			// 			"error":            err,
+			// 			"chainID":          idx.chainID,
+			// 			"identityRegistry": idx.identityAddr.Hex(),
+			// 			"agentID":          agentRegistry.AgentID,
+			// 			"tokenURL":         agentRegistry.TokenURL,
+			// 		}).Error("failed to update agent registry inserted")
+			// 		continue
+			// 	}
+			// }
+			if err := model.UpdateAgentRegistryInserted([]string{agentRegistry.AgentID}); err != nil {
+				idx.logger.WithFields(logrus.Fields{
+					"error":            err,
+					"chainID":          idx.chainID,
+					"identityRegistry": idx.identityAddr.Hex(),
+					"agentID":          agentRegistry.AgentID,
+					"tokenURL":         agentRegistry.TokenURL,
+					"inserted":         inserted,
+				}).Error("failed to update agent registry inserted")
+				continue
 			}
 		}
 

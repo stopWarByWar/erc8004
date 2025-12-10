@@ -220,7 +220,7 @@ CREATE INDEX IF NOT EXISTS idx_agent_comments_commenter ON agent_comments(commen
 CREATE INDEX IF NOT EXISTS idx_agent_comments_tx_hash ON agent_comments(tx_hash);
 CREATE INDEX IF NOT EXISTS idx_agent_comments_revoked ON agent_comments(revoked);
 
-CREATE TABLE IF NOT EXISTS metadata (
+CREATE TABLE IF NOT EXISTS agent_metadatas (
   chain_id char(42) NOT NULL,
   identity_registry char(42) NOT NULL,
   agent_id varchar(255) NOT NULL,

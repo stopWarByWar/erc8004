@@ -235,4 +235,4 @@ type Metadata struct {
 	TxHash           string `gorm:"column:tx_hash;type:char(66)"`
 }
 
-func (Metadata) TableName() string { return "metadata" }
+func (Metadata) TableName() string { return "agent_metadatas" }

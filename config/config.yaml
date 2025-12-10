@@ -23,7 +23,7 @@ register_list:
     reputation_address: "0x8602bF1BD40F1E840cADf402a2710c846c4c4AD5"
     validation_address: ""
     name: "BAS"
-    description: "BAS official registry"
+    description: "BAS Official Registry"
     logo_url: "https://bnbattest.s3.ap-southeast-1.amazonaws.com/agentCard/org/bas.png"
 
   - chain_id: "11155111"
@@ -33,6 +33,11 @@ register_list:
     name: "ETH Foundation"
     description: "ETH Foundation Official Registry"
     logo_url: "https://bnbattest.s3.ap-southeast-1.amazonaws.com/agentCard/org/eth.png"
-    
 
-
+  - chain_id: "97"
+    identity_address: "0xabBd26D86435B35D9C45177725084ee6a2812e40"
+    reputation_address: "0xeCEd1af52a0446275E9e6e4f6F26c99977400a6a"
+    validation_address: "0x7866BD057f09a4940FE2cE43320518c8749A921E"
+    name: "ChaosChain"
+    description: "ChaosChain Official Registry"
+    logo_url: "https://bnbattest.s3.ap-southeast-1.amazonaws.com/agentCard/org/chaoschain.png"
