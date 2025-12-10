@@ -25,31 +25,9 @@ var feedbackMock = false
 const maxMultipartMemory = 20 << 20 // 20MB
 
 func GetAgentCardListHandler(c *gin.Context) {
-	if mock {
-		page := c.Query("page")
-		pageSize := c.Query("page_size")
-
-		pageInt, err := strconv.Atoi(page)
-		if err != nil {
-			ErrResp(nil, "fail to get page", "Invalid Request", c)
-			return
-		}
-		pageSizeInt, err := strconv.Atoi(pageSize)
-		if err != nil {
-			ErrResp(nil, "fail to get page_size", "Invalid Request", c)
-			return
-		}
-		SuccessResp(gin.H{
-			"agent_list":   mockAgents(pageSizeInt),
-			"total":        int64(len(mockAgents(pageSizeInt))),
-			"current_page": pageInt,
-		}, c)
-		return
-	}
-
+	name := c.Query("name")
 	page := c.Query("page")
 	pageSize := c.Query("page_size")
-
 	pageInt, err := strconv.Atoi(page)
 	if err != nil {
 		ErrResp(nil, "fail to get page", "Invalid Request", c)
@@ -60,14 +38,52 @@ func GetAgentCardListHandler(c *gin.Context) {
 		ErrResp(nil, "fail to get page_size", "Invalid Request", c)
 		return
 	}
-	resp, total, err := GetAgentList(pageInt, pageSizeInt)
-	if err != nil {
-		ErrResp(nil, "fail to get agent card list", "Internal Error", c)
-		return
+
+	trustModels := c.QueryArray("trust_model")
+	chains := c.QueryArray("chains")
+
+	trustModelIDs := make([]string, 0)
+	for _, v := range trustModels {
+		for _, id := range strings.Split(v, ",") {
+			if id != "" {
+				trustModelIDs = append(trustModelIDs, id)
+			}
+		}
 	}
 
+	chainIDs := make([]string, 0)
+	for _, v := range chains {
+		for _, id := range strings.Split(v, ",") {
+			if id != "" {
+				chainIDs = append(chainIDs, id)
+			}
+		}
+	}
+
+	var agents []*AgentResponse
+	var total int64
+
+	if name != "" {
+		agents, total, err = FilterSearchAgentListByFilter(name, pageInt, pageSizeInt, trustModelIDs, chainIDs)
+		if err != nil {
+			ErrResp(nil, "fail to get agent card list by name", "Internal Error", c)
+			return
+		}
+	} else if name == "" && (len(trustModelIDs) != 0 || len(chainIDs) != 0) {
+		agents, total, err = GetAgentListByFilter(pageInt, pageSizeInt, trustModelIDs, chainIDs)
+		if err != nil {
+			ErrResp(nil, "fail to get agent card list by filter", "Internal Error", c)
+			return
+		}
+	} else {
+		agents, total, err = GetAgentList(pageInt, pageSizeInt)
+		if err != nil {
+			ErrResp(nil, "fail to get agent card list", "Internal Error", c)
+			return
+		}
+	}
 	SuccessResp(gin.H{
-		"agent_list":   resp,
+		"agent_list":   agents,
 		"total":        total,
 		"current_page": pageInt,
 	}, c)
@@ -93,84 +109,6 @@ func GetAgentCardDetailHandler(c *gin.Context) {
 	}
 	SuccessResp(gin.H{
 		"agent": agentCard,
-	}, c)
-}
-
-func GetAgentCardListByFilterHandler(c *gin.Context) {
-	if mock {
-		page := c.Query("page")
-		pageSize := c.Query("page_size")
-
-		pageInt, err := strconv.Atoi(page)
-		if err != nil {
-			ErrResp(nil, "fail to get page", "Invalid Request", c)
-			return
-		}
-		pageSizeInt, err := strconv.Atoi(pageSize)
-		if err != nil {
-			ErrResp(nil, "fail to get page_size", "Invalid Request", c)
-			return
-		}
-		SuccessResp(gin.H{
-			"agent_list":   mockAgents(pageSizeInt),
-			"total":        int64(len(mockAgents(pageSizeInt))),
-			"current_page": pageInt,
-		}, c)
-		return
-	}
-
-	trustModels := c.QueryArray("trust_model")
-	chains := c.QueryArray("chains")
-
-	trustModelIDs := make([]string, 0)
-	for _, v := range trustModels {
-		for _, id := range strings.Split(v, ",") {
-			if id != "" {
-				trustModelIDs = append(trustModelIDs, id)
-			}
-		}
-		fmt.Println(v)
-	}
-
-	chainIDs := make([]string, 0)
-	for _, v := range chains {
-		for _, id := range strings.Split(v, ",") {
-			if id != "" {
-				chainIDs = append(chainIDs, id)
-			}
-		}
-		fmt.Println(v)
-	}
-
-	page := c.Query("page")
-	pageSize := c.Query("page_size")
-	pageInt, err := strconv.Atoi(page)
-	if err != nil {
-		ErrResp(nil, "fail to get page", "Invalid Request", c)
-		return
-	}
-	pageSizeInt, err := strconv.Atoi(pageSize)
-	if err != nil {
-		ErrResp(nil, "fail to get page_size", "Invalid Request", c)
-		return
-	}
-
-	_logger.WithFields(logrus.Fields{
-		"page":        pageInt,
-		"page_size":   pageSizeInt,
-		"trust_model": trustModelIDs,
-		"chain":       chainIDs,
-	}).Info("GetCardResponseByFilter")
-
-	agents, total, err := GetAgentListByFilter(pageInt, pageSizeInt, trustModelIDs, chainIDs)
-	if err != nil {
-		ErrResp(nil, "fail to get agent card list by filter", "Internal Error", c)
-		return
-	}
-	SuccessResp(gin.H{
-		"agent_list":   agents,
-		"total":        total,
-		"current_page": pageInt,
 	}, c)
 }
 
@@ -272,75 +210,6 @@ func GetAgentCardsSearchByNameHandler(c *gin.Context) {
 		return
 	}
 	agents, total, err := SearchAgentListByName(name, pageInt, pageSizeInt)
-	if err != nil {
-		ErrResp(nil, "fail to get agent card list by name", "Internal Error", c)
-		return
-	}
-	SuccessResp(gin.H{
-		"agent_list":   agents,
-		"total":        total,
-		"current_page": pageInt,
-	}, c)
-}
-
-func GetAgentCardsFilterSearchByNameHandler(c *gin.Context) {
-	if mock {
-		page := c.Query("page")
-		pageSize := c.Query("page_size")
-
-		pageInt, err := strconv.Atoi(page)
-		if err != nil {
-			ErrResp(nil, "fail to get page", "Invalid Request", c)
-			return
-		}
-		pageSizeInt, err := strconv.Atoi(pageSize)
-		if err != nil {
-			ErrResp(nil, "fail to get page_size", "Invalid Request", c)
-			return
-		}
-		SuccessResp(gin.H{
-			"agent_list":   mockAgents(pageSizeInt),
-			"total":        int64(len(mockAgents(pageSizeInt))),
-			"current_page": pageInt,
-		}, c)
-		return
-	}
-	name := c.Query("name")
-	page := c.Query("page")
-	pageSize := c.Query("page_size")
-	pageInt, err := strconv.Atoi(page)
-	if err != nil {
-		ErrResp(nil, "fail to get page", "Invalid Request", c)
-		return
-	}
-	pageSizeInt, err := strconv.Atoi(pageSize)
-	if err != nil {
-		ErrResp(nil, "fail to get page_size", "Invalid Request", c)
-		return
-	}
-
-	trustModels := c.QueryArray("trust_model")
-	chains := c.QueryArray("chains")
-
-	trustModelIDs := make([]string, 0)
-	for _, v := range trustModels {
-		for _, id := range strings.Split(v, ",") {
-			if id != "" {
-				trustModelIDs = append(trustModelIDs, id)
-			}
-		}
-	}
-
-	chainIDs := make([]string, 0)
-	for _, v := range chains {
-		for _, id := range strings.Split(v, ",") {
-			if id != "" {
-				chainIDs = append(chainIDs, id)
-			}
-		}
-	}
-
-	agents, total, err := FilterSearchAgentListByFilter(name, pageInt, pageSizeInt, trustModelIDs, chainIDs)
 	if err != nil {
 		ErrResp(nil, "fail to get agent card list by name", "Internal Error", c)
 		return
