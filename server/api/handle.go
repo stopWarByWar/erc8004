@@ -99,12 +99,12 @@ func GetAgentCardDetailHandler(c *gin.Context) {
 
 	agentUID, err := strconv.ParseUint(c.Query("uid"), 10, 64)
 	if err != nil {
-		ErrResp(nil, "fail to get agent uid", "Invalid Request", c)
+		ErrResp(logrus.Fields{"error": err.Error()}, "fail to get agent uid", "Invalid Request", c)
 		return
 	}
 	agentCard, err := GetCardResponse(agentUID)
 	if err != nil {
-		ErrResp(nil, "fail to get agent card detail", "Internal Error", c)
+		ErrResp(logrus.Fields{"error": err.Error()}, "fail to get agent card detail", "Internal Error", c)
 		return
 	}
 	SuccessResp(gin.H{

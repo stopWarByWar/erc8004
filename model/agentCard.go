@@ -241,7 +241,7 @@ func GetTokenURL(chainID, identityRegistry, agentID string) (string, error) {
 		First(&agentRegistry).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return "", err
+		return "", nil
 	}
 	if err != nil {
 		return "", err
