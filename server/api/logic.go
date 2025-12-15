@@ -59,10 +59,22 @@ func GetCardResponse(agentUID uint64) (*AgentResponse, error) {
 
 	var metadataResponse = make([]MetadataResponse, 0)
 	for _, metadata := range metadataRaw {
-		metadataResponse = append(metadataResponse, MetadataResponse{
-			Key:   metadata.Key,
-			Value: metadata.Value,
-		})
+
+		data, err := hex.DecodeString(metadata.Value)
+		if err != nil {
+			return nil, err
+		}
+
+		var value string
+		if len(data) == (20) {
+			value = common.BytesToAddress(data).String()
+		} else if len(data) == (32) {
+			value = common.BytesToHash(data).String()
+		} else {
+			value = string(data)
+		}
+
+		metadataResponse = append(metadataResponse, MetadataResponse{Key: metadata.Key, Value: value})
 	}
 
 	var skillTagsResponse = make([]SkillTagResponse, 0)
