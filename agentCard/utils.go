@@ -7,10 +7,8 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/common"
 	"trpc.group/trpc-go/trpc-a2a-go/server"
 )
 
@@ -44,6 +42,7 @@ func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistr
 		Owner:            owner,
 		Timestamps:       timestamps,
 		UserInterfaceURL: tokenURLResponse.UserInterfaceURL,
+		IdentityRegistry: identityRegistryAddr,
 	}
 
 	var agentCard *server.AgentCard
@@ -71,23 +70,10 @@ func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistr
 		}
 	}
 
-	if tokenURLResponse.Registrations != nil {
-		for _, registration := range tokenURLResponse.Registrations {
-			if strconv.FormatUint(registration.AgentID, 10) == tokenId {
-				agent.AgentID = tokenId
-				namespace, _chainID, registryAddr, err := formatAddress(registration.AgentRegistry)
-				if err != nil {
-					errors = append(errors, err)
-					inserted = false
-				}
-				if namespace == "eip155" && _chainID == chainID && common.HexToAddress(registryAddr).String() == common.HexToAddress(identityRegistryAddr).String() {
-					agent.IdentityRegistry = registryAddr
-				}
-			}
-		}
-	}
-	if len(agent.AgentID) == 0 || len(agent.IdentityRegistry) == 0 || len(agent.Namespace) == 0 || len(agent.AgentWallet) == 0 {
-		errors = append(errors, fmt.Errorf("invalid agent agent id:%s, identity registry:%s, namespace:%s, agent wallet:%s", tokenId, identityRegistryAddr, agent.Namespace, agent.AgentWallet))
+	//todo: check registration is valid
+
+	if len(agent.AgentID) == 0 || len(agent.Namespace) == 0 || len(agent.AgentWallet) == 0 {
+		errors = append(errors, fmt.Errorf("invalid agent: agent id:%s, namespace:%s, agent wallet:%s", agent.AgentID, agent.Namespace, agent.AgentWallet))
 		inserted = false
 	}
 

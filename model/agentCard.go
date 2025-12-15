@@ -38,7 +38,7 @@ func InsertAgentCard(agent *agentcard.Agent) error {
 				documentationURL = *agent.AgentCard.DocumentationURL
 			}
 
-			if agent.AgentCard.Provider.URL != nil {
+			if agent.AgentCard.Provider != nil && agent.AgentCard.Provider.URL != nil {
 				providerURL = *agent.AgentCard.Provider.URL
 			}
 
