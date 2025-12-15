@@ -70,22 +70,23 @@ func InsertAgentCard(agent *agentcard.Agent) error {
 		var existingAgent Agent
 		err := tx.Where("chain_id = ? AND identity_registry = ? AND agent_id = ?", agentCardModel.ChainID, agentCardModel.IdentityRegistry, agentCardModel.AgentID).First(&existingAgent).Error
 		if err == nil {
-			if err := tx.Where("agent_uid = ?", agentCardModel.UID).Delete(&SkillTags{}).Error; err != nil {
+			// 清理旧的关联数据时应使用已存在记录的 UID，而不是尚未赋值的 agentCardModel.UID
+			if err := tx.Where("agent_uid = ?", existingAgent.UID).Delete(&SkillTags{}).Error; err != nil {
 				return err
 			}
-			if err := tx.Where("agent_uid = ?", agentCardModel.UID).Delete(&Skill{}).Error; err != nil {
+			if err := tx.Where("agent_uid = ?", existingAgent.UID).Delete(&Skill{}).Error; err != nil {
 				return err
 			}
-			if err := tx.Where("agent_uid = ?", agentCardModel.UID).Delete(&Provider{}).Error; err != nil {
+			if err := tx.Where("agent_uid = ?", existingAgent.UID).Delete(&Provider{}).Error; err != nil {
 				return err
 			}
-			if err := tx.Where("agent_uid = ?", agentCardModel.UID).Delete(&Capability{}).Error; err != nil {
+			if err := tx.Where("agent_uid = ?", existingAgent.UID).Delete(&Capability{}).Error; err != nil {
 				return err
 			}
-			if err := tx.Where("agent_uid = ?", agentCardModel.UID).Delete(&TrustModel{}).Error; err != nil {
+			if err := tx.Where("agent_uid = ?", existingAgent.UID).Delete(&TrustModel{}).Error; err != nil {
 				return err
 			}
-			if err := tx.Where("agent_uid = ?", agentCardModel.UID).Delete(&Extension{}).Error; err != nil {
+			if err := tx.Where("agent_uid = ?", existingAgent.UID).Delete(&Extension{}).Error; err != nil {
 				return err
 			}
 		} else if err != gorm.ErrRecordNotFound {
@@ -165,47 +166,34 @@ func InsertAgentCard(agent *agentcard.Agent) error {
 				}
 			}
 
+			capabilities := agent.AgentCard.Capabilities
 			capability := Capability{
 				AgentUID: agentCardModel.UID,
 				Streaming: func() bool {
-					if agent.AgentCard.Capabilities.Streaming == nil {
+					if capabilities.Streaming == nil {
 						return false
 					}
-					return *agent.AgentCard.Capabilities.Streaming
+					return *capabilities.Streaming
 				}(),
 				PushNotifications: func() bool {
-					if agent.AgentCard.Capabilities.PushNotifications == nil {
+					if capabilities.PushNotifications == nil {
 						return false
 					}
-					return *agent.AgentCard.Capabilities.PushNotifications
+					return *capabilities.PushNotifications
 				}(),
 				StateTransitionHistory: func() bool {
-					if agent.AgentCard.Capabilities.StateTransitionHistory == nil {
+					if capabilities.StateTransitionHistory == nil {
 						return false
 					}
-					return *agent.AgentCard.Capabilities.StateTransitionHistory
+					return *capabilities.StateTransitionHistory
 				}(),
 			}
 			if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&capability).Error; err != nil {
 				return err
 			}
 
-			var trustModels []TrustModel
-			for _, trustModel := range agent.SupportedTrust {
-				trustModels = append(trustModels, TrustModel{
-					AgentUID:   agentCardModel.UID,
-					TrustModel: trustModel,
-				})
-			}
-
-			if len(trustModels) > 0 {
-				if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&trustModels).Error; err != nil {
-					return err
-				}
-			}
-
 			var extensions []Extension
-			for _, extension := range agent.AgentCard.Capabilities.Extensions {
+			for _, extension := range capabilities.Extensions {
 				extensions = append(extensions, Extension{
 					AgentUID: agentCardModel.UID,
 					URI:      extension.URI,
@@ -229,6 +217,21 @@ func InsertAgentCard(agent *agentcard.Agent) error {
 				}
 			}
 		}
+
+		var trustModels []TrustModel
+		for _, trustModel := range agent.SupportedTrust {
+			trustModels = append(trustModels, TrustModel{
+				AgentUID:   agentCardModel.UID,
+				TrustModel: trustModel,
+			})
+		}
+
+		if len(trustModels) > 0 {
+			if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&trustModels).Error; err != nil {
+				return err
+			}
+		}
+
 		return nil
 	})
 }
