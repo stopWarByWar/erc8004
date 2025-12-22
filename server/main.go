@@ -14,7 +14,6 @@ import (
 )
 
 var configFile = flag.String("f", "./conf.yaml", "the config file")
-var generalInfo = make(map[string]int64)
 
 func main() {
 	flag.Parse()
