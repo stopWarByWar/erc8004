@@ -47,7 +47,7 @@ func main() {
 		panic(err)
 	}
 
-	model.InitDB(config.Dns)
+	model.InitDB(config.Dns, config.OpenaiAPIKey)
 
 	if config.Reputation.Run {
 		reputationIdx := processor.NewReputationProcessor(config.Reputation.Addr, ethClient, config.Reputation.FetchBlockInterval, config.Reputation.StartBlock, _logger)

@@ -91,10 +91,11 @@ func GetDeployerInfo(ChainID string, RegistryAddress string) ContractInfo {
 }
 
 type IndexerConfig struct {
-	Name       string `yaml:"name"`
-	RpcURL     string `yaml:"rpc_url"`
-	Dns        string `yaml:"dns"`
-	Reputation struct {
+	Name         string `yaml:"name"`
+	RpcURL       string `yaml:"rpc_url"`
+	Dns          string `yaml:"dns"`
+	OpenaiAPIKey string `yaml:"openai_api_key"`
+	Reputation   struct {
 		Addr               string `yaml:"addr"`
 		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
 		StartBlock         uint64 `yaml:"start_block"`

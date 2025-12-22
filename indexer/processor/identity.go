@@ -281,6 +281,28 @@ func (idx *IdentityProcessor) setAgentCardInserted() {
 					}).Error("failed to insert agent card")
 					continue
 				}
+
+				agentUID, err := model.GetAgentUID(agent.ChainID, agent.IdentityRegistry, agent.AgentID)
+				if err != nil {
+					idx.logger.WithFields(logrus.Fields{
+						"error":            err,
+						"chainID":          idx.chainID,
+						"identityRegistry": idx.identityAddr.Hex(),
+						"agentID":          agent.AgentID,
+					}).Error("failed to get agent uid")
+					continue
+				}
+
+				err = model.InsertAgentVector(agentUID, agent.IdentityRegistry, agent.ChainID, agent.Timestamps, agent.Description, nil)
+				if err != nil {
+					idx.logger.WithFields(logrus.Fields{
+						"error":            err,
+						"chainID":          idx.chainID,
+						"identityRegistry": idx.identityAddr.Hex(),
+						"agentID":          agent.AgentID,
+					}).Error("failed to insert agent vector")
+					continue
+				}
 			}
 
 			// if len(extractErrs) == 0 || inserted {

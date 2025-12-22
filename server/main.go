@@ -14,6 +14,7 @@ import (
 )
 
 var configFile = flag.String("f", "./conf.yaml", "the config file")
+var generalInfo = make(map[string]int64)
 
 func main() {
 	flag.Parse()
@@ -37,8 +38,9 @@ func main() {
 
 	helper.InitHelper(_config.S3Region, _config.S3BucketName, _config.S3AccessKey, _config.S3SecretKey)
 
-	model.InitDB(_config.Dns)
+	model.InitDB(_config.Dns, _config.OpenaiAPIKey)
 	api.InitRouter(_logger, _config.Mock, _config.FeedbackMock)
+
 	api.Run([]string{"*"}, _config.Port)
 }
 
@@ -51,6 +53,7 @@ type Config struct {
 	S3BucketName string `yaml:"s3_bucket_name"`
 	S3AccessKey  string `yaml:"aws_access_key_id"`
 	S3SecretKey  string `yaml:"aws_secret_access_key"`
+	OpenaiAPIKey string `yaml:"openai_api_key"`
 }
 
 func initConf(confPath string) (*Config, error) {

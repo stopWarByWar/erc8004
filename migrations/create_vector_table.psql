@@ -1,0 +1,22 @@
+
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE IF NOT EXISTS agent_vectors (
+  uid serial PRIMARY KEY,
+  agent_uid bigint NOT NULL UNIQUE,
+  identity_registry varchar(255) NOT NULL,
+  chain_id varchar(255) NOT NULL,
+  create_timestamp bigint NOT NULL,
+  embedding vector(1536) NOT NULL,
+  content text,
+  metadata jsonb,
+  created_at bigint
+);
+
+CREATE INDEX IF NOT EXISTS idx_agent_vectors_agent_uid ON agent_vectors(agent_uid);
+CREATE INDEX IF NOT EXISTS idx_agent_vectors_identity_registry ON agent_vectors(identity_registry);
+CREATE INDEX IF NOT EXISTS idx_agent_vectors_chain_id ON agent_vectors(chain_id);
+CREATE INDEX IF NOT EXISTS idx_agent_vectors_create_timestamp ON agent_vectors(create_timestamp);
+
+CREATE INDEX IF NOT EXISTS idx_agent_vectors_chain_identity ON agent_vectors(chain_id, identity_registry);
+CREATE INDEX IF NOT EXISTS idx_agent_vectors_agent_chain ON agent_vectors(agent_uid, chain_id);

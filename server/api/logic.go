@@ -204,7 +204,32 @@ func FilterSearchAgentListByFilter(name string, page, pageSize int, trustModelID
 	return cards, total, nil
 }
 
+func FilterSearchAgentListBySemantic(desc string, limit int, threshold float64, trustModelIDs, chainIDs []string) ([]*AgentResponse, error) {
+	filters := &model.VectorSearchFilters{
+		TrustModel: trustModelIDs,
+		ChainID:    chainIDs,
+	}
+	agentUIDs, err := model.SearchSimilarVectors(desc, limit, threshold, filters)
+	if err != nil {
+		return nil, err
+	}
+	agents, err := model.GetAgentsByUIDs(agentUIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	cards, err := formatAgentResponse(agents)
+	if err != nil {
+		return nil, err
+	}
+	return cards, nil
+}
+
 func formatAgentResponse(agents []*model.Agent) ([]*AgentResponse, error) {
+	if len(agents) == 0 {
+		return []*AgentResponse{}, nil
+	}
+
 	agentUIDs := make([]uint64, 0, len(agents))
 	for _, agent := range agents {
 		agentUIDs = append(agentUIDs, agent.UID)

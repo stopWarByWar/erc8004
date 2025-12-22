@@ -29,12 +29,12 @@ func initTest() {
 		panic(err)
 	}
 
-	model.InitDB(config.Dns)
+	model.InitDB(config.Dns, config.OpenaiAPIKey)
 }
 
 func TestGetCardResponse(t *testing.T) {
 	initTest()
-	CardResponse, err := GetCardResponse(4)
+	CardResponse, err := GetCardResponse(5593)
 	if err != nil {
 		t.Errorf("GetCardResponse error: %v", err)
 	}
@@ -85,6 +85,7 @@ type Config struct {
 	S3BucketName       string `yaml:"s3_bucket_name"`
 	AwsAccessKeyId     string `yaml:"aws_access_key_id"`
 	AwsSecretAccessKey string `yaml:"aws_secret_access_key"`
+	OpenaiAPIKey       string `yaml:"openai_api_key"`
 }
 
 func initConf(confPath string) (*Config, error) {

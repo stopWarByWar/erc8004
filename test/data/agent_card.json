@@ -1,0 +1,73 @@
+{
+    "name": "FluidSDK MCP Server",
+    "version": "1.0.0",
+    "status": "healthy",
+    "paymentEnabled": true,
+    "endpoints": {
+        "initialize": "POST /mcp/initialize",
+        "tools": {
+            "list": "GET/POST /mcp/tools",
+            "calculate": "GET/POST /mcp/calculate",
+            "weather": "GET/POST /mcp/weather"
+        },
+        "prompts": {
+            "list": "GET/POST /mcp/prompts"
+        },
+        "resources": {
+            "list": "GET/POST /mcp/resources"
+        },
+        "jsonRpc": "POST /mcp",
+        "health": "GET /health",
+        "info": "GET /info"
+    },
+    "pricing": {
+        "calculate": "$0.1",
+        "weather": "$0.2",
+        "echo": "$0.5",
+        "timestamp": "$0.5",
+        "jsonRpc": "$0.5",
+        "network": "base-sepolia"
+    },
+    "examples": {
+        "calculate": {
+            "get": "/mcp/calculate?operation=add&a=10&b=5",
+            "post": {
+                "url": "/mcp/calculate",
+                "body": {
+                    "operation": "add",
+                    "a": 10,
+                    "b": 5
+                }
+            }
+        },
+        "weather": {
+            "get": "/mcp/weather?location=New York&unit=celsius",
+            "post": {
+                "url": "/mcp/weather",
+                "body": {
+                    "location": "New York",
+                    "unit": "celsius"
+                }
+            }
+        }
+    },
+    "capabilities": {
+        "tools": [
+            "calculate",
+            "get_weather",
+            "echo",
+            "get_timestamp"
+        ],
+        "prompts": [
+            "greeting",
+            "code_review",
+            "debug_assistant"
+        ],
+        "resources": [
+            "config",
+            "status",
+            "docs/api",
+            "docs/quickstart"
+        ]
+    }
+}

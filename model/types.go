@@ -236,3 +236,18 @@ type Metadata struct {
 }
 
 func (Metadata) TableName() string { return "agent_metadatas" }
+
+// AgentVector 向量表结构体，用于存储语义信息的向量表示
+type AgentVector struct {
+	UID              uint64 `gorm:"column:uid;type:bigint;primaryKey"`
+	AgentUID         uint64 `gorm:"column:agent_uid;type:bigint;not null;index"`
+	IdentityRegistry string `gorm:"column:identity_registry;type:varchar(255);not null;index"`
+	ChainID          string `gorm:"column:chain_id;type:varchar(255);not null;index"`
+	CreateTimestamp  uint64 `gorm:"column:create_timestamp;type:bigint;not null;index"`
+	Embedding        string `gorm:"column:embedding;type:vector(1536);not null"` // 使用string类型存储，实际使用时需要转换为[]float32
+	Content          string `gorm:"column:content;type:text"`
+	Metadata         string `gorm:"column:metadata;type:jsonb"` // 使用string存储JSON，也可以使用自定义类型
+	CreatedAt        int64  `gorm:"column:created_at;type:timestamp"`
+}
+
+func (AgentVector) TableName() string { return "agent_vectors" }

@@ -13,3 +13,4 @@
 /config/testnet/
 /config/mainnet/
 /bin/
+/model/config.yaml

@@ -30,7 +30,7 @@ func TestProcessor(t *testing.T) {
 		panic(err)
 	}
 
-	model.InitDB(config.Dns)
+	model.InitDB(config.Dns, config.OpenaiAPIKey)
 
 	ethClient, err := ethclient.Dial(config.RpcURL)
 	if err != nil {
@@ -44,9 +44,10 @@ func TestProcessor(t *testing.T) {
 }
 
 type Config struct {
-	RpcURL     string `yaml:"rpc_url"`
-	Dns        string `yaml:"dns"`
-	Reputation struct {
+	RpcURL       string `yaml:"rpc_url"`
+	Dns          string `yaml:"dns"`
+	OpenaiAPIKey string `yaml:"openai_api_key"`
+	Reputation   struct {
 		Addr               string `yaml:"addr"`
 		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
 		StartBlock         uint64 `yaml:"start_block"`

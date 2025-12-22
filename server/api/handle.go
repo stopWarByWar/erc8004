@@ -413,3 +413,49 @@ func UploadAgentProfileHandler(c *gin.Context) {
 		"tokenURI": tokenURI,
 	}, c)
 }
+
+// SemanticSearchRequest 语义搜索请求体
+type SemanticSearchRequest struct {
+	Desc       string   `json:"desc" binding:"required"`
+	Limit      int      `json:"limit" binding:"required"`
+	Threshold  float64  `json:"threshold" binding:"required"`
+	TrustModel []string `json:"trust_models"`
+	Chains     []string `json:"chains"`
+}
+
+func GetAgentCardsSearchBySemanticHandler(c *gin.Context) {
+	var req SemanticSearchRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		ErrResp(logrus.Fields{
+			"error":   err.Error(),
+			"request": req,
+		}, "fail to bind request", "Invalid Request", c)
+		return
+	}
+
+	// 基本参数校验
+	if req.Limit <= 0 {
+		ErrResp(logrus.Fields{
+			"error": "limit must be greater than 0",
+			"limit": req.Limit,
+		}, "invalid request", "Invalid Request", c)
+		return
+	}
+
+	agents, err := FilterSearchAgentListBySemantic(req.Desc, req.Limit, req.Threshold, req.TrustModel, req.Chains)
+	if err != nil {
+		ErrResp(logrus.Fields{
+			"error":   err.Error(),
+			"request": req,
+		}, "fail to get agent card list by semantic", "Internal Error", c)
+		return
+	}
+
+	SuccessResp(gin.H{
+		"agent_list": agents,
+	}, c)
+}
+
+func GetGeneralInfoHandler(c *gin.Context) {
+	SuccessResp(gin.H(generalInfo), c)
+}
