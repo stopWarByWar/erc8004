@@ -6,6 +6,7 @@ import (
 	"agent_identity/model"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -65,7 +66,7 @@ func updateGeneralInfo() {
 		total := int64(0)
 		for chainId, amount := range agentsAmount {
 			chainInfo := config.GetChainInfo(chainId)
-			generalInfo[chainInfo.ChainName] = amount
+			generalInfo[strings.Replace(chainInfo.ChainName, " ", "_", -1)] = amount
 			total += amount
 		}
 		generalInfo["total"] = total
