@@ -68,6 +68,21 @@ func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistr
 				agent.AgentWallet = agentWallet
 			}
 		}
+
+		if endpoint.Name == "MCP" && len(endpoint.Endpoint) > 0 {
+			agent.MCPEndpoints = &MCPEndpoint{
+				Endpoint:     endpoint.Endpoint,
+				Version:      endpoint.Version,
+				Capabilities: endpoint.Capabilities,
+			}
+		}
+
+		if endpoint.Name == "OAF" && endpoint.Endpoint != "" {
+			agent.OAFEndpoints = &OAFEndpoint{
+				Endpoint: endpoint.Endpoint,
+				Version:  endpoint.Version,
+			}
+		}
 	}
 
 	//todo: check registration is valid

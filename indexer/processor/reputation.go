@@ -20,9 +20,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var NewFeedbackTopic = common.HexToHash("")
-var ResponseAppendedTopic = common.HexToHash("")
-var FeedbackRevokedTopic = common.HexToHash("")
+var NewFeedbackTopic = common.HexToHash("0xb655ce21b319053e24bad48a8f38fa1a42101e27866f559ca10f597d2bb584a1")
+var ResponseAppendedTopic = common.HexToHash("0x25156fd3288212246d8b008d5921fde376c71ed14ac2e072a506eb06fde6d09d")
+var FeedbackRevokedTopic = common.HexToHash("0xb1c6be0b5b8aef6539e2fac0fd131a2faa7b49edf8e505b5eb0ad487d56051d4")
 
 type ReputationProcessor struct {
 	execBlock uint64

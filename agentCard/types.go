@@ -20,9 +20,10 @@ type Registration struct {
 }
 
 type Endpoint struct {
-	Name     string `json:"name"`
-	Endpoint string `json:"endpoint"`
-	Version  string `json:"version"`
+	Name         string                 `json:"name"`
+	Endpoint     string                 `json:"endpoint"`
+	Version      string                 `json:"version"`
+	Capabilities map[string]interface{} `json:"capabilities,omitempty"`
 }
 
 const TrustModelFeedback = "feedback"
@@ -46,4 +47,17 @@ type Agent struct {
 	AgentWallet      string            `json:"agentWallet"`
 	Timestamps       uint64            `json:"timestamps"`
 	UserInterfaceURL string            `json:"userInterfaceURL"`
+	MCPEndpoints     *MCPEndpoint      `json:"mcpEndpoint"`
+	OAFEndpoints     *OAFEndpoint      `json:"oafEndpoint"`
+}
+
+type MCPEndpoint struct {
+	Endpoint     string                 `json:"endpoint"`
+	Version      string                 `json:"version"`
+	Capabilities map[string]interface{} `json:"capabilities"`
+}
+
+type OAFEndpoint struct {
+	Endpoint string `json:"endpoint"`
+	Version  string `json:"version"`
 }

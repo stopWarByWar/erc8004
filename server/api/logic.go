@@ -115,7 +115,7 @@ func GetCardResponse(agentUID uint64) (*AgentResponse, error) {
 
 	deployerInfo := config.GetDeployerInfo(agent.ChainID, common.HexToAddress(agent.IdentityRegistry).String())
 
-	return &AgentResponse{
+	resp := AgentResponse{
 		UID:              agent.UID,
 		AgentID:          agent.AgentID,
 		AgentDomain:      agent.A2AEndpoint,
@@ -141,7 +141,24 @@ func GetCardResponse(agentUID uint64) (*AgentResponse, error) {
 		TokenURL:         tokenURL,
 		Deployer:         deployerInfo.Deployer,
 		DeployerLogo:     deployerInfo.LogoURL,
-	}, nil
+	}
+
+	mcpEndpoint, err := model.GetMCPEndpointByAgentUID(agent.UID)
+	if err != nil {
+		return nil, err
+	}
+	oafEndpoint, err := model.GetOAFEndpointByAgentUID(agent.UID)
+	if err != nil {
+		return nil, err
+	}
+	if mcpEndpoint != nil {
+		resp.MACEndpoint = mcpEndpoint.Endpoint
+	}
+	if oafEndpoint != nil {
+		resp.OASFEndpoint = oafEndpoint.Endpoint
+	}
+
+	return &resp, nil
 }
 
 func GetAgentList(page, pageSize int) ([]*AgentResponse, int64, error) {

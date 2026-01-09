@@ -26,6 +26,8 @@ type AgentResponse struct {
 	TokenURL         string             `json:"tokenUrl"`
 	Deployer         string             `json:"deployer"`
 	DeployerLogo     string             `json:"deployerLogo"`
+	MACEndpoint      string             `json:"mcpEndpoint,omitempty"`
+	OASFEndpoint     string             `json:"oasfEndpoint,omitempty"`
 }
 
 type SkillTagResponse struct {
@@ -77,4 +79,27 @@ type UploadAgentProfileRequest struct {
 type MetadataResponse struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
+}
+
+type ValidationResponse struct {
+	AgentUID           uint64 `json:"agent_uid"`
+	ChainID            string `json:"chain_id"`
+	AgentID            string `json:"agent_id"`
+	ValidationRegistry string `json:"validation_registry"`
+	ValidatorAddress   string `json:"validator_address"`
+	RequestHash        string `json:"request_hash"`
+	Response           int    `json:"response"`
+	ResponseURI        string `json:"response_uri"`
+	ResponseHash       string `json:"response_hash"`
+	Tag1               string `json:"tag1"`
+}
+
+type ValidatorRequest struct {
+	ValidatorAddress   string `json:"validator_address"`
+	RequestHash        string `json:"request_hash"`
+	RequestURI         string `json:"request_uri"`
+	AgentUID           uint64 `json:"agent_uid"`
+	ChainID            string `json:"chain_id"`
+	AgentID            string `json:"agent_id"`
+	ValidationRegistry string `json:"validation_registry"`
 }

@@ -102,6 +102,12 @@ func InsertAgentCard(agent *agentcard.Agent) error {
 			if err := tx.Where("agent_uid = ?", existingAgent.UID).Delete(&Extension{}).Error; err != nil {
 				return err
 			}
+			if err := tx.Where("agent_uid = ?", existingAgent.UID).Delete(&MCPEndpoint{}).Error; err != nil {
+				return err
+			}
+			if err := tx.Where("agent_uid = ?", existingAgent.UID).Delete(&OAFEndpoint{}).Error; err != nil {
+				return err
+			}
 		} else if err != gorm.ErrRecordNotFound {
 			return err
 		}
@@ -239,6 +245,29 @@ func InsertAgentCard(agent *agentcard.Agent) error {
 			})
 		}
 
+		if agent.MCPEndpoints != nil {
+			capabilitiesJSON, err := json.Marshal(agent.MCPEndpoints.Capabilities)
+			if err != nil {
+				return err
+			}
+			if err := tx.Create(&MCPEndpoint{
+				AgentUID:     agentCardModel.UID,
+				Endpoint:     agent.MCPEndpoints.Endpoint,
+				Version:      agent.MCPEndpoints.Version,
+				Capabilities: string(capabilitiesJSON),
+			}).Error; err != nil {
+				return err
+			}
+		}
+		if agent.OAFEndpoints != nil {
+			if err := tx.Create(&OAFEndpoint{
+				AgentUID: agentCardModel.UID,
+				Endpoint: agent.OAFEndpoints.Endpoint,
+				Version:  agent.OAFEndpoints.Version,
+			}).Error; err != nil {
+				return err
+			}
+		}
 		if len(trustModels) > 0 {
 			if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(&trustModels).Error; err != nil {
 				return err
@@ -1210,4 +1239,57 @@ func GetAgentAmountForEachChain() (map[string]int64, error) {
 		amounts[row.ChainID] = row.Amount
 	}
 	return amounts, nil
+}
+
+// CreateMCPEndpoint 创建 MCP 端点
+func CreateMCPEndpoint(agentUID uint64, endpoint, version string, capabilities map[string]interface{}) error {
+	mcpEndpoint := MCPEndpoint{
+		AgentUID: agentUID,
+		Endpoint: endpoint,
+		Version:  version,
+	}
+
+	if capabilities != nil {
+		capabilitiesJSON, err := json.Marshal(capabilities)
+		if err != nil {
+			return fmt.Errorf("failed to marshal capabilities: %w", err)
+		}
+		mcpEndpoint.Capabilities = string(capabilitiesJSON)
+	} else {
+		mcpEndpoint.Capabilities = "{}"
+	}
+
+	return db.Create(&mcpEndpoint).Error
+}
+
+// CreateMCPEndpoints 批量创建 MCP 端点
+func CreateMCPEndpoints(endpoints []*MCPEndpoint) error {
+	if len(endpoints) == 0 {
+		return nil
+	}
+	return db.Create(&endpoints).Error
+}
+
+func GetMCPEndpointByAgentUID(agentUID uint64) (*MCPEndpoint, error) {
+	var endpoint MCPEndpoint
+	err := db.Where("agent_uid = ?", agentUID).First(&endpoint).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return &endpoint, nil
+}
+
+func GetOAFEndpointByAgentUID(agentUID uint64) (*OAFEndpoint, error) {
+	var oafEndpoint OAFEndpoint
+	err := db.Where("agent_uid = ?", agentUID).First(&oafEndpoint).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return &oafEndpoint, nil
 }
