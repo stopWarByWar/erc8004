@@ -1,0 +1,20 @@
+create table if not exists mcp_endpoints (
+    uid serial primary key,
+    agent_uid bigint not null,
+    endpoint varchar(255) not null,
+    version varchar(255) not null,
+    capabilities jsonb not null default '{}'
+    created_at timestamp not null default current_timestamp
+)
+
+create index if not exists idx_mcp_agent_uid on mcp_endpoints(agent_uid);
+
+create table if not exists oaf_endpoints (
+    uid serial primary key,
+    agent_uid bigint not null,
+    endpoint varchar(255) not null,
+    version varchar(255) not null,
+    created_at timestamp not null default current_timestamp
+)
+
+create index if not exists idx_oaf_agent_uid on oaf_endpoints(agent_uid);
