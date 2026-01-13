@@ -1,24 +1,19 @@
 package api
 
 import (
-	"agent_identity/config"
 	"agent_identity/logger"
-	"agent_identity/model"
+	"agent_identity/server/api/handle"
+	apiUtils "agent_identity/server/api/utils"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-var generalInfo = make(map[string]any)
-
-func InitRouter(nlogger *logger.Logger, _mock bool, _feedbackMock bool) {
-	_logger = nlogger
-	mock = _mock
-	feedbackMock = _feedbackMock
+func InitRouter(nlogger *logger.Logger) {
+	apiUtils.Init(nlogger)
 }
 
 func Run(_cors []string, port string) {
@@ -36,46 +31,26 @@ func Run(_cors []string, port string) {
 		c.String(http.StatusOK, "pong")
 	})
 
-	r.GET("agent/identity/list", GetAgentCardListHandler)
-	r.GET("agent/identity/detail", GetAgentCardDetailHandler)
-	r.GET("agent/identity/trustModel", GetTrustModelListHandler)
-	r.GET("agent/identity/chains", GetChainListHandler)
-	r.GET("agent/identity/search/skill", GetAgentCardsSearchBySkillHandler)
-	r.GET("agent/identity/search/name", GetAgentCardsSearchByNameHandler)
-	r.POST("agent/identity/search/semantic", GetAgentCardsSearchBySemanticHandler)
-	r.GET("agent/identity/detail/comments", GetAgentCommentsHandler)
-	r.GET("agent/identity/detail/feedbacks", GetAgentFeedbacksHandler)
-	r.GET("agent/identity/general/info", GetGeneralInfoHandler)
+	r.GET("agent/identity/list", handle.GetAgentCardListHandler)
+	r.GET("agent/identity/detail", handle.GetAgentCardDetailHandler)
+	r.GET("agent/identity/trustModel", handle.GetTrustModelListHandler)
+	r.GET("agent/identity/chains", handle.GetChainListHandler)
+	r.GET("agent/identity/search/skill", handle.GetAgentCardsSearchBySkillHandler)
+	r.GET("agent/identity/search/name", handle.GetAgentCardsSearchByNameHandler)
+	r.POST("agent/identity/search/semantic", handle.GetAgentCardsSearchBySemanticHandler)
+	r.GET("agent/identity/detail/feedbacks", handle.GetAgentFeedbacksHandler)
+	r.GET("agent/identity/general/info", handle.GetGeneralInfoHandler)
 
-	r.POST("agent/identity/set/feedback", UploadFeedbackHandler)
-	r.POST("agent/identity/set/profile", UploadAgentProfileHandler)
+	r.POST("agent/identity/set/feedback", handle.UploadFeedbackHandler)
+	r.POST("agent/identity/set/profile", handle.UploadAgentProfileHandler)
 
-	r.GET("agent/identity/detail/validation/list", GetAgentValidationListHandler)
-	r.GET("agent/validator/list", GetValidatorListHandler)
-	r.GET("agent/validator/detail/validation/list", GetValidatorValidationListHandler)
+	r.GET("agent/identity/detail/validation/list", handle.GetAgentValidationListHandler)
+	r.GET("agent/validator/list", handle.GetValidatorListHandler)
+	r.GET("agent/validator/detail/validation/list", handle.GetValidatorValidationListHandler)
+	r.GET("agent/validator/detail/address", handle.GetValidatorByAddressHandler)
 
-	r.GET("agent/network/list", GetNetworkListHandler)
+	r.GET("agent/network/list", handle.GetNetworkListHandler)
 
-	go updateGeneralInfo()
+	go apiUtils.UpdateGeneralInfo()
 	r.Run(fmt.Sprintf(":%s", port))
-}
-
-func updateGeneralInfo() {
-	for {
-		agentsAmount, err := model.GetAgentAmountForEachChain()
-		if err != nil {
-			fmt.Println("failed to get agent amount for each chain", err)
-			time.Sleep(5 * time.Minute)
-			continue
-		}
-
-		total := int64(0)
-		for chainId, amount := range agentsAmount {
-			chainInfo := config.GetChainInfo(chainId)
-			generalInfo[strings.Replace(chainInfo.ChainName, " ", "_", -1)] = amount
-			total += amount
-		}
-		generalInfo["total"] = total
-		time.Sleep(5 * time.Minute)
-	}
 }

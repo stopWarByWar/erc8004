@@ -38,7 +38,7 @@ func main() {
 	helper.InitHelper(_config.S3Region, _config.S3BucketName, _config.S3AccessKey, _config.S3SecretKey)
 
 	model.InitDB(_config.Dns, _config.OpenaiAPIKey)
-	api.InitRouter(_logger, _config.Mock, _config.FeedbackMock)
+	api.InitRouter(_logger)
 
 	api.Run([]string{"*"}, _config.Port)
 }

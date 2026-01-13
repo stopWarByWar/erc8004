@@ -170,3 +170,12 @@ func GetValidationListByValidatorAddress(validatorAddress string, page int, page
 
 	return validationList, total, nil
 }
+
+func GetValidatorByAddress(address string) (*Validator, error) {
+	var validator Validator
+	err := db.Where("address = ?", address).First(&validator).Error
+	if err != nil {
+		return nil, err
+	}
+	return &validator, nil
+}
