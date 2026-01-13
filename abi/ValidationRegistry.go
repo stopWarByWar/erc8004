@@ -31,7 +31,7 @@ var (
 
 // ValidationRegistryMetaData contains all meta data concerning the ValidationRegistry contract.
 var ValidationRegistryMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"}],\"name\":\"AddressEmptyCode\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"ERC1967InvalidImplementation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ERC1967NonPayable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FailedCall\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UUPSUnauthorizedCallContext\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"slot\",\"type\":\"bytes32\"}],\"name\":\"UUPSUnsupportedProxiableUUID\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"validatorAddress\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"requestUri\",\"type\":\"string\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"requestHash\",\"type\":\"bytes32\"}],\"name\":\"ValidationRequest\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"validatorAddress\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"requestHash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"response\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"responseUri\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"responseHash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"tag\",\"type\":\"bytes32\"}],\"name\":\"ValidationResponse\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"UPGRADE_INTERFACE_VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"}],\"name\":\"getAgentValidations\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"\",\"type\":\"bytes32[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getIdentityRegistry\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"validatorAddresses\",\"type\":\"address[]\"},{\"internalType\":\"bytes32\",\"name\":\"tag\",\"type\":\"bytes32\"}],\"name\":\"getSummary\",\"outputs\":[{\"internalType\":\"uint64\",\"name\":\"count\",\"type\":\"uint64\"},{\"internalType\":\"uint8\",\"name\":\"avgResponse\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"requestHash\",\"type\":\"bytes32\"}],\"name\":\"getValidationStatus\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"validatorAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"uint8\",\"name\":\"response\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"responseHash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"tag\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"lastUpdate\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"validatorAddress\",\"type\":\"address\"}],\"name\":\"getValidatorRequests\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"\",\"type\":\"bytes32[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getVersion\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_identityRegistry\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"validatorAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"requestUri\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"requestHash\",\"type\":\"bytes32\"}],\"name\":\"validationRequest\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"requestHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint8\",\"name\":\"response\",\"type\":\"uint8\"},{\"internalType\":\"string\",\"name\":\"responseUri\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"responseHash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"tag\",\"type\":\"bytes32\"}],\"name\":\"validationResponse\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"validations\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"validatorAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"uint8\",\"name\":\"response\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"responseHash\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"tag\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"lastUpdate\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"}],\"name\":\"AddressEmptyCode\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"ERC1967InvalidImplementation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ERC1967NonPayable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FailedCall\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UUPSUnauthorizedCallContext\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"slot\",\"type\":\"bytes32\"}],\"name\":\"UUPSUnsupportedProxiableUUID\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"validatorAddress\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"requestURI\",\"type\":\"string\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"requestHash\",\"type\":\"bytes32\"}],\"name\":\"ValidationRequest\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"validatorAddress\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"requestHash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"response\",\"type\":\"uint8\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"responseURI\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"responseHash\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tag\",\"type\":\"string\"}],\"name\":\"ValidationResponse\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"UPGRADE_INTERFACE_VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"}],\"name\":\"getAgentValidations\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"\",\"type\":\"bytes32[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getIdentityRegistry\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"validatorAddresses\",\"type\":\"address[]\"},{\"internalType\":\"string\",\"name\":\"tag\",\"type\":\"string\"}],\"name\":\"getSummary\",\"outputs\":[{\"internalType\":\"uint64\",\"name\":\"count\",\"type\":\"uint64\"},{\"internalType\":\"uint8\",\"name\":\"avgResponse\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"requestHash\",\"type\":\"bytes32\"}],\"name\":\"getValidationStatus\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"validatorAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"uint8\",\"name\":\"response\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"responseHash\",\"type\":\"bytes32\"},{\"internalType\":\"string\",\"name\":\"tag\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"lastUpdate\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"validatorAddress\",\"type\":\"address\"}],\"name\":\"getValidatorRequests\",\"outputs\":[{\"internalType\":\"bytes32[]\",\"name\":\"\",\"type\":\"bytes32[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getVersion\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"identityRegistry_\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"validatorAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"requestURI\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"requestHash\",\"type\":\"bytes32\"}],\"name\":\"validationRequest\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"requestHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint8\",\"name\":\"response\",\"type\":\"uint8\"},{\"internalType\":\"string\",\"name\":\"responseURI\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"responseHash\",\"type\":\"bytes32\"},{\"internalType\":\"string\",\"name\":\"tag\",\"type\":\"string\"}],\"name\":\"validationResponse\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // ValidationRegistryABI is the input ABI used to generate the binding from.
@@ -273,10 +273,10 @@ func (_ValidationRegistry *ValidationRegistryCallerSession) GetIdentityRegistry(
 	return _ValidationRegistry.Contract.GetIdentityRegistry(&_ValidationRegistry.CallOpts)
 }
 
-// GetSummary is a free data retrieval call binding the contract method 0xa0aa15a1.
+// GetSummary is a free data retrieval call binding the contract method 0x1b7cabd6.
 //
-// Solidity: function getSummary(uint256 agentId, address[] validatorAddresses, bytes32 tag) view returns(uint64 count, uint8 avgResponse)
-func (_ValidationRegistry *ValidationRegistryCaller) GetSummary(opts *bind.CallOpts, agentId *big.Int, validatorAddresses []common.Address, tag [32]byte) (struct {
+// Solidity: function getSummary(uint256 agentId, address[] validatorAddresses, string tag) view returns(uint64 count, uint8 avgResponse)
+func (_ValidationRegistry *ValidationRegistryCaller) GetSummary(opts *bind.CallOpts, agentId *big.Int, validatorAddresses []common.Address, tag string) (struct {
 	Count       uint64
 	AvgResponse uint8
 }, error) {
@@ -298,20 +298,20 @@ func (_ValidationRegistry *ValidationRegistryCaller) GetSummary(opts *bind.CallO
 
 }
 
-// GetSummary is a free data retrieval call binding the contract method 0xa0aa15a1.
+// GetSummary is a free data retrieval call binding the contract method 0x1b7cabd6.
 //
-// Solidity: function getSummary(uint256 agentId, address[] validatorAddresses, bytes32 tag) view returns(uint64 count, uint8 avgResponse)
-func (_ValidationRegistry *ValidationRegistrySession) GetSummary(agentId *big.Int, validatorAddresses []common.Address, tag [32]byte) (struct {
+// Solidity: function getSummary(uint256 agentId, address[] validatorAddresses, string tag) view returns(uint64 count, uint8 avgResponse)
+func (_ValidationRegistry *ValidationRegistrySession) GetSummary(agentId *big.Int, validatorAddresses []common.Address, tag string) (struct {
 	Count       uint64
 	AvgResponse uint8
 }, error) {
 	return _ValidationRegistry.Contract.GetSummary(&_ValidationRegistry.CallOpts, agentId, validatorAddresses, tag)
 }
 
-// GetSummary is a free data retrieval call binding the contract method 0xa0aa15a1.
+// GetSummary is a free data retrieval call binding the contract method 0x1b7cabd6.
 //
-// Solidity: function getSummary(uint256 agentId, address[] validatorAddresses, bytes32 tag) view returns(uint64 count, uint8 avgResponse)
-func (_ValidationRegistry *ValidationRegistryCallerSession) GetSummary(agentId *big.Int, validatorAddresses []common.Address, tag [32]byte) (struct {
+// Solidity: function getSummary(uint256 agentId, address[] validatorAddresses, string tag) view returns(uint64 count, uint8 avgResponse)
+func (_ValidationRegistry *ValidationRegistryCallerSession) GetSummary(agentId *big.Int, validatorAddresses []common.Address, tag string) (struct {
 	Count       uint64
 	AvgResponse uint8
 }, error) {
@@ -320,13 +320,13 @@ func (_ValidationRegistry *ValidationRegistryCallerSession) GetSummary(agentId *
 
 // GetValidationStatus is a free data retrieval call binding the contract method 0xff2febfc.
 //
-// Solidity: function getValidationStatus(bytes32 requestHash) view returns(address validatorAddress, uint256 agentId, uint8 response, bytes32 responseHash, bytes32 tag, uint256 lastUpdate)
+// Solidity: function getValidationStatus(bytes32 requestHash) view returns(address validatorAddress, uint256 agentId, uint8 response, bytes32 responseHash, string tag, uint256 lastUpdate)
 func (_ValidationRegistry *ValidationRegistryCaller) GetValidationStatus(opts *bind.CallOpts, requestHash [32]byte) (struct {
 	ValidatorAddress common.Address
 	AgentId          *big.Int
 	Response         uint8
 	ResponseHash     [32]byte
-	Tag              [32]byte
+	Tag              string
 	LastUpdate       *big.Int
 }, error) {
 	var out []interface{}
@@ -337,7 +337,7 @@ func (_ValidationRegistry *ValidationRegistryCaller) GetValidationStatus(opts *b
 		AgentId          *big.Int
 		Response         uint8
 		ResponseHash     [32]byte
-		Tag              [32]byte
+		Tag              string
 		LastUpdate       *big.Int
 	})
 	if err != nil {
@@ -348,7 +348,7 @@ func (_ValidationRegistry *ValidationRegistryCaller) GetValidationStatus(opts *b
 	outstruct.AgentId = *abi.ConvertType(out[1], new(*big.Int)).(**big.Int)
 	outstruct.Response = *abi.ConvertType(out[2], new(uint8)).(*uint8)
 	outstruct.ResponseHash = *abi.ConvertType(out[3], new([32]byte)).(*[32]byte)
-	outstruct.Tag = *abi.ConvertType(out[4], new([32]byte)).(*[32]byte)
+	outstruct.Tag = *abi.ConvertType(out[4], new(string)).(*string)
 	outstruct.LastUpdate = *abi.ConvertType(out[5], new(*big.Int)).(**big.Int)
 
 	return *outstruct, err
@@ -357,13 +357,13 @@ func (_ValidationRegistry *ValidationRegistryCaller) GetValidationStatus(opts *b
 
 // GetValidationStatus is a free data retrieval call binding the contract method 0xff2febfc.
 //
-// Solidity: function getValidationStatus(bytes32 requestHash) view returns(address validatorAddress, uint256 agentId, uint8 response, bytes32 responseHash, bytes32 tag, uint256 lastUpdate)
+// Solidity: function getValidationStatus(bytes32 requestHash) view returns(address validatorAddress, uint256 agentId, uint8 response, bytes32 responseHash, string tag, uint256 lastUpdate)
 func (_ValidationRegistry *ValidationRegistrySession) GetValidationStatus(requestHash [32]byte) (struct {
 	ValidatorAddress common.Address
 	AgentId          *big.Int
 	Response         uint8
 	ResponseHash     [32]byte
-	Tag              [32]byte
+	Tag              string
 	LastUpdate       *big.Int
 }, error) {
 	return _ValidationRegistry.Contract.GetValidationStatus(&_ValidationRegistry.CallOpts, requestHash)
@@ -371,13 +371,13 @@ func (_ValidationRegistry *ValidationRegistrySession) GetValidationStatus(reques
 
 // GetValidationStatus is a free data retrieval call binding the contract method 0xff2febfc.
 //
-// Solidity: function getValidationStatus(bytes32 requestHash) view returns(address validatorAddress, uint256 agentId, uint8 response, bytes32 responseHash, bytes32 tag, uint256 lastUpdate)
+// Solidity: function getValidationStatus(bytes32 requestHash) view returns(address validatorAddress, uint256 agentId, uint8 response, bytes32 responseHash, string tag, uint256 lastUpdate)
 func (_ValidationRegistry *ValidationRegistryCallerSession) GetValidationStatus(requestHash [32]byte) (struct {
 	ValidatorAddress common.Address
 	AgentId          *big.Int
 	Response         uint8
 	ResponseHash     [32]byte
-	Tag              [32]byte
+	Tag              string
 	LastUpdate       *big.Int
 }, error) {
 	return _ValidationRegistry.Contract.GetValidationStatus(&_ValidationRegistry.CallOpts, requestHash)
@@ -507,90 +507,25 @@ func (_ValidationRegistry *ValidationRegistryCallerSession) ProxiableUUID() ([32
 	return _ValidationRegistry.Contract.ProxiableUUID(&_ValidationRegistry.CallOpts)
 }
 
-// Validations is a free data retrieval call binding the contract method 0xe28c3802.
+// Initialize is a paid mutator transaction binding the contract method 0xc4d66de8.
 //
-// Solidity: function validations(bytes32 ) view returns(address validatorAddress, uint256 agentId, uint8 response, bytes32 responseHash, bytes32 tag, uint256 lastUpdate)
-func (_ValidationRegistry *ValidationRegistryCaller) Validations(opts *bind.CallOpts, arg0 [32]byte) (struct {
-	ValidatorAddress common.Address
-	AgentId          *big.Int
-	Response         uint8
-	ResponseHash     [32]byte
-	Tag              [32]byte
-	LastUpdate       *big.Int
-}, error) {
-	var out []interface{}
-	err := _ValidationRegistry.contract.Call(opts, &out, "validations", arg0)
-
-	outstruct := new(struct {
-		ValidatorAddress common.Address
-		AgentId          *big.Int
-		Response         uint8
-		ResponseHash     [32]byte
-		Tag              [32]byte
-		LastUpdate       *big.Int
-	})
-	if err != nil {
-		return *outstruct, err
-	}
-
-	outstruct.ValidatorAddress = *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
-	outstruct.AgentId = *abi.ConvertType(out[1], new(*big.Int)).(**big.Int)
-	outstruct.Response = *abi.ConvertType(out[2], new(uint8)).(*uint8)
-	outstruct.ResponseHash = *abi.ConvertType(out[3], new([32]byte)).(*[32]byte)
-	outstruct.Tag = *abi.ConvertType(out[4], new([32]byte)).(*[32]byte)
-	outstruct.LastUpdate = *abi.ConvertType(out[5], new(*big.Int)).(**big.Int)
-
-	return *outstruct, err
-
-}
-
-// Validations is a free data retrieval call binding the contract method 0xe28c3802.
-//
-// Solidity: function validations(bytes32 ) view returns(address validatorAddress, uint256 agentId, uint8 response, bytes32 responseHash, bytes32 tag, uint256 lastUpdate)
-func (_ValidationRegistry *ValidationRegistrySession) Validations(arg0 [32]byte) (struct {
-	ValidatorAddress common.Address
-	AgentId          *big.Int
-	Response         uint8
-	ResponseHash     [32]byte
-	Tag              [32]byte
-	LastUpdate       *big.Int
-}, error) {
-	return _ValidationRegistry.Contract.Validations(&_ValidationRegistry.CallOpts, arg0)
-}
-
-// Validations is a free data retrieval call binding the contract method 0xe28c3802.
-//
-// Solidity: function validations(bytes32 ) view returns(address validatorAddress, uint256 agentId, uint8 response, bytes32 responseHash, bytes32 tag, uint256 lastUpdate)
-func (_ValidationRegistry *ValidationRegistryCallerSession) Validations(arg0 [32]byte) (struct {
-	ValidatorAddress common.Address
-	AgentId          *big.Int
-	Response         uint8
-	ResponseHash     [32]byte
-	Tag              [32]byte
-	LastUpdate       *big.Int
-}, error) {
-	return _ValidationRegistry.Contract.Validations(&_ValidationRegistry.CallOpts, arg0)
+// Solidity: function initialize(address identityRegistry_) returns()
+func (_ValidationRegistry *ValidationRegistryTransactor) Initialize(opts *bind.TransactOpts, identityRegistry_ common.Address) (*types.Transaction, error) {
+	return _ValidationRegistry.contract.Transact(opts, "initialize", identityRegistry_)
 }
 
 // Initialize is a paid mutator transaction binding the contract method 0xc4d66de8.
 //
-// Solidity: function initialize(address _identityRegistry) returns()
-func (_ValidationRegistry *ValidationRegistryTransactor) Initialize(opts *bind.TransactOpts, _identityRegistry common.Address) (*types.Transaction, error) {
-	return _ValidationRegistry.contract.Transact(opts, "initialize", _identityRegistry)
+// Solidity: function initialize(address identityRegistry_) returns()
+func (_ValidationRegistry *ValidationRegistrySession) Initialize(identityRegistry_ common.Address) (*types.Transaction, error) {
+	return _ValidationRegistry.Contract.Initialize(&_ValidationRegistry.TransactOpts, identityRegistry_)
 }
 
 // Initialize is a paid mutator transaction binding the contract method 0xc4d66de8.
 //
-// Solidity: function initialize(address _identityRegistry) returns()
-func (_ValidationRegistry *ValidationRegistrySession) Initialize(_identityRegistry common.Address) (*types.Transaction, error) {
-	return _ValidationRegistry.Contract.Initialize(&_ValidationRegistry.TransactOpts, _identityRegistry)
-}
-
-// Initialize is a paid mutator transaction binding the contract method 0xc4d66de8.
-//
-// Solidity: function initialize(address _identityRegistry) returns()
-func (_ValidationRegistry *ValidationRegistryTransactorSession) Initialize(_identityRegistry common.Address) (*types.Transaction, error) {
-	return _ValidationRegistry.Contract.Initialize(&_ValidationRegistry.TransactOpts, _identityRegistry)
+// Solidity: function initialize(address identityRegistry_) returns()
+func (_ValidationRegistry *ValidationRegistryTransactorSession) Initialize(identityRegistry_ common.Address) (*types.Transaction, error) {
+	return _ValidationRegistry.Contract.Initialize(&_ValidationRegistry.TransactOpts, identityRegistry_)
 }
 
 // RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
@@ -658,44 +593,44 @@ func (_ValidationRegistry *ValidationRegistryTransactorSession) UpgradeToAndCall
 
 // ValidationRequest is a paid mutator transaction binding the contract method 0xaaf400c4.
 //
-// Solidity: function validationRequest(address validatorAddress, uint256 agentId, string requestUri, bytes32 requestHash) returns()
-func (_ValidationRegistry *ValidationRegistryTransactor) ValidationRequest(opts *bind.TransactOpts, validatorAddress common.Address, agentId *big.Int, requestUri string, requestHash [32]byte) (*types.Transaction, error) {
-	return _ValidationRegistry.contract.Transact(opts, "validationRequest", validatorAddress, agentId, requestUri, requestHash)
+// Solidity: function validationRequest(address validatorAddress, uint256 agentId, string requestURI, bytes32 requestHash) returns()
+func (_ValidationRegistry *ValidationRegistryTransactor) ValidationRequest(opts *bind.TransactOpts, validatorAddress common.Address, agentId *big.Int, requestURI string, requestHash [32]byte) (*types.Transaction, error) {
+	return _ValidationRegistry.contract.Transact(opts, "validationRequest", validatorAddress, agentId, requestURI, requestHash)
 }
 
 // ValidationRequest is a paid mutator transaction binding the contract method 0xaaf400c4.
 //
-// Solidity: function validationRequest(address validatorAddress, uint256 agentId, string requestUri, bytes32 requestHash) returns()
-func (_ValidationRegistry *ValidationRegistrySession) ValidationRequest(validatorAddress common.Address, agentId *big.Int, requestUri string, requestHash [32]byte) (*types.Transaction, error) {
-	return _ValidationRegistry.Contract.ValidationRequest(&_ValidationRegistry.TransactOpts, validatorAddress, agentId, requestUri, requestHash)
+// Solidity: function validationRequest(address validatorAddress, uint256 agentId, string requestURI, bytes32 requestHash) returns()
+func (_ValidationRegistry *ValidationRegistrySession) ValidationRequest(validatorAddress common.Address, agentId *big.Int, requestURI string, requestHash [32]byte) (*types.Transaction, error) {
+	return _ValidationRegistry.Contract.ValidationRequest(&_ValidationRegistry.TransactOpts, validatorAddress, agentId, requestURI, requestHash)
 }
 
 // ValidationRequest is a paid mutator transaction binding the contract method 0xaaf400c4.
 //
-// Solidity: function validationRequest(address validatorAddress, uint256 agentId, string requestUri, bytes32 requestHash) returns()
-func (_ValidationRegistry *ValidationRegistryTransactorSession) ValidationRequest(validatorAddress common.Address, agentId *big.Int, requestUri string, requestHash [32]byte) (*types.Transaction, error) {
-	return _ValidationRegistry.Contract.ValidationRequest(&_ValidationRegistry.TransactOpts, validatorAddress, agentId, requestUri, requestHash)
+// Solidity: function validationRequest(address validatorAddress, uint256 agentId, string requestURI, bytes32 requestHash) returns()
+func (_ValidationRegistry *ValidationRegistryTransactorSession) ValidationRequest(validatorAddress common.Address, agentId *big.Int, requestURI string, requestHash [32]byte) (*types.Transaction, error) {
+	return _ValidationRegistry.Contract.ValidationRequest(&_ValidationRegistry.TransactOpts, validatorAddress, agentId, requestURI, requestHash)
 }
 
-// ValidationResponse is a paid mutator transaction binding the contract method 0x30e5993a.
+// ValidationResponse is a paid mutator transaction binding the contract method 0x3d659a96.
 //
-// Solidity: function validationResponse(bytes32 requestHash, uint8 response, string responseUri, bytes32 responseHash, bytes32 tag) returns()
-func (_ValidationRegistry *ValidationRegistryTransactor) ValidationResponse(opts *bind.TransactOpts, requestHash [32]byte, response uint8, responseUri string, responseHash [32]byte, tag [32]byte) (*types.Transaction, error) {
-	return _ValidationRegistry.contract.Transact(opts, "validationResponse", requestHash, response, responseUri, responseHash, tag)
+// Solidity: function validationResponse(bytes32 requestHash, uint8 response, string responseURI, bytes32 responseHash, string tag) returns()
+func (_ValidationRegistry *ValidationRegistryTransactor) ValidationResponse(opts *bind.TransactOpts, requestHash [32]byte, response uint8, responseURI string, responseHash [32]byte, tag string) (*types.Transaction, error) {
+	return _ValidationRegistry.contract.Transact(opts, "validationResponse", requestHash, response, responseURI, responseHash, tag)
 }
 
-// ValidationResponse is a paid mutator transaction binding the contract method 0x30e5993a.
+// ValidationResponse is a paid mutator transaction binding the contract method 0x3d659a96.
 //
-// Solidity: function validationResponse(bytes32 requestHash, uint8 response, string responseUri, bytes32 responseHash, bytes32 tag) returns()
-func (_ValidationRegistry *ValidationRegistrySession) ValidationResponse(requestHash [32]byte, response uint8, responseUri string, responseHash [32]byte, tag [32]byte) (*types.Transaction, error) {
-	return _ValidationRegistry.Contract.ValidationResponse(&_ValidationRegistry.TransactOpts, requestHash, response, responseUri, responseHash, tag)
+// Solidity: function validationResponse(bytes32 requestHash, uint8 response, string responseURI, bytes32 responseHash, string tag) returns()
+func (_ValidationRegistry *ValidationRegistrySession) ValidationResponse(requestHash [32]byte, response uint8, responseURI string, responseHash [32]byte, tag string) (*types.Transaction, error) {
+	return _ValidationRegistry.Contract.ValidationResponse(&_ValidationRegistry.TransactOpts, requestHash, response, responseURI, responseHash, tag)
 }
 
-// ValidationResponse is a paid mutator transaction binding the contract method 0x30e5993a.
+// ValidationResponse is a paid mutator transaction binding the contract method 0x3d659a96.
 //
-// Solidity: function validationResponse(bytes32 requestHash, uint8 response, string responseUri, bytes32 responseHash, bytes32 tag) returns()
-func (_ValidationRegistry *ValidationRegistryTransactorSession) ValidationResponse(requestHash [32]byte, response uint8, responseUri string, responseHash [32]byte, tag [32]byte) (*types.Transaction, error) {
-	return _ValidationRegistry.Contract.ValidationResponse(&_ValidationRegistry.TransactOpts, requestHash, response, responseUri, responseHash, tag)
+// Solidity: function validationResponse(bytes32 requestHash, uint8 response, string responseURI, bytes32 responseHash, string tag) returns()
+func (_ValidationRegistry *ValidationRegistryTransactorSession) ValidationResponse(requestHash [32]byte, response uint8, responseURI string, responseHash [32]byte, tag string) (*types.Transaction, error) {
+	return _ValidationRegistry.Contract.ValidationResponse(&_ValidationRegistry.TransactOpts, requestHash, response, responseURI, responseHash, tag)
 }
 
 // ValidationRegistryInitializedIterator is returned from FilterInitialized and is used to iterate over the raw logs and unpacked data for Initialized events raised by the ValidationRegistry contract.
@@ -1200,14 +1135,14 @@ func (it *ValidationRegistryValidationRequestIterator) Close() error {
 type ValidationRegistryValidationRequest struct {
 	ValidatorAddress common.Address
 	AgentId          *big.Int
-	RequestUri       string
+	RequestURI       string
 	RequestHash      [32]byte
 	Raw              types.Log // Blockchain specific contextual infos
 }
 
 // FilterValidationRequest is a free log retrieval operation binding the contract event 0x530436c3634a98e1e626b0898be2f1e9980cc1bd2a78c07a0aba52d0a48a5059.
 //
-// Solidity: event ValidationRequest(address indexed validatorAddress, uint256 indexed agentId, string requestUri, bytes32 indexed requestHash)
+// Solidity: event ValidationRequest(address indexed validatorAddress, uint256 indexed agentId, string requestURI, bytes32 indexed requestHash)
 func (_ValidationRegistry *ValidationRegistryFilterer) FilterValidationRequest(opts *bind.FilterOpts, validatorAddress []common.Address, agentId []*big.Int, requestHash [][32]byte) (*ValidationRegistryValidationRequestIterator, error) {
 
 	var validatorAddressRule []interface{}
@@ -1233,7 +1168,7 @@ func (_ValidationRegistry *ValidationRegistryFilterer) FilterValidationRequest(o
 
 // WatchValidationRequest is a free log subscription operation binding the contract event 0x530436c3634a98e1e626b0898be2f1e9980cc1bd2a78c07a0aba52d0a48a5059.
 //
-// Solidity: event ValidationRequest(address indexed validatorAddress, uint256 indexed agentId, string requestUri, bytes32 indexed requestHash)
+// Solidity: event ValidationRequest(address indexed validatorAddress, uint256 indexed agentId, string requestURI, bytes32 indexed requestHash)
 func (_ValidationRegistry *ValidationRegistryFilterer) WatchValidationRequest(opts *bind.WatchOpts, sink chan<- *ValidationRegistryValidationRequest, validatorAddress []common.Address, agentId []*big.Int, requestHash [][32]byte) (event.Subscription, error) {
 
 	var validatorAddressRule []interface{}
@@ -1284,7 +1219,7 @@ func (_ValidationRegistry *ValidationRegistryFilterer) WatchValidationRequest(op
 
 // ParseValidationRequest is a log parse operation binding the contract event 0x530436c3634a98e1e626b0898be2f1e9980cc1bd2a78c07a0aba52d0a48a5059.
 //
-// Solidity: event ValidationRequest(address indexed validatorAddress, uint256 indexed agentId, string requestUri, bytes32 indexed requestHash)
+// Solidity: event ValidationRequest(address indexed validatorAddress, uint256 indexed agentId, string requestURI, bytes32 indexed requestHash)
 func (_ValidationRegistry *ValidationRegistryFilterer) ParseValidationRequest(log types.Log) (*ValidationRegistryValidationRequest, error) {
 	event := new(ValidationRegistryValidationRequest)
 	if err := _ValidationRegistry.contract.UnpackLog(event, "ValidationRequest", log); err != nil {
@@ -1367,15 +1302,15 @@ type ValidationRegistryValidationResponse struct {
 	AgentId          *big.Int
 	RequestHash      [32]byte
 	Response         uint8
-	ResponseUri      string
+	ResponseURI      string
 	ResponseHash     [32]byte
-	Tag              [32]byte
+	Tag              string
 	Raw              types.Log // Blockchain specific contextual infos
 }
 
-// FilterValidationResponse is a free log retrieval operation binding the contract event 0xf224d3d5ad74301be48e4d51ca5f1b24c7946875887327585becc59165297dcf.
+// FilterValidationResponse is a free log retrieval operation binding the contract event 0xafddf629e874ccc3963b6a888c477bd464a6c8525024fc88759ea3b2326349ae.
 //
-// Solidity: event ValidationResponse(address indexed validatorAddress, uint256 indexed agentId, bytes32 indexed requestHash, uint8 response, string responseUri, bytes32 responseHash, bytes32 tag)
+// Solidity: event ValidationResponse(address indexed validatorAddress, uint256 indexed agentId, bytes32 indexed requestHash, uint8 response, string responseURI, bytes32 responseHash, string tag)
 func (_ValidationRegistry *ValidationRegistryFilterer) FilterValidationResponse(opts *bind.FilterOpts, validatorAddress []common.Address, agentId []*big.Int, requestHash [][32]byte) (*ValidationRegistryValidationResponseIterator, error) {
 
 	var validatorAddressRule []interface{}
@@ -1398,9 +1333,9 @@ func (_ValidationRegistry *ValidationRegistryFilterer) FilterValidationResponse(
 	return &ValidationRegistryValidationResponseIterator{contract: _ValidationRegistry.contract, event: "ValidationResponse", logs: logs, sub: sub}, nil
 }
 
-// WatchValidationResponse is a free log subscription operation binding the contract event 0xf224d3d5ad74301be48e4d51ca5f1b24c7946875887327585becc59165297dcf.
+// WatchValidationResponse is a free log subscription operation binding the contract event 0xafddf629e874ccc3963b6a888c477bd464a6c8525024fc88759ea3b2326349ae.
 //
-// Solidity: event ValidationResponse(address indexed validatorAddress, uint256 indexed agentId, bytes32 indexed requestHash, uint8 response, string responseUri, bytes32 responseHash, bytes32 tag)
+// Solidity: event ValidationResponse(address indexed validatorAddress, uint256 indexed agentId, bytes32 indexed requestHash, uint8 response, string responseURI, bytes32 responseHash, string tag)
 func (_ValidationRegistry *ValidationRegistryFilterer) WatchValidationResponse(opts *bind.WatchOpts, sink chan<- *ValidationRegistryValidationResponse, validatorAddress []common.Address, agentId []*big.Int, requestHash [][32]byte) (event.Subscription, error) {
 
 	var validatorAddressRule []interface{}
@@ -1448,9 +1383,9 @@ func (_ValidationRegistry *ValidationRegistryFilterer) WatchValidationResponse(o
 	}), nil
 }
 
-// ParseValidationResponse is a log parse operation binding the contract event 0xf224d3d5ad74301be48e4d51ca5f1b24c7946875887327585becc59165297dcf.
+// ParseValidationResponse is a log parse operation binding the contract event 0xafddf629e874ccc3963b6a888c477bd464a6c8525024fc88759ea3b2326349ae.
 //
-// Solidity: event ValidationResponse(address indexed validatorAddress, uint256 indexed agentId, bytes32 indexed requestHash, uint8 response, string responseUri, bytes32 responseHash, bytes32 tag)
+// Solidity: event ValidationResponse(address indexed validatorAddress, uint256 indexed agentId, bytes32 indexed requestHash, uint8 response, string responseURI, bytes32 responseHash, string tag)
 func (_ValidationRegistry *ValidationRegistryFilterer) ParseValidationResponse(log types.Log) (*ValidationRegistryValidationResponse, error) {
 	event := new(ValidationRegistryValidationResponse)
 	if err := _ValidationRegistry.contract.UnpackLog(event, "ValidationResponse", log); err != nil {

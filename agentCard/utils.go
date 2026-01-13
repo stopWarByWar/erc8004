@@ -58,17 +58,6 @@ func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistr
 			agent.Endpoint = endpoint.Endpoint
 		}
 
-		if endpoint.Name == "agentWallet" {
-			namespace, _chainID, agentWallet, err := formatAddress(endpoint.Endpoint)
-			if err != nil {
-				errors = append(errors, err)
-			}
-			if namespace == "eip155" && _chainID == chainID {
-				agent.Namespace = namespace
-				agent.AgentWallet = agentWallet
-			}
-		}
-
 		if endpoint.Name == "MCP" && len(endpoint.Endpoint) > 0 {
 			agent.MCPEndpoints = &MCPEndpoint{
 				Endpoint:     endpoint.Endpoint,
@@ -77,8 +66,8 @@ func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistr
 			}
 		}
 
-		if endpoint.Name == "OAF" && endpoint.Endpoint != "" {
-			agent.OAFEndpoints = &OAFEndpoint{
+		if endpoint.Name == "OASF" && endpoint.Endpoint != "" {
+			agent.OASFEndpoints = &OASFEndpoint{
 				Endpoint: endpoint.Endpoint,
 				Version:  endpoint.Version,
 			}

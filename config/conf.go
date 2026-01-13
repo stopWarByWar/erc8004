@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"fmt"
 	"os"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -10,9 +9,10 @@ import (
 )
 
 type ChainInfo struct {
-	ChainId   string `json:"chain_id" yaml:"chain_id"`
-	ChainName string `json:"chain_name" yaml:"chain_name"`
-	ChainLogo string `json:"chain_logo" yaml:"chain_logo"`
+	ChainId    string `json:"chain_id" yaml:"chain_id"`
+	ChainName  string `json:"chain_name" yaml:"chain_name"`
+	ChainLogo  string `json:"chain_logo" yaml:"chain_logo"`
+	ScanPrefix string `json:"scan_prefix" yaml:"scan_prefix"`
 }
 
 type ContractInfo struct {
@@ -32,7 +32,7 @@ type Config struct {
 
 var ChainList = []ChainInfo{}
 var RegisterList = []ContractInfo{}
-var RegisterMap = make(map[string]ContractInfo)
+var RegisterMap = make(map[string]map[string]ContractInfo)
 var ChainMap = make(map[string]ChainInfo)
 
 // Init 从配置文件加载 ChainList 和 RegisterList
@@ -67,8 +67,10 @@ func Init(configPath string) error {
 	}
 
 	for _, register := range RegisterList {
-		key := fmt.Sprintf("%s-%s", register.ChainId, register.IdentityAddress)
-		RegisterMap[key] = register
+		if RegisterMap[register.ChainId] == nil {
+			RegisterMap[register.ChainId] = make(map[string]ContractInfo)
+		}
+		RegisterMap[register.ChainId][register.IdentityAddress] = register
 	}
 	return nil
 }
@@ -81,9 +83,8 @@ func GetChainInfo(chainId string) ChainInfo {
 	return chain
 }
 
-func GetDeployerInfo(ChainID string, RegistryAddress string) ContractInfo {
-	key := fmt.Sprintf("%s-%s", ChainID, RegistryAddress)
-	register, ok := RegisterMap[key]
+func GetContractsDeployerInfo(ChainID string, RegistryAddress string) ContractInfo {
+	register, ok := RegisterMap[ChainID][RegistryAddress]
 	if !ok {
 		return ContractInfo{}
 	}
@@ -111,8 +112,14 @@ type IndexerConfig struct {
 	Comment struct {
 		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
 		StartBlock         uint64 `yaml:"start_block"`
-		Limit              int    `yaml:"limit"`
+		Limit              int    `yaml:"lim	it"`
 		CommentSchemaID    string `yaml:"comment_schema_id"`
 		Run                bool   `yaml:"run"`
 	} `yaml:"comment"`
+	Validation struct {
+		Addr               string `yaml:"addr"`
+		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
+		StartBlock         uint64 `yaml:"start_block"`
+		Run                bool   `yaml:"run"`
+	} `yaml:"validation"`
 }

@@ -1,4 +1,4 @@
-create table if not exists validation_requests (
+create table if not exists validations (
     agent_uid bigint not null,
 
     chain_id varchar(255) not null,
@@ -6,31 +6,10 @@ create table if not exists validation_requests (
     validation_registry char(42) not null,
 
     validator_address char(42) not null,
+
     request_hash char(66) not null,
     request_uri varchar(255) not null,
 
-    block_number bigint not null,
-    index bigint not null,
-    tx_hash char(66) primary key not null,
-    timestamps bigint not null,
-    constraint uniq_block_number_index unique (block_number, index)
-);
-
-
-create index if not exists idx_validation_req_block_index on validation_requests(block_number, index);
-create index if not exists idx_validation_req_agent_uid on validation_requests(agent_uid);
-create index if not exists idx_validation_req_agent on validation_requests(chain_id, validation_registry, agent_id);
-
-create table if not exists validation_responses (
-    agent_uid bigint not null,
-
-    chain_id varchar(255) not null,
-    agent_id varchar(255) not null,
-    validation_registry char(42) not null,
-
-    validator_address char(42) not null,
-
-    request_hash char(66) not null,
     response int not null,
     response_uri varchar(255) not null,
     response_hash char(66) not null,
@@ -38,55 +17,69 @@ create table if not exists validation_responses (
 
     block_number bigint not null,
     index bigint not null,
-    tx_hash char(66) primary key not null,
+    request_tx_hash char(66) primary key not null,
+    response_tx_hash char(66),
     timestamps bigint not null,
     constraint uniq_block_number_index unique (block_number, index)
 );
 
-create index if not exists idx_validation_resp_block_index on validation_responses(block_number, index);
-create index if not exists idx_validation_resp_agent_uid on validation_responses(agent_uid);
-create index if not exists idx_validation_resp_agent on validation_responses(chain_id, validation_registry, agent_id, request_hash);
+create index if not exists idx_validation_resp_block_index on validations(block_number, index);
+create index if not exists idx_validation_resp_agent_uid on validations(agent_uid);
+create index if not exists idx_validation_resp_agent on validations(chain_id, validation_registry, agent_id, request_hash);
 
 create table if not exists validators (
     address char(42) primary key not null,
-    request_count bigint not null default 0,
-    response_count bigint not null default 0
+    pending_amount bigint not null default 0,
+    finished_amount bigint not null default 0
 );
 
--- 函数：当创建 validation_requests 时，更新 validators 表的 request_count
--- 如果 validator_address 不存在，则插入新记录并设置 request_count 为 1，response_count 为 0
--- 如果 validator_address 已存在，则更新 request_count 为 request_count + 1，response_count 为 response_count
-CREATE OR REPLACE FUNCTION update_validator_request_count() RETURNS TRIGGER AS $$
+create index if not exists idx_validators_address on validators(address);
+create index if not exists idx_validators_finished_amount on validators(finished_amount);
+
+-- Function 1: 新增验证请求时，pending_amount加1
+CREATE OR REPLACE FUNCTION increment_pending_amount_on_new_validation()
+RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO validators (address, request_count, response_count)
-  VALUES (NEW.validator_address, 1, 0)
-  ON CONFLICT (address) 
-  DO UPDATE SET request_count = validators.request_count + 1;
+  UPDATE validators
+  SET pending_amount = pending_amount + 1
+  WHERE address = NEW.validator_address;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
--- 触发器：在 validation_requests 插入后执行
-CREATE TRIGGER update_validator_request_count_trigger 
-AFTER INSERT ON validation_requests 
-FOR EACH ROW 
-EXECUTE FUNCTION update_validator_request_count();
+CREATE TRIGGER trigger_increment_pending_amount_on_new_validation
+AFTER INSERT ON validations
+FOR EACH ROW
+EXECUTE FUNCTION increment_pending_amount_on_new_validation();
 
--- 函数：当创建 validation_responses 时，更新 validator 表的 response_count
--- 如果 validator_address 不存在，则插入新记录并设置 response_count 为 1，request_count 为 0
--- 如果 validator_address 已存在，则更新 response_count 为 response_count + 1，request_count 为 request_count
-CREATE OR REPLACE FUNCTION update_validator_response_count() RETURNS TRIGGER AS $$
+-- Function 2: 验证请求更新（response_tx_hash变为非空）时，pending_amount减1，finished_amount加1
+CREATE OR REPLACE FUNCTION update_validator_status_on_validation_response()
+RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO validators (address, request_count, response_count)
-  VALUES (NEW.validator_address, 0, 1)
-  ON CONFLICT (address) 
-  DO UPDATE SET response_count = validators.response_count + 1
+  -- 若旧的response_tx_hash不为空，则什么都不做
+  IF COALESCE(OLD.response_tx_hash, '') <> '' THEN
+    RETURN NEW;
+  END IF;
+
+  -- 若更新后的response_tx_hash还是为空，也什么都不做
+  IF COALESCE(NEW.response_tx_hash, '') = '' THEN
+    RETURN NEW;
+  END IF;
+
+  -- response_tx_hash由空变为非空，pending_amount减1，finished_amount加1
+  UPDATE validators
+  SET pending_amount = GREATEST(pending_amount - 1, 0), -- 防止减成负数
+      finished_amount = COALESCE(finished_amount, 0) + 1
+  WHERE address = NEW.validator_address;
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
--- 触发器：在 validation_responses 插入后执行
-CREATE TRIGGER update_validator_response_count_trigger 
-AFTER INSERT ON validation_responses 
-FOR EACH ROW 
-EXECUTE FUNCTION update_validator_response_count();
+CREATE TRIGGER trigger_update_validator_status_on_validation_response
+AFTER UPDATE OF response_tx_hash ON validations
+FOR EACH ROW
+EXECUTE FUNCTION update_validator_status_on_validation_response();
+
+
+

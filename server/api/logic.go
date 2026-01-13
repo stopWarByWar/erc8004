@@ -113,13 +113,13 @@ func GetCardResponse(agentUID uint64) (*AgentResponse, error) {
 
 	chainInfo := config.GetChainInfo(agent.ChainID)
 
-	deployerInfo := config.GetDeployerInfo(agent.ChainID, common.HexToAddress(agent.IdentityRegistry).String())
+	deployerInfo := config.GetContractsDeployerInfo(agent.ChainID, common.HexToAddress(agent.IdentityRegistry).String())
 
 	resp := AgentResponse{
 		UID:              agent.UID,
 		AgentID:          agent.AgentID,
-		AgentDomain:      agent.A2AEndpoint,
-		AgentAddress:     agent.AgentWallet,
+		A2AEndpoint:      agent.A2AEndpoint,
+		WalletAddress:    agent.AgentWallet,
 		Owner:            agent.Owner,
 		ChainID:          agent.ChainID,
 		ChainName:        chainInfo.ChainName,
@@ -141,21 +141,25 @@ func GetCardResponse(agentUID uint64) (*AgentResponse, error) {
 		TokenURL:         tokenURL,
 		Deployer:         deployerInfo.Deployer,
 		DeployerLogo:     deployerInfo.LogoURL,
+
+		WalletAddressScanURL:        fmt.Sprintf("%s/address/%s", chainInfo.ScanPrefix, agent.AgentWallet),
+		WalletAddressExpirationTime: agent.AgentWalletExpirationTime,
+		ReputationRegistry:          deployerInfo.ReputationAddress,
 	}
 
 	mcpEndpoint, err := model.GetMCPEndpointByAgentUID(agent.UID)
 	if err != nil {
 		return nil, err
 	}
-	oafEndpoint, err := model.GetOAFEndpointByAgentUID(agent.UID)
+	oasfEndpoint, err := model.GetOASFEndpointByAgentUID(agent.UID)
 	if err != nil {
 		return nil, err
 	}
 	if mcpEndpoint != nil {
 		resp.MACEndpoint = mcpEndpoint.Endpoint
 	}
-	if oafEndpoint != nil {
-		resp.OASFEndpoint = oafEndpoint.Endpoint
+	if oasfEndpoint != nil {
+		resp.OASFEndpoint = oasfEndpoint.Endpoint
 	}
 
 	return &resp, nil
@@ -312,13 +316,13 @@ func formatAgentResponse(agents []*model.Agent) ([]*AgentResponse, error) {
 
 		chainInfo := config.GetChainInfo(agent.ChainID)
 
-		deployerInfo := config.GetDeployerInfo(agent.ChainID, common.HexToAddress(agent.IdentityRegistry).String())
+		deployerInfo := config.GetContractsDeployerInfo(agent.ChainID, common.HexToAddress(agent.IdentityRegistry).String())
 
 		resp = append(resp, &AgentResponse{
 			UID:              agent.UID,
 			AgentID:          agent.AgentID,
-			AgentDomain:      agent.A2AEndpoint,
-			AgentAddress:     agent.AgentWallet,
+			A2AEndpoint:      agent.A2AEndpoint,
+			WalletAddress:    agent.AgentWallet,
 			Owner:            agent.Owner,
 			ChainID:          agent.ChainID,
 			ChainName:        chainInfo.ChainName,
@@ -338,6 +342,10 @@ func formatAgentResponse(agents []*model.Agent) ([]*AgentResponse, error) {
 			IdentityRegistry: agent.IdentityRegistry,
 			Deployer:         deployerInfo.Deployer,
 			DeployerLogo:     deployerInfo.LogoURL,
+
+			WalletAddressScanURL:        fmt.Sprintf("%s/address/%s", chainInfo.ScanPrefix, agent.AgentWallet),
+			WalletAddressExpirationTime: agent.AgentWalletExpirationTime,
+			ReputationRegistry:          deployerInfo.ReputationAddress,
 		})
 	}
 
@@ -350,36 +358,37 @@ func SetFeedback(request UploadFeedbackRequest) (string, string, error) {
 		return "", "", fmt.Errorf("fail to get agent: %w", err)
 	}
 
-	if agent.AgentID != request.FeedbackAuth.AgentId {
-		return "", "", fmt.Errorf("agent id mismatch")
-	}
-
-	if common.HexToAddress(agent.IdentityRegistry).String() != common.HexToAddress(request.FeedbackAuth.IdentityRegistry).String() {
-		return "", "", fmt.Errorf("identity registry mismatch")
-	}
-
-	feedbackAuthData, err := json.Marshal(request.FeedbackAuth)
-	if err != nil {
-		return "", "", fmt.Errorf("fail to marshal feedback auth: %w", err)
-	}
-
-	agentID, err := strconv.ParseUint(request.FeedbackAuth.AgentId, 10, 64)
+	agentID, err := strconv.ParseUint(agent.AgentID, 10, 64)
 	if err != nil {
 		return "", "", fmt.Errorf("fail to parse agent id: %w", err)
 	}
 
+	agentRegistry := common.HexToAddress(agent.IdentityRegistry).String()
+	clientAddress := common.HexToAddress(request.ClientAddress).String()
+
 	feedback := &types.Feedback{
-		AgentRegistry: common.HexToAddress(request.FeedbackAuth.IdentityRegistry).String(),
+		AgentRegistry: fmt.Sprintf("eip155:%s:%s", agent.ChainID, agentRegistry),
 		AgentId:       int64(agentID),
-		ClientAddress: common.HexToAddress(request.FeedbackAuth.ClientAddress).String(),
+		ClientAddress: fmt.Sprintf("eip155:%s:%s", agent.ChainID, clientAddress),
 		CreatedAt:     strconv.FormatInt(time.Now().Unix(), 10),
-		FeedbackAuth:  hex.EncodeToString(feedbackAuthData),
 		Score:         request.Score,
-		Tag1:          &request.Tag1,
-		Tag2:          &request.Tag2,
-		Context:       &request.Context,
-		Task:          &request.Task,
-		Capability:    &request.Capability,
+		Tag1:          request.Tag1,
+		Tag2:          request.Tag2,
+		Context:       request.Context,
+		Task:          request.Task,
+		Capability:    request.Capability,
+		Endpoint:      request.Endpoint,
+		Domain:        request.Domain,
+		Name:          request.Name,
+	}
+
+	if request.ProofOfPayment != nil {
+		feedback.ProofOfPayment = &types.ProofOfPayment{
+			FromAddress: common.HexToAddress(request.ProofOfPayment.FromAddress).String(),
+			ToAddress:   common.HexToAddress(request.ProofOfPayment.ToAddress).String(),
+			ChainId:     agent.ChainID,
+			TxHash:      request.ProofOfPayment.TxHash,
+		}
 	}
 
 	feedbackData, err := json.Marshal(feedback)
@@ -387,7 +396,7 @@ func SetFeedback(request UploadFeedbackRequest) (string, string, error) {
 		return "", "", fmt.Errorf("fail to marshal feedback: %w", err)
 	}
 
-	feedbackURI, err := helper.GetHelper().UploadFeedbackToS3(request.FeedbackAuth.ChainId, common.HexToAddress(request.FeedbackAuth.IdentityRegistry).String(), request.FeedbackAuth.AgentId, common.HexToAddress(request.FeedbackAuth.ClientAddress).String(), request.FeedbackAuth.IndexLimit, feedbackData)
+	feedbackURI, err := helper.GetHelper().UploadFeedbackToS3(agent.ChainID, agentRegistry, agent.AgentID, clientAddress, request.IndexLimit, feedbackData)
 	if err != nil {
 		return "", "", fmt.Errorf("fail to upload feedback to s3: %w", err)
 	}
@@ -395,4 +404,33 @@ func SetFeedback(request UploadFeedbackRequest) (string, string, error) {
 	feedbackHash := common.BytesToHash(sha256.New().Sum(feedbackData)).String()
 
 	return feedbackURI, feedbackHash, nil
+}
+
+func getNetworkList() ([]types.NetworkResponse, error) {
+	networkList := make([]types.NetworkResponse, 0)
+	for _, chain := range config.ChainList {
+		network := types.NetworkResponse{
+			ChainId:   chain.ChainId,
+			ChainName: chain.ChainName,
+			ChainLogo: chain.ChainLogo,
+		}
+
+		deployers := make([]types.ContractInfo, 0)
+		for _, register := range config.RegisterMap[chain.ChainId] {
+			deployers = append(deployers, types.ContractInfo{
+				IdentityAddress:       register.IdentityAddress,
+				IdentityContractURL:   fmt.Sprintf("%s/address/%s", chain.ScanPrefix, register.IdentityAddress),
+				ReputationAddress:     register.ReputationAddress,
+				ReputationContractURL: fmt.Sprintf("%s/address/%s", chain.ScanPrefix, register.ReputationAddress),
+				ValidationAddress:     register.ValidationAddress,
+				ValidationContractURL: fmt.Sprintf("%s/address/%s", chain.ScanPrefix, register.ValidationAddress),
+				Deployer:              register.Deployer,
+				Description:           register.Description,
+				LogoURL:               register.LogoURL,
+			})
+		}
+		network.ContractInfo = deployers
+		networkList = append(networkList, network)
+	}
+	return networkList, nil
 }

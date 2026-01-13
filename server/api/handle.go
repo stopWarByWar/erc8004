@@ -460,7 +460,7 @@ func GetGeneralInfoHandler(c *gin.Context) {
 	SuccessResp(gin.H(generalInfo), c)
 }
 
-func GetAgentValidationResponsesHandler(c *gin.Context) {
+func GetAgentValidationListHandler(c *gin.Context) {
 	page := c.Query("page")
 	pageSize := c.Query("page_size")
 	pageInt, err := strconv.Atoi(page)
@@ -478,32 +478,38 @@ func GetAgentValidationResponsesHandler(c *gin.Context) {
 	validationRegistry := c.Query("validation_registry")
 	agentID := c.Query("agent_id")
 
-	validationResponses, total, err := model.GetValidationRespList(chainID, validationRegistry, agentID, pageInt, pageSizeInt)
+	filter := c.Query("filter")
+	validationResponses, total, err := model.GetValidationListByAgent(chainID, validationRegistry, agentID, pageInt, pageSizeInt, filter)
 	if err != nil {
 		ErrResp(nil, "fail to get validation responses", "Internal Error", c)
 		return
 	}
 
-	var validationResponsesList []*ValidationResponse
+	var validationResponsesList []*Validation
 	for _, validationResponse := range validationResponses {
-		validationResponsesList = append(validationResponsesList, &ValidationResponse{
+		validationResponsesList = append(validationResponsesList, &Validation{
 			AgentUID:           validationResponse.AgentUID,
 			ChainID:            validationResponse.ChainID,
 			AgentID:            validationResponse.AgentID,
 			ValidationRegistry: validationResponse.ValidationRegistry,
-			ValidatorAddress:   validationResponse.ValidatorAddress,
-			RequestHash:        validationResponse.RequestHash,
-			Response:           validationResponse.Response,
-			ResponseURI:        validationResponse.ResponseURI,
-			ResponseHash:       validationResponse.ResponseHash,
-			Tag1:               validationResponse.Tag1,
+
+			ValidatorAddress: validationResponse.ValidatorAddress,
+
+			RequestURI:  validationResponse.RequestURI,
+			RequestHash: validationResponse.RequestHash,
+
+			Response:     validationResponse.Response,
+			ResponseURI:  validationResponse.ResponseURI,
+			ResponseHash: validationResponse.ResponseHash,
+			Tag1:         validationResponse.Tag1,
+			Timestamps:   validationResponse.Timestamps,
 		})
 	}
 
 	SuccessResp(gin.H{
-		"validation_responses": validationResponsesList,
-		"total":                total,
-		"current_page":         pageInt,
+		"validation_list": validationResponsesList,
+		"total":           total,
+		"current_page":    pageInt,
 	}, c)
 }
 
@@ -534,7 +540,7 @@ func GetValidatorListHandler(c *gin.Context) {
 	}, c)
 }
 
-func GetValidatorRequestsHandler(c *gin.Context) {
+func GetValidatorValidationListHandler(c *gin.Context) {
 	page := c.Query("page")
 	pageSize := c.Query("page_size")
 	pageInt, err := strconv.Atoi(page)
@@ -549,72 +555,49 @@ func GetValidatorRequestsHandler(c *gin.Context) {
 	}
 
 	validatorAddress := c.Query("validator_address")
-	validatorRequests, total, err := model.GetValidationReqListByValidatorAddress(validatorAddress, pageInt, pageSizeInt)
+	filter := c.Query("filter")
+
+	validations, total, err := model.GetValidationListByValidatorAddress(validatorAddress, pageInt, pageSizeInt, filter)
 	if err != nil {
 		ErrResp(nil, "fail to get validator requests", "Internal Error", c)
 		return
 	}
 
-	var validatorRequestsList []*ValidatorRequest
-	for _, validatorRequest := range validatorRequests {
-		validatorRequestsList = append(validatorRequestsList, &ValidatorRequest{
-			ValidatorAddress:   validatorRequest.ValidatorAddress,
-			RequestHash:        validatorRequest.RequestHash,
-			RequestURI:         validatorRequest.RequestURI,
-			AgentUID:           validatorRequest.AgentUID,
-			ChainID:            validatorRequest.ChainID,
-			AgentID:            validatorRequest.AgentID,
-			ValidationRegistry: validatorRequest.ValidationRegistry,
+	var validationsList []*Validation
+	for _, validation := range validations {
+		validationsList = append(validationsList, &Validation{
+			AgentUID:           validation.AgentUID,
+			ChainID:            validation.ChainID,
+			AgentID:            validation.AgentID,
+			ValidationRegistry: validation.ValidationRegistry,
+
+			ValidatorAddress: validation.ValidatorAddress,
+
+			RequestURI:  validation.RequestURI,
+			RequestHash: validation.RequestHash,
+
+			Response:     validation.Response,
+			ResponseURI:  validation.ResponseURI,
+			ResponseHash: validation.ResponseHash,
+			Tag1:         validation.Tag1,
+			Timestamps:   validation.Timestamps,
 		})
 	}
 
 	SuccessResp(gin.H{
-		"validator_requests": validatorRequestsList,
-		"total":              total,
-		"current_page":       pageInt,
+		"validation_list": validationsList,
+		"total":           total,
+		"current_page":    pageInt,
 	}, c)
 }
 
-func GetValidatorResponsesHandler(c *gin.Context) {
-	page := c.Query("page")
-	pageSize := c.Query("page_size")
-	pageInt, err := strconv.Atoi(page)
+func GetNetworkListHandler(c *gin.Context) {
+	networkList, err := getNetworkList()
 	if err != nil {
-		ErrResp(nil, "fail to get page", "Invalid Request", c)
+		ErrResp(nil, "fail to get network list", "Internal Error", c)
 		return
 	}
-	pageSizeInt, err := strconv.Atoi(pageSize)
-	if err != nil {
-		ErrResp(nil, "fail to get page_size", "Invalid Request", c)
-		return
-	}
-
-	validatorAddress := c.Query("validator_address")
-	validationResponses, total, err := model.GetValidationRespListByValidatorAddress(validatorAddress, pageInt, pageSizeInt)
-	if err != nil {
-		ErrResp(nil, "fail to get validator responses", "Internal Error", c)
-		return
-	}
-
-	var validatorResponsesList []*ValidationResponse
-	for _, validationResponse := range validationResponses {
-		validatorResponsesList = append(validatorResponsesList, &ValidationResponse{
-			AgentUID:           validationResponse.AgentUID,
-			ChainID:            validationResponse.ChainID,
-			AgentID:            validationResponse.AgentID,
-			ValidationRegistry: validationResponse.ValidationRegistry,
-			ValidatorAddress:   validationResponse.ValidatorAddress,
-			RequestHash:        validationResponse.RequestHash,
-			Response:           validationResponse.Response,
-			ResponseURI:        validationResponse.ResponseURI,
-			ResponseHash:       validationResponse.ResponseHash,
-			Tag1:               validationResponse.Tag1,
-		})
-	}
-
 	SuccessResp(gin.H{
-		"validator_responses": validatorResponsesList,
-		"total":               total,
-		"current_page":        pageInt,
+		"network_list": networkList,
 	}, c)
 }

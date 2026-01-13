@@ -20,9 +20,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var NewFeedbackTopic = common.HexToHash("0xb655ce21b319053e24bad48a8f38fa1a42101e27866f559ca10f597d2bb584a1")
-var ResponseAppendedTopic = common.HexToHash("0x25156fd3288212246d8b008d5921fde376c71ed14ac2e072a506eb06fde6d09d")
-var FeedbackRevokedTopic = common.HexToHash("0xb1c6be0b5b8aef6539e2fac0fd131a2faa7b49edf8e505b5eb0ad487d56051d4")
+var NewFeedbackTopic = common.HexToHash("0x801d7d4264128f6f43835850f1fabb91902c3543c3738f1f62fbf7e9fd80531d")
+var ResponseAppendedTopic = common.HexToHash("0xb1c6be0b5b8aef6539e2fac0fd131a2faa7b49edf8e505b5eb0ad487d56051d4")
+var FeedbackRevokedTopic = common.HexToHash("0x25156fd3288212246d8b008d5921fde376c71ed14ac2e072a506eb06fde6d09d")
 
 type ReputationProcessor struct {
 	execBlock uint64
@@ -30,6 +30,7 @@ type ReputationProcessor struct {
 
 	reputationRegistry *abi.ReputationRegistry
 	reputationAddr     common.Address
+	identityAddr       string
 
 	fetchBlockInterval int64
 	chainID            string
@@ -37,7 +38,7 @@ type ReputationProcessor struct {
 	ethClient          *ethclient.Client
 }
 
-func NewReputationProcessor(reputationAddr string, ethClient *ethclient.Client, fetchBlockInterval int64, startBlock uint64, _logger *logger.Logger) *ReputationProcessor {
+func NewReputationProcessor(reputationAddr, identityAddr string, ethClient *ethclient.Client, fetchBlockInterval int64, startBlock uint64, _logger *logger.Logger) *ReputationProcessor {
 	chainId, err := ethClient.ChainID(ctx)
 	if err != nil {
 		panic(err)
@@ -65,6 +66,7 @@ func NewReputationProcessor(reputationAddr string, ethClient *ethclient.Client, 
 		ethClient:          ethClient,
 		logger:             _logger,
 		chainID:            chainId.String(),
+		identityAddr:       identityAddr,
 	}
 }
 
@@ -170,7 +172,7 @@ func (p *ReputationProcessor) dealWithNewFeedbackEvent(e types.Log) error {
 		return fmt.Errorf("failed to parse new feedback event: %w", err)
 	}
 
-	agentUID, err := model.GetAgentUID(p.chainID, p.reputationAddr.Hex(), newFeedbackEvent.AgentId.String())
+	agentUID, err := model.GetAgentUID(p.chainID, p.identityAddr, newFeedbackEvent.AgentId.String())
 	if err != nil {
 		return fmt.Errorf("failed to get agent uid: %w", err)
 	}
@@ -186,9 +188,10 @@ func (p *ReputationProcessor) dealWithNewFeedbackEvent(e types.Log) error {
 		FeedbackIndex:      newFeedbackEvent.FeedbackIndex,
 		Score:              newFeedbackEvent.Score,
 		Tag1:               common.BytesToHash(newFeedbackEvent.Tag1[:]).String(),
-		Tag2:               common.BytesToHash(newFeedbackEvent.Tag2[:]).String(),
-		FeedbackURI:        newFeedbackEvent.FeedbackUri,
+		Tag2:               newFeedbackEvent.Tag2,
+		FeedbackURI:        newFeedbackEvent.FeedbackURI,
 		FeedbackHash:       common.BytesToHash(newFeedbackEvent.FeedbackHash[:]).String(),
+		Endpoint:           newFeedbackEvent.Endpoint,
 		Revoked:            false,
 		BlockNumber:        uint64(e.BlockNumber),
 		Index:              uint64(e.Index),
@@ -223,7 +226,12 @@ func (p *ReputationProcessor) dealWithResponseAppendedEvent(e types.Log) error {
 
 	feedbackUID, agentUID, err := model.GetFeedbackUIDAndAgentUID(p.chainID, responseAppendedEvent.AgentId.String(), responseAppendedEvent.ClientAddress.String(), responseAppendedEvent.FeedbackIndex)
 	if err != nil {
-		return fmt.Errorf("failed to get feedback uid and agent uid: %w", err)
+		p.logger.WithFields(logrus.Fields{
+			"error": err,
+			"block": e.BlockNumber,
+			"index": e.Index,
+		}).Error("fail to get feedback uid and agent uid")
+		return nil
 	}
 
 	blockTimestamp := uint64(e.BlockTimestamp)
@@ -236,7 +244,7 @@ func (p *ReputationProcessor) dealWithResponseAppendedEvent(e types.Log) error {
 		ClientAddress: responseAppendedEvent.ClientAddress.String(),
 		FeedbackIndex: responseAppendedEvent.FeedbackIndex,
 		Responder:     responseAppendedEvent.Responder.String(),
-		ResponseURI:   responseAppendedEvent.ResponseUri,
+		ResponseURI:   responseAppendedEvent.ResponseURI,
 		ResponseHash:  common.BytesToHash(responseAppendedEvent.ResponseHash[:]).String(),
 		BlockNumber:   uint64(e.BlockNumber),
 		Index:         uint64(e.Index),

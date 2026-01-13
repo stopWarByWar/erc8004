@@ -24,7 +24,8 @@ type Agent struct {
 	CommentCount uint64 `gorm:"column:comment_count;type:bigint"`
 	Timestamps   uint64 `gorm:"column:timestamps;type:bigint"`
 
-	UserInterfaceURL string `gorm:"column:user_interface_url;type:varchar(500)"`
+	UserInterfaceURL          string `gorm:"column:user_interface_url;type:varchar(500)"`
+	AgentWalletExpirationTime uint64 `gorm:"column:agent_wallet_expiration_time;type:bigint"`
 }
 
 func (Agent) TableName() string { return "agents" }
@@ -139,6 +140,7 @@ type Feedback struct {
 	TxHash      string
 	Revoked     bool   `gorm:"column:revoked;type:boolean"`
 	Timestamps  uint64 `gorm:"column:timestamps;type:bigint"`
+	Endpoint    string `gorm:"column:endpoint;type:text"`
 }
 
 func (Feedback) TableName() string { return "feedbacks" }
@@ -215,9 +217,9 @@ type FeedbackResp struct {
 	Tag2               string
 	FeedbackURI        string
 	FeedbackHash       string
-
-	TxHash     string
-	Timestamps uint64 `gorm:"column:timestamps;type:bigint"`
+	Endpoint           string `gorm:"column:endpoint;type:text"`
+	TxHash             string
+	Timestamps         uint64 `gorm:"column:timestamps;type:bigint"`
 
 	Name     string
 	Avatar   string
@@ -264,57 +266,42 @@ type MCPEndpoint struct {
 func (MCPEndpoint) TableName() string { return "mcp_endpoints" }
 
 // OAFEndpoint OAF 端点表结构体
-type OAFEndpoint struct {
+type OASFEndpoint struct {
 	UID      uint64 `gorm:"column:uid;type:bigint;primaryKey"`
 	AgentUID uint64 `gorm:"column:agent_uid;type:bigint;not null;index"`
 	Endpoint string `gorm:"column:endpoint;type:varchar(255);not null"`
 	Version  string `gorm:"column:version;type:varchar(255);not null"`
 }
 
-func (OAFEndpoint) TableName() string { return "oaf_endpoints" }
+func (OASFEndpoint) TableName() string { return "oasf_endpoints" }
 
-// ValidationRequest 验证请求表结构体
-type ValidationRequest struct {
+// Validation 验证表结构体
+type Validation struct {
 	AgentUID           uint64 `gorm:"column:agent_uid;type:bigint;not null"`
 	ChainID            string `gorm:"column:chain_id;type:varchar(255);not null"`
 	AgentID            string `gorm:"column:agent_id;type:varchar(255);not null"`
 	ValidationRegistry string `gorm:"column:validation_registry;type:char(42);not null"`
 	ValidatorAddress   string `gorm:"column:validator_address;type:char(42);not null"`
 	RequestHash        string `gorm:"column:request_hash;type:char(66);not null"`
-	RequestURI         string `gorm:"column:request_uri;type:varchar(255);not null"`
-	BlockNumber        uint64 `gorm:"column:block_number;type:bigint;not null"`
-	Index              uint64 `gorm:"column:index;type:bigint;not null	"`
-	TxHash             string `gorm:"column:tx_hash;type:char(66);not null;primaryKey"`
-	Timestamps         uint64 `gorm:"column:timestamps;type:bigint;not null"`
-}
-
-func (ValidationRequest) TableName() string { return "validation_requests" }
-
-// ValidationResponse 验证响应表结构体
-type ValidationResponse struct {
-	AgentUID           uint64 `gorm:"column:agent_uid;type:bigint;not null"`
-	ChainID            string `gorm:"column:chain_id;type:varchar(255);not null"`
-	AgentID            string `gorm:"column:agent_id;type:varchar(255);not null"`
-	ValidationRegistry string `gorm:"column:validation_registry;type:char(42);not null"`
-	ValidatorAddress   string `gorm:"column:validator_address;type:char(42);not null"`
-	RequestHash        string `gorm:"column:request_hash;type:char(66);not null"`
-	Response           int    `gorm:"column:response;type:int;not null"`
 	ResponseURI        string `gorm:"column:response_uri;type:varchar(255);not null"`
 	ResponseHash       string `gorm:"column:response_hash;type:char(66);not null"`
+	Response           int    `gorm:"column:response;type:int;not null"`
 	Tag1               string `gorm:"column:tag1;type:varchar(255);not null"`
 	BlockNumber        uint64 `gorm:"column:block_number;type:bigint;not null"`
 	Index              uint64 `gorm:"column:index;type:bigint;not null"`
-	TxHash             string `gorm:"column:tx_hash;type:char(66);not null;primaryKey"`
 	Timestamps         uint64 `gorm:"column:timestamps;type:bigint;not null"`
+	RequestTxHash      string `gorm:"column:request_tx_hash;type:char(66);not null;primaryKey"`
+	ResponseTxHash     string `gorm:"column:response_tx_hash;type:char(66);not null"`
+	RequestURI         string `gorm:"column:request_uri;type:varchar(255);not null"`
 }
 
-func (ValidationResponse) TableName() string { return "validation_responses" }
+func (Validation) TableName() string { return "validations" }
 
 // Validator 验证者统计表结构体
 type Validator struct {
-	Address       string `gorm:"column:address;type:char(42);primaryKey"`
-	RequestCount  uint64 `gorm:"column:request_count;type:bigint;not null;default:0"`
-	ResponseCount uint64 `gorm:"column:response_count;type:bigint;not null;default:0"`
+	Address        string `gorm:"column:address;type:char(42);primaryKey"`
+	PendingAmount  uint64 `gorm:"column:pending_amount;type:bigint;not null;default:0"`
+	FinishedAmount uint64 `gorm:"column:finished_amount;type:bigint;not null;default:0"`
 }
 
 func (Validator) TableName() string { return "validators" }

@@ -164,17 +164,17 @@ func (p *ValidationRegistryProcessor) dealWithValidationRequestEvent(e types.Log
 		return err
 	}
 
-	return model.InsertValidationRequest(&model.ValidationRequest{
+	return model.InsertValidation(&model.Validation{
 		AgentUID:           agentUID,
 		ChainID:            p.chainID,
 		AgentID:            event.AgentId.String(),
 		ValidationRegistry: p.validationAddr.String(),
 		ValidatorAddress:   event.ValidatorAddress.String(),
 		RequestHash:        common.BytesToHash(event.RequestHash[:]).String(),
-		RequestURI:         event.RequestUri,
+		RequestURI:         event.RequestURI,
 		BlockNumber:        uint64(e.BlockNumber),
 		Index:              uint64(e.Index),
-		TxHash:             e.TxHash.String(),
+		RequestTxHash:      e.TxHash.String(),
 		Timestamps:         uint64(e.BlockTimestamp),
 	})
 }
@@ -185,25 +185,16 @@ func (p *ValidationRegistryProcessor) dealWithValidationResponseEvent(e types.Lo
 		return err
 	}
 
-	agentUID, err := model.GetAgentUID(p.chainID, p.validationAddr.Hex(), event.AgentId.String())
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return err
-	}
-
-	return model.InsertValidationResponse(&model.ValidationResponse{
-		AgentUID:           agentUID,
-		ChainID:            p.chainID,
-		AgentID:            event.AgentId.String(),
-		ValidationRegistry: p.validationAddr.String(),
-		ValidatorAddress:   event.ValidatorAddress.String(),
-		RequestHash:        common.BytesToHash(event.RequestHash[:]).String(),
-		Response:           int(event.Response),
-		ResponseURI:        event.ResponseUri,
-		ResponseHash:       common.BytesToHash(event.ResponseHash[:]).String(),
-		Tag1:               common.BytesToHash(event.Tag[:]).String(),
-		BlockNumber:        uint64(e.BlockNumber),
-		Index:              uint64(e.Index),
-		TxHash:             e.TxHash.String(),
-		Timestamps:         uint64(e.BlockTimestamp),
+	//todo: update
+	return model.UpdateValidation(&model.Validation{
+		RequestHash:    common.BytesToHash(event.RequestHash[:]).String(),
+		Response:       int(event.Response),
+		ResponseURI:    event.ResponseURI,
+		ResponseHash:   common.BytesToHash(event.ResponseHash[:]).String(),
+		Tag1:           event.Tag,
+		ResponseTxHash: e.TxHash.String(),
+		Timestamps:     uint64(e.BlockTimestamp),
+		BlockNumber:    uint64(e.BlockNumber),
+		Index:          uint64(e.Index),
 	})
 }

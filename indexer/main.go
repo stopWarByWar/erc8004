@@ -50,7 +50,7 @@ func main() {
 	model.InitDB(config.Dns, config.OpenaiAPIKey)
 
 	if config.Reputation.Run {
-		reputationIdx := processor.NewReputationProcessor(config.Reputation.Addr, ethClient, config.Reputation.FetchBlockInterval, config.Reputation.StartBlock, _logger)
+		reputationIdx := processor.NewReputationProcessor(config.Reputation.Addr, config.Identity.Addr, ethClient, config.Reputation.FetchBlockInterval, config.Reputation.StartBlock, _logger)
 		go reputationIdx.Process()
 	}
 
@@ -62,6 +62,11 @@ func main() {
 	if config.Comment.Run {
 		commentIdx := processor.NewCommentProcessor(chainID.String(), config.Comment.CommentSchemaID, config.Comment.StartBlock, config.Comment.Limit, config.Comment.FetchBlockInterval, _logger)
 		go commentIdx.Process()
+	}
+
+	if config.Validation.Run {
+		validationIdx := processor.NewValidationRegistryProcessor(config.Validation.Addr, ethClient, config.Validation.FetchBlockInterval, config.Validation.StartBlock, _logger)
+		go validationIdx.Process()
 	}
 
 	select {}

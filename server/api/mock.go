@@ -9,8 +9,8 @@ func mockAgent() *AgentResponse {
 	return &AgentResponse{
 		UID:              1,
 		AgentID:          "1",
-		AgentDomain:      "passport.bnbattest.io",
-		AgentAddress:     "0x0000000000000000000000000000000000000000",
+		A2AEndpoint:      "passport.bnbattest.io",
+		WalletAddress:    "0x0000000000000000000000000000000000000000",
 		ChainID:          "97",
 		Namespace:        "eip:155",
 		IdentityRegistry: "0xa98a5542a1aab336397d487e32021e0e48bef717",

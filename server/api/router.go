@@ -50,10 +50,11 @@ func Run(_cors []string, port string) {
 	r.POST("agent/identity/set/feedback", UploadFeedbackHandler)
 	r.POST("agent/identity/set/profile", UploadAgentProfileHandler)
 
-	r.GET("agent/identity/validation/responses", GetAgentValidationResponsesHandler)
+	r.GET("agent/identity/detail/validation/list", GetAgentValidationListHandler)
 	r.GET("agent/validator/list", GetValidatorListHandler)
-	r.GET("agent/validator/request/list", GetValidatorRequestsHandler)
-	r.GET("agent/validator/response/list", GetValidatorResponsesHandler)
+	r.GET("agent/validator/detail/validation/list", GetValidatorValidationListHandler)
+
+	r.GET("agent/network/list", GetNetworkListHandler)
 
 	go updateGeneralInfo()
 	r.Run(fmt.Sprintf(":%s", port))

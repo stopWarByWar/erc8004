@@ -105,7 +105,7 @@ func InsertAgentCard(agent *agentcard.Agent) error {
 			if err := tx.Where("agent_uid = ?", existingAgent.UID).Delete(&MCPEndpoint{}).Error; err != nil {
 				return err
 			}
-			if err := tx.Where("agent_uid = ?", existingAgent.UID).Delete(&OAFEndpoint{}).Error; err != nil {
+			if err := tx.Where("agent_uid = ?", existingAgent.UID).Delete(&OASFEndpoint{}).Error; err != nil {
 				return err
 			}
 		} else if err != gorm.ErrRecordNotFound {
@@ -259,11 +259,11 @@ func InsertAgentCard(agent *agentcard.Agent) error {
 				return err
 			}
 		}
-		if agent.OAFEndpoints != nil {
-			if err := tx.Create(&OAFEndpoint{
+		if agent.OASFEndpoints != nil {
+			if err := tx.Create(&OASFEndpoint{
 				AgentUID: agentCardModel.UID,
-				Endpoint: agent.OAFEndpoints.Endpoint,
-				Version:  agent.OAFEndpoints.Version,
+				Endpoint: agent.OASFEndpoints.Endpoint,
+				Version:  agent.OASFEndpoints.Version,
 			}).Error; err != nil {
 				return err
 			}
@@ -643,12 +643,18 @@ func CreateFeedback(feedback *Feedback) error {
 }
 
 func UpdateFeedbackRevoked(chainID string, agentID string, clientAddress string, feedbackIndex uint64) error {
-	return db.Model(&Feedback{}).Where("chain_id = ? and agent_id = ? and client_address = ? and feedback_index = ?", chainID, agentID, clientAddress, feedbackIndex).Update("revoked", true).Error
+	return db.
+		Model(&Feedback{}).
+		Where("chain_id = ? and agent_id = ? and client_address = ? and feedback_index = ?", chainID, agentID, clientAddress, feedbackIndex).
+		Update("revoked", true).
+		Update("endpoint", "").Error
 }
 
 func GetFeedbackUIDAndAgentUID(chainID string, agentID string, clientAddress string, feedbackIndex uint64) (uint64, uint64, error) {
 	var feedback *Feedback
-	err := db.Where("chain_id = ? and agent_id = ? and client_address = ? and feedback_index = ?", chainID, agentID, clientAddress, feedbackIndex).First(&feedback).Error
+	err := db.
+		Where("chain_id = ? and agent_id = ? and client_address = ? and feedback_index = ?", chainID, agentID, clientAddress, feedbackIndex).
+		First(&feedback).Error
 	if err != nil {
 		return 0, 0, err
 	}
@@ -898,7 +904,7 @@ func GetFeedbacksByAgentUID(uid uint64, page, pageSize int) ([]*FeedbackResp, in
 	}
 	var feedbacks []*FeedbackResp
 	if err := db.Table("feedbacks f").
-		Select("f.uid, f.agent_uid, f.chain_id, f.agent_id, f.reputation_registry, f.client_address, f.feedback_index, f.score, f.tag1, f.tag2, f.feedback_uri, f.feedback_hash, f.tx_hash, f.timestamps").
+		Select("f.uid, f.agent_uid, f.chain_id, f.agent_id, f.reputation_registry, f.client_address, f.feedback_index, f.score, f.tag1, f.tag2, f.feedback_uri, f.feedback_hash, f.endpoint, f.tx_hash, f.timestamps").
 		Where("f.agent_uid = ? and f.revoked = ?", uid, false).
 		Order("f.timestamps DESC").
 		Offset((page - 1) * pageSize).
@@ -1282,14 +1288,21 @@ func GetMCPEndpointByAgentUID(agentUID uint64) (*MCPEndpoint, error) {
 	return &endpoint, nil
 }
 
-func GetOAFEndpointByAgentUID(agentUID uint64) (*OAFEndpoint, error) {
-	var oafEndpoint OAFEndpoint
-	err := db.Where("agent_uid = ?", agentUID).First(&oafEndpoint).Error
+func GetOASFEndpointByAgentUID(agentUID uint64) (*OASFEndpoint, error) {
+	var oasfEndpoint OASFEndpoint
+	err := db.Where("agent_uid = ?", agentUID).First(&oasfEndpoint).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
-	return &oafEndpoint, nil
+	return &oasfEndpoint, nil
+}
+
+func UpdateAgentWallet(chainID string, identityRegistry string, agentID string, agentWallet string, agentWalletExpirationTime uint64) error {
+	return db.Model(&Agent{}).Where("chain_id = ? AND identity_registry = ? AND agent_id = ?", chainID, identityRegistry, agentID).Updates(&Agent{
+		AgentWallet:               agentWallet,
+		AgentWalletExpirationTime: agentWalletExpirationTime,
+	}).Error
 }

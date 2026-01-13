@@ -31,24 +31,25 @@ const TrustModelInferenceValidation = "inference-validation"
 const TrustModelTeeAttestation = "tee-attestation"
 
 type Agent struct {
-	Owner            string            `json:"owner"`
-	Type             string            `json:"type"`
-	Name             string            `json:"name"`
-	Description      string            `json:"description"`
-	Image            string            `json:"image"`
-	Endpoint         string            `json:"endpoint"`
-	IdentityRegistry string            `json:"registry"`
-	SupportedTrust   []string          `json:"supportedTrust"`
-	AgentID          string            `json:"agentId"`
-	TokenURL         string            `json:"tokenUrl"`
-	AgentCard        *server.AgentCard `json:"agentCard"`
-	Namespace        string            `json:"namespace"`
-	ChainID          string            `json:"chainId"`
-	AgentWallet      string            `json:"agentWallet"`
-	Timestamps       uint64            `json:"timestamps"`
-	UserInterfaceURL string            `json:"userInterfaceURL"`
-	MCPEndpoints     *MCPEndpoint      `json:"mcpEndpoint"`
-	OAFEndpoints     *OAFEndpoint      `json:"oafEndpoint"`
+	Owner                     string            `json:"owner"`
+	Type                      string            `json:"type"`
+	Name                      string            `json:"name"`
+	Description               string            `json:"description"`
+	Image                     string            `json:"image"`
+	Endpoint                  string            `json:"endpoint"`
+	IdentityRegistry          string            `json:"registry"`
+	SupportedTrust            []string          `json:"supportedTrust"`
+	AgentID                   string            `json:"agentId"`
+	TokenURL                  string            `json:"tokenUrl"`
+	AgentCard                 *server.AgentCard `json:"agentCard"`
+	Namespace                 string            `json:"namespace"`
+	ChainID                   string            `json:"chainId"`
+	AgentWallet               string            `json:"agentWallet"`
+	Timestamps                uint64            `json:"timestamps"`
+	UserInterfaceURL          string            `json:"userInterfaceURL"`
+	MCPEndpoints              *MCPEndpoint      `json:"mcpEndpoint"`
+	OASFEndpoints             *OASFEndpoint     `json:"oasfEndpoint"`
+	AgentWalletExpirationTime uint64            `json:"agentWalletExpirationTime"`
 }
 
 type MCPEndpoint struct {
@@ -57,7 +58,7 @@ type MCPEndpoint struct {
 	Capabilities map[string]interface{} `json:"capabilities"`
 }
 
-type OAFEndpoint struct {
+type OASFEndpoint struct {
 	Endpoint string `json:"endpoint"`
 	Version  string `json:"version"`
 }
