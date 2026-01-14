@@ -10,17 +10,21 @@ import (
 
 func TestFilterSearchAgentListByFilter(t *testing.T) {
 	initTest()
-	name := "test"
+	name := "Babylon"
 	page := 1
 	pageSize := 10
-	trustModelIDs := []string{agentcard.TrustModelTeeAttestation}
+	trustModelIDs := []string{}
 	chainIDs := []string{"11155111"}
 
 	agents, total, err := FilterSearchAgentListByFilter(name, page, pageSize, trustModelIDs, chainIDs)
 	if err != nil {
 		t.Errorf("FilterSearchAgentListByFilter error: %v", err)
 	}
-	fmt.Println(agents, total)
+	if len(agents) > 1 {
+		fmt.Printf("agents: %+v, total: %d\n", agents[0], total)
+	} else {
+		t.Errorf("agents: %+v, total: %d\n", agents, total)
+	}
 }
 
 func TestGetAgentListByFilter(t *testing.T) {
@@ -34,7 +38,11 @@ func TestGetAgentListByFilter(t *testing.T) {
 	if err != nil {
 		t.Errorf("GetAgentListByFilter error: %v", err)
 	}
-	fmt.Println(agents, total)
+	if len(agents) > 1 {
+		fmt.Printf("agents: %+v, total: %d\n", agents[0], total)
+	} else {
+		t.Errorf("agents: %+v, total: %d\n", agents, total)
+	}
 }
 
 func TestGetAgentList(t *testing.T) {
@@ -45,17 +53,21 @@ func TestGetAgentList(t *testing.T) {
 	if err != nil {
 		t.Errorf("GetAgentList error: %v", err)
 	}
-	fmt.Println(agents, total)
+	if len(agents) > 1 {
+		fmt.Printf("agents: %+v, total: %d\n", agents[0], total)
+	} else {
+		t.Errorf("agents: %+v, total: %d\n", agents, total)
+	}
 }
 
 func TestGetCardResponse(t *testing.T) {
 	initTest()
-	agentUID := uint64(1)
+	agentUID := uint64(1900)
 	agentCard, err := GetCardResponse(agentUID)
 	if err != nil {
 		t.Errorf("GetCardResponse error: %v", err)
 	}
-	fmt.Println(agentCard)
+	fmt.Printf("agentCard: %+v\n", agentCard)
 }
 
 func TestSearchAgentListBySkill(t *testing.T) {
@@ -67,19 +79,27 @@ func TestSearchAgentListBySkill(t *testing.T) {
 	if err != nil {
 		t.Errorf("SearchAgentListBySkill error: %v", err)
 	}
-	fmt.Println(agents, total)
+	if len(agents) > 1 {
+		fmt.Printf("agents: %+v, total: %d\n", agents[0], total)
+	} else {
+		t.Errorf("agents: %+v, total: %d\n", agents, total)
+	}
 }
 
 func TestSearchAgentListByName(t *testing.T) {
 	initTest()
-	name := "test"
+	name := "Babylon"
 	page := 1
 	pageSize := 10
 	agents, total, err := SearchAgentListByName(name, page, pageSize)
 	if err != nil {
 		t.Errorf("SearchAgentListByName error: %v", err)
 	}
-	fmt.Println(agents, total)
+	if len(agents) > 1 {
+		fmt.Printf("agents: %+v, total: %d\n", agents[0], total)
+	} else {
+		t.Errorf("agents: %+v, total: %d\n", agents, total)
+	}
 }
 
 func TestFilterSearchAgentListBySemantic(t *testing.T) {
@@ -93,7 +113,7 @@ func TestFilterSearchAgentListBySemantic(t *testing.T) {
 	if err != nil {
 		t.Errorf("FilterSearchAgentListBySemantic error: %v", err)
 	}
-	fmt.Println(agents)
+	fmt.Printf("agents: %+v\n", agents)
 }
 
 func TestUploadAgentProfile(t *testing.T) {
@@ -135,5 +155,5 @@ func TestUploadAgentProfile(t *testing.T) {
 		t.Errorf("UploadAgentProfile error: %v", err)
 		return
 	}
-	fmt.Println(tokenURI)
+	fmt.Printf("tokenURI: %s\n", tokenURI)
 }

@@ -29,7 +29,10 @@ func initTest() {
 	if err != nil {
 		panic(err)
 	}
-	config.Init("../config/config.yaml")
+	err = config.Init("../../../config/config.yaml")
+	if err != nil {
+		panic(err)
+	}
 
 	helper.InitHelper(_config.S3Region, _config.S3BucketName, _config.AWSAccessKeyId, _config.AWSSecretAccessKey)
 

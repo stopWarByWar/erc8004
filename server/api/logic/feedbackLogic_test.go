@@ -8,7 +8,7 @@ import (
 
 func TestGetAgentFeedbacksList(t *testing.T) {
 	initTest()
-	agentUID := uint64(1)
+	agentUID := uint64(1900)
 	page := 1
 	pageSize := 10
 	feedbacks, total, err := GetAgentFeedbacksList(agentUID, page, pageSize)
