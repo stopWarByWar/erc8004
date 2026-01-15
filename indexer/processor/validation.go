@@ -34,14 +34,14 @@ type ValidationRegistryProcessor struct {
 
 	validationRegistry *abi.ValidationRegistry
 	validationAddr     common.Address
-
+	identityAddr       string
 	fetchBlockInterval int64
 	chainID            string
 	logger             *logger.Logger
 	ethClient          *ethclient.Client
 }
 
-func NewValidationRegistryProcessor(validationAddr string, ethClient *ethclient.Client, fetchBlockInterval int64, startBlock uint64, _logger *logger.Logger, identityExecBlockChan <-chan uint64) *ValidationRegistryProcessor {
+func NewValidationRegistryProcessor(validationAddr, identityAddr string, ethClient *ethclient.Client, fetchBlockInterval int64, startBlock uint64, _logger *logger.Logger, identityExecBlockChan <-chan uint64) *ValidationRegistryProcessor {
 	chainId, err := ethClient.ChainID(ctx)
 	if err != nil {
 		panic(err)
@@ -66,6 +66,7 @@ func NewValidationRegistryProcessor(validationAddr string, ethClient *ethclient.
 		identityExecBlockChan: identityExecBlockChan,
 		validationRegistry:    validationRegistry,
 		validationAddr:        common.HexToAddress(validationAddr),
+		identityAddr:          identityAddr,
 		fetchBlockInterval:    fetchBlockInterval,
 		ethClient:             ethClient,
 		logger:                _logger,
@@ -171,7 +172,7 @@ func (p *ValidationRegistryProcessor) dealWithValidationRequestEvent(e types.Log
 		return err
 	}
 
-	agentUID, err := model.GetAgentUID(p.chainID, p.validationAddr.Hex(), event.AgentId.String())
+	agentUID, err := model.GetAgentUID(p.chainID, p.identityAddr, event.AgentId.String())
 	if err != nil {
 		if p.identityExecBlock > uint64(e.BlockNumber) && errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil

@@ -91,7 +91,7 @@ func main() {
 	}
 
 	if config.Validation.Run {
-		validationIdx = processor.NewValidationRegistryProcessor(config.Validation.Addr, ethClient, config.Validation.FetchBlockInterval, config.Validation.StartBlock, _logger, validationExecBlockChan)
+		validationIdx = processor.NewValidationRegistryProcessor(config.Validation.Addr, config.Identity.Addr, ethClient, config.Validation.FetchBlockInterval, config.Validation.StartBlock, _logger, identityExecBlockChan)
 		go validationIdx.Process()
 	}
 
@@ -121,6 +121,7 @@ func initConf(confPath string) (*config.IndexerConfig, error) {
 
 	config.Reputation.Addr = common.HexToAddress(config.Reputation.Addr).String()
 	config.Identity.Addr = common.HexToAddress(config.Identity.Addr).String()
+	config.Validation.Addr = common.HexToAddress(config.Validation.Addr).String()
 	config.Comment.CommentSchemaID = common.HexToHash(config.Comment.CommentSchemaID).String()
 	return config, nil
 }

@@ -61,6 +61,12 @@ type Config struct {
 		StartBlock         uint64 `yaml:"start_block"`
 		Run                bool   `yaml:"run"`
 	} `yaml:"identity"`
+	Validation struct {
+		Addr               string `yaml:"addr"`
+		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
+		StartBlock         uint64 `yaml:"start_block"`
+		Run                bool   `yaml:"run"`
+	} `yaml:"validation"`
 	Comment struct {
 		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
 		StartBlock         uint64 `yaml:"start_block"`
