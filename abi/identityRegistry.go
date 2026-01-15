@@ -31,13 +31,13 @@ var (
 
 // IdentityRegistryUpgradeableMetadataEntry is an auto generated low-level Go binding around an user-defined struct.
 type IdentityRegistryUpgradeableMetadataEntry struct {
-	MetadataKey   string
-	MetadataValue []byte
+	Key   string
+	Value []byte
 }
 
 // IdentityRegistryMetaData contains all meta data concerning the IdentityRegistry contract.
 var IdentityRegistryMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"}],\"name\":\"AddressEmptyCode\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ECDSAInvalidSignature\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"length\",\"type\":\"uint256\"}],\"name\":\"ECDSAInvalidSignatureLength\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"ECDSAInvalidSignatureS\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"ERC1967InvalidImplementation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ERC1967NonPayable\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"ERC721IncorrectOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"ERC721InsufficientApproval\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"approver\",\"type\":\"address\"}],\"name\":\"ERC721InvalidApprover\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"ERC721InvalidOperator\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"ERC721InvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"receiver\",\"type\":\"address\"}],\"name\":\"ERC721InvalidReceiver\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"ERC721InvalidSender\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"ERC721NonexistentToken\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FailedCall\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UUPSUnauthorizedCallContext\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"slot\",\"type\":\"bytes32\"}],\"name\":\"UUPSUnsupportedProxiableUUID\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"approved\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"approved\",\"type\":\"bool\"}],\"name\":\"ApprovalForAll\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_fromTokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_toTokenId\",\"type\":\"uint256\"}],\"name\":\"BatchMetadataUpdate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[],\"name\":\"EIP712DomainChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"string\",\"name\":\"indexedMetadataKey\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"metadataKey\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"metadataValue\",\"type\":\"bytes\"}],\"name\":\"MetadataSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"MetadataUpdate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"agentURI\",\"type\":\"string\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"Registered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"newURI\",\"type\":\"string\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"updatedBy\",\"type\":\"address\"}],\"name\":\"URIUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"UPGRADE_INTERFACE_VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"eip712Domain\",\"outputs\":[{\"internalType\":\"bytes1\",\"name\":\"fields\",\"type\":\"bytes1\"},{\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"version\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"chainId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"verifyingContract\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"salt\",\"type\":\"bytes32\"},{\"internalType\":\"uint256[]\",\"name\":\"extensions\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"}],\"name\":\"getAgentWallet\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getApproved\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"metadataKey\",\"type\":\"string\"}],\"name\":\"getMetadata\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getVersion\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"isApprovedForAll\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"ownerOf\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"register\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"agentURI\",\"type\":\"string\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"metadataKey\",\"type\":\"string\"},{\"internalType\":\"bytes\",\"name\":\"metadataValue\",\"type\":\"bytes\"}],\"internalType\":\"structIdentityRegistryUpgradeable.MetadataEntry[]\",\"name\":\"metadata\",\"type\":\"tuple[]\"}],\"name\":\"register\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"agentURI\",\"type\":\"string\"}],\"name\":\"register\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"safeTransferFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"safeTransferFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"newURI\",\"type\":\"string\"}],\"name\":\"setAgentURI\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"newWallet\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"deadline\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"setAgentWallet\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"approved\",\"type\":\"bool\"}],\"name\":\"setApprovalForAll\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"metadataKey\",\"type\":\"string\"},{\"internalType\":\"bytes\",\"name\":\"metadataValue\",\"type\":\"bytes\"}],\"name\":\"setMetadata\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"tokenURI\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"}],\"name\":\"AddressEmptyCode\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"ERC1967InvalidImplementation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ERC1967NonPayable\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"ERC721IncorrectOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"ERC721InsufficientApproval\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"approver\",\"type\":\"address\"}],\"name\":\"ERC721InvalidApprover\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"ERC721InvalidOperator\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"ERC721InvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"receiver\",\"type\":\"address\"}],\"name\":\"ERC721InvalidReceiver\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"ERC721InvalidSender\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"ERC721NonexistentToken\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FailedCall\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UUPSUnauthorizedCallContext\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"slot\",\"type\":\"bytes32\"}],\"name\":\"UUPSUnsupportedProxiableUUID\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"approved\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"Approval\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"approved\",\"type\":\"bool\"}],\"name\":\"ApprovalForAll\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_fromTokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_toTokenId\",\"type\":\"uint256\"}],\"name\":\"BatchMetadataUpdate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"string\",\"name\":\"indexedKey\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"key\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"value\",\"type\":\"bytes\"}],\"name\":\"MetadataSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"MetadataUpdate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tokenURI\",\"type\":\"string\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"Registered\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"Transfer\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"newUri\",\"type\":\"string\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"updatedBy\",\"type\":\"address\"}],\"name\":\"UriUpdated\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"UPGRADE_INTERFACE_VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"getApproved\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"key\",\"type\":\"string\"}],\"name\":\"getMetadata\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getVersion\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"}],\"name\":\"isApprovedForAll\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"ownerOf\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"register\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenUri\",\"type\":\"string\"},{\"components\":[{\"internalType\":\"string\",\"name\":\"key\",\"type\":\"string\"},{\"internalType\":\"bytes\",\"name\":\"value\",\"type\":\"bytes\"}],\"internalType\":\"structIdentityRegistryUpgradeable.MetadataEntry[]\",\"name\":\"metadata\",\"type\":\"tuple[]\"}],\"name\":\"register\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"tokenUri\",\"type\":\"string\"}],\"name\":\"register\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"safeTransferFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"safeTransferFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"newUri\",\"type\":\"string\"}],\"name\":\"setAgentUri\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"approved\",\"type\":\"bool\"}],\"name\":\"setApprovalForAll\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"key\",\"type\":\"string\"},{\"internalType\":\"bytes\",\"name\":\"value\",\"type\":\"bytes\"}],\"name\":\"setMetadata\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"tokenURI\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"}]",
 }
 
 // IdentityRegistryABI is the input ABI used to generate the binding from.
@@ -248,107 +248,6 @@ func (_IdentityRegistry *IdentityRegistryCallerSession) BalanceOf(owner common.A
 	return _IdentityRegistry.Contract.BalanceOf(&_IdentityRegistry.CallOpts, owner)
 }
 
-// Eip712Domain is a free data retrieval call binding the contract method 0x84b0196e.
-//
-// Solidity: function eip712Domain() view returns(bytes1 fields, string name, string version, uint256 chainId, address verifyingContract, bytes32 salt, uint256[] extensions)
-func (_IdentityRegistry *IdentityRegistryCaller) Eip712Domain(opts *bind.CallOpts) (struct {
-	Fields            [1]byte
-	Name              string
-	Version           string
-	ChainId           *big.Int
-	VerifyingContract common.Address
-	Salt              [32]byte
-	Extensions        []*big.Int
-}, error) {
-	var out []interface{}
-	err := _IdentityRegistry.contract.Call(opts, &out, "eip712Domain")
-
-	outstruct := new(struct {
-		Fields            [1]byte
-		Name              string
-		Version           string
-		ChainId           *big.Int
-		VerifyingContract common.Address
-		Salt              [32]byte
-		Extensions        []*big.Int
-	})
-	if err != nil {
-		return *outstruct, err
-	}
-
-	outstruct.Fields = *abi.ConvertType(out[0], new([1]byte)).(*[1]byte)
-	outstruct.Name = *abi.ConvertType(out[1], new(string)).(*string)
-	outstruct.Version = *abi.ConvertType(out[2], new(string)).(*string)
-	outstruct.ChainId = *abi.ConvertType(out[3], new(*big.Int)).(**big.Int)
-	outstruct.VerifyingContract = *abi.ConvertType(out[4], new(common.Address)).(*common.Address)
-	outstruct.Salt = *abi.ConvertType(out[5], new([32]byte)).(*[32]byte)
-	outstruct.Extensions = *abi.ConvertType(out[6], new([]*big.Int)).(*[]*big.Int)
-
-	return *outstruct, err
-
-}
-
-// Eip712Domain is a free data retrieval call binding the contract method 0x84b0196e.
-//
-// Solidity: function eip712Domain() view returns(bytes1 fields, string name, string version, uint256 chainId, address verifyingContract, bytes32 salt, uint256[] extensions)
-func (_IdentityRegistry *IdentityRegistrySession) Eip712Domain() (struct {
-	Fields            [1]byte
-	Name              string
-	Version           string
-	ChainId           *big.Int
-	VerifyingContract common.Address
-	Salt              [32]byte
-	Extensions        []*big.Int
-}, error) {
-	return _IdentityRegistry.Contract.Eip712Domain(&_IdentityRegistry.CallOpts)
-}
-
-// Eip712Domain is a free data retrieval call binding the contract method 0x84b0196e.
-//
-// Solidity: function eip712Domain() view returns(bytes1 fields, string name, string version, uint256 chainId, address verifyingContract, bytes32 salt, uint256[] extensions)
-func (_IdentityRegistry *IdentityRegistryCallerSession) Eip712Domain() (struct {
-	Fields            [1]byte
-	Name              string
-	Version           string
-	ChainId           *big.Int
-	VerifyingContract common.Address
-	Salt              [32]byte
-	Extensions        []*big.Int
-}, error) {
-	return _IdentityRegistry.Contract.Eip712Domain(&_IdentityRegistry.CallOpts)
-}
-
-// GetAgentWallet is a free data retrieval call binding the contract method 0x00339509.
-//
-// Solidity: function getAgentWallet(uint256 agentId) view returns(address)
-func (_IdentityRegistry *IdentityRegistryCaller) GetAgentWallet(opts *bind.CallOpts, agentId *big.Int) (common.Address, error) {
-	var out []interface{}
-	err := _IdentityRegistry.contract.Call(opts, &out, "getAgentWallet", agentId)
-
-	if err != nil {
-		return *new(common.Address), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
-
-	return out0, err
-
-}
-
-// GetAgentWallet is a free data retrieval call binding the contract method 0x00339509.
-//
-// Solidity: function getAgentWallet(uint256 agentId) view returns(address)
-func (_IdentityRegistry *IdentityRegistrySession) GetAgentWallet(agentId *big.Int) (common.Address, error) {
-	return _IdentityRegistry.Contract.GetAgentWallet(&_IdentityRegistry.CallOpts, agentId)
-}
-
-// GetAgentWallet is a free data retrieval call binding the contract method 0x00339509.
-//
-// Solidity: function getAgentWallet(uint256 agentId) view returns(address)
-func (_IdentityRegistry *IdentityRegistryCallerSession) GetAgentWallet(agentId *big.Int) (common.Address, error) {
-	return _IdentityRegistry.Contract.GetAgentWallet(&_IdentityRegistry.CallOpts, agentId)
-}
-
 // GetApproved is a free data retrieval call binding the contract method 0x081812fc.
 //
 // Solidity: function getApproved(uint256 tokenId) view returns(address)
@@ -382,10 +281,10 @@ func (_IdentityRegistry *IdentityRegistryCallerSession) GetApproved(tokenId *big
 
 // GetMetadata is a free data retrieval call binding the contract method 0xcb4799f2.
 //
-// Solidity: function getMetadata(uint256 agentId, string metadataKey) view returns(bytes)
-func (_IdentityRegistry *IdentityRegistryCaller) GetMetadata(opts *bind.CallOpts, agentId *big.Int, metadataKey string) ([]byte, error) {
+// Solidity: function getMetadata(uint256 agentId, string key) view returns(bytes)
+func (_IdentityRegistry *IdentityRegistryCaller) GetMetadata(opts *bind.CallOpts, agentId *big.Int, key string) ([]byte, error) {
 	var out []interface{}
-	err := _IdentityRegistry.contract.Call(opts, &out, "getMetadata", agentId, metadataKey)
+	err := _IdentityRegistry.contract.Call(opts, &out, "getMetadata", agentId, key)
 
 	if err != nil {
 		return *new([]byte), err
@@ -399,16 +298,16 @@ func (_IdentityRegistry *IdentityRegistryCaller) GetMetadata(opts *bind.CallOpts
 
 // GetMetadata is a free data retrieval call binding the contract method 0xcb4799f2.
 //
-// Solidity: function getMetadata(uint256 agentId, string metadataKey) view returns(bytes)
-func (_IdentityRegistry *IdentityRegistrySession) GetMetadata(agentId *big.Int, metadataKey string) ([]byte, error) {
-	return _IdentityRegistry.Contract.GetMetadata(&_IdentityRegistry.CallOpts, agentId, metadataKey)
+// Solidity: function getMetadata(uint256 agentId, string key) view returns(bytes)
+func (_IdentityRegistry *IdentityRegistrySession) GetMetadata(agentId *big.Int, key string) ([]byte, error) {
+	return _IdentityRegistry.Contract.GetMetadata(&_IdentityRegistry.CallOpts, agentId, key)
 }
 
 // GetMetadata is a free data retrieval call binding the contract method 0xcb4799f2.
 //
-// Solidity: function getMetadata(uint256 agentId, string metadataKey) view returns(bytes)
-func (_IdentityRegistry *IdentityRegistryCallerSession) GetMetadata(agentId *big.Int, metadataKey string) ([]byte, error) {
-	return _IdentityRegistry.Contract.GetMetadata(&_IdentityRegistry.CallOpts, agentId, metadataKey)
+// Solidity: function getMetadata(uint256 agentId, string key) view returns(bytes)
+func (_IdentityRegistry *IdentityRegistryCallerSession) GetMetadata(agentId *big.Int, key string) ([]byte, error) {
+	return _IdentityRegistry.Contract.GetMetadata(&_IdentityRegistry.CallOpts, agentId, key)
 }
 
 // GetVersion is a free data retrieval call binding the contract method 0x0d8e6e2c.
@@ -755,44 +654,44 @@ func (_IdentityRegistry *IdentityRegistryTransactorSession) Register() (*types.T
 
 // Register0 is a paid mutator transaction binding the contract method 0x8ea42286.
 //
-// Solidity: function register(string agentURI, (string,bytes)[] metadata) returns(uint256 agentId)
-func (_IdentityRegistry *IdentityRegistryTransactor) Register0(opts *bind.TransactOpts, agentURI string, metadata []IdentityRegistryUpgradeableMetadataEntry) (*types.Transaction, error) {
-	return _IdentityRegistry.contract.Transact(opts, "register0", agentURI, metadata)
+// Solidity: function register(string tokenUri, (string,bytes)[] metadata) returns(uint256 agentId)
+func (_IdentityRegistry *IdentityRegistryTransactor) Register0(opts *bind.TransactOpts, tokenUri string, metadata []IdentityRegistryUpgradeableMetadataEntry) (*types.Transaction, error) {
+	return _IdentityRegistry.contract.Transact(opts, "register0", tokenUri, metadata)
 }
 
 // Register0 is a paid mutator transaction binding the contract method 0x8ea42286.
 //
-// Solidity: function register(string agentURI, (string,bytes)[] metadata) returns(uint256 agentId)
-func (_IdentityRegistry *IdentityRegistrySession) Register0(agentURI string, metadata []IdentityRegistryUpgradeableMetadataEntry) (*types.Transaction, error) {
-	return _IdentityRegistry.Contract.Register0(&_IdentityRegistry.TransactOpts, agentURI, metadata)
+// Solidity: function register(string tokenUri, (string,bytes)[] metadata) returns(uint256 agentId)
+func (_IdentityRegistry *IdentityRegistrySession) Register0(tokenUri string, metadata []IdentityRegistryUpgradeableMetadataEntry) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.Register0(&_IdentityRegistry.TransactOpts, tokenUri, metadata)
 }
 
 // Register0 is a paid mutator transaction binding the contract method 0x8ea42286.
 //
-// Solidity: function register(string agentURI, (string,bytes)[] metadata) returns(uint256 agentId)
-func (_IdentityRegistry *IdentityRegistryTransactorSession) Register0(agentURI string, metadata []IdentityRegistryUpgradeableMetadataEntry) (*types.Transaction, error) {
-	return _IdentityRegistry.Contract.Register0(&_IdentityRegistry.TransactOpts, agentURI, metadata)
+// Solidity: function register(string tokenUri, (string,bytes)[] metadata) returns(uint256 agentId)
+func (_IdentityRegistry *IdentityRegistryTransactorSession) Register0(tokenUri string, metadata []IdentityRegistryUpgradeableMetadataEntry) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.Register0(&_IdentityRegistry.TransactOpts, tokenUri, metadata)
 }
 
 // Register1 is a paid mutator transaction binding the contract method 0xf2c298be.
 //
-// Solidity: function register(string agentURI) returns(uint256 agentId)
-func (_IdentityRegistry *IdentityRegistryTransactor) Register1(opts *bind.TransactOpts, agentURI string) (*types.Transaction, error) {
-	return _IdentityRegistry.contract.Transact(opts, "register1", agentURI)
+// Solidity: function register(string tokenUri) returns(uint256 agentId)
+func (_IdentityRegistry *IdentityRegistryTransactor) Register1(opts *bind.TransactOpts, tokenUri string) (*types.Transaction, error) {
+	return _IdentityRegistry.contract.Transact(opts, "register1", tokenUri)
 }
 
 // Register1 is a paid mutator transaction binding the contract method 0xf2c298be.
 //
-// Solidity: function register(string agentURI) returns(uint256 agentId)
-func (_IdentityRegistry *IdentityRegistrySession) Register1(agentURI string) (*types.Transaction, error) {
-	return _IdentityRegistry.Contract.Register1(&_IdentityRegistry.TransactOpts, agentURI)
+// Solidity: function register(string tokenUri) returns(uint256 agentId)
+func (_IdentityRegistry *IdentityRegistrySession) Register1(tokenUri string) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.Register1(&_IdentityRegistry.TransactOpts, tokenUri)
 }
 
 // Register1 is a paid mutator transaction binding the contract method 0xf2c298be.
 //
-// Solidity: function register(string agentURI) returns(uint256 agentId)
-func (_IdentityRegistry *IdentityRegistryTransactorSession) Register1(agentURI string) (*types.Transaction, error) {
-	return _IdentityRegistry.Contract.Register1(&_IdentityRegistry.TransactOpts, agentURI)
+// Solidity: function register(string tokenUri) returns(uint256 agentId)
+func (_IdentityRegistry *IdentityRegistryTransactorSession) Register1(tokenUri string) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.Register1(&_IdentityRegistry.TransactOpts, tokenUri)
 }
 
 // RenounceOwnership is a paid mutator transaction binding the contract method 0x715018a6.
@@ -858,46 +757,25 @@ func (_IdentityRegistry *IdentityRegistryTransactorSession) SafeTransferFrom0(fr
 	return _IdentityRegistry.Contract.SafeTransferFrom0(&_IdentityRegistry.TransactOpts, from, to, tokenId, data)
 }
 
-// SetAgentURI is a paid mutator transaction binding the contract method 0x0af28bd3.
+// SetAgentUri is a paid mutator transaction binding the contract method 0x5a753149.
 //
-// Solidity: function setAgentURI(uint256 agentId, string newURI) returns()
-func (_IdentityRegistry *IdentityRegistryTransactor) SetAgentURI(opts *bind.TransactOpts, agentId *big.Int, newURI string) (*types.Transaction, error) {
-	return _IdentityRegistry.contract.Transact(opts, "setAgentURI", agentId, newURI)
+// Solidity: function setAgentUri(uint256 agentId, string newUri) returns()
+func (_IdentityRegistry *IdentityRegistryTransactor) SetAgentUri(opts *bind.TransactOpts, agentId *big.Int, newUri string) (*types.Transaction, error) {
+	return _IdentityRegistry.contract.Transact(opts, "setAgentUri", agentId, newUri)
 }
 
-// SetAgentURI is a paid mutator transaction binding the contract method 0x0af28bd3.
+// SetAgentUri is a paid mutator transaction binding the contract method 0x5a753149.
 //
-// Solidity: function setAgentURI(uint256 agentId, string newURI) returns()
-func (_IdentityRegistry *IdentityRegistrySession) SetAgentURI(agentId *big.Int, newURI string) (*types.Transaction, error) {
-	return _IdentityRegistry.Contract.SetAgentURI(&_IdentityRegistry.TransactOpts, agentId, newURI)
+// Solidity: function setAgentUri(uint256 agentId, string newUri) returns()
+func (_IdentityRegistry *IdentityRegistrySession) SetAgentUri(agentId *big.Int, newUri string) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.SetAgentUri(&_IdentityRegistry.TransactOpts, agentId, newUri)
 }
 
-// SetAgentURI is a paid mutator transaction binding the contract method 0x0af28bd3.
+// SetAgentUri is a paid mutator transaction binding the contract method 0x5a753149.
 //
-// Solidity: function setAgentURI(uint256 agentId, string newURI) returns()
-func (_IdentityRegistry *IdentityRegistryTransactorSession) SetAgentURI(agentId *big.Int, newURI string) (*types.Transaction, error) {
-	return _IdentityRegistry.Contract.SetAgentURI(&_IdentityRegistry.TransactOpts, agentId, newURI)
-}
-
-// SetAgentWallet is a paid mutator transaction binding the contract method 0x2d1ef5ae.
-//
-// Solidity: function setAgentWallet(uint256 agentId, address newWallet, uint256 deadline, bytes signature) returns()
-func (_IdentityRegistry *IdentityRegistryTransactor) SetAgentWallet(opts *bind.TransactOpts, agentId *big.Int, newWallet common.Address, deadline *big.Int, signature []byte) (*types.Transaction, error) {
-	return _IdentityRegistry.contract.Transact(opts, "setAgentWallet", agentId, newWallet, deadline, signature)
-}
-
-// SetAgentWallet is a paid mutator transaction binding the contract method 0x2d1ef5ae.
-//
-// Solidity: function setAgentWallet(uint256 agentId, address newWallet, uint256 deadline, bytes signature) returns()
-func (_IdentityRegistry *IdentityRegistrySession) SetAgentWallet(agentId *big.Int, newWallet common.Address, deadline *big.Int, signature []byte) (*types.Transaction, error) {
-	return _IdentityRegistry.Contract.SetAgentWallet(&_IdentityRegistry.TransactOpts, agentId, newWallet, deadline, signature)
-}
-
-// SetAgentWallet is a paid mutator transaction binding the contract method 0x2d1ef5ae.
-//
-// Solidity: function setAgentWallet(uint256 agentId, address newWallet, uint256 deadline, bytes signature) returns()
-func (_IdentityRegistry *IdentityRegistryTransactorSession) SetAgentWallet(agentId *big.Int, newWallet common.Address, deadline *big.Int, signature []byte) (*types.Transaction, error) {
-	return _IdentityRegistry.Contract.SetAgentWallet(&_IdentityRegistry.TransactOpts, agentId, newWallet, deadline, signature)
+// Solidity: function setAgentUri(uint256 agentId, string newUri) returns()
+func (_IdentityRegistry *IdentityRegistryTransactorSession) SetAgentUri(agentId *big.Int, newUri string) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.SetAgentUri(&_IdentityRegistry.TransactOpts, agentId, newUri)
 }
 
 // SetApprovalForAll is a paid mutator transaction binding the contract method 0xa22cb465.
@@ -923,23 +801,23 @@ func (_IdentityRegistry *IdentityRegistryTransactorSession) SetApprovalForAll(op
 
 // SetMetadata is a paid mutator transaction binding the contract method 0x466648da.
 //
-// Solidity: function setMetadata(uint256 agentId, string metadataKey, bytes metadataValue) returns()
-func (_IdentityRegistry *IdentityRegistryTransactor) SetMetadata(opts *bind.TransactOpts, agentId *big.Int, metadataKey string, metadataValue []byte) (*types.Transaction, error) {
-	return _IdentityRegistry.contract.Transact(opts, "setMetadata", agentId, metadataKey, metadataValue)
+// Solidity: function setMetadata(uint256 agentId, string key, bytes value) returns()
+func (_IdentityRegistry *IdentityRegistryTransactor) SetMetadata(opts *bind.TransactOpts, agentId *big.Int, key string, value []byte) (*types.Transaction, error) {
+	return _IdentityRegistry.contract.Transact(opts, "setMetadata", agentId, key, value)
 }
 
 // SetMetadata is a paid mutator transaction binding the contract method 0x466648da.
 //
-// Solidity: function setMetadata(uint256 agentId, string metadataKey, bytes metadataValue) returns()
-func (_IdentityRegistry *IdentityRegistrySession) SetMetadata(agentId *big.Int, metadataKey string, metadataValue []byte) (*types.Transaction, error) {
-	return _IdentityRegistry.Contract.SetMetadata(&_IdentityRegistry.TransactOpts, agentId, metadataKey, metadataValue)
+// Solidity: function setMetadata(uint256 agentId, string key, bytes value) returns()
+func (_IdentityRegistry *IdentityRegistrySession) SetMetadata(agentId *big.Int, key string, value []byte) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.SetMetadata(&_IdentityRegistry.TransactOpts, agentId, key, value)
 }
 
 // SetMetadata is a paid mutator transaction binding the contract method 0x466648da.
 //
-// Solidity: function setMetadata(uint256 agentId, string metadataKey, bytes metadataValue) returns()
-func (_IdentityRegistry *IdentityRegistryTransactorSession) SetMetadata(agentId *big.Int, metadataKey string, metadataValue []byte) (*types.Transaction, error) {
-	return _IdentityRegistry.Contract.SetMetadata(&_IdentityRegistry.TransactOpts, agentId, metadataKey, metadataValue)
+// Solidity: function setMetadata(uint256 agentId, string key, bytes value) returns()
+func (_IdentityRegistry *IdentityRegistryTransactorSession) SetMetadata(agentId *big.Int, key string, value []byte) (*types.Transaction, error) {
+	return _IdentityRegistry.Contract.SetMetadata(&_IdentityRegistry.TransactOpts, agentId, key, value)
 }
 
 // TransferFrom is a paid mutator transaction binding the contract method 0x23b872dd.
@@ -1456,139 +1334,6 @@ func (_IdentityRegistry *IdentityRegistryFilterer) ParseBatchMetadataUpdate(log 
 	return event, nil
 }
 
-// IdentityRegistryEIP712DomainChangedIterator is returned from FilterEIP712DomainChanged and is used to iterate over the raw logs and unpacked data for EIP712DomainChanged events raised by the IdentityRegistry contract.
-type IdentityRegistryEIP712DomainChangedIterator struct {
-	Event *IdentityRegistryEIP712DomainChanged // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *IdentityRegistryEIP712DomainChangedIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(IdentityRegistryEIP712DomainChanged)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(IdentityRegistryEIP712DomainChanged)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *IdentityRegistryEIP712DomainChangedIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *IdentityRegistryEIP712DomainChangedIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// IdentityRegistryEIP712DomainChanged represents a EIP712DomainChanged event raised by the IdentityRegistry contract.
-type IdentityRegistryEIP712DomainChanged struct {
-	Raw types.Log // Blockchain specific contextual infos
-}
-
-// FilterEIP712DomainChanged is a free log retrieval operation binding the contract event 0x0a6387c9ea3628b88a633bb4f3b151770f70085117a15f9bf3787cda53f13d31.
-//
-// Solidity: event EIP712DomainChanged()
-func (_IdentityRegistry *IdentityRegistryFilterer) FilterEIP712DomainChanged(opts *bind.FilterOpts) (*IdentityRegistryEIP712DomainChangedIterator, error) {
-
-	logs, sub, err := _IdentityRegistry.contract.FilterLogs(opts, "EIP712DomainChanged")
-	if err != nil {
-		return nil, err
-	}
-	return &IdentityRegistryEIP712DomainChangedIterator{contract: _IdentityRegistry.contract, event: "EIP712DomainChanged", logs: logs, sub: sub}, nil
-}
-
-// WatchEIP712DomainChanged is a free log subscription operation binding the contract event 0x0a6387c9ea3628b88a633bb4f3b151770f70085117a15f9bf3787cda53f13d31.
-//
-// Solidity: event EIP712DomainChanged()
-func (_IdentityRegistry *IdentityRegistryFilterer) WatchEIP712DomainChanged(opts *bind.WatchOpts, sink chan<- *IdentityRegistryEIP712DomainChanged) (event.Subscription, error) {
-
-	logs, sub, err := _IdentityRegistry.contract.WatchLogs(opts, "EIP712DomainChanged")
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(IdentityRegistryEIP712DomainChanged)
-				if err := _IdentityRegistry.contract.UnpackLog(event, "EIP712DomainChanged", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseEIP712DomainChanged is a log parse operation binding the contract event 0x0a6387c9ea3628b88a633bb4f3b151770f70085117a15f9bf3787cda53f13d31.
-//
-// Solidity: event EIP712DomainChanged()
-func (_IdentityRegistry *IdentityRegistryFilterer) ParseEIP712DomainChanged(log types.Log) (*IdentityRegistryEIP712DomainChanged, error) {
-	event := new(IdentityRegistryEIP712DomainChanged)
-	if err := _IdentityRegistry.contract.UnpackLog(event, "EIP712DomainChanged", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
 // IdentityRegistryInitializedIterator is returned from FilterInitialized and is used to iterate over the raw logs and unpacked data for Initialized events raised by the IdentityRegistry contract.
 type IdentityRegistryInitializedIterator struct {
 	Event *IdentityRegistryInitialized // Event containing the contract specifics and raw log
@@ -1792,28 +1537,28 @@ func (it *IdentityRegistryMetadataSetIterator) Close() error {
 
 // IdentityRegistryMetadataSet represents a MetadataSet event raised by the IdentityRegistry contract.
 type IdentityRegistryMetadataSet struct {
-	AgentId            *big.Int
-	IndexedMetadataKey common.Hash
-	MetadataKey        string
-	MetadataValue      []byte
-	Raw                types.Log // Blockchain specific contextual infos
+	AgentId    *big.Int
+	IndexedKey common.Hash
+	Key        string
+	Value      []byte
+	Raw        types.Log // Blockchain specific contextual infos
 }
 
 // FilterMetadataSet is a free log retrieval operation binding the contract event 0x2c149ed548c6d2993cd73efe187df6eccabe4538091b33adbd25fafdb8a1468b.
 //
-// Solidity: event MetadataSet(uint256 indexed agentId, string indexed indexedMetadataKey, string metadataKey, bytes metadataValue)
-func (_IdentityRegistry *IdentityRegistryFilterer) FilterMetadataSet(opts *bind.FilterOpts, agentId []*big.Int, indexedMetadataKey []string) (*IdentityRegistryMetadataSetIterator, error) {
+// Solidity: event MetadataSet(uint256 indexed agentId, string indexed indexedKey, string key, bytes value)
+func (_IdentityRegistry *IdentityRegistryFilterer) FilterMetadataSet(opts *bind.FilterOpts, agentId []*big.Int, indexedKey []string) (*IdentityRegistryMetadataSetIterator, error) {
 
 	var agentIdRule []interface{}
 	for _, agentIdItem := range agentId {
 		agentIdRule = append(agentIdRule, agentIdItem)
 	}
-	var indexedMetadataKeyRule []interface{}
-	for _, indexedMetadataKeyItem := range indexedMetadataKey {
-		indexedMetadataKeyRule = append(indexedMetadataKeyRule, indexedMetadataKeyItem)
+	var indexedKeyRule []interface{}
+	for _, indexedKeyItem := range indexedKey {
+		indexedKeyRule = append(indexedKeyRule, indexedKeyItem)
 	}
 
-	logs, sub, err := _IdentityRegistry.contract.FilterLogs(opts, "MetadataSet", agentIdRule, indexedMetadataKeyRule)
+	logs, sub, err := _IdentityRegistry.contract.FilterLogs(opts, "MetadataSet", agentIdRule, indexedKeyRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1822,19 +1567,19 @@ func (_IdentityRegistry *IdentityRegistryFilterer) FilterMetadataSet(opts *bind.
 
 // WatchMetadataSet is a free log subscription operation binding the contract event 0x2c149ed548c6d2993cd73efe187df6eccabe4538091b33adbd25fafdb8a1468b.
 //
-// Solidity: event MetadataSet(uint256 indexed agentId, string indexed indexedMetadataKey, string metadataKey, bytes metadataValue)
-func (_IdentityRegistry *IdentityRegistryFilterer) WatchMetadataSet(opts *bind.WatchOpts, sink chan<- *IdentityRegistryMetadataSet, agentId []*big.Int, indexedMetadataKey []string) (event.Subscription, error) {
+// Solidity: event MetadataSet(uint256 indexed agentId, string indexed indexedKey, string key, bytes value)
+func (_IdentityRegistry *IdentityRegistryFilterer) WatchMetadataSet(opts *bind.WatchOpts, sink chan<- *IdentityRegistryMetadataSet, agentId []*big.Int, indexedKey []string) (event.Subscription, error) {
 
 	var agentIdRule []interface{}
 	for _, agentIdItem := range agentId {
 		agentIdRule = append(agentIdRule, agentIdItem)
 	}
-	var indexedMetadataKeyRule []interface{}
-	for _, indexedMetadataKeyItem := range indexedMetadataKey {
-		indexedMetadataKeyRule = append(indexedMetadataKeyRule, indexedMetadataKeyItem)
+	var indexedKeyRule []interface{}
+	for _, indexedKeyItem := range indexedKey {
+		indexedKeyRule = append(indexedKeyRule, indexedKeyItem)
 	}
 
-	logs, sub, err := _IdentityRegistry.contract.WatchLogs(opts, "MetadataSet", agentIdRule, indexedMetadataKeyRule)
+	logs, sub, err := _IdentityRegistry.contract.WatchLogs(opts, "MetadataSet", agentIdRule, indexedKeyRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1868,7 +1613,7 @@ func (_IdentityRegistry *IdentityRegistryFilterer) WatchMetadataSet(opts *bind.W
 
 // ParseMetadataSet is a log parse operation binding the contract event 0x2c149ed548c6d2993cd73efe187df6eccabe4538091b33adbd25fafdb8a1468b.
 //
-// Solidity: event MetadataSet(uint256 indexed agentId, string indexed indexedMetadataKey, string metadataKey, bytes metadataValue)
+// Solidity: event MetadataSet(uint256 indexed agentId, string indexed indexedKey, string key, bytes value)
 func (_IdentityRegistry *IdentityRegistryFilterer) ParseMetadataSet(log types.Log) (*IdentityRegistryMetadataSet, error) {
 	event := new(IdentityRegistryMetadataSet)
 	if err := _IdentityRegistry.contract.UnpackLog(event, "MetadataSet", log); err != nil {
@@ -2235,14 +1980,14 @@ func (it *IdentityRegistryRegisteredIterator) Close() error {
 // IdentityRegistryRegistered represents a Registered event raised by the IdentityRegistry contract.
 type IdentityRegistryRegistered struct {
 	AgentId  *big.Int
-	AgentURI string
+	TokenURI string
 	Owner    common.Address
 	Raw      types.Log // Blockchain specific contextual infos
 }
 
 // FilterRegistered is a free log retrieval operation binding the contract event 0xca52e62c367d81bb2e328eb795f7c7ba24afb478408a26c0e201d155c449bc4a.
 //
-// Solidity: event Registered(uint256 indexed agentId, string agentURI, address indexed owner)
+// Solidity: event Registered(uint256 indexed agentId, string tokenURI, address indexed owner)
 func (_IdentityRegistry *IdentityRegistryFilterer) FilterRegistered(opts *bind.FilterOpts, agentId []*big.Int, owner []common.Address) (*IdentityRegistryRegisteredIterator, error) {
 
 	var agentIdRule []interface{}
@@ -2264,7 +2009,7 @@ func (_IdentityRegistry *IdentityRegistryFilterer) FilterRegistered(opts *bind.F
 
 // WatchRegistered is a free log subscription operation binding the contract event 0xca52e62c367d81bb2e328eb795f7c7ba24afb478408a26c0e201d155c449bc4a.
 //
-// Solidity: event Registered(uint256 indexed agentId, string agentURI, address indexed owner)
+// Solidity: event Registered(uint256 indexed agentId, string tokenURI, address indexed owner)
 func (_IdentityRegistry *IdentityRegistryFilterer) WatchRegistered(opts *bind.WatchOpts, sink chan<- *IdentityRegistryRegistered, agentId []*big.Int, owner []common.Address) (event.Subscription, error) {
 
 	var agentIdRule []interface{}
@@ -2311,7 +2056,7 @@ func (_IdentityRegistry *IdentityRegistryFilterer) WatchRegistered(opts *bind.Wa
 
 // ParseRegistered is a log parse operation binding the contract event 0xca52e62c367d81bb2e328eb795f7c7ba24afb478408a26c0e201d155c449bc4a.
 //
-// Solidity: event Registered(uint256 indexed agentId, string agentURI, address indexed owner)
+// Solidity: event Registered(uint256 indexed agentId, string tokenURI, address indexed owner)
 func (_IdentityRegistry *IdentityRegistryFilterer) ParseRegistered(log types.Log) (*IdentityRegistryRegistered, error) {
 	event := new(IdentityRegistryRegistered)
 	if err := _IdentityRegistry.contract.UnpackLog(event, "Registered", log); err != nil {
@@ -2483,162 +2228,6 @@ func (_IdentityRegistry *IdentityRegistryFilterer) ParseTransfer(log types.Log) 
 	return event, nil
 }
 
-// IdentityRegistryURIUpdatedIterator is returned from FilterURIUpdated and is used to iterate over the raw logs and unpacked data for URIUpdated events raised by the IdentityRegistry contract.
-type IdentityRegistryURIUpdatedIterator struct {
-	Event *IdentityRegistryURIUpdated // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *IdentityRegistryURIUpdatedIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(IdentityRegistryURIUpdated)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(IdentityRegistryURIUpdated)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *IdentityRegistryURIUpdatedIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *IdentityRegistryURIUpdatedIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// IdentityRegistryURIUpdated represents a URIUpdated event raised by the IdentityRegistry contract.
-type IdentityRegistryURIUpdated struct {
-	AgentId   *big.Int
-	NewURI    string
-	UpdatedBy common.Address
-	Raw       types.Log // Blockchain specific contextual infos
-}
-
-// FilterURIUpdated is a free log retrieval operation binding the contract event 0x3a2c7fffc2cba7582c690e3b82c453ea02a308326a98a3ad7576c606336409fb.
-//
-// Solidity: event URIUpdated(uint256 indexed agentId, string newURI, address indexed updatedBy)
-func (_IdentityRegistry *IdentityRegistryFilterer) FilterURIUpdated(opts *bind.FilterOpts, agentId []*big.Int, updatedBy []common.Address) (*IdentityRegistryURIUpdatedIterator, error) {
-
-	var agentIdRule []interface{}
-	for _, agentIdItem := range agentId {
-		agentIdRule = append(agentIdRule, agentIdItem)
-	}
-
-	var updatedByRule []interface{}
-	for _, updatedByItem := range updatedBy {
-		updatedByRule = append(updatedByRule, updatedByItem)
-	}
-
-	logs, sub, err := _IdentityRegistry.contract.FilterLogs(opts, "URIUpdated", agentIdRule, updatedByRule)
-	if err != nil {
-		return nil, err
-	}
-	return &IdentityRegistryURIUpdatedIterator{contract: _IdentityRegistry.contract, event: "URIUpdated", logs: logs, sub: sub}, nil
-}
-
-// WatchURIUpdated is a free log subscription operation binding the contract event 0x3a2c7fffc2cba7582c690e3b82c453ea02a308326a98a3ad7576c606336409fb.
-//
-// Solidity: event URIUpdated(uint256 indexed agentId, string newURI, address indexed updatedBy)
-func (_IdentityRegistry *IdentityRegistryFilterer) WatchURIUpdated(opts *bind.WatchOpts, sink chan<- *IdentityRegistryURIUpdated, agentId []*big.Int, updatedBy []common.Address) (event.Subscription, error) {
-
-	var agentIdRule []interface{}
-	for _, agentIdItem := range agentId {
-		agentIdRule = append(agentIdRule, agentIdItem)
-	}
-
-	var updatedByRule []interface{}
-	for _, updatedByItem := range updatedBy {
-		updatedByRule = append(updatedByRule, updatedByItem)
-	}
-
-	logs, sub, err := _IdentityRegistry.contract.WatchLogs(opts, "URIUpdated", agentIdRule, updatedByRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(IdentityRegistryURIUpdated)
-				if err := _IdentityRegistry.contract.UnpackLog(event, "URIUpdated", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseURIUpdated is a log parse operation binding the contract event 0x3a2c7fffc2cba7582c690e3b82c453ea02a308326a98a3ad7576c606336409fb.
-//
-// Solidity: event URIUpdated(uint256 indexed agentId, string newURI, address indexed updatedBy)
-func (_IdentityRegistry *IdentityRegistryFilterer) ParseURIUpdated(log types.Log) (*IdentityRegistryURIUpdated, error) {
-	event := new(IdentityRegistryURIUpdated)
-	if err := _IdentityRegistry.contract.UnpackLog(event, "URIUpdated", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
 // IdentityRegistryUpgradedIterator is returned from FilterUpgraded and is used to iterate over the raw logs and unpacked data for Upgraded events raised by the IdentityRegistry contract.
 type IdentityRegistryUpgradedIterator struct {
 	Event *IdentityRegistryUpgraded // Event containing the contract specifics and raw log
@@ -2777,6 +2366,162 @@ func (_IdentityRegistry *IdentityRegistryFilterer) WatchUpgraded(opts *bind.Watc
 func (_IdentityRegistry *IdentityRegistryFilterer) ParseUpgraded(log types.Log) (*IdentityRegistryUpgraded, error) {
 	event := new(IdentityRegistryUpgraded)
 	if err := _IdentityRegistry.contract.UnpackLog(event, "Upgraded", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// IdentityRegistryUriUpdatedIterator is returned from FilterUriUpdated and is used to iterate over the raw logs and unpacked data for UriUpdated events raised by the IdentityRegistry contract.
+type IdentityRegistryUriUpdatedIterator struct {
+	Event *IdentityRegistryUriUpdated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *IdentityRegistryUriUpdatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(IdentityRegistryUriUpdated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(IdentityRegistryUriUpdated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *IdentityRegistryUriUpdatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *IdentityRegistryUriUpdatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// IdentityRegistryUriUpdated represents a UriUpdated event raised by the IdentityRegistry contract.
+type IdentityRegistryUriUpdated struct {
+	AgentId   *big.Int
+	NewUri    string
+	UpdatedBy common.Address
+	Raw       types.Log // Blockchain specific contextual infos
+}
+
+// FilterUriUpdated is a free log retrieval operation binding the contract event 0xb41beef75d9f8d55b985319b459e96f82453580af381391f1ad531eb8f8b5a3a.
+//
+// Solidity: event UriUpdated(uint256 indexed agentId, string newUri, address indexed updatedBy)
+func (_IdentityRegistry *IdentityRegistryFilterer) FilterUriUpdated(opts *bind.FilterOpts, agentId []*big.Int, updatedBy []common.Address) (*IdentityRegistryUriUpdatedIterator, error) {
+
+	var agentIdRule []interface{}
+	for _, agentIdItem := range agentId {
+		agentIdRule = append(agentIdRule, agentIdItem)
+	}
+
+	var updatedByRule []interface{}
+	for _, updatedByItem := range updatedBy {
+		updatedByRule = append(updatedByRule, updatedByItem)
+	}
+
+	logs, sub, err := _IdentityRegistry.contract.FilterLogs(opts, "UriUpdated", agentIdRule, updatedByRule)
+	if err != nil {
+		return nil, err
+	}
+	return &IdentityRegistryUriUpdatedIterator{contract: _IdentityRegistry.contract, event: "UriUpdated", logs: logs, sub: sub}, nil
+}
+
+// WatchUriUpdated is a free log subscription operation binding the contract event 0xb41beef75d9f8d55b985319b459e96f82453580af381391f1ad531eb8f8b5a3a.
+//
+// Solidity: event UriUpdated(uint256 indexed agentId, string newUri, address indexed updatedBy)
+func (_IdentityRegistry *IdentityRegistryFilterer) WatchUriUpdated(opts *bind.WatchOpts, sink chan<- *IdentityRegistryUriUpdated, agentId []*big.Int, updatedBy []common.Address) (event.Subscription, error) {
+
+	var agentIdRule []interface{}
+	for _, agentIdItem := range agentId {
+		agentIdRule = append(agentIdRule, agentIdItem)
+	}
+
+	var updatedByRule []interface{}
+	for _, updatedByItem := range updatedBy {
+		updatedByRule = append(updatedByRule, updatedByItem)
+	}
+
+	logs, sub, err := _IdentityRegistry.contract.WatchLogs(opts, "UriUpdated", agentIdRule, updatedByRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(IdentityRegistryUriUpdated)
+				if err := _IdentityRegistry.contract.UnpackLog(event, "UriUpdated", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseUriUpdated is a log parse operation binding the contract event 0xb41beef75d9f8d55b985319b459e96f82453580af381391f1ad531eb8f8b5a3a.
+//
+// Solidity: event UriUpdated(uint256 indexed agentId, string newUri, address indexed updatedBy)
+func (_IdentityRegistry *IdentityRegistryFilterer) ParseUriUpdated(log types.Log) (*IdentityRegistryUriUpdated, error) {
+	event := new(IdentityRegistryUriUpdated)
+	if err := _IdentityRegistry.contract.UnpackLog(event, "UriUpdated", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"trpc.group/trpc-go/trpc-a2a-go/server"
 )
@@ -48,7 +49,7 @@ func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistr
 	var agentCard *server.AgentCard
 
 	for _, endpoint := range tokenURLResponse.Endpoints {
-		if endpoint.Name == "A2A" {
+		if strings.ToLower(endpoint.Name) == "a2a" {
 			agentCard, err = getAgentCardFromA2AEndpoint(endpoint.Endpoint)
 			if err != nil {
 				errors = append(errors, err)
@@ -58,7 +59,19 @@ func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistr
 			agent.Endpoint = endpoint.Endpoint
 		}
 
-		if endpoint.Name == "MCP" && len(endpoint.Endpoint) > 0 {
+		if strings.ToLower(endpoint.Name) == "agentwallet" {
+			namespace, _chainID, agentWallet, err := formatAddress(endpoint.Endpoint)
+			if err != nil {
+				errors = append(errors, err)
+			}
+			if namespace == "eip155" && _chainID == chainID {
+				agent.Namespace = namespace
+				agent.AgentWallet = agentWallet
+				agent.AgentWalletExpirationTime = uint64(time.Now().Add(24 * 365 * 100 * time.Hour).Unix()) // 100 years
+			}
+		}
+
+		if strings.ToLower(endpoint.Name) == "mcp" && len(endpoint.Endpoint) > 0 {
 			agent.MCPEndpoints = &MCPEndpoint{
 				Endpoint:     endpoint.Endpoint,
 				Version:      endpoint.Version,
@@ -66,7 +79,7 @@ func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistr
 			}
 		}
 
-		if endpoint.Name == "OASF" && endpoint.Endpoint != "" {
+		if strings.ToLower(endpoint.Name) == "oasf" && endpoint.Endpoint != "" {
 			agent.OASFEndpoints = &OASFEndpoint{
 				Endpoint: endpoint.Endpoint,
 				Version:  endpoint.Version,

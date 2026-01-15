@@ -5,7 +5,6 @@ import (
 	agentcard "agent_identity/agentCard"
 	"agent_identity/model"
 	"context"
-	"encoding/hex"
 	"fmt"
 	"math/big"
 	"sync"
@@ -207,8 +206,8 @@ func (idx *IdentityProcessor) dealWithSetMetaDataEvent(e types.Log) error {
 		return fmt.Errorf("failed to parse set meta data event: %w", err)
 	}
 
-	if event.MetadataKey == "agentWallet" {
-		err := model.UpdateAgentWallet(idx.chainID, idx.identityAddr.String(), event.AgentId.String(), common.BytesToAddress(event.IndexedMetadataKey[:]).String(), uint64(e.BlockTimestamp))
+	if event.Key == "agentWallet" {
+		err := model.UpdateAgentWallet(idx.chainID, idx.identityAddr.String(), event.AgentId.String(), common.BytesToAddress(event.Value[:]).String(), uint64(e.BlockTimestamp))
 		if err != nil {
 			return fmt.Errorf("failed to update agent wallet: %w", err)
 		}
@@ -219,8 +218,11 @@ func (idx *IdentityProcessor) dealWithSetMetaDataEvent(e types.Log) error {
 		ChainID:          idx.chainID,
 		IdentityRegistry: idx.identityAddr.Hex(),
 		AgentID:          event.AgentId.String(),
-		Key:              event.MetadataKey,
-		Value:            hex.EncodeToString(event.IndexedMetadataKey[:]),
+		Key:              event.Key,
+		Value:            string(event.Value[:]),
+		Block:            uint64(e.BlockNumber),
+		Index:            uint64(e.Index),
+		TxHash:           e.TxHash.String(),
 	})
 }
 
@@ -234,7 +236,7 @@ func (idx *IdentityProcessor) dealWithAgentRegisteredEvent(e types.Log) error {
 		AgentID:          agentRegisteredEvent.AgentId.String(),
 		IdentityRegistry: idx.identityAddr.Hex(),
 		Owner:            agentRegisteredEvent.Owner.String(),
-		TokenURL:         agentRegisteredEvent.AgentURI,
+		TokenURL:         agentRegisteredEvent.TokenURI,
 		ChainID:          idx.chainID,
 		BlockNumber:      uint64(e.BlockNumber),
 		Index:            uint64(e.Index),
@@ -249,12 +251,12 @@ func (idx *IdentityProcessor) dealWithAgentRegisteredEvent(e types.Log) error {
 }
 
 func (idx *IdentityProcessor) dealWithUriUpdatedEvent(e types.Log) error {
-	event, err := idx.identityRegistry.ParseURIUpdated(e)
+	event, err := idx.identityRegistry.ParseUriUpdated(e)
 	if err != nil {
 		return fmt.Errorf("failed to parse auth feedback event: %w", err)
 	}
 
-	if err := model.UpdateAgentTokenURL(idx.chainID, idx.identityAddr.Hex(), event.AgentId.String(), event.NewURI, uint64(e.BlockNumber), uint64(e.Index)); err != nil {
+	if err := model.UpdateAgentTokenURL(idx.chainID, idx.identityAddr.Hex(), event.AgentId.String(), event.NewUri, uint64(e.BlockNumber), uint64(e.Index)); err != nil {
 		return fmt.Errorf("failed to update agent token url: %w", err)
 	}
 
