@@ -34,6 +34,7 @@ type ValidationRegistryProcessor struct {
 
 	validationRegistry *abi.ValidationRegistry
 	validationAddr     common.Address
+	identityAddr       string
 
 	fetchBlockInterval int64
 	chainID            string
@@ -41,7 +42,7 @@ type ValidationRegistryProcessor struct {
 	ethClient          *ethclient.Client
 }
 
-func NewValidationRegistryProcessor(validationAddr string, ethClient *ethclient.Client, fetchBlockInterval int64, startBlock uint64, _logger *logger.Logger, identityExecBlockChan <-chan uint64) *ValidationRegistryProcessor {
+func NewValidationRegistryProcessor(validationAddr, identityAddr string, ethClient *ethclient.Client, fetchBlockInterval int64, startBlock uint64, _logger *logger.Logger, identityExecBlockChan <-chan uint64) *ValidationRegistryProcessor {
 	chainId, err := ethClient.ChainID(ctx)
 	if err != nil {
 		panic(err)
@@ -69,6 +70,7 @@ func NewValidationRegistryProcessor(validationAddr string, ethClient *ethclient.
 		fetchBlockInterval:    fetchBlockInterval,
 		ethClient:             ethClient,
 		logger:                _logger,
+		identityAddr:          identityAddr,
 		chainID:               chainId.String(),
 	}
 }
@@ -96,7 +98,6 @@ func (p *ValidationRegistryProcessor) Process() {
 				p.process(int64(currentBlock))
 			}
 		case identityBlock := <-p.identityExecBlockChan:
-			// 接收identity processor发送的execBlock更新
 			p.identityExecBlock = identityBlock
 		}
 	}
@@ -132,9 +133,10 @@ loop:
 
 			if err := p.dealWithEvent(e); err != nil {
 				p.logger.WithFields(logrus.Fields{
-					"error": err,
-					"block": e.BlockNumber,
-					"index": e.Index,
+					"error":   err,
+					"block":   e.BlockNumber,
+					"index":   e.Index,
+					"tx_hash": e.TxHash.Hex(),
 				}).Error("fail to deal with event")
 				return
 			}
@@ -171,7 +173,7 @@ func (p *ValidationRegistryProcessor) dealWithValidationRequestEvent(e types.Log
 		return err
 	}
 
-	agentUID, err := model.GetAgentUID(p.chainID, p.validationAddr.Hex(), event.AgentId.String())
+	agentUID, err := model.GetAgentUID(p.chainID, p.identityAddr, event.AgentId.String())
 	if err != nil {
 		if p.identityExecBlock > uint64(e.BlockNumber) && errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil
@@ -192,7 +194,7 @@ func (p *ValidationRegistryProcessor) dealWithValidationRequestEvent(e types.Log
 		ValidationRegistry: p.validationAddr.String(),
 		ValidatorAddress:   event.ValidatorAddress.String(),
 		RequestHash:        common.BytesToHash(event.RequestHash[:]).String(),
-		RequestURI:         event.RequestURI,
+		RequestURI:         event.RequestUri,
 		BlockNumber:        uint64(e.BlockNumber),
 		Index:              uint64(e.Index),
 		RequestTxHash:      e.TxHash.String(),
@@ -209,9 +211,9 @@ func (p *ValidationRegistryProcessor) dealWithValidationResponseEvent(e types.Lo
 	return model.UpdateValidation(&model.Validation{
 		RequestHash:    common.BytesToHash(event.RequestHash[:]).String(),
 		Response:       int(event.Response),
-		ResponseURI:    event.ResponseURI,
+		ResponseURI:    event.ResponseUri,
 		ResponseHash:   common.BytesToHash(event.ResponseHash[:]).String(),
-		Tag1:           event.Tag,
+		Tag1:           common.BytesToHash(event.Tag[:]).String(),
 		ResponseTxHash: e.TxHash.String(),
 		Timestamps:     uint64(e.BlockTimestamp),
 		BlockNumber:    uint64(e.BlockNumber),

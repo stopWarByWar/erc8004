@@ -68,6 +68,12 @@ type Config struct {
 		CommentSchemaID    string `yaml:"comment_schema_id"`
 		Run                bool   `yaml:"run"`
 	} `yaml:"comment"`
+	Validation struct {
+		Addr               string `yaml:"addr"`
+		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
+		StartBlock         uint64 `yaml:"start_block"`
+		Run                bool   `yaml:"run"`
+	} `yaml:"validation"`
 }
 
 func initConf(confPath string) (*Config, error) {
@@ -81,6 +87,9 @@ func initConf(confPath string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	config.Identity.Addr = common.HexToAddress(config.Identity.Addr).String()
+	config.Validation.Addr = common.HexToAddress(config.Validation.Addr).String()
+	config.Reputation.Addr = common.HexToAddress(config.Reputation.Addr).String()
 	return config, nil
 }
 

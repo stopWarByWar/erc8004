@@ -91,7 +91,7 @@ func main() {
 	}
 
 	if config.Validation.Run {
-		validationIdx = processor.NewValidationRegistryProcessor(config.Validation.Addr, ethClient, config.Validation.FetchBlockInterval, config.Validation.StartBlock, _logger, validationExecBlockChan)
+		validationIdx = processor.NewValidationRegistryProcessor(config.Validation.Addr, config.Identity.Addr, ethClient, config.Validation.FetchBlockInterval, config.Validation.StartBlock, _logger, validationExecBlockChan)
 		go validationIdx.Process()
 	}
 

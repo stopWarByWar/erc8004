@@ -147,7 +147,7 @@
       {
         "indexed": false,
         "internalType": "string",
-        "name": "requestURI",
+        "name": "requestUri",
         "type": "string"
       },
       {
@@ -190,7 +190,7 @@
       {
         "indexed": false,
         "internalType": "string",
-        "name": "responseURI",
+        "name": "responseUri",
         "type": "string"
       },
       {
@@ -201,9 +201,9 @@
       },
       {
         "indexed": false,
-        "internalType": "string",
+        "internalType": "bytes32",
         "name": "tag",
-        "type": "string"
+        "type": "bytes32"
       }
     ],
     "name": "ValidationResponse",
@@ -267,9 +267,9 @@
         "type": "address[]"
       },
       {
-        "internalType": "string",
+        "internalType": "bytes32",
         "name": "tag",
-        "type": "string"
+        "type": "bytes32"
       }
     ],
     "name": "getSummary",
@@ -319,9 +319,9 @@
         "type": "bytes32"
       },
       {
-        "internalType": "string",
+        "internalType": "bytes32",
         "name": "tag",
-        "type": "string"
+        "type": "bytes32"
       },
       {
         "internalType": "uint256",
@@ -368,7 +368,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "identityRegistry_",
+        "name": "_identityRegistry",
         "type": "address"
       }
     ],
@@ -455,7 +455,7 @@
       },
       {
         "internalType": "string",
-        "name": "requestURI",
+        "name": "requestUri",
         "type": "string"
       },
       {
@@ -483,7 +483,7 @@
       },
       {
         "internalType": "string",
-        "name": "responseURI",
+        "name": "responseUri",
         "type": "string"
       },
       {
@@ -492,14 +492,58 @@
         "type": "bytes32"
       },
       {
-        "internalType": "string",
+        "internalType": "bytes32",
         "name": "tag",
-        "type": "string"
+        "type": "bytes32"
       }
     ],
     "name": "validationResponse",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "name": "validations",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "validatorAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "agentId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint8",
+        "name": "response",
+        "type": "uint8"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "responseHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "tag",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "lastUpdate",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   }
 ]

@@ -16,6 +16,33 @@
     "type": "error"
   },
   {
+    "inputs": [],
+    "name": "ECDSAInvalidSignature",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "length",
+        "type": "uint256"
+      }
+    ],
+    "name": "ECDSAInvalidSignatureLength",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "s",
+        "type": "bytes32"
+      }
+    ],
+    "name": "ECDSAInvalidSignatureS",
+    "type": "error"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -138,7 +165,7 @@
         "type": "address"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "uint64",
         "name": "feedbackIndex",
         "type": "uint64"
@@ -150,27 +177,21 @@
         "type": "uint8"
       },
       {
-        "indexed": true,
-        "internalType": "string",
+        "indexed": false,
+        "internalType": "bytes32",
         "name": "tag1",
-        "type": "string"
+        "type": "bytes32"
       },
       {
         "indexed": false,
-        "internalType": "string",
+        "internalType": "bytes32",
         "name": "tag2",
-        "type": "string"
+        "type": "bytes32"
       },
       {
         "indexed": false,
         "internalType": "string",
-        "name": "endpoint",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "feedbackURI",
+        "name": "feedbackUri",
         "type": "string"
       },
       {
@@ -232,7 +253,7 @@
       {
         "indexed": false,
         "internalType": "string",
-        "name": "responseURI",
+        "name": "responseUri",
         "type": "string"
       },
       {
@@ -290,7 +311,7 @@
       },
       {
         "internalType": "string",
-        "name": "responseURI",
+        "name": "responseUri",
         "type": "string"
       },
       {
@@ -407,14 +428,14 @@
         "type": "address[]"
       },
       {
-        "internalType": "string",
+        "internalType": "bytes32",
         "name": "tag1",
-        "type": "string"
+        "type": "bytes32"
       },
       {
-        "internalType": "string",
+        "internalType": "bytes32",
         "name": "tag2",
-        "type": "string"
+        "type": "bytes32"
       }
     ],
     "name": "getSummary",
@@ -459,29 +480,29 @@
         "type": "uint8"
       },
       {
-        "internalType": "string",
+        "internalType": "bytes32",
         "name": "tag1",
-        "type": "string"
+        "type": "bytes32"
       },
       {
-        "internalType": "string",
+        "internalType": "bytes32",
         "name": "tag2",
-        "type": "string"
+        "type": "bytes32"
       },
       {
         "internalType": "string",
-        "name": "endpoint",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "feedbackURI",
+        "name": "feedbackUri",
         "type": "string"
       },
       {
         "internalType": "bytes32",
         "name": "feedbackHash",
         "type": "bytes32"
+      },
+      {
+        "internalType": "bytes",
+        "name": "feedbackAuth",
+        "type": "bytes"
       }
     ],
     "name": "giveFeedback",
@@ -493,7 +514,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "identityRegistry_",
+        "name": "_identityRegistry",
         "type": "address"
       }
     ],
@@ -541,14 +562,14 @@
         "type": "address[]"
       },
       {
-        "internalType": "string",
+        "internalType": "bytes32",
         "name": "tag1",
-        "type": "string"
+        "type": "bytes32"
       },
       {
-        "internalType": "string",
+        "internalType": "bytes32",
         "name": "tag2",
-        "type": "string"
+        "type": "bytes32"
       },
       {
         "internalType": "bool",
@@ -565,23 +586,18 @@
       },
       {
         "internalType": "uint8[]",
-        "name": "feedbackIndexes",
-        "type": "uint8[]"
-      },
-      {
-        "internalType": "uint8[]",
         "name": "scores",
         "type": "uint8[]"
       },
       {
-        "internalType": "string[]",
+        "internalType": "bytes32[]",
         "name": "tag1s",
-        "type": "string[]"
+        "type": "bytes32[]"
       },
       {
-        "internalType": "string[]",
+        "internalType": "bytes32[]",
         "name": "tag2s",
-        "type": "string[]"
+        "type": "bytes32[]"
       },
       {
         "internalType": "bool[]",
@@ -606,7 +622,7 @@
       },
       {
         "internalType": "uint64",
-        "name": "feedbackIndex",
+        "name": "index",
         "type": "uint64"
       }
     ],
@@ -618,14 +634,14 @@
         "type": "uint8"
       },
       {
-        "internalType": "string",
+        "internalType": "bytes32",
         "name": "tag1",
-        "type": "string"
+        "type": "bytes32"
       },
       {
-        "internalType": "string",
+        "internalType": "bytes32",
         "name": "tag2",
-        "type": "string"
+        "type": "bytes32"
       },
       {
         "internalType": "bool",
