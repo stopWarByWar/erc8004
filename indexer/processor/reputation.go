@@ -7,6 +7,7 @@ package processor
 import (
 	"agent_identity/abi"
 	"agent_identity/model"
+	"errors"
 	"fmt"
 	"math/big"
 	"time"
@@ -18,6 +19,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 var NewFeedbackTopic = common.HexToHash("0x801d7d4264128f6f43835850f1fabb91902c3543c3738f1f62fbf7e9fd80531d")
@@ -25,8 +27,10 @@ var ResponseAppendedTopic = common.HexToHash("0xb1c6be0b5b8aef6539e2fac0fd131a2f
 var FeedbackRevokedTopic = common.HexToHash("0x25156fd3288212246d8b008d5921fde376c71ed14ac2e072a506eb06fde6d09d")
 
 type ReputationProcessor struct {
-	execBlock uint64
-	execIndex uint64
+	execBlock             uint64
+	execIndex             uint64
+	identityExecBlockChan <-chan uint64
+	identityExecBlock     uint64
 
 	reputationRegistry *abi.ReputationRegistry
 	reputationAddr     common.Address
@@ -38,7 +42,7 @@ type ReputationProcessor struct {
 	ethClient          *ethclient.Client
 }
 
-func NewReputationProcessor(reputationAddr, identityAddr string, ethClient *ethclient.Client, fetchBlockInterval int64, startBlock uint64, _logger *logger.Logger) *ReputationProcessor {
+func NewReputationProcessor(reputationAddr, identityAddr string, ethClient *ethclient.Client, fetchBlockInterval int64, startBlock uint64, _logger *logger.Logger, identityExecBlockChan <-chan uint64) *ReputationProcessor {
 	chainId, err := ethClient.ChainID(ctx)
 	if err != nil {
 		panic(err)
@@ -58,15 +62,16 @@ func NewReputationProcessor(reputationAddr, identityAddr string, ethClient *ethc
 	}
 
 	return &ReputationProcessor{
-		execBlock:          execBlock,
-		execIndex:          execIndex,
-		reputationRegistry: reputationRegistry,
-		reputationAddr:     common.HexToAddress(reputationAddr),
-		fetchBlockInterval: fetchBlockInterval,
-		ethClient:          ethClient,
-		logger:             _logger,
-		chainID:            chainId.String(),
-		identityAddr:       identityAddr,
+		execBlock:             execBlock,
+		execIndex:             execIndex,
+		identityExecBlockChan: identityExecBlockChan,
+		reputationRegistry:    reputationRegistry,
+		reputationAddr:        common.HexToAddress(reputationAddr),
+		fetchBlockInterval:    fetchBlockInterval,
+		ethClient:             ethClient,
+		logger:                _logger,
+		chainID:               chainId.String(),
+		identityAddr:          identityAddr,
 	}
 }
 
@@ -97,6 +102,9 @@ func (p *ReputationProcessor) Process() {
 			}
 		case <-fetchFeedbackAndResponseTicker.C:
 			p.fetchFeedbackAndResponse()
+		case identityBlock := <-p.identityExecBlockChan:
+			// 接收identity processor发送的execBlock更新
+			p.identityExecBlock = identityBlock
 		}
 	}
 }
@@ -174,7 +182,16 @@ func (p *ReputationProcessor) dealWithNewFeedbackEvent(e types.Log) error {
 
 	agentUID, err := model.GetAgentUID(p.chainID, p.identityAddr, newFeedbackEvent.AgentId.String())
 	if err != nil {
-		return fmt.Errorf("failed to get agent uid: %w", err)
+		if p.identityExecBlock > uint64(e.BlockNumber) && errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		} else {
+			p.logger.WithFields(logrus.Fields{
+				"error": err,
+				"block": e.BlockNumber,
+				"index": e.Index,
+			}).Error("failed to get agent uid")
+			return fmt.Errorf("failed to get agent uid: %w", err)
+		}
 	}
 
 	blockTimestamp := uint64(e.BlockTimestamp)
@@ -212,7 +229,7 @@ func (p *ReputationProcessor) dealWithFeedbackRevokedEvent(e types.Log) error {
 		return fmt.Errorf("failed to parse feedback revoked event: %w", err)
 	}
 
-	if err := model.UpdateFeedbackRevoked(p.chainID, feedbackRevokedEvent.AgentId.String(), feedbackRevokedEvent.ClientAddress.String(), feedbackRevokedEvent.FeedbackIndex); err != nil {
+	if err := model.UpdateFeedbackRevoked(p.chainID, feedbackRevokedEvent.AgentId.String(), p.reputationAddr.String(), feedbackRevokedEvent.ClientAddress.String(), feedbackRevokedEvent.FeedbackIndex); err != nil {
 		return fmt.Errorf("failed to update feedback revoked: %w", err)
 	}
 	return nil
@@ -224,7 +241,7 @@ func (p *ReputationProcessor) dealWithResponseAppendedEvent(e types.Log) error {
 		return fmt.Errorf("failed to parse response appended event: %w", err)
 	}
 
-	feedbackUID, agentUID, err := model.GetFeedbackUIDAndAgentUID(p.chainID, responseAppendedEvent.AgentId.String(), responseAppendedEvent.ClientAddress.String(), responseAppendedEvent.FeedbackIndex)
+	feedbackUID, agentUID, err := model.GetFeedbackUIDAndAgentUID(p.chainID, responseAppendedEvent.AgentId.String(), p.reputationAddr.String(), responseAppendedEvent.ClientAddress.String(), responseAppendedEvent.FeedbackIndex)
 	if err != nil {
 		p.logger.WithFields(logrus.Fields{
 			"error": err,
@@ -252,7 +269,7 @@ func (p *ReputationProcessor) dealWithResponseAppendedEvent(e types.Log) error {
 		Timestamps:    blockTimestamp,
 	}
 
-	if err := model.CreateResponse(response); err != nil {
+	if err := model.CreateResponse(p.chainID, response); err != nil {
 		return fmt.Errorf("failed to create response: %w", err)
 	}
 

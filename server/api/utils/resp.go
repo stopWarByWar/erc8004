@@ -65,7 +65,10 @@ func UpdateGeneralInfo() {
 
 		total := int64(0)
 		for chainId, amount := range agentsAmount {
-			chainInfo := config.GetChainInfo(chainId)
+			chainInfo, ok := config.GetChainInfo(chainId)
+			if !ok {
+				continue
+			}
 			generalInfo[strings.Replace(chainInfo.ChainName, " ", "_", -1)] = amount
 			total += amount
 		}

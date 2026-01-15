@@ -79,7 +79,7 @@ func formatAgentResponse(agents []*model.Agent) ([]*serverTypes.AgentResponse, e
 			providerResponse = serverTypes.ProviderResponse{}
 		}
 
-		chainInfo := config.GetChainInfo(agent.ChainID)
+		chainInfo, _ := config.GetChainInfo(agent.ChainID)
 
 		deployerInfo := config.GetContractsDeployerInfo(agent.ChainID, common.HexToAddress(agent.IdentityRegistry).String())
 

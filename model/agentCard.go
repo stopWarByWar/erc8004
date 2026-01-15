@@ -642,18 +642,18 @@ func CreateFeedback(feedback *Feedback) error {
 	return db.Omit("uid").Create(&feedback).Error
 }
 
-func UpdateFeedbackRevoked(chainID string, agentID string, clientAddress string, feedbackIndex uint64) error {
+func UpdateFeedbackRevoked(chainID, agentID, reputationRegistry, clientAddress string, feedbackIndex uint64) error {
 	return db.
 		Model(&Feedback{}).
-		Where("chain_id = ? and agent_id = ? and client_address = ? and feedback_index = ?", chainID, agentID, clientAddress, feedbackIndex).
+		Where("chain_id = ? and agent_id = ? and reputation_registry =? and client_address = ? and feedback_index = ?", chainID, agentID, reputationRegistry, clientAddress, feedbackIndex).
 		Update("revoked", true).
 		Update("endpoint", "").Error
 }
 
-func GetFeedbackUIDAndAgentUID(chainID string, agentID string, clientAddress string, feedbackIndex uint64) (uint64, uint64, error) {
+func GetFeedbackUIDAndAgentUID(chainID, agentID, reputationRegistry, clientAddress string, feedbackIndex uint64) (uint64, uint64, error) {
 	var feedback *Feedback
 	err := db.
-		Where("chain_id = ? and agent_id = ? and client_address = ? and feedback_index = ?", chainID, agentID, clientAddress, feedbackIndex).
+		Where("chain_id = ? and agent_id = ? and reputation_registry =? and client_address = ? and feedback_index = ?", chainID, agentID, reputationRegistry, clientAddress, feedbackIndex).
 		First(&feedback).Error
 	if err != nil {
 		return 0, 0, err
@@ -661,9 +661,9 @@ func GetFeedbackUIDAndAgentUID(chainID string, agentID string, clientAddress str
 	return feedback.UID, feedback.AgentUID, nil
 }
 
-func CreateResponse(response *Response) error {
+func CreateResponse(chainID string, response *Response) error {
 	var amount int64
-	err := db.Model(&Response{}).Where("block_number = ? and index = ?", response.BlockNumber, response.Index).Count(&amount).Error
+	err := db.Model(&Response{}).Where("chain_id = ? and block_number = ? and index = ?", chainID, response.BlockNumber, response.Index).Count(&amount).Error
 	if err != nil || amount > 0 {
 		return err
 	}
@@ -797,8 +797,8 @@ func GetUnInsertedAgentRegistry(chainID string, identityRegistry string, limit i
 	return agentRegistries, nil
 }
 
-func UpdateAgentRegistryInserted(agentIDs []string) error {
-	return db.Model(&AgentRegistry{}).Where("agent_id IN (?)", agentIDs).Update("inserted", true).Error
+func UpdateAgentRegistryInserted(chainID string, identityRegistry string, agentIDs []string) error {
+	return db.Model(&AgentRegistry{}).Where("chain_id = ? and identity_registry = ? and agent_id IN (?)", chainID, identityRegistry, agentIDs).Update("inserted", true).Error
 }
 
 func GetUnInsertedCommentAttestation(blockNumber uint64, index uint64, limit int, schemaUID string) (attestations []*Attestation, err error) {

@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/big"
+	"sync"
 	"time"
 
 	"agent_identity/logger"
@@ -27,6 +28,9 @@ var SetMetaDataTopic = common.HexToHash("0x2c149ed548c6d2993cd73efe187df6eccabe4
 type IdentityProcessor struct {
 	execBlock uint64
 	execIndex uint64
+	mu        sync.RWMutex // 保护execBlock和execIndex的并发访问
+
+	execBlockChan chan<- uint64 // 用于向reputation processor发送execBlock的channel
 
 	ethClient        *ethclient.Client
 	identityRegistry *abi.IdentityRegistry
@@ -38,7 +42,7 @@ type IdentityProcessor struct {
 	logger  *logger.Logger
 }
 
-func NewCreateAgentProcessor(identityAddr string, ethClient *ethclient.Client, fetchBlockInterval int64, startBlock uint64, _logger *logger.Logger) *IdentityProcessor {
+func NewCreateAgentProcessor(identityAddr string, ethClient *ethclient.Client, fetchBlockInterval int64, startBlock uint64, _logger *logger.Logger, execBlockChan chan<- uint64) *IdentityProcessor {
 	chainId, err := ethClient.ChainID(ctx)
 	if err != nil {
 		panic(err)
@@ -61,6 +65,7 @@ func NewCreateAgentProcessor(identityAddr string, ethClient *ethclient.Client, f
 	return &IdentityProcessor{
 		execBlock:          execBlock,
 		execIndex:          execIndex,
+		execBlockChan:      execBlockChan,
 		identityRegistry:   identity,
 		identityAddr:       common.HexToAddress(identityAddr),
 		fetchBlockInterval: fetchBlockInterval,
@@ -73,9 +78,13 @@ func NewCreateAgentProcessor(identityAddr string, ethClient *ethclient.Client, f
 var ctx = context.Background()
 
 func (idx *IdentityProcessor) Process() {
+	idx.mu.RLock()
+	execBlock := idx.execBlock
+	execIndex := idx.execIndex
+	idx.mu.RUnlock()
 	idx.logger.WithFields(logrus.Fields{
-		"block": idx.execBlock,
-		"index": idx.execIndex,
+		"block": execBlock,
+		"index": execIndex,
 	}).Info("start run identity registry processor")
 
 	ticker := time.NewTicker(20 * time.Second)
@@ -94,7 +103,18 @@ func (idx *IdentityProcessor) Process() {
 				}).Error("fail to get current block num")
 				continue
 			}
-			if idx.execBlock < uint64(currentBlock) {
+			idx.mu.RLock()
+			execBlock := idx.execBlock
+			idx.mu.RUnlock()
+
+			if idx.execBlockChan != nil {
+				select {
+				case idx.execBlockChan <- execBlock:
+				default:
+				}
+			}
+
+			if execBlock < uint64(currentBlock) {
 				idx.process(int64(currentBlock))
 			}
 		case <-fetchAgentCardTicker.C:
@@ -104,7 +124,11 @@ func (idx *IdentityProcessor) Process() {
 }
 
 func (idx *IdentityProcessor) process(currentBlockNum int64) {
+	idx.mu.RLock()
 	fromBlock := int64(idx.execBlock) + 1
+	currentExecBlock := idx.execBlock
+	currentExecIndex := idx.execIndex
+	idx.mu.RUnlock()
 
 loop:
 	for {
@@ -126,9 +150,9 @@ loop:
 		}
 
 		for _, e := range events {
-			if uint64(idx.execBlock) > e.BlockNumber {
+			if currentExecBlock > e.BlockNumber {
 				continue
-			} else if uint64(idx.execBlock) == e.BlockNumber && idx.execIndex >= uint64(e.Index) {
+			} else if currentExecBlock == e.BlockNumber && currentExecIndex >= uint64(e.Index) {
 				continue
 			}
 
@@ -141,16 +165,22 @@ loop:
 				return
 			}
 
+			idx.mu.Lock()
 			idx.execBlock = uint64(e.BlockNumber)
 			idx.execIndex = uint64(e.Index)
+			currentExecBlock = idx.execBlock
+			currentExecIndex = idx.execIndex
+			idx.mu.Unlock()
 		}
 
 		if toBlock < currentBlockNum {
 			fromBlock = toBlock
 			continue loop
 		} else {
+			idx.mu.Lock()
 			idx.execBlock = uint64(currentBlockNum)
 			idx.execIndex = 0
+			idx.mu.Unlock()
 			return
 		}
 	}
@@ -320,7 +350,7 @@ func (idx *IdentityProcessor) setAgentCardInserted() {
 			// 		continue
 			// 	}
 			// }
-			if err := model.UpdateAgentRegistryInserted([]string{agentRegistry.AgentID}); err != nil {
+			if err := model.UpdateAgentRegistryInserted(idx.chainID, idx.identityAddr.Hex(), []string{agentRegistry.AgentID}); err != nil {
 				idx.logger.WithFields(logrus.Fields{
 					"error":            err,
 					"chainID":          idx.chainID,

@@ -29,6 +29,9 @@ type ValidationRegistryProcessor struct {
 	execBlock uint64
 	execIndex uint64
 
+	identityExecBlockChan <-chan uint64 // 用于接收identity processor发送的execBlock的channel
+	identityExecBlock     uint64        // 记录identity processor执行到的区块号
+
 	validationRegistry *abi.ValidationRegistry
 	validationAddr     common.Address
 
@@ -38,7 +41,7 @@ type ValidationRegistryProcessor struct {
 	ethClient          *ethclient.Client
 }
 
-func NewValidationRegistryProcessor(validationAddr string, ethClient *ethclient.Client, fetchBlockInterval int64, startBlock uint64, _logger *logger.Logger) *ValidationRegistryProcessor {
+func NewValidationRegistryProcessor(validationAddr string, ethClient *ethclient.Client, fetchBlockInterval int64, startBlock uint64, _logger *logger.Logger, identityExecBlockChan <-chan uint64) *ValidationRegistryProcessor {
 	chainId, err := ethClient.ChainID(ctx)
 	if err != nil {
 		panic(err)
@@ -58,14 +61,15 @@ func NewValidationRegistryProcessor(validationAddr string, ethClient *ethclient.
 	}
 
 	return &ValidationRegistryProcessor{
-		execBlock:          execBlock,
-		execIndex:          execIndex,
-		validationRegistry: validationRegistry,
-		validationAddr:     common.HexToAddress(validationAddr),
-		fetchBlockInterval: fetchBlockInterval,
-		ethClient:          ethClient,
-		logger:             _logger,
-		chainID:            chainId.String(),
+		execBlock:             execBlock,
+		execIndex:             execIndex,
+		identityExecBlockChan: identityExecBlockChan,
+		validationRegistry:    validationRegistry,
+		validationAddr:        common.HexToAddress(validationAddr),
+		fetchBlockInterval:    fetchBlockInterval,
+		ethClient:             ethClient,
+		logger:                _logger,
+		chainID:               chainId.String(),
 	}
 }
 
@@ -75,18 +79,26 @@ func (p *ValidationRegistryProcessor) Process() {
 		"index": p.execIndex,
 	}).Info("start run validation registry processor")
 
+	ticker := time.NewTicker(20 * time.Second)
+	defer ticker.Stop()
+
 	for {
-		currentBlock, err := p.ethClient.BlockNumber(ctx)
-		if err != nil {
-			p.logger.WithFields(logrus.Fields{
-				"error": err,
-			}).Error("fail to get current block num")
-			continue
+		select {
+		case <-ticker.C:
+			currentBlock, err := p.ethClient.BlockNumber(ctx)
+			if err != nil {
+				p.logger.WithFields(logrus.Fields{
+					"error": err,
+				}).Error("fail to get current block num")
+				continue
+			}
+			if p.execBlock < uint64(currentBlock) {
+				p.process(int64(currentBlock))
+			}
+		case identityBlock := <-p.identityExecBlockChan:
+			// 接收identity processor发送的execBlock更新
+			p.identityExecBlock = identityBlock
 		}
-		if p.execBlock < uint64(currentBlock) {
-			p.process(int64(currentBlock))
-		}
-		time.Sleep(20 * time.Second)
 	}
 }
 
@@ -160,8 +172,17 @@ func (p *ValidationRegistryProcessor) dealWithValidationRequestEvent(e types.Log
 	}
 
 	agentUID, err := model.GetAgentUID(p.chainID, p.validationAddr.Hex(), event.AgentId.String())
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return err
+	if err != nil {
+		if p.identityExecBlock > uint64(e.BlockNumber) && errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
+		} else {
+			p.logger.WithFields(logrus.Fields{
+				"error": err,
+				"block": e.BlockNumber,
+				"index": e.Index,
+			}).Error("failed to get agent uid")
+			return err
+		}
 	}
 
 	return model.InsertValidation(&model.Validation{
@@ -185,7 +206,6 @@ func (p *ValidationRegistryProcessor) dealWithValidationResponseEvent(e types.Lo
 		return err
 	}
 
-	//todo: update
 	return model.UpdateValidation(&model.Validation{
 		RequestHash:    common.BytesToHash(event.RequestHash[:]).String(),
 		Response:       int(event.Response),

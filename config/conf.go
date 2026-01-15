@@ -75,12 +75,12 @@ func Init(configPath string) error {
 	return nil
 }
 
-func GetChainInfo(chainId string) ChainInfo {
+func GetChainInfo(chainId string) (ChainInfo, bool) {
 	chain, ok := ChainMap[chainId]
 	if !ok {
-		return ChainInfo{}
+		return ChainInfo{}, false
 	}
-	return chain
+	return chain, true
 }
 
 func GetContractsDeployerInfo(ChainID string, RegistryAddress string) ContractInfo {

@@ -37,7 +37,8 @@ func TestProcessor(t *testing.T) {
 		panic(err)
 	}
 
-	idx := NewCreateAgentProcessor(common.HexToAddress(config.Identity.Addr).String(), ethClient, config.Identity.FetchBlockInterval, config.Identity.StartBlock, _logger)
+	sendChan := make(chan uint64, 10)
+	idx := NewCreateAgentProcessor(common.HexToAddress(config.Identity.Addr).String(), ethClient, config.Identity.FetchBlockInterval, config.Identity.StartBlock, _logger, sendChan)
 	idx.Process()
 
 	// idx.setAgentCardInserted()

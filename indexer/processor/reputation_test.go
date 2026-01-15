@@ -32,6 +32,8 @@ func TestReputationProcessor(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	processor := NewReputationProcessor(config.Reputation.Addr, config.Identity.Addr, ethClient, config.Reputation.FetchBlockInterval, config.Reputation.StartBlock, _logger)
+
+	identityExecBlockChan := make(chan uint64, 10)
+	processor := NewReputationProcessor(config.Reputation.Addr, config.Identity.Addr, ethClient, config.Reputation.FetchBlockInterval, config.Reputation.StartBlock, _logger, identityExecBlockChan)
 	processor.Process()
 }
