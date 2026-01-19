@@ -35,6 +35,7 @@ var ChainList = []ChainInfo{}
 var RegisterList = []ContractInfo{}
 var RegisterMap = make(map[string]map[string]ContractInfo)
 var ChainMap = make(map[string]ChainInfo)
+var ValidationRegistryMap = make(map[string]map[string]ContractInfo)
 
 // Init 从配置文件加载 ChainList 和 RegisterList
 // 如果 configPath 为空，将尝试从多个常见路径加载
@@ -72,6 +73,10 @@ func Init(configPath string) error {
 			RegisterMap[register.ChainId] = make(map[string]ContractInfo)
 		}
 		RegisterMap[register.ChainId][register.IdentityAddress] = register
+		if ValidationRegistryMap[register.ChainId] == nil {
+			ValidationRegistryMap[register.ChainId] = make(map[string]ContractInfo)
+		}
+		ValidationRegistryMap[register.ChainId][register.ValidationAddress] = register
 	}
 	return nil
 }
@@ -97,6 +102,14 @@ func GetContractsDeployerInfo(ChainID string, RegistryAddress string) ContractIn
 		return ContractInfo{}
 	}
 	return register
+}
+
+func GetIdentityAddressByValidationAddress(chainID, ValidationAddress string) string {
+	registry, ok := ValidationRegistryMap[chainID][ValidationAddress]
+	if !ok {
+		return ""
+	}
+	return registry.IdentityAddress
 }
 
 type IndexerConfig struct {

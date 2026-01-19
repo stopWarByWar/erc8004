@@ -5,6 +5,7 @@ import (
 	"agent_identity/model"
 	serverTypes "agent_identity/server/api/types"
 	"fmt"
+	"strings"
 )
 
 func GetAgentValidationList(chainID, validationRegistry, agentID string, page, pageSize int, filter string) ([]*serverTypes.Validation, int64, error) {
@@ -62,7 +63,8 @@ func GetValidatorValidationList(validatorAddress string, page, pageSize int, fil
 	var validationsList []*serverTypes.ValidatorValidation
 	for _, validation := range validations {
 		chainInfo, _ := config.GetChainInfo(validation.ChainID)
-		deployerInfo := config.GetContractsDeployerInfo(validation.ChainID, validation.ValidationRegistry)
+		registryAddress := config.GetIdentityAddressByValidationAddress(validation.ChainID, validation.ValidationRegistry)
+		deployerInfo := config.GetContractsDeployerInfo(validation.ChainID, registryAddress)
 
 		validationsList = append(validationsList, &serverTypes.ValidatorValidation{
 			ChainName:          chainInfo.ChainName,
@@ -77,11 +79,11 @@ func GetValidatorValidationList(validatorAddress string, page, pageSize int, fil
 			ValidatorAddress: validation.ValidatorAddress,
 
 			RequestURI:  validation.RequestURI,
-			RequestHash: validation.RequestHash,
+			RequestHash: strings.Trim(validation.RequestHash, " "),
 
 			Response:     validation.Response,
 			ResponseURI:  validation.ResponseURI,
-			ResponseHash: validation.ResponseHash,
+			ResponseHash: strings.Trim(validation.ResponseHash, " "),
 			Tag1:         validation.Tag1,
 			Timestamps:   validation.Timestamps,
 		})
