@@ -8,10 +8,10 @@ create table if not exists validations (
     validator_address char(42) not null,
 
     request_hash char(66) not null,
-    request_uri varchar(255) not null,
+    request_uri text not null,
 
     response int not null,
-    response_uri varchar(255) not null,
+    response_uri text not null,
     response_hash char(66) not null,
     tag1 varchar(255) not null,
 
@@ -40,9 +40,10 @@ create index if not exists idx_validators_finished_amount on validators(finished
 CREATE OR REPLACE FUNCTION increment_pending_amount_on_new_validation()
 RETURNS TRIGGER AS $$
 BEGIN
-  UPDATE validators
-  SET pending_amount = pending_amount + 1
-  WHERE address = NEW.validator_address;
+  INSERT INTO validators (address, pending_amount, finished_amount)
+  VALUES (NEW.validator_address, 1, 0)
+  ON CONFLICT (address) 
+  DO UPDATE SET pending_amount = validators.pending_amount + 1;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

@@ -10,9 +10,10 @@ func GetNetworkList() ([]types.NetworkResponse, error) {
 	networkList := make([]types.NetworkResponse, 0)
 	for _, chain := range config.ChainList {
 		network := types.NetworkResponse{
-			ChainId:   chain.ChainId,
-			ChainName: chain.ChainName,
-			ChainLogo: chain.ChainLogo,
+			ChainId:     chain.ChainId,
+			ChainName:   chain.ChainName,
+			ChainLogo:   chain.ChainLogo,
+			AgentAmount: chain.AgentAmount,
 		}
 
 		deployers := make([]types.ContractInfo, 0)
