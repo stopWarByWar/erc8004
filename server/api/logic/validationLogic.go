@@ -35,12 +35,21 @@ func GetAgentValidationList(chainID, validationRegistry, agentID string, page, p
 	return validationResponsesList, total, nil
 }
 
-func GetValidatorList(page, pageSize int) ([]*model.Validator, int64, error) {
+func GetValidatorList(page, pageSize int) ([]*serverTypes.ValidatorListInfo, int64, error) {
 	validatorList, total, err := model.GetValidatorList(page, pageSize)
 	if err != nil {
 		return nil, 0, fmt.Errorf("fail to get validator list: %v", err)
 	}
-	return validatorList, total, nil
+	var validatorListInfoList []*serverTypes.ValidatorListInfo
+	for i, validator := range validatorList {
+		validatorListInfoList = append(validatorListInfoList, &serverTypes.ValidatorListInfo{
+			Rank:           uint64(i + (page-1)*pageSize + 1),
+			Address:        validator.Address,
+			PendingAmount:  validator.PendingAmount,
+			FinishedAmount: validator.FinishedAmount,
+		})
+	}
+	return validatorListInfoList, total, nil
 }
 
 func GetValidatorValidationList(validatorAddress string, page, pageSize int, filter string) ([]*serverTypes.Validation, int64, error) {

@@ -167,3 +167,10 @@ type ContractInfo struct {
 	Description           string `json:"description"`
 	LogoURL               string `json:"logoURL"`
 }
+
+type ValidatorListInfo struct {
+	Rank           uint64 `json:"rank"`
+	Address        string `json:"address"`
+	PendingAmount  uint64 `json:"pendingAmount"`
+	FinishedAmount uint64 `json:"finishedAmount"`
+}
