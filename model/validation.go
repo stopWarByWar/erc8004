@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"fmt"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -171,11 +172,35 @@ func GetValidationListByValidatorAddress(validatorAddress string, page int, page
 	return validationList, total, nil
 }
 
-func GetValidatorByAddress(address string) (*Validator, error) {
+func GetValidatorByAddress(address string) (any, error) {
 	var validator Validator
 	err := db.Where("address = ?", address).First(&validator).Error
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to get validator: %v", err)
 	}
-	return &validator, nil
+
+	passportMap, err := checkPassport([]string{address})
+	if err != nil {
+		return nil, fmt.Errorf("fail to check passport: %v", err)
+	}
+
+	type ValidatorInfo struct {
+		Address        string
+		PendingAmount  uint64
+		FinishedAmount uint64
+		Name           string
+		Avatar         string
+		Passport       bool
+	}
+
+	var validatorInfo = &ValidatorInfo{
+		Address:        validator.Address,
+		PendingAmount:  validator.PendingAmount,
+		FinishedAmount: validator.FinishedAmount,
+		Name:           passportMap[address].Name,
+		Avatar:         passportMap[address].Avatar,
+		Passport:       passportMap[address].Name != "",
+	}
+
+	return validatorInfo, nil
 }

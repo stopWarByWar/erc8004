@@ -81,10 +81,10 @@ func GetValidatorValidationList(validatorAddress string, page, pageSize int, fil
 	return validationsList, total, nil
 }
 
-func GetValidatorByAddress(address string) (*model.Validator, error) {
-	validator, err := model.GetValidatorByAddress(address)
+func GetValidatorByAddress(address string) (any, error) {
+	validatorInfo, err := model.GetValidatorByAddress(address)
 	if err != nil {
 		return nil, fmt.Errorf("fail to get validator: %v", err)
 	}
-	return validator, nil
+	return validatorInfo, nil
 }
