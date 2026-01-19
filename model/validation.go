@@ -121,7 +121,12 @@ func GetValidationListByAgent(chainID string, validationRegistry string, agentID
 	return validationList, total, nil
 }
 
-func GetValidationListByValidatorAddress(validatorAddress string, page int, pageSize int, filter string) ([]*Validation, int64, error) {
+type ValidationInfo struct {
+	Validation
+	AgentName string
+}
+
+func GetValidationListByValidatorAddress(validatorAddress string, page int, pageSize int, filter string) ([]*ValidationInfo, int64, error) {
 	if page <= 0 || pageSize <= 0 {
 		return nil, 0, errors.New("invalid page or pageSize")
 	}
@@ -132,7 +137,8 @@ func GetValidationListByValidatorAddress(validatorAddress string, page int, page
 	// - 如果 filter == "finished"，返回 response_tx_hash 非空的验证记录。
 
 	// 构建基础查询条件（按验证者地址）
-	query := db.Where("validator_address = ?", validatorAddress)
+	// 从 validations 表出发，后续只选择 ValidationInfo 中定义的字段
+	query := db.Model(&Validation{}).Where("validator_address = ?", validatorAddress)
 
 	// 根据 filter 参数添加过滤条件
 	switch filter {
@@ -148,10 +154,13 @@ func GetValidationListByValidatorAddress(validatorAddress string, page int, page
 		// 如果 filter 不是上述值，默认返回所有记录
 	}
 
-	var validationList []*Validation
-	if err := query.Order("block_number DESC, index DESC").
+	var validationList []*ValidationInfo
+	if err := query.
+		Select("validations.*, agents.name AS agent_name").
+		Order("block_number DESC, index DESC").
 		Offset((page - 1) * pageSize).
 		Limit(pageSize).
+		Joins("LEFT JOIN agents ON validations.agent_uid = agents.uid").
 		Find(&validationList).Error; err != nil {
 		return nil, 0, err
 	}

@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"agent_identity/config"
 	"agent_identity/model"
 	serverTypes "agent_identity/server/api/types"
 	"fmt"
@@ -52,18 +53,25 @@ func GetValidatorList(page, pageSize int) ([]*serverTypes.ValidatorListInfo, int
 	return validatorListInfoList, total, nil
 }
 
-func GetValidatorValidationList(validatorAddress string, page, pageSize int, filter string) ([]*serverTypes.Validation, int64, error) {
+func GetValidatorValidationList(validatorAddress string, page, pageSize int, filter string) ([]*serverTypes.ValidatorValidation, int64, error) {
 	validations, total, err := model.GetValidationListByValidatorAddress(validatorAddress, page, pageSize, filter)
 	if err != nil {
 		return nil, 0, fmt.Errorf("fail to get validator requests: %v", err)
 	}
 
-	var validationsList []*serverTypes.Validation
+	var validationsList []*serverTypes.ValidatorValidation
 	for _, validation := range validations {
-		validationsList = append(validationsList, &serverTypes.Validation{
+		chainInfo, _ := config.GetChainInfo(validation.ChainID)
+		deployerInfo := config.GetContractsDeployerInfo(validation.ChainID, validation.ValidationRegistry)
+
+		validationsList = append(validationsList, &serverTypes.ValidatorValidation{
+			ChainName:          chainInfo.ChainName,
+			ChainLogo:          chainInfo.ChainLogo,
+			ContractDeployer:   deployerInfo.Deployer,
 			AgentUID:           validation.AgentUID,
 			ChainID:            validation.ChainID,
 			AgentID:            validation.AgentID,
+			AgentName:          validation.AgentName,
 			ValidationRegistry: validation.ValidationRegistry,
 
 			ValidatorAddress: validation.ValidatorAddress,

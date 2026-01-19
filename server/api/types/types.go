@@ -95,6 +95,31 @@ type Validation struct {
 	Timestamps   uint64 `json:"timestamps"`
 }
 
+type ValidatorValidation struct {
+	ChainName        string `json:"chain_name"`
+	ChainLogo        string `json:"chain_logo"`
+	ContractDeployer string `json:"contract_deployer"`
+
+	AgentUID  uint64 `json:"agent_uid"`
+	ChainID   string `json:"chain_id"`
+	AgentID   string `json:"agent_id"`
+	AgentName string `json:"agent_name"`
+
+	ValidationRegistry string `json:"validation_registry"`
+
+	ValidatorAddress string `json:"validator_address"`
+
+	RequestURI  string `json:"request_uri"`
+	RequestHash string `json:"request_hash"`
+
+	Response     int    `json:"response"`
+	ResponseURI  string `json:"response_uri"`
+	ResponseHash string `json:"response_hash"`
+	Tag1         string `json:"tag1"`
+	Timestamps   uint64 `json:"timestamps"`
+	Status       string `json:"status"`
+}
+
 type Endpoint struct {
 	Name         string                  `json:"name"`
 	Endpoint     string                  `json:"endpoint"`
