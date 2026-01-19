@@ -65,6 +65,10 @@ func GetValidatorValidationList(validatorAddress string, page, pageSize int, fil
 		chainInfo, _ := config.GetChainInfo(validation.ChainID)
 		registryAddress := config.GetIdentityAddressByValidationAddress(validation.ChainID, validation.ValidationRegistry)
 		deployerInfo := config.GetContractsDeployerInfo(validation.ChainID, registryAddress)
+		status := "pending"
+		if len(validation.ResponseTxHash) > 0 {
+			status = "finished"
+		}
 
 		validationsList = append(validationsList, &serverTypes.ValidatorValidation{
 			ChainName:          chainInfo.ChainName,
@@ -86,6 +90,7 @@ func GetValidatorValidationList(validatorAddress string, page, pageSize int, fil
 			ResponseHash: strings.Trim(validation.ResponseHash, " "),
 			Tag1:         validation.Tag1,
 			Timestamps:   validation.Timestamps,
+			Status:       status,
 		})
 	}
 	return validationsList, total, nil
