@@ -9,10 +9,11 @@ import (
 )
 
 type ChainInfo struct {
-	ChainId    string `json:"chain_id" yaml:"chain_id"`
-	ChainName  string `json:"chain_name" yaml:"chain_name"`
-	ChainLogo  string `json:"chain_logo" yaml:"chain_logo"`
-	ScanPrefix string `json:"scan_prefix" yaml:"scan_prefix"`
+	ChainId     string `json:"chain_id" yaml:"chain_id"`
+	ChainName   string `json:"chain_name" yaml:"chain_name"`
+	ChainLogo   string `json:"chain_logo" yaml:"chain_logo"`
+	ScanPrefix  string `json:"scan_prefix" yaml:"scan_prefix"`
+	AgentAmount uint64 `json:"agent_amount" yaml:"agent_amount"`
 }
 
 type ContractInfo struct {
@@ -83,6 +84,13 @@ func GetChainInfo(chainId string) (ChainInfo, bool) {
 	return chain, true
 }
 
+func SetChainAgentAmount(chainId string, amount int64) {
+	chain, ok := ChainMap[chainId]
+	if !ok {
+		return
+	}
+	chain.AgentAmount = uint64(amount)
+}
 func GetContractsDeployerInfo(ChainID string, RegistryAddress string) ContractInfo {
 	register, ok := RegisterMap[ChainID][RegistryAddress]
 	if !ok {

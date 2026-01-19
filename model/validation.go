@@ -61,12 +61,12 @@ func GetValidatorList(page int, pageSize int) ([]*Validator, int64, error) {
 		return nil, 0, errors.New("invalid page or pageSize")
 	}
 	var validatorList []*Validator
-	err := db.Order("finished_amount DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&validatorList).Error
+	err := db.Model(&Validator{}).Order("finished_amount DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&validatorList).Error
 	if err != nil {
 		return nil, 0, err
 	}
 	var total int64
-	err = db.Count(&total).Error
+	err = db.Model(&Validator{}).Count(&total).Error
 	if err != nil {
 		return nil, 0, err
 	}

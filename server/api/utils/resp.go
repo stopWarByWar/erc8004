@@ -69,8 +69,13 @@ func UpdateGeneralInfo() {
 			if !ok {
 				continue
 			}
-			generalInfo[strings.Replace(chainInfo.ChainName, " ", "_", -1)] = amount
-			total += amount
+			chainName := strings.Replace(chainInfo.ChainName, " ", "_", -1)
+			if len(chainName) > 0 {
+				generalInfo[chainName] = amount
+				total += amount
+			}
+			config.SetChainAgentAmount(chainId, amount)
+
 		}
 		generalInfo["total"] = total
 		time.Sleep(5 * time.Minute)

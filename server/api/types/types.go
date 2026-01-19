@@ -148,9 +148,10 @@ type ProofOfPayment struct {
 }
 
 type NetworkResponse struct {
-	ChainId   string `json:"chainId"`
-	ChainName string `json:"chainName"`
-	ChainLogo string `json:"chainLogo"`
+	ChainId     string `json:"chainId"`
+	ChainName   string `json:"chainName"`
+	ChainLogo   string `json:"chainLogo"`
+	AgentAmount uint64 `json:"agentAmount"`
 
 	ContractInfo []ContractInfo `json:"contractInfo"`
 }
