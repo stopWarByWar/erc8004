@@ -30,7 +30,7 @@ func SetFeedback(request serverTypes.UploadFeedbackRequest) (string, string, err
 
 	agentID, err := strconv.ParseUint(agent.AgentID, 10, 64)
 	if err != nil {
-		return "", "", fmt.Errorf("fail to parse agent id: %w", err)
+		return "", "", fmt.Errorf("fail to parse agent id:%s, error: %w", agent.AgentID, err)
 	}
 
 	agentRegistry := common.HexToAddress(agent.IdentityRegistry).String()
@@ -66,7 +66,7 @@ func SetFeedback(request serverTypes.UploadFeedbackRequest) (string, string, err
 		return "", "", fmt.Errorf("fail to marshal feedback: %w", err)
 	}
 
-	feedbackURI, err := helper.GetHelper().UploadFeedbackToS3(agent.ChainID, agentRegistry, agent.AgentID, clientAddress, request.IndexLimit, feedbackData)
+	feedbackURI, err := helper.GetHelper().UploadFeedbackToS3(agent.ChainID, agentRegistry, agent.AgentID, clientAddress, feedbackData)
 	if err != nil {
 		return "", "", fmt.Errorf("fail to upload feedback to s3: %w", err)
 	}

@@ -20,20 +20,19 @@ func TestGetAgentFeedbacksList(t *testing.T) {
 
 func TestSetFeedback(t *testing.T) {
 	initTest()
-	tag1 := "test"
-	tag2 := "test"
+	tag1 := "tag1"
+	tag2 := "tag2"
 	skill := "test"
 	context := "test"
 	domain := "test"
 	name := "test"
 	request := types.UploadFeedbackRequest{
-		UID:           uint64(1),
+		UID:           uint64(2277),
 		ClientAddress: "0x0004AA63c570c570eBF15376c0dB199918BFe9Fb",
 		Skill:         &skill,
 		Context:       &context,
 		Domain:        &domain,
 		Name:          &name,
-		IndexLimit:    100,
 		Score:         1,
 		Tag1:          &tag1,
 		Tag2:          &tag2,

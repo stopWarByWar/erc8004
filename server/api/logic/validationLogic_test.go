@@ -7,13 +7,11 @@ import (
 
 func TestGetAgentValidationList(t *testing.T) {
 	initTest()
-	chainID := "11155111"
-	validationRegistry := "0x8004AA63c570c570eBF15376c0dB199918BFe9Fb"
-	agentID := "1"
+	uid := uint64(1)
 	page := 1
 	pageSize := 10
 	filter := "all"
-	validationResponses, total, err := GetAgentValidationList(chainID, validationRegistry, agentID, page, pageSize, filter)
+	validationResponses, total, err := GetAgentValidationList(uid, page, pageSize, filter)
 	if err != nil {
 		t.Errorf("GetAgentValidationList error: %v", err)
 	}

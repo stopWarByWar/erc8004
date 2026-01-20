@@ -3,6 +3,7 @@ package helper
 import (
 	"bytes"
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -65,8 +66,10 @@ func (h Helper) UploadLogoToS3(chainId, identityRegistry, agentId string, data [
 }
 
 // UploadFeedbackToS3 上传 Feedback 到 S3，文件设置为公开可读
-func (h Helper) UploadFeedbackToS3(chainId, identityRegistry, agentId, userAddress string, indexLimit uint64, data []byte) (string, error) {
-	key := fmt.Sprintf("erc8004/feedback/%s-%s-%s-%s-%d.json", chainId, identityRegistry, agentId, userAddress, indexLimit)
+func (h Helper) UploadFeedbackToS3(chainId, identityRegistry, agentId, userAddress string, data []byte) (string, error) {
+
+	timestamp := time.Now().UnixNano()
+	key := fmt.Sprintf("erc8004/feedback/%s/%s/%s-%s-%d.json", chainId, identityRegistry, agentId, userAddress, timestamp)
 	_, err := h.s3SVC.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(h.bucketName),
 		Key:    aws.String(key),
