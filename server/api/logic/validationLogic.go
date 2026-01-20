@@ -36,6 +36,7 @@ func GetAgentValidationList(uid uint64, page, pageSize int, filter string) ([]*s
 			ResponseHash: validationResponse.ResponseHash,
 			Tag1:         validationResponse.Tag1,
 			Timestamps:   validationResponse.Timestamps,
+			Status:       status,
 		})
 	}
 	return validationResponsesList, total, nil
