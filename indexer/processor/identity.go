@@ -208,7 +208,7 @@ func (idx *IdentityProcessor) dealWithSetMetaDataEvent(e types.Log) error {
 	}
 
 	if event.MetadataKey == "agentWallet" {
-		err := model.UpdateAgentWallet(idx.chainID, idx.identityAddr.String(), event.AgentId.String(), common.BytesToAddress(event.IndexedMetadataKey[:]).String(), uint64(e.BlockTimestamp))
+		err := model.UpdateAgentWallet(idx.chainID, idx.identityAddr.String(), event.AgentId.String(), common.BytesToAddress(event.MetadataValue).String(), uint64(e.BlockTimestamp))
 		if err != nil {
 			return fmt.Errorf("failed to update agent wallet: %w", err)
 		}
@@ -220,7 +220,7 @@ func (idx *IdentityProcessor) dealWithSetMetaDataEvent(e types.Log) error {
 		IdentityRegistry: idx.identityAddr.Hex(),
 		AgentID:          event.AgentId.String(),
 		Key:              event.MetadataKey,
-		Value:            hex.EncodeToString(event.IndexedMetadataKey[:]),
+		Value:            hex.EncodeToString(event.MetadataValue),
 	})
 }
 

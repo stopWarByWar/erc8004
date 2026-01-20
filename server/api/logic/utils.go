@@ -25,22 +25,22 @@ func formatAgentResponse(agents []*model.Agent) ([]*serverTypes.AgentResponse, e
 
 	skills, err := model.GetSkillsByAgentUIDs(agentUIDs)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to get skills by agent uids: %v", err)
 	}
 
 	skillTags, err := model.GetSkillTagsByAgentUIDs(agentUIDs)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to get skill tags by agent uids: %v", err)
 	}
 
 	providers, err := model.GetProvidersByAgentUIDs(agentUIDs)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to get providers by agent uids: %v", err)
 	}
 
 	trustModels, err := model.GetTrustModelsByAgentUIDs(agentUIDs)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to get trust models by agent uids: %v", err)
 	}
 
 	for _, agent := range agents {
