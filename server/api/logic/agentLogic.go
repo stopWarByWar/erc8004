@@ -6,7 +6,6 @@ import (
 	"agent_identity/model"
 	"agent_identity/server/api/types"
 	serverTypes "agent_identity/server/api/types"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -93,19 +92,18 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 
 	var metadataResponse = make([]serverTypes.MetadataResponse, 0)
 	for _, metadata := range metadataRaw {
-
-		data, err := hex.DecodeString(metadata.Value)
-		if err != nil {
-			return nil, fmt.Errorf("fail to decode metadata value: %v", err)
-		}
-
 		var value string
-		if len(data) == (20) {
-			value = common.BytesToAddress(data).String()
-		} else if len(data) == (32) {
-			value = common.BytesToHash(data).String()
+		data, ok := decodeMetadataValue(metadata.Value)
+		if !ok {
+			value = metadata.Value
 		} else {
-			value = string(data)
+			if len(data) == (20) {
+				value = common.BytesToAddress(data).String()
+			} else if len(data) == (32) {
+				value = common.BytesToHash(data).String()
+			} else {
+				value = string(data)
+			}
 		}
 
 		metadataResponse = append(metadataResponse, serverTypes.MetadataResponse{Key: metadata.Key, Value: value})

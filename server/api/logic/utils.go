@@ -3,8 +3,10 @@ package logic
 import (
 	"agent_identity/config"
 	"agent_identity/model"
+	"encoding/hex"
 	"fmt"
 	"math"
+	"strings"
 
 	serverTypes "agent_identity/server/api/types"
 
@@ -115,4 +117,13 @@ func formatAgentResponse(agents []*model.Agent) ([]*serverTypes.AgentResponse, e
 	}
 
 	return resp, nil
+}
+
+// 检测value是不是hex编码，如果是则解码，否则返回原值
+func decodeMetadataValue(value string) ([]byte, bool) {
+	data, err := hex.DecodeString(strings.TrimPrefix(value, "0x"))
+	if err != nil {
+		return nil, false
+	}
+	return data, true
 }
