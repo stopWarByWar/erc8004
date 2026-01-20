@@ -17,7 +17,7 @@ func GetAgentValidationList(uid uint64, page, pageSize int, filter string) ([]*s
 	var validationResponsesList []*serverTypes.Validation
 	for _, validationResponse := range validationResponses {
 		status := "pending"
-		if len(validationResponse.ResponseTxHash) > 0 {
+		if len(strings.Trim(validationResponse.ResponseTxHash, " ")) > 0 {
 			status = "finished"
 		}
 		validationResponsesList = append(validationResponsesList, &serverTypes.Validation{
@@ -29,11 +29,11 @@ func GetAgentValidationList(uid uint64, page, pageSize int, filter string) ([]*s
 			ValidatorAddress: validationResponse.ValidatorAddress,
 
 			RequestURI:  validationResponse.RequestURI,
-			RequestHash: validationResponse.RequestHash,
+			RequestHash: strings.Trim(validationResponse.RequestHash, " "),
 
 			Response:     validationResponse.Response,
 			ResponseURI:  validationResponse.ResponseURI,
-			ResponseHash: validationResponse.ResponseHash,
+			ResponseHash: strings.Trim(validationResponse.ResponseHash, " "),
 			Tag1:         validationResponse.Tag1,
 			Timestamps:   validationResponse.Timestamps,
 			Status:       status,
@@ -71,7 +71,7 @@ func GetValidatorValidationList(validatorAddress string, page, pageSize int, fil
 		registryAddress := config.GetIdentityAddressByValidationAddress(validation.ChainID, validation.ValidationRegistry)
 		deployerInfo := config.GetContractsDeployerInfo(validation.ChainID, registryAddress)
 		status := "pending"
-		if len(validation.ResponseTxHash) > 0 {
+		if len(strings.Trim(validation.ResponseTxHash, " ")) > 0 {
 			status = "finished"
 		}
 
