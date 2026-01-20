@@ -27,9 +27,9 @@ func GetAgentValidationList(uid uint64, page, pageSize int, filter string) ([]*s
 			ValidationRegistry: validationResponse.ValidationRegistry,
 
 			ValidatorAddress: validationResponse.ValidatorAddress,
-
-			RequestURI:  validationResponse.RequestURI,
-			RequestHash: strings.Trim(validationResponse.RequestHash, " "),
+			ValidatorLogo:    validationResponse.ValidatorLogo,
+			RequestURI:       validationResponse.RequestURI,
+			RequestHash:      strings.Trim(validationResponse.RequestHash, " "),
 
 			Response:     validationResponse.Response,
 			ResponseURI:  validationResponse.ResponseURI,

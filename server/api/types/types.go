@@ -84,6 +84,7 @@ type Validation struct {
 	ValidationRegistry string `json:"validation_registry"`
 
 	ValidatorAddress string `json:"validator_address"`
+	ValidatorLogo    string `json:"validator_logo"`
 
 	RequestURI  string `json:"request_uri"`
 	RequestHash string `json:"request_hash"`

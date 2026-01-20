@@ -74,7 +74,12 @@ func GetValidatorList(page int, pageSize int) ([]*Validator, int64, error) {
 	return validatorList, total, nil
 }
 
-func GetValidationListByAgent(uid uint64, page int, pageSize int, filter string) ([]*Validation, int64, error) {
+type ValidationListByAgentValidationInfo struct {
+	Validation
+	ValidatorLogo string
+}
+
+func GetValidationListByAgent(uid uint64, page int, pageSize int, filter string) ([]*ValidationListByAgentValidationInfo, int64, error) {
 	if page <= 0 || pageSize <= 0 {
 		return nil, 0, errors.New("invalid page or pageSize")
 	}
@@ -99,7 +104,7 @@ func GetValidationListByAgent(uid uint64, page int, pageSize int, filter string)
 		// 如果 filter 不是上述值，默认返回所有记录
 	}
 
-	var validationList []*Validation
+	var validationList []*ValidationListByAgentValidationInfo
 	err := query.Order("block_number DESC, index DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&validationList).Error
 	if err != nil {
 		return nil, 0, err
@@ -117,6 +122,22 @@ func GetValidationListByAgent(uid uint64, page int, pageSize int, filter string)
 	err = countQuery.Count(&total).Error
 	if err != nil {
 		return nil, 0, err
+	}
+
+	validatorAddresses := make([]string, 0)
+	for _, validation := range validationList {
+		validatorAddresses = append(validatorAddresses, validation.ValidatorAddress)
+	}
+	passportMap, err := checkPassport(validatorAddresses)
+	if err != nil {
+		return nil, 0, err
+	}
+	for _, validation := range validationList {
+		if account, ok := passportMap[validation.ValidatorAddress]; ok {
+			validation.ValidatorLogo = account.Avatar
+		} else {
+			validation.ValidatorLogo = ""
+		}
 	}
 	return validationList, total, nil
 }
