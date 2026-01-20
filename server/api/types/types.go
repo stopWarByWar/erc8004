@@ -91,6 +91,7 @@ type Validation struct {
 	Response     int    `json:"response"`
 	ResponseURI  string `json:"response_uri"`
 	ResponseHash string `json:"response_hash"`
+	Status       string `json:"status"`
 	Tag1         string `json:"tag1"`
 	Timestamps   uint64 `json:"timestamps"`
 }

@@ -8,14 +8,18 @@ import (
 	"strings"
 )
 
-func GetAgentValidationList(chainID, validationRegistry, agentID string, page, pageSize int, filter string) ([]*serverTypes.Validation, int64, error) {
-	validationResponses, total, err := model.GetValidationListByAgent(chainID, validationRegistry, agentID, page, pageSize, filter)
+func GetAgentValidationList(uid uint64, page, pageSize int, filter string) ([]*serverTypes.Validation, int64, error) {
+	validationResponses, total, err := model.GetValidationListByAgent(uid, page, pageSize, filter)
 	if err != nil {
 		return nil, 0, fmt.Errorf("fail to get validation responses: %v", err)
 	}
 
 	var validationResponsesList []*serverTypes.Validation
 	for _, validationResponse := range validationResponses {
+		status := "pending"
+		if len(validationResponse.ResponseTxHash) > 0 {
+			status = "finished"
+		}
 		validationResponsesList = append(validationResponsesList, &serverTypes.Validation{
 			AgentUID:           validationResponse.AgentUID,
 			ChainID:            validationResponse.ChainID,

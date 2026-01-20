@@ -74,7 +74,7 @@ func GetValidatorList(page int, pageSize int) ([]*Validator, int64, error) {
 	return validatorList, total, nil
 }
 
-func GetValidationListByAgent(chainID string, validationRegistry string, agentID string, page int, pageSize int, filter string) ([]*Validation, int64, error) {
+func GetValidationListByAgent(uid uint64, page int, pageSize int, filter string) ([]*Validation, int64, error) {
 	if page <= 0 || pageSize <= 0 {
 		return nil, 0, errors.New("invalid page or pageSize")
 	}
@@ -85,7 +85,7 @@ func GetValidationListByAgent(chainID string, validationRegistry string, agentID
 	// - 如果 filter == "finished"，返回 response_tx_hash 非空的验证记录。
 
 	// 构建基础查询条件
-	query := db.Where("chain_id = ? and validation_registry = ? and agent_id = ?", chainID, validationRegistry, agentID)
+	query := db.Where("agent_uid = ?", uid)
 
 	// 根据 filter 参数添加过滤条件
 	switch filter {
@@ -107,7 +107,7 @@ func GetValidationListByAgent(chainID string, validationRegistry string, agentID
 
 	var total int64
 	// 计算总数时使用相同的过滤条件
-	countQuery := db.Model(&Validation{}).Where("chain_id = ? and validation_registry = ? and agent_id = ?", chainID, validationRegistry, agentID)
+	countQuery := db.Model(&Validation{}).Where("agent_uid = ?", uid)
 	switch filter {
 	case "pending":
 		countQuery = countQuery.Where("response_tx_hash = '' OR response_tx_hash IS NULL")

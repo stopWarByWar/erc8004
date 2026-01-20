@@ -24,13 +24,15 @@ func GetAgentValidationListHandler(c *gin.Context) {
 		return
 	}
 
-	chainID := c.Query("chain_id")
-	validationRegistry := c.Query("validation_registry")
-	agentID := c.Query("agent_id")
-
+	agentUID := c.Query("agent_uid")
+	agentUIDInt, err := strconv.ParseUint(agentUID, 10, 64)
+	if err != nil {
+		serverUtils.ErrResp(nil, "fail to get agent uid", "Invalid Request", c)
+		return
+	}
 	filter := c.Query("filter")
 
-	validationResponsesList, total, err := serverLogic.GetAgentValidationList(chainID, validationRegistry, agentID, pageInt, pageSizeInt, filter)
+	validationResponsesList, total, err := serverLogic.GetAgentValidationList(agentUIDInt, pageInt, pageSizeInt, filter)
 	if err != nil {
 		serverUtils.ErrResp(logrus.Fields{"error": err.Error()}, "fail to get agent validation list", "Internal Error", c)
 		return
