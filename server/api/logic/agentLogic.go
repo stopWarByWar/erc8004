@@ -8,7 +8,6 @@ import (
 	serverTypes "agent_identity/server/api/types"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -55,41 +54,41 @@ func GetAgentList(page, pageSize int) ([]*serverTypes.AgentResponse, int64, erro
 func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 	agent, err := model.GetAgentByUID(agentUID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to get agent by uid: %v", err)
 	}
 
 	if agent == nil || agent.AgentID == "" {
-		return nil, errors.New("agent not found")
+		return nil, fmt.Errorf("agent not found")
 	}
 
 	skills, err := model.GetSkillsByAgentUID(agentUID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to get skills by agent uid: %v", err)
 	}
 
 	skillTags, err := model.GetSkillTagsByAgentUID(agentUID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to get skill tags by agent uid: %v", err)
 	}
 
 	provider, err := model.GetProviderByAgentUID(agentUID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to get provider by agent uid: %v", err)
 	}
 
 	trustModels, err := model.GetTrustModelsByAgentUID(agentUID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to get trust models by agent uid: %v", err)
 	}
 
 	metadataRaw, err := model.GetMetadata(agent.ChainID, agent.IdentityRegistry, agent.AgentID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to get metadata by agent uid: %v", err)
 	}
 
 	tokenURL, err := model.GetTokenURL(agent.ChainID, agent.IdentityRegistry, agent.AgentID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to get token url by agent uid: %v", err)
 	}
 
 	var metadataResponse = make([]serverTypes.MetadataResponse, 0)
@@ -97,7 +96,7 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 
 		data, err := hex.DecodeString(metadata.Value)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("fail to decode metadata value: %v", err)
 		}
 
 		var value string
@@ -184,11 +183,11 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 
 	mcpEndpoint, err := model.GetMCPEndpointByAgentUID(agent.UID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to get mcp endpoint by agent uid: %v", err)
 	}
 	oasfEndpoint, err := model.GetOASFEndpointByAgentUID(agent.UID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fail to get oasf endpoint by agent uid: %v", err)
 	}
 	if mcpEndpoint != nil {
 		resp.MACEndpoint = mcpEndpoint.Endpoint
