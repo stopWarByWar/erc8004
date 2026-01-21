@@ -66,7 +66,7 @@ func SetFeedback(request serverTypes.UploadFeedbackRequest) (string, string, err
 		return "", "", fmt.Errorf("fail to marshal feedback: %w", err)
 	}
 
-	feedbackURI, err := helper.GetHelper().UploadFeedbackToS3(agent.ChainID, agentRegistry, agent.AgentID, request.LastIndex, clientAddress, feedbackData)
+	feedbackURI, err := helper.GetHelper().UploadFeedbackToS3(agent.ChainID, agentRegistry, agent.AgentID, request.IndexLimit, clientAddress, feedbackData)
 	if err != nil {
 		return "", "", fmt.Errorf("fail to upload feedback to s3: %w", err)
 	}
