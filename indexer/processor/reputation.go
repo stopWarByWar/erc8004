@@ -195,6 +195,9 @@ func (p *ReputationProcessor) dealWithNewFeedbackEvent(e types.Log) error {
 	}
 
 	blockTimestamp := uint64(e.BlockTimestamp)
+	scoreStr := newFeedbackEvent.Value.String()
+	scoreDecimals := newFeedbackEvent.ValueDecimals
+	score := calculateScore(newFeedbackEvent.Value, newFeedbackEvent.ValueDecimals)
 
 	feedback := &model.Feedback{
 		ChainID:            p.chainID,
@@ -203,8 +206,10 @@ func (p *ReputationProcessor) dealWithNewFeedbackEvent(e types.Log) error {
 		ReputationRegistry: p.reputationAddr.Hex(),
 		ClientAddress:      newFeedbackEvent.ClientAddress.String(),
 		FeedbackIndex:      newFeedbackEvent.FeedbackIndex,
-		Score:              newFeedbackEvent.Score,
-		Tag1:               common.BytesToHash(newFeedbackEvent.Tag1[:]).String(),
+		Score:              score,
+		Value:              scoreStr,
+		ValueDecimals:      scoreDecimals,
+		Tag1:               newFeedbackEvent.Tag1,
 		Tag2:               newFeedbackEvent.Tag2,
 		FeedbackURI:        newFeedbackEvent.FeedbackURI,
 		FeedbackHash:       common.BytesToHash(newFeedbackEvent.FeedbackHash[:]).String(),

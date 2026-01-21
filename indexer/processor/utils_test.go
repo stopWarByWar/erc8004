@@ -2,6 +2,8 @@ package processor
 
 import (
 	"encoding/hex"
+	"fmt"
+	"math/big"
 	"testing"
 )
 
@@ -19,4 +21,11 @@ func Test_DecodeCommentEvent(t *testing.T) {
 	t.Log(comment.Score)
 	t.Log(comment.CommentText)
 
+}
+
+func Test_CalculateScore(t *testing.T) {
+	value := big.NewInt(10000000)
+	valueDecimals := uint8(2)
+	score := calculateScore(value, valueDecimals)
+	fmt.Println(score)
 }

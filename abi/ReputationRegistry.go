@@ -31,7 +31,7 @@ var (
 
 // ReputationRegistryMetaData contains all meta data concerning the ReputationRegistry contract.
 var ReputationRegistryMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"}],\"name\":\"AddressEmptyCode\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"ERC1967InvalidImplementation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ERC1967NonPayable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FailedCall\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UUPSUnauthorizedCallContext\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"slot\",\"type\":\"bytes32\"}],\"name\":\"UUPSUnsupportedProxiableUUID\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"clientAddress\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint64\",\"name\":\"feedbackIndex\",\"type\":\"uint64\"}],\"name\":\"FeedbackRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"clientAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"feedbackIndex\",\"type\":\"uint64\"},{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"score\",\"type\":\"uint8\"},{\"indexed\":true,\"internalType\":\"string\",\"name\":\"tag1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tag2\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"endpoint\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"feedbackURI\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"feedbackHash\",\"type\":\"bytes32\"}],\"name\":\"NewFeedback\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"clientAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"feedbackIndex\",\"type\":\"uint64\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"responder\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"responseURI\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"responseHash\",\"type\":\"bytes32\"}],\"name\":\"ResponseAppended\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"UPGRADE_INTERFACE_VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"clientAddress\",\"type\":\"address\"},{\"internalType\":\"uint64\",\"name\":\"feedbackIndex\",\"type\":\"uint64\"},{\"internalType\":\"string\",\"name\":\"responseURI\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"responseHash\",\"type\":\"bytes32\"}],\"name\":\"appendResponse\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"}],\"name\":\"getClients\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getIdentityRegistry\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"clientAddress\",\"type\":\"address\"}],\"name\":\"getLastIndex\",\"outputs\":[{\"internalType\":\"uint64\",\"name\":\"\",\"type\":\"uint64\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"clientAddress\",\"type\":\"address\"},{\"internalType\":\"uint64\",\"name\":\"feedbackIndex\",\"type\":\"uint64\"},{\"internalType\":\"address[]\",\"name\":\"responders\",\"type\":\"address[]\"}],\"name\":\"getResponseCount\",\"outputs\":[{\"internalType\":\"uint64\",\"name\":\"count\",\"type\":\"uint64\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"clientAddresses\",\"type\":\"address[]\"},{\"internalType\":\"string\",\"name\":\"tag1\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"tag2\",\"type\":\"string\"}],\"name\":\"getSummary\",\"outputs\":[{\"internalType\":\"uint64\",\"name\":\"count\",\"type\":\"uint64\"},{\"internalType\":\"uint8\",\"name\":\"averageScore\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getVersion\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"uint8\",\"name\":\"score\",\"type\":\"uint8\"},{\"internalType\":\"string\",\"name\":\"tag1\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"tag2\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"endpoint\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"feedbackURI\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"feedbackHash\",\"type\":\"bytes32\"}],\"name\":\"giveFeedback\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"identityRegistry_\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"clientAddresses\",\"type\":\"address[]\"},{\"internalType\":\"string\",\"name\":\"tag1\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"tag2\",\"type\":\"string\"},{\"internalType\":\"bool\",\"name\":\"includeRevoked\",\"type\":\"bool\"}],\"name\":\"readAllFeedback\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"clients\",\"type\":\"address[]\"},{\"internalType\":\"uint8[]\",\"name\":\"feedbackIndexes\",\"type\":\"uint8[]\"},{\"internalType\":\"uint8[]\",\"name\":\"scores\",\"type\":\"uint8[]\"},{\"internalType\":\"string[]\",\"name\":\"tag1s\",\"type\":\"string[]\"},{\"internalType\":\"string[]\",\"name\":\"tag2s\",\"type\":\"string[]\"},{\"internalType\":\"bool[]\",\"name\":\"revokedStatuses\",\"type\":\"bool[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"clientAddress\",\"type\":\"address\"},{\"internalType\":\"uint64\",\"name\":\"feedbackIndex\",\"type\":\"uint64\"}],\"name\":\"readFeedback\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"score\",\"type\":\"uint8\"},{\"internalType\":\"string\",\"name\":\"tag1\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"tag2\",\"type\":\"string\"},{\"internalType\":\"bool\",\"name\":\"isRevoked\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"uint64\",\"name\":\"feedbackIndex\",\"type\":\"uint64\"}],\"name\":\"revokeFeedback\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"}],\"name\":\"AddressEmptyCode\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"ERC1967InvalidImplementation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ERC1967NonPayable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FailedCall\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UUPSUnauthorizedCallContext\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"slot\",\"type\":\"bytes32\"}],\"name\":\"UUPSUnsupportedProxiableUUID\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"clientAddress\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint64\",\"name\":\"feedbackIndex\",\"type\":\"uint64\"}],\"name\":\"FeedbackRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"clientAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"feedbackIndex\",\"type\":\"uint64\"},{\"indexed\":false,\"internalType\":\"int256\",\"name\":\"value\",\"type\":\"int256\"},{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"valueDecimals\",\"type\":\"uint8\"},{\"indexed\":true,\"internalType\":\"string\",\"name\":\"indexedTag1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tag1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"tag2\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"endpoint\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"feedbackURI\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"feedbackHash\",\"type\":\"bytes32\"}],\"name\":\"NewFeedback\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"clientAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"feedbackIndex\",\"type\":\"uint64\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"responder\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"responseURI\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"responseHash\",\"type\":\"bytes32\"}],\"name\":\"ResponseAppended\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"UPGRADE_INTERFACE_VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"clientAddress\",\"type\":\"address\"},{\"internalType\":\"uint64\",\"name\":\"feedbackIndex\",\"type\":\"uint64\"},{\"internalType\":\"string\",\"name\":\"responseURI\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"responseHash\",\"type\":\"bytes32\"}],\"name\":\"appendResponse\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"}],\"name\":\"getClients\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getIdentityRegistry\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"clientAddress\",\"type\":\"address\"}],\"name\":\"getLastIndex\",\"outputs\":[{\"internalType\":\"uint64\",\"name\":\"\",\"type\":\"uint64\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"clientAddress\",\"type\":\"address\"},{\"internalType\":\"uint64\",\"name\":\"feedbackIndex\",\"type\":\"uint64\"},{\"internalType\":\"address[]\",\"name\":\"responders\",\"type\":\"address[]\"}],\"name\":\"getResponseCount\",\"outputs\":[{\"internalType\":\"uint64\",\"name\":\"count\",\"type\":\"uint64\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"clientAddresses\",\"type\":\"address[]\"},{\"internalType\":\"string\",\"name\":\"tag1\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"tag2\",\"type\":\"string\"}],\"name\":\"getSummary\",\"outputs\":[{\"internalType\":\"uint64\",\"name\":\"count\",\"type\":\"uint64\"},{\"internalType\":\"int256\",\"name\":\"summaryValue\",\"type\":\"int256\"},{\"internalType\":\"uint8\",\"name\":\"summaryValueDecimals\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getVersion\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"int256\",\"name\":\"value\",\"type\":\"int256\"},{\"internalType\":\"uint8\",\"name\":\"valueDecimals\",\"type\":\"uint8\"},{\"internalType\":\"string\",\"name\":\"tag1\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"tag2\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"endpoint\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"feedbackURI\",\"type\":\"string\"},{\"internalType\":\"bytes32\",\"name\":\"feedbackHash\",\"type\":\"bytes32\"}],\"name\":\"giveFeedback\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"identityRegistry_\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"address[]\",\"name\":\"clientAddresses\",\"type\":\"address[]\"},{\"internalType\":\"string\",\"name\":\"tag1\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"tag2\",\"type\":\"string\"},{\"internalType\":\"bool\",\"name\":\"includeRevoked\",\"type\":\"bool\"}],\"name\":\"readAllFeedback\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"clients\",\"type\":\"address[]\"},{\"internalType\":\"uint64[]\",\"name\":\"feedbackIndexes\",\"type\":\"uint64[]\"},{\"internalType\":\"int256[]\",\"name\":\"values\",\"type\":\"int256[]\"},{\"internalType\":\"uint8[]\",\"name\":\"valueDecimals\",\"type\":\"uint8[]\"},{\"internalType\":\"string[]\",\"name\":\"tag1s\",\"type\":\"string[]\"},{\"internalType\":\"string[]\",\"name\":\"tag2s\",\"type\":\"string[]\"},{\"internalType\":\"bool[]\",\"name\":\"revokedStatuses\",\"type\":\"bool[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"clientAddress\",\"type\":\"address\"},{\"internalType\":\"uint64\",\"name\":\"feedbackIndex\",\"type\":\"uint64\"}],\"name\":\"readFeedback\",\"outputs\":[{\"internalType\":\"int256\",\"name\":\"value\",\"type\":\"int256\"},{\"internalType\":\"uint8\",\"name\":\"valueDecimals\",\"type\":\"uint8\"},{\"internalType\":\"string\",\"name\":\"tag1\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"tag2\",\"type\":\"string\"},{\"internalType\":\"bool\",\"name\":\"isRevoked\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"},{\"internalType\":\"uint64\",\"name\":\"feedbackIndex\",\"type\":\"uint64\"}],\"name\":\"revokeFeedback\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"}]",
 }
 
 // ReputationRegistryABI is the input ABI used to generate the binding from.
@@ -337,24 +337,27 @@ func (_ReputationRegistry *ReputationRegistryCallerSession) GetResponseCount(age
 
 // GetSummary is a free data retrieval call binding the contract method 0x81bbba58.
 //
-// Solidity: function getSummary(uint256 agentId, address[] clientAddresses, string tag1, string tag2) view returns(uint64 count, uint8 averageScore)
+// Solidity: function getSummary(uint256 agentId, address[] clientAddresses, string tag1, string tag2) view returns(uint64 count, int256 summaryValue, uint8 summaryValueDecimals)
 func (_ReputationRegistry *ReputationRegistryCaller) GetSummary(opts *bind.CallOpts, agentId *big.Int, clientAddresses []common.Address, tag1 string, tag2 string) (struct {
-	Count        uint64
-	AverageScore uint8
+	Count                uint64
+	SummaryValue         *big.Int
+	SummaryValueDecimals uint8
 }, error) {
 	var out []interface{}
 	err := _ReputationRegistry.contract.Call(opts, &out, "getSummary", agentId, clientAddresses, tag1, tag2)
 
 	outstruct := new(struct {
-		Count        uint64
-		AverageScore uint8
+		Count                uint64
+		SummaryValue         *big.Int
+		SummaryValueDecimals uint8
 	})
 	if err != nil {
 		return *outstruct, err
 	}
 
 	outstruct.Count = *abi.ConvertType(out[0], new(uint64)).(*uint64)
-	outstruct.AverageScore = *abi.ConvertType(out[1], new(uint8)).(*uint8)
+	outstruct.SummaryValue = *abi.ConvertType(out[1], new(*big.Int)).(**big.Int)
+	outstruct.SummaryValueDecimals = *abi.ConvertType(out[2], new(uint8)).(*uint8)
 
 	return *outstruct, err
 
@@ -362,20 +365,22 @@ func (_ReputationRegistry *ReputationRegistryCaller) GetSummary(opts *bind.CallO
 
 // GetSummary is a free data retrieval call binding the contract method 0x81bbba58.
 //
-// Solidity: function getSummary(uint256 agentId, address[] clientAddresses, string tag1, string tag2) view returns(uint64 count, uint8 averageScore)
+// Solidity: function getSummary(uint256 agentId, address[] clientAddresses, string tag1, string tag2) view returns(uint64 count, int256 summaryValue, uint8 summaryValueDecimals)
 func (_ReputationRegistry *ReputationRegistrySession) GetSummary(agentId *big.Int, clientAddresses []common.Address, tag1 string, tag2 string) (struct {
-	Count        uint64
-	AverageScore uint8
+	Count                uint64
+	SummaryValue         *big.Int
+	SummaryValueDecimals uint8
 }, error) {
 	return _ReputationRegistry.Contract.GetSummary(&_ReputationRegistry.CallOpts, agentId, clientAddresses, tag1, tag2)
 }
 
 // GetSummary is a free data retrieval call binding the contract method 0x81bbba58.
 //
-// Solidity: function getSummary(uint256 agentId, address[] clientAddresses, string tag1, string tag2) view returns(uint64 count, uint8 averageScore)
+// Solidity: function getSummary(uint256 agentId, address[] clientAddresses, string tag1, string tag2) view returns(uint64 count, int256 summaryValue, uint8 summaryValueDecimals)
 func (_ReputationRegistry *ReputationRegistryCallerSession) GetSummary(agentId *big.Int, clientAddresses []common.Address, tag1 string, tag2 string) (struct {
-	Count        uint64
-	AverageScore uint8
+	Count                uint64
+	SummaryValue         *big.Int
+	SummaryValueDecimals uint8
 }, error) {
 	return _ReputationRegistry.Contract.GetSummary(&_ReputationRegistry.CallOpts, agentId, clientAddresses, tag1, tag2)
 }
@@ -475,11 +480,12 @@ func (_ReputationRegistry *ReputationRegistryCallerSession) ProxiableUUID() ([32
 
 // ReadAllFeedback is a free data retrieval call binding the contract method 0xd9d84224.
 //
-// Solidity: function readAllFeedback(uint256 agentId, address[] clientAddresses, string tag1, string tag2, bool includeRevoked) view returns(address[] clients, uint8[] feedbackIndexes, uint8[] scores, string[] tag1s, string[] tag2s, bool[] revokedStatuses)
+// Solidity: function readAllFeedback(uint256 agentId, address[] clientAddresses, string tag1, string tag2, bool includeRevoked) view returns(address[] clients, uint64[] feedbackIndexes, int256[] values, uint8[] valueDecimals, string[] tag1s, string[] tag2s, bool[] revokedStatuses)
 func (_ReputationRegistry *ReputationRegistryCaller) ReadAllFeedback(opts *bind.CallOpts, agentId *big.Int, clientAddresses []common.Address, tag1 string, tag2 string, includeRevoked bool) (struct {
 	Clients         []common.Address
-	FeedbackIndexes []uint8
-	Scores          []uint8
+	FeedbackIndexes []uint64
+	Values          []*big.Int
+	ValueDecimals   []uint8
 	Tag1s           []string
 	Tag2s           []string
 	RevokedStatuses []bool
@@ -489,8 +495,9 @@ func (_ReputationRegistry *ReputationRegistryCaller) ReadAllFeedback(opts *bind.
 
 	outstruct := new(struct {
 		Clients         []common.Address
-		FeedbackIndexes []uint8
-		Scores          []uint8
+		FeedbackIndexes []uint64
+		Values          []*big.Int
+		ValueDecimals   []uint8
 		Tag1s           []string
 		Tag2s           []string
 		RevokedStatuses []bool
@@ -500,11 +507,12 @@ func (_ReputationRegistry *ReputationRegistryCaller) ReadAllFeedback(opts *bind.
 	}
 
 	outstruct.Clients = *abi.ConvertType(out[0], new([]common.Address)).(*[]common.Address)
-	outstruct.FeedbackIndexes = *abi.ConvertType(out[1], new([]uint8)).(*[]uint8)
-	outstruct.Scores = *abi.ConvertType(out[2], new([]uint8)).(*[]uint8)
-	outstruct.Tag1s = *abi.ConvertType(out[3], new([]string)).(*[]string)
-	outstruct.Tag2s = *abi.ConvertType(out[4], new([]string)).(*[]string)
-	outstruct.RevokedStatuses = *abi.ConvertType(out[5], new([]bool)).(*[]bool)
+	outstruct.FeedbackIndexes = *abi.ConvertType(out[1], new([]uint64)).(*[]uint64)
+	outstruct.Values = *abi.ConvertType(out[2], new([]*big.Int)).(*[]*big.Int)
+	outstruct.ValueDecimals = *abi.ConvertType(out[3], new([]uint8)).(*[]uint8)
+	outstruct.Tag1s = *abi.ConvertType(out[4], new([]string)).(*[]string)
+	outstruct.Tag2s = *abi.ConvertType(out[5], new([]string)).(*[]string)
+	outstruct.RevokedStatuses = *abi.ConvertType(out[6], new([]bool)).(*[]bool)
 
 	return *outstruct, err
 
@@ -512,11 +520,12 @@ func (_ReputationRegistry *ReputationRegistryCaller) ReadAllFeedback(opts *bind.
 
 // ReadAllFeedback is a free data retrieval call binding the contract method 0xd9d84224.
 //
-// Solidity: function readAllFeedback(uint256 agentId, address[] clientAddresses, string tag1, string tag2, bool includeRevoked) view returns(address[] clients, uint8[] feedbackIndexes, uint8[] scores, string[] tag1s, string[] tag2s, bool[] revokedStatuses)
+// Solidity: function readAllFeedback(uint256 agentId, address[] clientAddresses, string tag1, string tag2, bool includeRevoked) view returns(address[] clients, uint64[] feedbackIndexes, int256[] values, uint8[] valueDecimals, string[] tag1s, string[] tag2s, bool[] revokedStatuses)
 func (_ReputationRegistry *ReputationRegistrySession) ReadAllFeedback(agentId *big.Int, clientAddresses []common.Address, tag1 string, tag2 string, includeRevoked bool) (struct {
 	Clients         []common.Address
-	FeedbackIndexes []uint8
-	Scores          []uint8
+	FeedbackIndexes []uint64
+	Values          []*big.Int
+	ValueDecimals   []uint8
 	Tag1s           []string
 	Tag2s           []string
 	RevokedStatuses []bool
@@ -526,11 +535,12 @@ func (_ReputationRegistry *ReputationRegistrySession) ReadAllFeedback(agentId *b
 
 // ReadAllFeedback is a free data retrieval call binding the contract method 0xd9d84224.
 //
-// Solidity: function readAllFeedback(uint256 agentId, address[] clientAddresses, string tag1, string tag2, bool includeRevoked) view returns(address[] clients, uint8[] feedbackIndexes, uint8[] scores, string[] tag1s, string[] tag2s, bool[] revokedStatuses)
+// Solidity: function readAllFeedback(uint256 agentId, address[] clientAddresses, string tag1, string tag2, bool includeRevoked) view returns(address[] clients, uint64[] feedbackIndexes, int256[] values, uint8[] valueDecimals, string[] tag1s, string[] tag2s, bool[] revokedStatuses)
 func (_ReputationRegistry *ReputationRegistryCallerSession) ReadAllFeedback(agentId *big.Int, clientAddresses []common.Address, tag1 string, tag2 string, includeRevoked bool) (struct {
 	Clients         []common.Address
-	FeedbackIndexes []uint8
-	Scores          []uint8
+	FeedbackIndexes []uint64
+	Values          []*big.Int
+	ValueDecimals   []uint8
 	Tag1s           []string
 	Tag2s           []string
 	RevokedStatuses []bool
@@ -540,30 +550,33 @@ func (_ReputationRegistry *ReputationRegistryCallerSession) ReadAllFeedback(agen
 
 // ReadFeedback is a free data retrieval call binding the contract method 0x232b0810.
 //
-// Solidity: function readFeedback(uint256 agentId, address clientAddress, uint64 feedbackIndex) view returns(uint8 score, string tag1, string tag2, bool isRevoked)
+// Solidity: function readFeedback(uint256 agentId, address clientAddress, uint64 feedbackIndex) view returns(int256 value, uint8 valueDecimals, string tag1, string tag2, bool isRevoked)
 func (_ReputationRegistry *ReputationRegistryCaller) ReadFeedback(opts *bind.CallOpts, agentId *big.Int, clientAddress common.Address, feedbackIndex uint64) (struct {
-	Score     uint8
-	Tag1      string
-	Tag2      string
-	IsRevoked bool
+	Value         *big.Int
+	ValueDecimals uint8
+	Tag1          string
+	Tag2          string
+	IsRevoked     bool
 }, error) {
 	var out []interface{}
 	err := _ReputationRegistry.contract.Call(opts, &out, "readFeedback", agentId, clientAddress, feedbackIndex)
 
 	outstruct := new(struct {
-		Score     uint8
-		Tag1      string
-		Tag2      string
-		IsRevoked bool
+		Value         *big.Int
+		ValueDecimals uint8
+		Tag1          string
+		Tag2          string
+		IsRevoked     bool
 	})
 	if err != nil {
 		return *outstruct, err
 	}
 
-	outstruct.Score = *abi.ConvertType(out[0], new(uint8)).(*uint8)
-	outstruct.Tag1 = *abi.ConvertType(out[1], new(string)).(*string)
-	outstruct.Tag2 = *abi.ConvertType(out[2], new(string)).(*string)
-	outstruct.IsRevoked = *abi.ConvertType(out[3], new(bool)).(*bool)
+	outstruct.Value = *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+	outstruct.ValueDecimals = *abi.ConvertType(out[1], new(uint8)).(*uint8)
+	outstruct.Tag1 = *abi.ConvertType(out[2], new(string)).(*string)
+	outstruct.Tag2 = *abi.ConvertType(out[3], new(string)).(*string)
+	outstruct.IsRevoked = *abi.ConvertType(out[4], new(bool)).(*bool)
 
 	return *outstruct, err
 
@@ -571,24 +584,26 @@ func (_ReputationRegistry *ReputationRegistryCaller) ReadFeedback(opts *bind.Cal
 
 // ReadFeedback is a free data retrieval call binding the contract method 0x232b0810.
 //
-// Solidity: function readFeedback(uint256 agentId, address clientAddress, uint64 feedbackIndex) view returns(uint8 score, string tag1, string tag2, bool isRevoked)
+// Solidity: function readFeedback(uint256 agentId, address clientAddress, uint64 feedbackIndex) view returns(int256 value, uint8 valueDecimals, string tag1, string tag2, bool isRevoked)
 func (_ReputationRegistry *ReputationRegistrySession) ReadFeedback(agentId *big.Int, clientAddress common.Address, feedbackIndex uint64) (struct {
-	Score     uint8
-	Tag1      string
-	Tag2      string
-	IsRevoked bool
+	Value         *big.Int
+	ValueDecimals uint8
+	Tag1          string
+	Tag2          string
+	IsRevoked     bool
 }, error) {
 	return _ReputationRegistry.Contract.ReadFeedback(&_ReputationRegistry.CallOpts, agentId, clientAddress, feedbackIndex)
 }
 
 // ReadFeedback is a free data retrieval call binding the contract method 0x232b0810.
 //
-// Solidity: function readFeedback(uint256 agentId, address clientAddress, uint64 feedbackIndex) view returns(uint8 score, string tag1, string tag2, bool isRevoked)
+// Solidity: function readFeedback(uint256 agentId, address clientAddress, uint64 feedbackIndex) view returns(int256 value, uint8 valueDecimals, string tag1, string tag2, bool isRevoked)
 func (_ReputationRegistry *ReputationRegistryCallerSession) ReadFeedback(agentId *big.Int, clientAddress common.Address, feedbackIndex uint64) (struct {
-	Score     uint8
-	Tag1      string
-	Tag2      string
-	IsRevoked bool
+	Value         *big.Int
+	ValueDecimals uint8
+	Tag1          string
+	Tag2          string
+	IsRevoked     bool
 }, error) {
 	return _ReputationRegistry.Contract.ReadFeedback(&_ReputationRegistry.CallOpts, agentId, clientAddress, feedbackIndex)
 }
@@ -614,25 +629,25 @@ func (_ReputationRegistry *ReputationRegistryTransactorSession) AppendResponse(a
 	return _ReputationRegistry.Contract.AppendResponse(&_ReputationRegistry.TransactOpts, agentId, clientAddress, feedbackIndex, responseURI, responseHash)
 }
 
-// GiveFeedback is a paid mutator transaction binding the contract method 0x1bae8c36.
+// GiveFeedback is a paid mutator transaction binding the contract method 0xbdf2a090.
 //
-// Solidity: function giveFeedback(uint256 agentId, uint8 score, string tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash) returns()
-func (_ReputationRegistry *ReputationRegistryTransactor) GiveFeedback(opts *bind.TransactOpts, agentId *big.Int, score uint8, tag1 string, tag2 string, endpoint string, feedbackURI string, feedbackHash [32]byte) (*types.Transaction, error) {
-	return _ReputationRegistry.contract.Transact(opts, "giveFeedback", agentId, score, tag1, tag2, endpoint, feedbackURI, feedbackHash)
+// Solidity: function giveFeedback(uint256 agentId, int256 value, uint8 valueDecimals, string tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash) returns()
+func (_ReputationRegistry *ReputationRegistryTransactor) GiveFeedback(opts *bind.TransactOpts, agentId *big.Int, value *big.Int, valueDecimals uint8, tag1 string, tag2 string, endpoint string, feedbackURI string, feedbackHash [32]byte) (*types.Transaction, error) {
+	return _ReputationRegistry.contract.Transact(opts, "giveFeedback", agentId, value, valueDecimals, tag1, tag2, endpoint, feedbackURI, feedbackHash)
 }
 
-// GiveFeedback is a paid mutator transaction binding the contract method 0x1bae8c36.
+// GiveFeedback is a paid mutator transaction binding the contract method 0xbdf2a090.
 //
-// Solidity: function giveFeedback(uint256 agentId, uint8 score, string tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash) returns()
-func (_ReputationRegistry *ReputationRegistrySession) GiveFeedback(agentId *big.Int, score uint8, tag1 string, tag2 string, endpoint string, feedbackURI string, feedbackHash [32]byte) (*types.Transaction, error) {
-	return _ReputationRegistry.Contract.GiveFeedback(&_ReputationRegistry.TransactOpts, agentId, score, tag1, tag2, endpoint, feedbackURI, feedbackHash)
+// Solidity: function giveFeedback(uint256 agentId, int256 value, uint8 valueDecimals, string tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash) returns()
+func (_ReputationRegistry *ReputationRegistrySession) GiveFeedback(agentId *big.Int, value *big.Int, valueDecimals uint8, tag1 string, tag2 string, endpoint string, feedbackURI string, feedbackHash [32]byte) (*types.Transaction, error) {
+	return _ReputationRegistry.Contract.GiveFeedback(&_ReputationRegistry.TransactOpts, agentId, value, valueDecimals, tag1, tag2, endpoint, feedbackURI, feedbackHash)
 }
 
-// GiveFeedback is a paid mutator transaction binding the contract method 0x1bae8c36.
+// GiveFeedback is a paid mutator transaction binding the contract method 0xbdf2a090.
 //
-// Solidity: function giveFeedback(uint256 agentId, uint8 score, string tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash) returns()
-func (_ReputationRegistry *ReputationRegistryTransactorSession) GiveFeedback(agentId *big.Int, score uint8, tag1 string, tag2 string, endpoint string, feedbackURI string, feedbackHash [32]byte) (*types.Transaction, error) {
-	return _ReputationRegistry.Contract.GiveFeedback(&_ReputationRegistry.TransactOpts, agentId, score, tag1, tag2, endpoint, feedbackURI, feedbackHash)
+// Solidity: function giveFeedback(uint256 agentId, int256 value, uint8 valueDecimals, string tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash) returns()
+func (_ReputationRegistry *ReputationRegistryTransactorSession) GiveFeedback(agentId *big.Int, value *big.Int, valueDecimals uint8, tag1 string, tag2 string, endpoint string, feedbackURI string, feedbackHash [32]byte) (*types.Transaction, error) {
+	return _ReputationRegistry.Contract.GiveFeedback(&_ReputationRegistry.TransactOpts, agentId, value, valueDecimals, tag1, tag2, endpoint, feedbackURI, feedbackHash)
 }
 
 // Initialize is a paid mutator transaction binding the contract method 0xc4d66de8.
@@ -1108,8 +1123,10 @@ type ReputationRegistryNewFeedback struct {
 	AgentId       *big.Int
 	ClientAddress common.Address
 	FeedbackIndex uint64
-	Score         uint8
-	Tag1          common.Hash
+	Value         *big.Int
+	ValueDecimals uint8
+	IndexedTag1   common.Hash
+	Tag1          string
 	Tag2          string
 	Endpoint      string
 	FeedbackURI   string
@@ -1117,10 +1134,10 @@ type ReputationRegistryNewFeedback struct {
 	Raw           types.Log // Blockchain specific contextual infos
 }
 
-// FilterNewFeedback is a free log retrieval operation binding the contract event 0x801d7d4264128f6f43835850f1fabb91902c3543c3738f1f62fbf7e9fd80531d.
+// FilterNewFeedback is a free log retrieval operation binding the contract event 0x413f2d30fdbc0b49e55537333a7c6287556f671f40c7e2dc00fc7ca1ced350da.
 //
-// Solidity: event NewFeedback(uint256 indexed agentId, address indexed clientAddress, uint64 feedbackIndex, uint8 score, string indexed tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash)
-func (_ReputationRegistry *ReputationRegistryFilterer) FilterNewFeedback(opts *bind.FilterOpts, agentId []*big.Int, clientAddress []common.Address, tag1 []string) (*ReputationRegistryNewFeedbackIterator, error) {
+// Solidity: event NewFeedback(uint256 indexed agentId, address indexed clientAddress, uint64 feedbackIndex, int256 value, uint8 valueDecimals, string indexed indexedTag1, string tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash)
+func (_ReputationRegistry *ReputationRegistryFilterer) FilterNewFeedback(opts *bind.FilterOpts, agentId []*big.Int, clientAddress []common.Address, indexedTag1 []string) (*ReputationRegistryNewFeedbackIterator, error) {
 
 	var agentIdRule []interface{}
 	for _, agentIdItem := range agentId {
@@ -1131,22 +1148,22 @@ func (_ReputationRegistry *ReputationRegistryFilterer) FilterNewFeedback(opts *b
 		clientAddressRule = append(clientAddressRule, clientAddressItem)
 	}
 
-	var tag1Rule []interface{}
-	for _, tag1Item := range tag1 {
-		tag1Rule = append(tag1Rule, tag1Item)
+	var indexedTag1Rule []interface{}
+	for _, indexedTag1Item := range indexedTag1 {
+		indexedTag1Rule = append(indexedTag1Rule, indexedTag1Item)
 	}
 
-	logs, sub, err := _ReputationRegistry.contract.FilterLogs(opts, "NewFeedback", agentIdRule, clientAddressRule, tag1Rule)
+	logs, sub, err := _ReputationRegistry.contract.FilterLogs(opts, "NewFeedback", agentIdRule, clientAddressRule, indexedTag1Rule)
 	if err != nil {
 		return nil, err
 	}
 	return &ReputationRegistryNewFeedbackIterator{contract: _ReputationRegistry.contract, event: "NewFeedback", logs: logs, sub: sub}, nil
 }
 
-// WatchNewFeedback is a free log subscription operation binding the contract event 0x801d7d4264128f6f43835850f1fabb91902c3543c3738f1f62fbf7e9fd80531d.
+// WatchNewFeedback is a free log subscription operation binding the contract event 0x413f2d30fdbc0b49e55537333a7c6287556f671f40c7e2dc00fc7ca1ced350da.
 //
-// Solidity: event NewFeedback(uint256 indexed agentId, address indexed clientAddress, uint64 feedbackIndex, uint8 score, string indexed tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash)
-func (_ReputationRegistry *ReputationRegistryFilterer) WatchNewFeedback(opts *bind.WatchOpts, sink chan<- *ReputationRegistryNewFeedback, agentId []*big.Int, clientAddress []common.Address, tag1 []string) (event.Subscription, error) {
+// Solidity: event NewFeedback(uint256 indexed agentId, address indexed clientAddress, uint64 feedbackIndex, int256 value, uint8 valueDecimals, string indexed indexedTag1, string tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash)
+func (_ReputationRegistry *ReputationRegistryFilterer) WatchNewFeedback(opts *bind.WatchOpts, sink chan<- *ReputationRegistryNewFeedback, agentId []*big.Int, clientAddress []common.Address, indexedTag1 []string) (event.Subscription, error) {
 
 	var agentIdRule []interface{}
 	for _, agentIdItem := range agentId {
@@ -1157,12 +1174,12 @@ func (_ReputationRegistry *ReputationRegistryFilterer) WatchNewFeedback(opts *bi
 		clientAddressRule = append(clientAddressRule, clientAddressItem)
 	}
 
-	var tag1Rule []interface{}
-	for _, tag1Item := range tag1 {
-		tag1Rule = append(tag1Rule, tag1Item)
+	var indexedTag1Rule []interface{}
+	for _, indexedTag1Item := range indexedTag1 {
+		indexedTag1Rule = append(indexedTag1Rule, indexedTag1Item)
 	}
 
-	logs, sub, err := _ReputationRegistry.contract.WatchLogs(opts, "NewFeedback", agentIdRule, clientAddressRule, tag1Rule)
+	logs, sub, err := _ReputationRegistry.contract.WatchLogs(opts, "NewFeedback", agentIdRule, clientAddressRule, indexedTag1Rule)
 	if err != nil {
 		return nil, err
 	}
@@ -1194,9 +1211,9 @@ func (_ReputationRegistry *ReputationRegistryFilterer) WatchNewFeedback(opts *bi
 	}), nil
 }
 
-// ParseNewFeedback is a log parse operation binding the contract event 0x801d7d4264128f6f43835850f1fabb91902c3543c3738f1f62fbf7e9fd80531d.
+// ParseNewFeedback is a log parse operation binding the contract event 0x413f2d30fdbc0b49e55537333a7c6287556f671f40c7e2dc00fc7ca1ced350da.
 //
-// Solidity: event NewFeedback(uint256 indexed agentId, address indexed clientAddress, uint64 feedbackIndex, uint8 score, string indexed tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash)
+// Solidity: event NewFeedback(uint256 indexed agentId, address indexed clientAddress, uint64 feedbackIndex, int256 value, uint8 valueDecimals, string indexed indexedTag1, string tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash)
 func (_ReputationRegistry *ReputationRegistryFilterer) ParseNewFeedback(log types.Log) (*ReputationRegistryNewFeedback, error) {
 	event := new(ReputationRegistryNewFeedback)
 	if err := _ReputationRegistry.contract.UnpackLog(event, "NewFeedback", log); err != nil {

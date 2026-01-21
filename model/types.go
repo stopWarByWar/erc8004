@@ -129,6 +129,8 @@ type Feedback struct {
 	ClientAddress      string `gorm:"column:client_address"`
 	FeedbackIndex      uint64 `gorm:"column:feedback_index"`
 	Score              uint8
+	Value              string `gorm:"column:value"`
+	ValueDecimals      uint8  `gorm:"column:value_decimals"`
 	Tag1               string
 	Tag2               string
 	FeedbackURI        string
