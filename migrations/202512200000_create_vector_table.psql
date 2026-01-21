@@ -32,3 +32,5 @@ WHERE a.uid < b.uid
 
 -- 添加唯一约束
 ALTER TABLE agent_vectors 
+
+ADD CONSTRAINT agent_vectors_agent_uid_unique UNIQUE (agent_uid);
