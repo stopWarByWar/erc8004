@@ -49,6 +49,7 @@ type ProviderResponse struct {
 type UploadFeedbackRequest struct {
 	UID            uint64          `json:"uid"`
 	ClientAddress  string          `json:"clientAddress"`
+	IndexLimit     uint64          `json:"indexLimit"`
 	Score          int             `json:"score"`
 	Tag1           *string         `json:"tag1,omitempty"`
 	Tag2           *string         `json:"tag2,omitempty"`
