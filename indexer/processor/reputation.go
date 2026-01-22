@@ -22,7 +22,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var NewFeedbackTopic = common.HexToHash("0x801d7d4264128f6f43835850f1fabb91902c3543c3738f1f62fbf7e9fd80531d")
+var NewFeedbackTopic = common.HexToHash("0x413f2d30fdbc0b49e55537333a7c6287556f671f40c7e2dc00fc7ca1ced350da")
 var ResponseAppendedTopic = common.HexToHash("0xb1c6be0b5b8aef6539e2fac0fd131a2faa7b49edf8e505b5eb0ad487d56051d4")
 var FeedbackRevokedTopic = common.HexToHash("0x25156fd3288212246d8b008d5921fde376c71ed14ac2e072a506eb06fde6d09d")
 

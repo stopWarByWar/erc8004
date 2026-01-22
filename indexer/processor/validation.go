@@ -23,7 +23,7 @@ import (
 )
 
 var ValidationRequestTopic = common.HexToHash("0x530436c3634a98e1e626b0898be2f1e9980cc1bd2a78c07a0aba52d0a48a5059")
-var ValidationResponseTopic = common.HexToHash("0xf224d3d5ad74301be48e4d51ca5f1b24c7946875887327585becc59165297dcf")
+var ValidationResponseTopic = common.HexToHash("0xafddf629e874ccc3963b6a888c477bd464a6c8525024fc88759ea3b2326349ae")
 
 type ValidationRegistryProcessor struct {
 	execBlock uint64
