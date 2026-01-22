@@ -95,6 +95,7 @@ func SetChainAgentAmount(chainId string, amount int64) {
 		return
 	}
 	chain.AgentAmount = uint64(amount)
+	ChainMap[chainId] = chain
 }
 func GetContractsDeployerInfo(ChainID string, RegistryAddress string) ContractInfo {
 	register, ok := RegisterMap[ChainID][RegistryAddress]
