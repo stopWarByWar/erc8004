@@ -8,23 +8,24 @@ import (
 
 func GetNetworkList() ([]types.NetworkResponse, error) {
 	networkList := make([]types.NetworkResponse, 0)
-	for _, chain := range config.ChainList {
+	chainInfoMap := config.GetChainInfoMap()
+	for chainId, info := range chainInfoMap {
 		network := types.NetworkResponse{
-			ChainId:     chain.ChainId,
-			ChainName:   chain.ChainName,
-			ChainLogo:   chain.ChainLogo,
-			AgentAmount: chain.AgentAmount,
+			ChainId:     chainId,
+			ChainName:   info.ChainName,
+			ChainLogo:   info.ChainLogo,
+			AgentAmount: info.AgentAmount,
 		}
 
 		deployers := make([]types.ContractInfo, 0)
-		for _, register := range config.RegisterMap[chain.ChainId] {
+		for _, register := range config.RegisterMap[chainId] {
 			deployers = append(deployers, types.ContractInfo{
 				IdentityAddress:       register.IdentityAddress,
-				IdentityContractURL:   fmt.Sprintf("%s/address/%s", chain.ScanPrefix, register.IdentityAddress),
+				IdentityContractURL:   fmt.Sprintf("%s/address/%s", info.ScanPrefix, register.IdentityAddress),
 				ReputationAddress:     register.ReputationAddress,
-				ReputationContractURL: fmt.Sprintf("%s/address/%s", chain.ScanPrefix, register.ReputationAddress),
+				ReputationContractURL: fmt.Sprintf("%s/address/%s", info.ScanPrefix, register.ReputationAddress),
 				ValidationAddress:     register.ValidationAddress,
-				ValidationContractURL: fmt.Sprintf("%s/address/%s", chain.ScanPrefix, register.ValidationAddress),
+				ValidationContractURL: fmt.Sprintf("%s/address/%s", info.ScanPrefix, register.ValidationAddress),
 				Deployer:              register.Deployer,
 				Description:           register.Description,
 				LogoURL:               register.LogoURL,

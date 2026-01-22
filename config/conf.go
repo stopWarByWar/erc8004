@@ -81,6 +81,10 @@ func Init(configPath string) error {
 	return nil
 }
 
+func GetChainInfoMap() map[string]ChainInfo {
+	return ChainMap
+}
+
 func GetChainInfo(chainId string) (ChainInfo, bool) {
 	chain, ok := ChainMap[chainId]
 	if !ok {
