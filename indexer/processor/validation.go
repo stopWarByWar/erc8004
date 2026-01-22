@@ -83,6 +83,9 @@ func (p *ValidationRegistryProcessor) Process() {
 	ticker := time.NewTicker(20 * time.Second)
 	defer ticker.Stop()
 
+	logExecBlockTicker := time.NewTicker(60 * time.Second)
+	defer logExecBlockTicker.Stop()
+
 	for {
 		select {
 		case <-ticker.C:
@@ -99,6 +102,12 @@ func (p *ValidationRegistryProcessor) Process() {
 		case identityBlock := <-p.identityExecBlockChan:
 			// 接收identity processor发送的execBlock更新
 			p.identityExecBlock = identityBlock
+		case <-logExecBlockTicker.C:
+			p.logger.WithFields(logrus.Fields{
+				"identityBlock": p.identityExecBlock,
+				"block":         p.execBlock,
+				"index":         p.execIndex,
+			}).Info("validation registry processor exec block")
 		}
 	}
 }
@@ -186,7 +195,7 @@ func (p *ValidationRegistryProcessor) dealWithValidationRequestEvent(e types.Log
 		}
 	}
 
-	return model.InsertValidation(&model.Validation{
+	err = model.InsertValidation(&model.Validation{
 		AgentUID:           agentUID,
 		ChainID:            p.chainID,
 		AgentID:            event.AgentId.String(),
@@ -199,6 +208,19 @@ func (p *ValidationRegistryProcessor) dealWithValidationRequestEvent(e types.Log
 		RequestTxHash:      e.TxHash.String(),
 		Timestamps:         uint64(e.BlockTimestamp),
 	})
+
+	p.logger.WithFields(logrus.Fields{
+		"event":            "validation request",
+		"agentID":          event.AgentId.String(),
+		"identityRegistry": p.identityAddr,
+		"chainID":          p.chainID,
+		"blockNumber":      uint64(e.BlockNumber),
+		"index":            uint64(e.Index),
+		"txHash":           e.TxHash.String(),
+		"timestamps":       uint64(e.BlockTimestamp),
+	}).Info("deal with validation request event")
+
+	return err
 }
 
 func (p *ValidationRegistryProcessor) dealWithValidationResponseEvent(e types.Log) error {
@@ -207,7 +229,7 @@ func (p *ValidationRegistryProcessor) dealWithValidationResponseEvent(e types.Lo
 		return err
 	}
 
-	return model.UpdateValidation(&model.Validation{
+	err = model.UpdateValidation(&model.Validation{
 		RequestHash:    common.BytesToHash(event.RequestHash[:]).String(),
 		Response:       int(event.Response),
 		ResponseURI:    event.ResponseURI,
@@ -218,4 +240,16 @@ func (p *ValidationRegistryProcessor) dealWithValidationResponseEvent(e types.Lo
 		BlockNumber:    uint64(e.BlockNumber),
 		Index:          uint64(e.Index),
 	})
+
+	p.logger.WithFields(logrus.Fields{
+		"event":            "validation response",
+		"agentID":          event.AgentId.String(),
+		"identityRegistry": p.identityAddr,
+		"chainID":          p.chainID,
+		"blockNumber":      uint64(e.BlockNumber),
+		"index":            uint64(e.Index),
+		"txHash":           e.TxHash.String(),
+		"timestamps":       uint64(e.BlockTimestamp),
+	}).Info("deal with validation response event")
+	return err
 }

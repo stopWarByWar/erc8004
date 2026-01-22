@@ -93,6 +93,8 @@ func (idx *IdentityProcessor) Process() {
 	fetchAgentCardTicker := time.NewTicker(20 * time.Second)
 	defer fetchAgentCardTicker.Stop()
 
+	logExecBlockTicker := time.NewTicker(60 * time.Second)
+	defer logExecBlockTicker.Stop()
 	for {
 		select {
 		case <-ticker.C:
@@ -119,6 +121,11 @@ func (idx *IdentityProcessor) Process() {
 			}
 		case <-fetchAgentCardTicker.C:
 			idx.setAgentCardInserted()
+		case <-logExecBlockTicker.C:
+			idx.logger.WithFields(logrus.Fields{
+				"block": execBlock,
+				"index": execIndex,
+			}).Info("identity registry processor exec block")
 		}
 	}
 }
@@ -245,6 +252,17 @@ func (idx *IdentityProcessor) dealWithAgentRegisteredEvent(e types.Log) error {
 	if err := model.CreateAgentRegistry(registry); err != nil {
 		return fmt.Errorf("failed to create agent registry: %w", err)
 	}
+
+	idx.logger.WithFields(logrus.Fields{
+		"event":            "register agent",
+		"agentID":          agentRegisteredEvent.AgentId.String(),
+		"identityRegistry": idx.identityAddr.Hex(),
+		"chainID":          idx.chainID,
+		"blockNumber":      uint64(e.BlockNumber),
+		"index":            uint64(e.Index),
+		"txHash":           e.TxHash.String(),
+		"timestamps":       uint64(e.BlockTimestamp),
+	}).Info("deal with agent registered event")
 	return nil
 }
 
@@ -257,6 +275,16 @@ func (idx *IdentityProcessor) dealWithUriUpdatedEvent(e types.Log) error {
 	if err := model.UpdateAgentTokenURL(idx.chainID, idx.identityAddr.Hex(), event.AgentId.String(), event.NewURI, uint64(e.BlockNumber), uint64(e.Index)); err != nil {
 		return fmt.Errorf("failed to update agent token url: %w", err)
 	}
+	idx.logger.WithFields(logrus.Fields{
+		"event":            "update agent uri",
+		"agentID":          event.AgentId.String(),
+		"identityRegistry": idx.identityAddr.Hex(),
+		"chainID":          idx.chainID,
+		"blockNumber":      uint64(e.BlockNumber),
+		"index":            uint64(e.Index),
+		"txHash":           e.TxHash.String(),
+		"timestamps":       uint64(e.BlockTimestamp),
+	}).Info("deal with agent uri updated event")
 
 	return nil
 }
@@ -270,6 +298,16 @@ func (idx *IdentityProcessor) dealWithTransferOwnerShipEvent(e types.Log) error 
 	if err := model.TransferOwnerShip(idx.chainID, idx.identityAddr.Hex(), event.TokenId.String(), event.To.String(), uint64(e.BlockNumber), uint64(e.Index)); err != nil {
 		return fmt.Errorf("failed to transfer owner ship: %w", err)
 	}
+	idx.logger.WithFields(logrus.Fields{
+		"event":            "transfer owner ship",
+		"agentID":          event.TokenId.String(),
+		"identityRegistry": idx.identityAddr.Hex(),
+		"chainID":          idx.chainID,
+		"blockNumber":      uint64(e.BlockNumber),
+		"index":            uint64(e.Index),
+		"txHash":           e.TxHash.String(),
+		"timestamps":       uint64(e.BlockTimestamp),
+	}).Info("deal with transfer owner ship event")
 	return nil
 }
 

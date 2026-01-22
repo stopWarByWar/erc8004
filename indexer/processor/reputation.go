@@ -87,6 +87,9 @@ func (p *ReputationProcessor) Process() {
 	fetchFeedbackAndResponseTicker := time.NewTicker(20 * time.Second)
 	defer fetchFeedbackAndResponseTicker.Stop()
 
+	logExecBlockTicker := time.NewTicker(60 * time.Second)
+	defer logExecBlockTicker.Stop()
+
 	for {
 		select {
 		case <-ticker.C:
@@ -105,6 +108,12 @@ func (p *ReputationProcessor) Process() {
 		case identityBlock := <-p.identityExecBlockChan:
 			// 接收identity processor发送的execBlock更新
 			p.identityExecBlock = identityBlock
+		case <-logExecBlockTicker.C:
+			p.logger.WithFields(logrus.Fields{
+				"identityBlock": p.identityExecBlock,
+				"block":         p.execBlock,
+				"index":         p.execIndex,
+			}).Info("reputation registry processor exec block")
 		}
 	}
 }
@@ -225,6 +234,16 @@ func (p *ReputationProcessor) dealWithNewFeedbackEvent(e types.Log) error {
 		return fmt.Errorf("failed to create feedback: %w", err)
 	}
 
+	p.logger.WithFields(logrus.Fields{
+		"event":            "new feedback",
+		"agentID":          newFeedbackEvent.AgentId.String(),
+		"identityRegistry": p.identityAddr,
+		"chainID":          p.chainID,
+		"blockNumber":      uint64(e.BlockNumber),
+		"index":            uint64(e.Index),
+		"txHash":           e.TxHash.String(),
+		"timestamps":       uint64(e.BlockTimestamp),
+	}).Info("deal with new feedback event")
 	return nil
 }
 
@@ -237,6 +256,17 @@ func (p *ReputationProcessor) dealWithFeedbackRevokedEvent(e types.Log) error {
 	if err := model.UpdateFeedbackRevoked(p.chainID, feedbackRevokedEvent.AgentId.String(), p.reputationAddr.String(), feedbackRevokedEvent.ClientAddress.String(), feedbackRevokedEvent.FeedbackIndex); err != nil {
 		return fmt.Errorf("failed to update feedback revoked: %w", err)
 	}
+
+	p.logger.WithFields(logrus.Fields{
+		"event":            "feedback revoked",
+		"agentID":          feedbackRevokedEvent.AgentId.String(),
+		"identityRegistry": p.identityAddr,
+		"chainID":          p.chainID,
+		"blockNumber":      uint64(e.BlockNumber),
+		"index":            uint64(e.Index),
+		"txHash":           e.TxHash.String(),
+		"timestamps":       uint64(e.BlockTimestamp),
+	}).Info("deal with feedback revoked event")
 	return nil
 }
 
@@ -277,6 +307,16 @@ func (p *ReputationProcessor) dealWithResponseAppendedEvent(e types.Log) error {
 	if err := model.CreateResponse(p.chainID, response); err != nil {
 		return fmt.Errorf("failed to create response: %w", err)
 	}
+	p.logger.WithFields(logrus.Fields{
+		"event":            "response appended",
+		"agentID":          responseAppendedEvent.AgentId.String(),
+		"identityRegistry": p.identityAddr,
+		"chainID":          p.chainID,
+		"blockNumber":      uint64(e.BlockNumber),
+		"index":            uint64(e.Index),
+		"txHash":           e.TxHash.String(),
+		"timestamps":       uint64(e.BlockTimestamp),
+	}).Info("deal with response appended event")
 
 	return nil
 }
