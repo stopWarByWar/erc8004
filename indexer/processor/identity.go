@@ -123,8 +123,8 @@ func (idx *IdentityProcessor) Process() {
 			idx.setAgentCardInserted()
 		case <-logExecBlockTicker.C:
 			idx.logger.WithFields(logrus.Fields{
-				"block": execBlock,
-				"index": execIndex,
+				"block": idx.execBlock,
+				"index": idx.execIndex,
 			}).Info("identity registry processor exec block")
 		}
 	}
