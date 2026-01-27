@@ -5,7 +5,7 @@ import (
 	"agent_identity/model"
 	"encoding/hex"
 	"fmt"
-	"math"
+	"strconv"
 	"strings"
 
 	serverTypes "agent_identity/server/api/types"
@@ -25,17 +25,12 @@ func formatAgentResponse(agents []*model.Agent) ([]*serverTypes.AgentResponse, e
 
 	var resp []*serverTypes.AgentResponse
 
-	skills, err := model.GetSkillsByAgentUIDs(agentUIDs)
+	skills, err := model.GetOASFSkillsByAgentUIDs(agentUIDs)
 	if err != nil {
 		return nil, fmt.Errorf("fail to get skills by agent uids: %v", err)
 	}
 
-	skillTags, err := model.GetSkillTagsByAgentUIDs(agentUIDs)
-	if err != nil {
-		return nil, fmt.Errorf("fail to get skill tags by agent uids: %v", err)
-	}
-
-	providers, err := model.GetProvidersByAgentUIDs(agentUIDs)
+	providers, err := model.GetA2AProvidersByAgentUIDs(agentUIDs)
 	if err != nil {
 		return nil, fmt.Errorf("fail to get providers by agent uids: %v", err)
 	}
@@ -45,29 +40,48 @@ func formatAgentResponse(agents []*model.Agent) ([]*serverTypes.AgentResponse, e
 		return nil, fmt.Errorf("fail to get trust models by agent uids: %v", err)
 	}
 
+	services, err := model.GetServicesByAgentUIDs(agentUIDs)
+	if err != nil {
+		return nil, fmt.Errorf("fail to get services by agent uids: %v", err)
+	}
+
 	for _, agent := range agents {
-		var skillTagsResponse = make([]serverTypes.SkillTagResponse, 0)
-		for _, skill := range skills[agent.UID] {
-			var tags = make([]string, 0)
-			for _, skillTag := range skillTags[agent.UID][skill.ID] {
-				tags = append(tags, skillTag.Tag)
+		_services := services[agent.UID]
+		var uri string
+		var mcpEndpoint string
+		var oasfEndpoint string
+		var a2aEndpoint string
+		var version string
+
+		for _, _service := range _services {
+			if _service.ServiceName == "a2a" {
+				a2aEndpoint = _service.Endpoint
+				version = _service.Version
 			}
+			if _service.ServiceName == "mcp" {
+				mcpEndpoint = _service.Endpoint
+			}
+			if _service.ServiceName == "oasf" {
+				oasfEndpoint = _service.Endpoint
+			}
+			if _service.ServiceName == "web" {
+				uri = _service.Endpoint
+			}
+		}
+
+		var skillTagsResponse = make([]serverTypes.SkillTagResponse, 0)
+		for i, skill := range skills[agent.UID] {
 			skillTagsResponse = append(skillTagsResponse, serverTypes.SkillTagResponse{
-				ID:          skill.ID,
-				Name:        skill.Name,
-				Description: skill.Description,
-				Tags:        tags,
+				ID:          strconv.Itoa(i),
+				Name:        skill.SkillName,
+				Description: "OASF Skill",
+				Tags:        []string{skill.SkillName},
 			})
 		}
 
 		var trustModelsResponse = make([]string, 0)
 		for _, trustModel := range trustModels[agent.UID] {
 			trustModelsResponse = append(trustModelsResponse, trustModel.TrustModel)
-		}
-
-		score := 0.0
-		if agent.CommentCount > 0 {
-			score = math.Round(float64(agent.Score)/float64(agent.CommentCount)*10) / 10
 		}
 
 		var providerResponse serverTypes.ProviderResponse
@@ -88,31 +102,28 @@ func formatAgentResponse(agents []*model.Agent) ([]*serverTypes.AgentResponse, e
 		resp = append(resp, &serverTypes.AgentResponse{
 			UID:              agent.UID,
 			AgentID:          agent.AgentID,
-			A2AEndpoint:      agent.A2AEndpoint,
+			A2AEndpoint:      a2aEndpoint,
 			WalletAddress:    agent.AgentWallet,
 			Owner:            agent.Owner,
 			ChainID:          agent.ChainID,
 			ChainName:        chainInfo.ChainName,
 			ChainLogo:        chainInfo.ChainLogo,
-			Namespace:        agent.Namespace,
 			Name:             agent.Name,
 			Description:      agent.Description,
-			URL:              agent.URL,
+			URL:              uri,
 			Provider:         providerResponse,
 			IconURL:          agent.Image,
-			Version:          agent.Version,
-			DocumentationURL: agent.DocumentationURL,
 			Skills:           skillTagsResponse,
 			TrustModels:      trustModelsResponse,
-			Score:            score,
-			UserInterface:    agent.UserInterfaceURL,
 			IdentityRegistry: agent.IdentityRegistry,
 			Deployer:         deployerInfo.Deployer,
 			DeployerLogo:     deployerInfo.LogoURL,
+			MCPEndpoint:      mcpEndpoint,
+			OASFEndpoint:     oasfEndpoint,
+			Version:          version,
 
-			WalletAddressScanURL:        fmt.Sprintf("%s/address/%s", chainInfo.ScanPrefix, agent.AgentWallet),
-			WalletAddressExpirationTime: agent.AgentWalletExpirationTime,
-			ReputationRegistry:          deployerInfo.ReputationAddress,
+			WalletAddressScanURL: fmt.Sprintf("%s/address/%s", chainInfo.ScanPrefix, agent.AgentWallet),
+			ReputationRegistry:   deployerInfo.ReputationAddress,
 		})
 	}
 

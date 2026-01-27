@@ -2,7 +2,6 @@ package processor
 
 import (
 	"encoding/hex"
-	"fmt"
 	"math/big"
 	"testing"
 )
@@ -16,7 +15,7 @@ func Test_DecodeCommentEvent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(comment.Commenter.Hex())
+	t.Log(comment.Commenter.String())
 	t.Log(comment.AgentID.String())
 	t.Log(comment.Score)
 	t.Log(comment.CommentText)
@@ -26,6 +25,9 @@ func Test_DecodeCommentEvent(t *testing.T) {
 func Test_CalculateScore(t *testing.T) {
 	value := big.NewInt(10000000)
 	valueDecimals := uint8(2)
-	score := calculateScore(value, valueDecimals)
-	fmt.Println(score)
+	score, err := calculateScore(value, valueDecimals)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(score)
 }

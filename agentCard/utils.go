@@ -14,74 +14,23 @@ import (
 
 const defaultIPFSGateway = "https://ipfs.io/ipfs/"
 
-func GetAgentCardFromTokenURL(owner, tokenId, tokenURL, chainID, identityRegistryAddr string, timestamps uint64) (*Agent, bool, []error) {
-	var errors []error
-	var inserted bool = true
+func GetAgentProfile(tokenURL string) (*TokenURLResponse, error) {
 	body, err := fetchTokenURLBody(tokenURL)
 	if err != nil {
-		errors = append(errors, err)
-		return nil, false, errors
+		return nil, err
 	}
 
 	var tokenURLResponse TokenURLResponse
 	err = json.Unmarshal(body, &tokenURLResponse)
 	if err != nil {
-		errors = append(errors, err)
-		return nil, false, errors
+		return nil, err
 	}
 
-	var agent = &Agent{
-		Type:             tokenURLResponse.Type,
-		Name:             tokenURLResponse.Name,
-		Description:      tokenURLResponse.Description,
-		Image:            tokenURLResponse.Image,
-		SupportedTrust:   tokenURLResponse.SupportedTrust,
-		AgentID:          tokenId,
-		TokenURL:         tokenURL,
-		ChainID:          chainID,
-		Owner:            owner,
-		Timestamps:       timestamps,
-		UserInterfaceURL: tokenURLResponse.UserInterfaceURL,
-		IdentityRegistry: identityRegistryAddr,
+	for i, service := range tokenURLResponse.Services {
+		tokenURLResponse.Services[i].Name = strings.ToLower(service.Name)
 	}
+	return &tokenURLResponse, nil
 
-	var agentCard *server.AgentCard
-
-	for _, endpoint := range tokenURLResponse.Endpoints {
-		if strings.ToLower(endpoint.Name) == "a2a" {
-			agentCard, err = getAgentCardFromA2AEndpoint(endpoint.Endpoint)
-			if err != nil {
-				errors = append(errors, err)
-				inserted = false
-			}
-			agent.AgentCard = agentCard
-			agent.Endpoint = endpoint.Endpoint
-		}
-
-		if strings.ToLower(endpoint.Name) == "mcp" && len(endpoint.Endpoint) > 0 {
-			agent.MCPEndpoints = &MCPEndpoint{
-				Endpoint:     endpoint.Endpoint,
-				Version:      endpoint.Version,
-				Capabilities: endpoint.Capabilities,
-			}
-		}
-
-		if strings.ToLower(endpoint.Name) == "oasf" && endpoint.Endpoint != "" {
-			agent.OASFEndpoints = &OASFEndpoint{
-				Endpoint: endpoint.Endpoint,
-				Version:  endpoint.Version,
-			}
-		}
-	}
-
-	//todo: check registration is valid
-
-	if len(agent.AgentID) == 0 || len(agent.Namespace) == 0 || len(agent.AgentWallet) == 0 {
-		errors = append(errors, fmt.Errorf("invalid agent: agent id:%s, namespace:%s, agent wallet:%s", agent.AgentID, agent.Namespace, agent.AgentWallet))
-		inserted = false
-	}
-
-	return agent, inserted, errors
 }
 
 func getAgentCardFromA2AEndpoint(endpoint string) (*server.AgentCard, error) {
@@ -122,13 +71,6 @@ func unmarshalAgentCard(body []byte) (*server.AgentCard, error) {
 	return agentCard, nil
 }
 
-func formatAddress(address string) (string, string, string, error) {
-	addressSlice := strings.Split(address, ":")
-	if len(addressSlice) != 3 {
-		return "", "", "", errors.New("invalid address format")
-	}
-	return addressSlice[0], addressSlice[1], addressSlice[2], nil
-}
 func validateA2AEndpoint(endpoint string) bool {
 	//检查https://agent.example/.well-known/agent-card.json这个格式
 	if !strings.HasSuffix(endpoint, "/.well-known/agent-card.json") || !strings.HasPrefix(endpoint, "https://") {

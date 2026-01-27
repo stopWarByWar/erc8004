@@ -48,7 +48,7 @@ func NewCreateAgentProcessor(identityAddr string, ethClient *ethclient.Client, f
 		panic(err)
 	}
 
-	execBlock, execIndex, err := model.GetLatestAgentRegistry(chainId.String(), identityAddr)
+	execBlock, execIndex, err := model.GetLatestAgent(chainId.String(), identityAddr)
 	if err != nil {
 		panic(err)
 	}
@@ -215,7 +215,7 @@ func (idx *IdentityProcessor) dealWithSetMetaDataEvent(e types.Log) error {
 	}
 
 	if event.MetadataKey == "agentWallet" {
-		err := model.UpdateAgentWallet(idx.chainID, idx.identityAddr.String(), event.AgentId.String(), common.BytesToAddress(event.MetadataValue).String(), uint64(e.BlockTimestamp))
+		err := model.UpdateAgentWallet(idx.chainID, idx.identityAddr.String(), event.AgentId.String(), common.BytesToAddress(event.MetadataValue).String())
 		if err != nil {
 			return fmt.Errorf("failed to update agent wallet: %w", err)
 		}
@@ -224,7 +224,7 @@ func (idx *IdentityProcessor) dealWithSetMetaDataEvent(e types.Log) error {
 
 	return model.CreateMetadata(&model.Metadata{
 		ChainID:          idx.chainID,
-		IdentityRegistry: idx.identityAddr.Hex(),
+		IdentityRegistry: idx.identityAddr.String(),
 		AgentID:          event.AgentId.String(),
 		Key:              event.MetadataKey,
 		Value:            hex.EncodeToString(event.MetadataValue),
@@ -237,11 +237,11 @@ func (idx *IdentityProcessor) dealWithAgentRegisteredEvent(e types.Log) error {
 		return fmt.Errorf("failed to parse agent registered event: %w", err)
 	}
 
-	registry := &model.AgentRegistry{
+	registry := &model.Agent{
 		AgentID:          agentRegisteredEvent.AgentId.String(),
-		IdentityRegistry: idx.identityAddr.Hex(),
+		IdentityRegistry: idx.identityAddr.String(),
 		Owner:            agentRegisteredEvent.Owner.String(),
-		TokenURL:         agentRegisteredEvent.AgentURI,
+		AgentURI:         agentRegisteredEvent.AgentURI,
 		ChainID:          idx.chainID,
 		BlockNumber:      uint64(e.BlockNumber),
 		Index:            uint64(e.Index),
@@ -249,14 +249,14 @@ func (idx *IdentityProcessor) dealWithAgentRegisteredEvent(e types.Log) error {
 		Timestamps:       uint64(e.BlockTimestamp),
 	}
 
-	if err := model.CreateAgentRegistry(registry); err != nil {
+	if err := model.CreateAgent(registry); err != nil {
 		return fmt.Errorf("failed to create agent registry: %w", err)
 	}
 
 	idx.logger.WithFields(logrus.Fields{
 		"event":            "register agent",
 		"agentID":          agentRegisteredEvent.AgentId.String(),
-		"identityRegistry": idx.identityAddr.Hex(),
+		"identityRegistry": idx.identityAddr.String(),
 		"chainID":          idx.chainID,
 		"blockNumber":      uint64(e.BlockNumber),
 		"index":            uint64(e.Index),
@@ -272,13 +272,13 @@ func (idx *IdentityProcessor) dealWithUriUpdatedEvent(e types.Log) error {
 		return fmt.Errorf("failed to parse auth feedback event: %w", err)
 	}
 
-	if err := model.UpdateAgentTokenURL(idx.chainID, idx.identityAddr.Hex(), event.AgentId.String(), event.NewURI, uint64(e.BlockNumber), uint64(e.Index)); err != nil {
+	if err := model.UpdateAgentTokenURL(idx.chainID, idx.identityAddr.String(), event.AgentId.String(), event.NewURI, uint64(e.BlockNumber), uint64(e.Index)); err != nil {
 		return fmt.Errorf("failed to update agent token url: %w", err)
 	}
 	idx.logger.WithFields(logrus.Fields{
 		"event":            "update agent uri",
 		"agentID":          event.AgentId.String(),
-		"identityRegistry": idx.identityAddr.Hex(),
+		"identityRegistry": idx.identityAddr.String(),
 		"chainID":          idx.chainID,
 		"blockNumber":      uint64(e.BlockNumber),
 		"index":            uint64(e.Index),
@@ -295,13 +295,13 @@ func (idx *IdentityProcessor) dealWithTransferOwnerShipEvent(e types.Log) error 
 		return fmt.Errorf("failed to parse transfer owner ship event: %w", err)
 	}
 
-	if err := model.TransferOwnerShip(idx.chainID, idx.identityAddr.Hex(), event.TokenId.String(), event.To.String(), uint64(e.BlockNumber), uint64(e.Index)); err != nil {
+	if err := model.TransferOwnerShip(idx.chainID, idx.identityAddr.String(), event.TokenId.String(), event.To.String(), uint64(e.BlockNumber), uint64(e.Index)); err != nil {
 		return fmt.Errorf("failed to transfer owner ship: %w", err)
 	}
 	idx.logger.WithFields(logrus.Fields{
 		"event":            "transfer owner ship",
 		"agentID":          event.TokenId.String(),
-		"identityRegistry": idx.identityAddr.Hex(),
+		"identityRegistry": idx.identityAddr.String(),
 		"chainID":          idx.chainID,
 		"blockNumber":      uint64(e.BlockNumber),
 		"index":            uint64(e.Index),
@@ -314,12 +314,12 @@ func (idx *IdentityProcessor) dealWithTransferOwnerShipEvent(e types.Log) error 
 func (idx *IdentityProcessor) setAgentCardInserted() {
 	var limit = 100
 	for {
-		agentRegistries, err := model.GetUnInsertedAgentRegistry(idx.chainID, idx.identityAddr.Hex(), limit)
+		agentRegistries, err := model.GetUnInsertedAgents(idx.chainID, idx.identityAddr.String(), limit)
 		if err != nil {
 			idx.logger.WithFields(logrus.Fields{
 				"error":            err,
 				"chainID":          idx.chainID,
-				"identityRegistry": idx.identityAddr.Hex(),
+				"identityRegistry": idx.identityAddr.String(),
 			}).Error("failed to get un inserted agent registry")
 			return
 		}
@@ -329,80 +329,57 @@ func (idx *IdentityProcessor) setAgentCardInserted() {
 		}
 
 		for _, agentRegistry := range agentRegistries {
-			agent, inserted, extractErrs := agentcard.GetAgentCardFromTokenURL(agentRegistry.Owner, agentRegistry.AgentID, agentRegistry.TokenURL, idx.chainID, idx.identityAddr.Hex(), agentRegistry.Timestamps)
-			if extractErrs != nil {
-				idx.logger.WithFields(logrus.Fields{
-					"error":            extractErrs,
-					"chainID":          idx.chainID,
-					"identityRegistry": idx.identityAddr.Hex(),
-					"agentID":          agentRegistry.AgentID,
-					"tokenURL":         agentRegistry.TokenURL,
-				}).Error("failed to get agent card from token url")
-			}
-
-			// upload agent to gemini file api
-			if agent != nil {
-				if err := model.InsertAgentCard(agent); err != nil {
-					idx.logger.WithFields(logrus.Fields{
-						"error":            err,
-						"chainID":          idx.chainID,
-						"identityRegistry": idx.identityAddr.Hex(),
-						"agentID":          agentRegistry.AgentID,
-						"tokenURL":         agentRegistry.TokenURL,
-					}).Error("failed to insert agent card")
-					continue
-				}
-
-				agentUID, err := model.GetAgentUID(agent.ChainID, agent.IdentityRegistry, agent.AgentID)
-				if err != nil {
-					idx.logger.WithFields(logrus.Fields{
-						"error":            err,
-						"chainID":          idx.chainID,
-						"identityRegistry": idx.identityAddr.Hex(),
-						"agentID":          agent.AgentID,
-					}).Error("failed to get agent uid")
-					continue
-				}
-
-				err = model.InsertAgentVector(agentUID, agent.IdentityRegistry, agent.ChainID, agent.Timestamps, agent.Description, nil)
-				if err != nil {
-					idx.logger.WithFields(logrus.Fields{
-						"error":            err,
-						"chainID":          idx.chainID,
-						"identityRegistry": idx.identityAddr.Hex(),
-						"agentID":          agent.AgentID,
-					}).Error("failed to insert agent vector")
-					continue
-				}
-			}
-
-			// if len(extractErrs) == 0 || inserted {
-			// 	if err := model.UpdateAgentRegistryInserted([]string{agentRegistry.AgentID}); err != nil {
-			// 		idx.logger.WithFields(logrus.Fields{
-			// 			"error":            err,
-			// 			"chainID":          idx.chainID,
-			// 			"identityRegistry": idx.identityAddr.Hex(),
-			// 			"agentID":          agentRegistry.AgentID,
-			// 			"tokenURL":         agentRegistry.TokenURL,
-			// 		}).Error("failed to update agent registry inserted")
-			// 		continue
-			// 	}
-			// }
-			if err := model.UpdateAgentRegistryInserted(idx.chainID, idx.identityAddr.Hex(), []string{agentRegistry.AgentID}); err != nil {
+			agentProfile, err := agentcard.GetAgentProfile(agentRegistry.AgentURI)
+			if err != nil {
 				idx.logger.WithFields(logrus.Fields{
 					"error":            err,
 					"chainID":          idx.chainID,
-					"identityRegistry": idx.identityAddr.Hex(),
+					"identityRegistry": idx.identityAddr.String(),
 					"agentID":          agentRegistry.AgentID,
-					"tokenURL":         agentRegistry.TokenURL,
-					"inserted":         inserted,
+					"agentURI":         agentRegistry.AgentURI,
+				}).Error("failed to get agent card from token url")
+			}
+
+			var agentUID uint64
+			// upload agent to gemini file api
+			if agentProfile != nil {
+				var agent *model.Agent
+				var err error
+				if agent, err = model.UpdateAgent(agentRegistry.ChainID, agentRegistry.IdentityRegistry, agentRegistry.AgentID, agentProfile); err != nil {
+					idx.logger.WithFields(logrus.Fields{
+						"error":            err,
+						"chainID":          agentRegistry.ChainID,
+						"identityRegistry": agentRegistry.IdentityRegistry,
+						"agentID":          agentRegistry.AgentID,
+						"agentURI":         agentRegistry.AgentURI,
+					}).Error("failed to update agent")
+					continue
+				}
+				agentUID = agent.UID
+
+				// err = model.InsertAgentVector(agent.UID, agent.IdentityRegistry, agent.ChainID, agent.Timestamps, agent.Description, nil)
+				// if err != nil {
+				// 	idx.logger.WithFields(logrus.Fields{
+				// 		"error":            err,
+				// 		"chainID":          agentRegistry.ChainID,
+				// 		"identityRegistry": agentRegistry.IdentityRegistry,
+				// 		"agentID":          agentRegistry.AgentID,
+				// 		"agentURI":         agentRegistry.AgentURI,
+				// 	}).Error("failed to insert agent vector")
+				// 	continue
+				// }
+			}
+
+			if err := model.UpdateAgentInserted([]uint64{agentUID}); err != nil {
+				idx.logger.WithFields(logrus.Fields{
+					"error":            err,
+					"chainID":          idx.chainID,
+					"identityRegistry": idx.identityAddr.String(),
+					"agentUID":         agentUID,
+					"agentURI":         agentRegistry.AgentURI,
 				}).Error("failed to update agent registry inserted")
 				continue
 			}
-		}
-
-		if len(agentRegistries) < limit {
-			return
 		}
 	}
 }

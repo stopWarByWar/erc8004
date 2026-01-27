@@ -145,9 +145,9 @@
       },
       {
         "indexed": false,
-        "internalType": "int256",
+        "internalType": "int128",
         "name": "value",
-        "type": "int256"
+        "type": "int128"
       },
       {
         "indexed": false,
@@ -437,9 +437,9 @@
         "type": "uint64"
       },
       {
-        "internalType": "int256",
+        "internalType": "int128",
         "name": "summaryValue",
-        "type": "int256"
+        "type": "int128"
       },
       {
         "internalType": "uint8",
@@ -471,9 +471,9 @@
         "type": "uint256"
       },
       {
-        "internalType": "int256",
+        "internalType": "int128",
         "name": "value",
-        "type": "int256"
+        "type": "int128"
       },
       {
         "internalType": "uint8",
@@ -591,9 +591,9 @@
         "type": "uint64[]"
       },
       {
-        "internalType": "int256[]",
+        "internalType": "int128[]",
         "name": "values",
-        "type": "int256[]"
+        "type": "int128[]"
       },
       {
         "internalType": "uint8[]",
@@ -640,9 +640,9 @@
     "name": "readFeedback",
     "outputs": [
       {
-        "internalType": "int256",
+        "internalType": "int128",
         "name": "value",
-        "type": "int256"
+        "type": "int128"
       },
       {
         "internalType": "uint8",

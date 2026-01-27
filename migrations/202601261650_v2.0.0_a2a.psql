@@ -1,0 +1,38 @@
+alter table agents add column a2a_uri text;
+alter table agents add column a2a_version varchar(255);
+alter table agents add column a2a_documentation_url text;
+alter table agents add column a2a_inserted boolean default false;
+
+CREATE TABLE IF NOT EXISTS a2a_skills (
+  agent_uid bigint NOT NULL,
+  id varchar(255) NOT NULL,
+  name varchar(255),
+  description text,
+  PRIMARY KEY (agent_uid, id)
+);
+CREATE INDEX IF NOT EXISTS idx_a2a_skills_agent_uid ON a2a_skills(agent_uid);
+
+CREATE TABLE IF NOT EXISTS a2a_skill_tags (
+  agent_uid bigint NOT NULL,
+  id varchar(255) NOT NULL,
+  tag varchar(255) NOT NULL,
+  PRIMARY KEY (agent_uid, id, tag)
+);
+CREATE INDEX IF NOT EXISTS idx_a2a_skill_tags_agent_uid ON a2a_skill_tags(agent_uid);
+
+CREATE TABLE IF NOT EXISTS a2a_providers (
+  agent_uid bigint NOT NULL,
+  organization varchar(255) NOT NULL,
+  url varchar(255),
+  PRIMARY KEY (agent_uid, organization, url)
+);
+CREATE INDEX IF NOT EXISTS idx_a2a_providers_agent_uid ON a2a_providers(agent_uid);
+
+CREATE TABLE IF NOT EXISTS a2a_extensions (
+  agent_uid bigint NOT NULL,
+  uri text NOT NULL,
+  required boolean,
+  description text,
+  PRIMARY KEY (agent_uid, uri)
+);
+CREATE INDEX IF NOT EXISTS idx_a2a_extensions_agent_uid ON a2a_extensions(agent_uid);

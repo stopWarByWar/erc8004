@@ -56,7 +56,7 @@ func GetGeneralInfo() map[string]any {
 
 func UpdateGeneralInfo() {
 	for {
-		agentsAmount, err := model.GetAgentAmountForEachChain()
+		agentAmounts, err := model.GetAgentAmountForEachChain()
 		if err != nil {
 			fmt.Println("failed to get agent amount for each chain", err)
 			time.Sleep(5 * time.Minute)
@@ -64,8 +64,8 @@ func UpdateGeneralInfo() {
 		}
 
 		total := int64(0)
-		for chainId, amount := range agentsAmount {
-			chainInfo, ok := config.GetChainInfo(chainId)
+		for chainID, amount := range agentAmounts {
+			chainInfo, ok := config.GetChainInfo(chainID)
 			if !ok {
 				continue
 			}
@@ -74,8 +74,7 @@ func UpdateGeneralInfo() {
 				generalInfo[chainName] = amount
 				total += amount
 			}
-			config.SetChainAgentAmount(chainId, amount)
-
+			config.SetChainAgentAmount(chainID, amount)
 		}
 		generalInfo["total"] = total
 		time.Sleep(5 * time.Minute)

@@ -1,2 +1,0 @@
-alter table feedbacks add column value varchar(255);
-alter table feedbacks add column value_decimals smallint;

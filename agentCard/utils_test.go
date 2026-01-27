@@ -4,11 +4,18 @@ import (
 	"testing"
 )
 
-func TestGetAgentCardFromTokenURL(t *testing.T) {
-	agent, provider, err := GetAgentCardFromTokenURL("0xA7132182Cbc0ceA8bE148FDE88faaD3BB9410d48", "1", "ipfs://QmNfTaioEdMfdnSRTHXJy6juAw4xFNGeCnAnfkqckjZHth", "11155111", "0x8004a6090Cd10A7288092483047B097295Fb8847", 1760570592)
+func TestGetAgentProfile(t *testing.T) {
+	agent, err := GetAgentProfile("ipfs://QmNfTaioEdMfdnSRTHXJy6juAw4xFNGeCnAnfkqckjZHth")
 	if err != nil {
 		panic(err)
 	}
-	t.Log(agent)
-	t.Log(provider)
+	t.Log(agent.Type)
+	t.Log(agent.Name)
+	t.Log(agent.Description)
+	t.Log(agent.Image)
+	t.Log(agent.Services)
+	t.Log(agent.X402Support)
+	t.Log(agent.Active)
+	t.Log(agent.Registrations)
+	t.Log(agent.SupportedTrust)
 }

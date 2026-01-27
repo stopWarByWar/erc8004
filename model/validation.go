@@ -234,3 +234,23 @@ func GetValidatorByAddress(address string) (any, error) {
 
 	return validatorInfo, nil
 }
+
+type SimplePassportAccount struct {
+	Address string `gorm:"column:address;type:varchar(255)"`
+	Name    string `gorm:"column:twitter_name;type:varchar(255)"`
+	Avatar  string `gorm:"column:avatar;type:varchar(255)"`
+}
+
+func checkPassport(addrs []string) (map[string]SimplePassportAccount, error) {
+	passportMap := make(map[string]SimplePassportAccount)
+	var accounts []SimplePassportAccount
+
+	err := db.Table("passport_accounts").Select("address, twitter_name, avatar").Where("address IN (?) and length(twitter_name) > 0", addrs).Scan(&accounts).Error
+	if err != nil {
+		return nil, err
+	}
+	for _, account := range accounts {
+		passportMap[account.Address] = account
+	}
+	return passportMap, nil
+}

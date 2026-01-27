@@ -10,28 +10,26 @@ type AgentResponse struct {
 	ChainID              string
 	ChainName            string `json:"chainName"`
 	ChainLogo            string `json:"chainLogo"`
-	Namespace            string
-	IdentityRegistry     string             `json:"identityRegistry"`
-	Name                 string             `json:"name"`
-	Description          string             `json:"description"`
-	URL                  string             `json:"url"`
-	Provider             ProviderResponse   `json:"provider"`
-	IconURL              string             `json:"iconUrl,omitempty"`
-	Version              string             `json:"version"`
-	DocumentationURL     string             `json:"documentationUrl,omitempty"`
-	Skills               []SkillTagResponse `json:"skills"`
-	TrustModels          []string           `json:"trustModels"`
-	UserInterface        string             `json:"userInterface"`
-	Score                float64            `json:"score"`
-	Metadata             []MetadataResponse `json:"metadata"`
-	TokenURL             string             `json:"tokenUrl"`
-	Deployer             string             `json:"deployer"`
-	DeployerLogo         string             `json:"deployerLogo"`
-	MACEndpoint          string             `json:"mcpEndpoint,omitempty"`
-	OASFEndpoint         string             `json:"oasfEndpoint,omitempty"`
-
-	WalletAddressExpirationTime uint64 `json:"walletAddressExpirationTime"`
-	ReputationRegistry          string `json:"reputationRegistry"`
+	// Namespace            string
+	IdentityRegistry string             `json:"identityRegistry"`
+	Name             string             `json:"name"`
+	Description      string             `json:"description"`
+	URL              string             `json:"url"`
+	Provider         ProviderResponse   `json:"provider"`
+	IconURL          string             `json:"iconUrl,omitempty"`
+	Version          string             `json:"version"`
+	DocumentationURL string             `json:"documentationUrl,omitempty"`
+	Skills           []SkillTagResponse `json:"skills"`
+	TrustModels      []string           `json:"trustModels"`
+	UserInterface    string             `json:"userInterface"`
+	// Score              float64            `json:"score"`
+	Metadata           []MetadataResponse `json:"metadata"`
+	TokenURL           string             `json:"tokenUrl"`
+	Deployer           string             `json:"deployer"`
+	DeployerLogo       string             `json:"deployerLogo"`
+	MCPEndpoint        string             `json:"mcpEndpoint,omitempty"`
+	OASFEndpoint       string             `json:"oasfEndpoint,omitempty"`
+	ReputationRegistry string             `json:"reputationRegistry"`
 }
 
 type SkillTagResponse struct {
@@ -152,19 +150,29 @@ type Feedback struct {
 	AgentId       int64  `json:"agentId"`
 	ClientAddress string `json:"clientAddress"`
 	CreatedAt     string `json:"createdAt"`
-	Score         int    `json:"score"`
-
+	Value         int    `json:"value"`
+	ValueDecimals int    `json:"valueDecimals"`
 	// MAY fields
-	Tag1           *string         `json:"tag1,omitempty"`
-	Tag2           *string         `json:"tag2,omitempty"`
-	Endpoint       *string         `json:"endpoint,omitempty"`
-	Domain         *string         `json:"domain,omitempty"`
-	Skill          *string         `json:"skill,omitempty"`
-	Context        *string         `json:"context,omitempty"`
-	Task           *string         `json:"task,omitempty"`
-	Capability     *string         `json:"capability,omitempty"`
-	Name           *string         `json:"name,omitempty"`
-	ProofOfPayment *ProofOfPayment `json:"proofOfPayment,omitempty"`
+	Tag1     *string `json:"tag1,omitempty"`
+	Tag2     *string `json:"tag2,omitempty"`
+	Endpoint *string `json:"endpoint,omitempty"`
+	Context  *string `json:"context,omitempty"`
+
+	MCP            *map[string]interface{} `json:"mcp,omitempty"`
+	A2A            *A2A                    `json:"a2a,omitempty"`
+	OASF           *OASF                   `json:"oasf,omitempty"`
+	ProofOfPayment *ProofOfPayment         `json:"proofOfPayment,omitempty"`
+}
+
+type A2A struct {
+	Skills    []string `json:"skills,omitempty"`
+	ContextId string   `json:"contextId,omitempty"`
+	TaskId    string   `json:"taskId,omitempty"`
+}
+
+type OASF struct {
+	Skills  []string `json:"skills,omitempty"`
+	Domains []string `json:"domains,omitempty"`
 }
 
 type ProofOfPayment struct {

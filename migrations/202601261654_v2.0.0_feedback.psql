@@ -1,0 +1,94 @@
+Drop table if exists feedbacks;
+Drop table if exists responses;
+
+-- Feedback 表
+CREATE TABLE IF NOT EXISTS feedbacks (
+  uid serial PRIMARY KEY,
+  agent_uid bigint NOT NULL,
+  chain_id varchar(255) NOT NULL,
+  agent_id varchar(255) NOT NULL,
+  identity_registry varchar(255) NOT NULL,
+  reputation_registry varchar(255) NOT NULL,
+  feedback_index bigint NOT NULL,
+  client_address varchar(255) NOT NULL,
+  
+  format_value numeric(36, 8),
+  value varchar(255),
+  value_decimals bigint NOT NULL,
+  
+  tag1 varchar(255),
+  tag2 varchar(255),
+  endpoint text,
+  feedback_uri text,
+  feedback_hash varchar(255),
+  
+  block_number bigint,
+  index bigint,
+  tx_hash varchar(255),
+  revoked boolean DEFAULT false,
+  fetched boolean DEFAULT false,
+  timestamps bigint
+);
+
+CREATE INDEX IF NOT EXISTS idx_feedbacks_agent_id ON feedbacks(agent_id);
+CREATE INDEX IF NOT EXISTS idx_feedbacks_client_address ON feedbacks(client_address);
+CREATE INDEX IF NOT EXISTS idx_feedbacks_reputation_registry ON feedbacks(reputation_registry);
+CREATE INDEX IF NOT EXISTS idx_feedbacks_block_number ON feedbacks(block_number);
+CREATE INDEX IF NOT EXISTS idx_feedbacks_revoked ON feedbacks(revoked);
+
+-- Response 表
+CREATE TABLE IF NOT EXISTS responses (
+  uid serial PRIMARY KEY,
+  agent_uid bigint NOT NULL,
+  feedback_uid bigint NOT NULL,
+  chain_id varchar(255) NOT NULL,
+  agent_id varchar(255) NOT NULL,
+  reputation_registry varchar(255) NOT NULL,
+  client_address varchar(255) NOT NULL,
+  feedback_index bigint NOT NULL,
+  responder varchar(255),
+  response_uri text,
+  response_hash varchar(255),
+  block_number bigint,
+  index bigint,
+  tx_hash varchar(255),
+  fetched boolean DEFAULT false,
+  timestamps bigint
+);
+
+CREATE INDEX IF NOT EXISTS idx_responses_agent_id ON responses(agent_id);
+CREATE INDEX IF NOT EXISTS idx_responses_client_address ON responses(client_address);
+CREATE INDEX IF NOT EXISTS idx_responses_responder ON responses(responder);
+CREATE INDEX IF NOT EXISTS idx_responses_reputation_registry ON responses(reputation_registry);
+CREATE INDEX IF NOT EXISTS idx_responses_block_number ON responses(block_number);
+
+
+CREATE or replace FUNCTION update_agent_feedback_count() RETURNS TRIGGER AS $$
+BEGIN
+  -- 只有当评分数值为正时，才增加反馈计数
+  IF NEW.format_value IS NOT NULL AND NEW.format_value > 0 THEN
+    UPDATE agents 
+    SET 
+      feedback_count = feedback_count + 1
+    WHERE agents.uid = NEW.agent_uid;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_agent_feedback_count_trigger AFTER INSERT ON feedbacks FOR EACH ROW EXECUTE FUNCTION update_agent_feedback_count();
+
+
+CREATE or replace FUNCTION update_agent_feedback_count_on_feedback_revoked() RETURNS TRIGGER AS $$
+BEGIN
+  -- 仅在 revoked 从 false 变为 true 时，才减少反馈计数
+  IF OLD.revoked IS DISTINCT FROM TRUE AND NEW.revoked = TRUE THEN
+    UPDATE agents 
+    SET 
+      feedback_count = feedback_count - 1
+    WHERE agents.uid = NEW.agent_uid;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+CREATE TRIGGER update_agent_feedback_count_on_feedback_revoked_trigger AFTER UPDATE ON feedbacks FOR EACH ROW EXECUTE FUNCTION update_agent_feedback_count_on_feedback_revoked();

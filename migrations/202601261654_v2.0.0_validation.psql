@@ -1,8 +1,12 @@
+Drop table if exists validations;
+Drop table if exists validators;
+
 create table if not exists validations (
     agent_uid bigint not null,
 
     chain_id varchar(255) not null,
     agent_id varchar(255) not null,
+    identity_registry varchar(255) not null,
     validation_registry char(42) not null,
 
     validator_address char(42) not null,
@@ -17,10 +21,11 @@ create table if not exists validations (
 
     block_number bigint not null,
     index bigint not null,
-    request_tx_hash char(66) primary key not null,
+    request_tx_hash char(66),
     response_tx_hash char(66),
     timestamps bigint not null,
-    constraint uniq_block_number_index unique (block_number, index)
+    constraint uniq_tx_hash unique (request_tx_hash),
+    primary key(agent_uid, validator_address, request_tx_hash)
 );
 
 create index if not exists idx_validation_resp_block_index on validations(block_number, index);

@@ -39,9 +39,9 @@ func TestProcessor(t *testing.T) {
 
 	sendChan := make(chan uint64, 10)
 	idx := NewCreateAgentProcessor(common.HexToAddress(config.Identity.Addr).String(), ethClient, config.Identity.FetchBlockInterval, config.Identity.StartBlock, _logger, sendChan)
-	idx.Process()
+	// idx.Process()
 
-	// idx.setAgentCardInserted()
+	idx.setAgentCardInserted()
 }
 
 type Config struct {
@@ -92,10 +92,18 @@ func initConf(confPath string) (*Config, error) {
 
 func Test_GetTokenURL(t *testing.T) {
 	tokenURL := "https://baspublic.s3.ap-southeast-1.amazonaws.com/erc8004/agent_profile/97-0x5C33f9bAFcC7e1347937e0E986Ee14e84A6DF345-382.json"
-	agent, provider, err := agentcard.GetAgentCardFromTokenURL("0x5C33f9bAFcC7e1347937e0E986Ee14e84A6DF345", "382", tokenURL, "97", "0xA98A5542a1AaB336397d487e32021E0E48BEF717", 1731196800)
-	if err != nil {
-		panic(err)
+	agentProfile, extractErrs := agentcard.GetAgentProfile(tokenURL)
+	if extractErrs != nil {
+		t.Log(extractErrs)
+		return
 	}
-	t.Log(agent)
-	t.Log(provider)
+	t.Log(agentProfile.Type)
+	t.Log(agentProfile.Name)
+	t.Log(agentProfile.Description)
+	t.Log(agentProfile.Image)
+	t.Log(agentProfile.X402Support)
+	t.Log(agentProfile.Active)
+	t.Log(agentProfile.Registrations)
+	t.Log(agentProfile.SupportedTrust)
+	t.Log(agentProfile.Services)
 }

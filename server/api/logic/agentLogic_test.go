@@ -10,7 +10,7 @@ import (
 
 func TestFilterSearchAgentListByFilter(t *testing.T) {
 	initTest()
-	name := "Babylon"
+	name := "Agent"
 	page := 1
 	pageSize := 10
 	trustModelIDs := []string{}
@@ -31,7 +31,7 @@ func TestGetAgentListByFilter(t *testing.T) {
 	initTest()
 	page := 1
 	pageSize := 10
-	trustModel := []string{agentcard.TrustModelTeeAttestation}
+	trustModel := []string{"reputation"}
 	chains := []string{"11155111"}
 
 	agents, total, err := GetAgentListByFilter(page, pageSize, trustModel, chains)
@@ -62,7 +62,7 @@ func TestGetAgentList(t *testing.T) {
 
 func TestGetCardResponse(t *testing.T) {
 	initTest()
-	agentUID := uint64(1900)
+	agentUID := uint64(1)
 	agentCard, err := GetCardResponse(agentUID)
 	if err != nil {
 		t.Errorf("GetCardResponse error: %v", err)
@@ -88,7 +88,7 @@ func TestSearchAgentListBySkill(t *testing.T) {
 
 func TestSearchAgentListByName(t *testing.T) {
 	initTest()
-	name := "Babylon"
+	name := "test"
 	page := 1
 	pageSize := 10
 	agents, total, err := SearchAgentListByName(name, page, pageSize)

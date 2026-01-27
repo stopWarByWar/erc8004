@@ -1,64 +1,31 @@
 package agentcard
 
-import (
-	"trpc.group/trpc-go/trpc-a2a-go/server"
-)
-
 type TokenURLResponse struct {
-	Type             string         `json:"type"`
-	Name             string         `json:"name"`
-	Description      string         `json:"description"`
-	Image            string         `json:"image"`
-	Endpoints        []Endpoint     `json:"endpoints"`
-	Registrations    []Registration `json:"registrations"`
-	SupportedTrust   []string       `json:"supportedTrust"`
-	UserInterfaceURL string         `json:"userInterface"`
+	Type           string         `json:"type"`
+	Name           string         `json:"name"`
+	Description    string         `json:"description"`
+	Image          string         `json:"image"`
+	Services       []Service      `json:"services"`
+	X402Support    bool           `json:"x402Support"`
+	Active         bool           `json:"active"`
+	Registrations  []Registration `json:"registrations"`
+	SupportedTrust []string       `json:"supportedTrust"`
 }
+
 type Registration struct {
 	AgentID       uint64 `json:"agentId"`
 	AgentRegistry string `json:"agentRegistry"`
 }
 
-type Endpoint struct {
+type Service struct {
 	Name         string                 `json:"name"`
 	Endpoint     string                 `json:"endpoint"`
-	Version      string                 `json:"version"`
+	Version      *string                `json:"version,omitempty"`
 	Capabilities map[string]interface{} `json:"capabilities,omitempty"`
+	Skills       []string               `json:"skills,omitempty"`
+	Domains      []string               `json:"domains,omitempty"`
 }
 
 const TrustModelFeedback = "feedback"
 const TrustModelInferenceValidation = "inference-validation"
 const TrustModelTeeAttestation = "tee-attestation"
-
-type Agent struct {
-	Owner                     string            `json:"owner"`
-	Type                      string            `json:"type"`
-	Name                      string            `json:"name"`
-	Description               string            `json:"description"`
-	Image                     string            `json:"image"`
-	Endpoint                  string            `json:"endpoint"`
-	IdentityRegistry          string            `json:"registry"`
-	SupportedTrust            []string          `json:"supportedTrust"`
-	AgentID                   string            `json:"agentId"`
-	TokenURL                  string            `json:"tokenUrl"`
-	AgentCard                 *server.AgentCard `json:"agentCard"`
-	Namespace                 string            `json:"namespace"`
-	ChainID                   string            `json:"chainId"`
-	AgentWallet               string            `json:"agentWallet"`
-	Timestamps                uint64            `json:"timestamps"`
-	UserInterfaceURL          string            `json:"userInterfaceURL"`
-	MCPEndpoints              *MCPEndpoint      `json:"mcpEndpoint"`
-	OASFEndpoints             *OASFEndpoint     `json:"oasfEndpoint"`
-	AgentWalletExpirationTime uint64            `json:"agentWalletExpirationTime"`
-}
-
-type MCPEndpoint struct {
-	Endpoint     string                 `json:"endpoint"`
-	Version      string                 `json:"version"`
-	Capabilities map[string]interface{} `json:"capabilities"`
-}
-
-type OASFEndpoint struct {
-	Endpoint string `json:"endpoint"`
-	Version  string `json:"version"`
-}

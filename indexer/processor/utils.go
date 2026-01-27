@@ -2,6 +2,7 @@ package processor
 
 import (
 	"fmt"
+	"math"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -60,22 +61,17 @@ func DecodeCommentEvent(reputationRegistry string, data []byte) (*Comment, error
 	return comment, nil
 }
 
-func calculateScore(value *big.Int, valueDecimals uint8) uint8 {
-	if value == nil {
-		return 0
+func calculateScore(value *big.Int, valueDecimals uint8) (float64, error) {
+	if valueDecimals == 0 {
+		result, _ := new(big.Float).SetInt(value).Float64()
+		return result, nil
 	}
-
-	// 步骤1：计算 realValue = value / 10^d （即value右移d位）
-	denominator := new(big.Int).Exp(big.NewInt(10), big.NewInt(int64(valueDecimals)), nil)
-	realValue := new(big.Int).Div(value, denominator) // 整数除法（舍去小数，如需四舍五入则保留之前的halfDenominator逻辑）
-
-	// 步骤2：限制结果范围在0-100之间
-	switch {
-	case realValue.Sign() < 0:
-		return 0
-	case realValue.Cmp(big.NewInt(100)) > 0:
-		return 100
-	default:
-		return uint8(realValue.Uint64())
+	// Use big.Float for precision
+	vf := new(big.Float).SetInt(value)
+	divisor := new(big.Float).SetFloat64(math.Pow10(int(valueDecimals)))
+	result, accuracy := new(big.Float).Quo(vf, divisor).Float64()
+	if accuracy != big.Exact {
+		return 0, fmt.Errorf("calculate score accuracy is not exact")
 	}
+	return result, nil
 }

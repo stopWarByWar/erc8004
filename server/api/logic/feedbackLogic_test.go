@@ -8,7 +8,7 @@ import (
 
 func TestGetAgentFeedbacksList(t *testing.T) {
 	initTest()
-	agentUID := uint64(1900)
+	agentUID := uint64(1)
 	page := 1
 	pageSize := 10
 	feedbacks, total, err := GetAgentFeedbacksList(agentUID, page, pageSize)
@@ -27,7 +27,7 @@ func TestSetFeedback(t *testing.T) {
 	domain := "test"
 	name := "test"
 	request := types.UploadFeedbackRequest{
-		UID:           uint64(2277),
+		UID:           uint64(1),
 		ClientAddress: "0x0004AA63c570c570eBF15376c0dB199918BFe9Fb",
 		Skill:         &skill,
 		Context:       &context,

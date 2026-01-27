@@ -22,7 +22,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var NewFeedbackTopic = common.HexToHash("0x413f2d30fdbc0b49e55537333a7c6287556f671f40c7e2dc00fc7ca1ced350da")
+var NewFeedbackTopic = common.HexToHash("0x6a4a61743519c9d648a14e6493f47dbe3ff1aa29e7785c96c8326a205e58febc")
 var ResponseAppendedTopic = common.HexToHash("0xb1c6be0b5b8aef6539e2fac0fd131a2faa7b49edf8e505b5eb0ad487d56051d4")
 var FeedbackRevokedTopic = common.HexToHash("0x25156fd3288212246d8b008d5921fde376c71ed14ac2e072a506eb06fde6d09d")
 
@@ -195,9 +195,12 @@ func (p *ReputationProcessor) dealWithNewFeedbackEvent(e types.Log) error {
 			return nil
 		} else {
 			p.logger.WithFields(logrus.Fields{
-				"error": err,
-				"block": e.BlockNumber,
-				"index": e.Index,
+				"agentID":          newFeedbackEvent.AgentId.String(),
+				"identityRegistry": p.identityAddr,
+				"chainID":          p.chainID,
+				"error":            err,
+				"block":            e.BlockNumber,
+				"index":            e.Index,
 			}).Error("failed to get agent uid")
 			return fmt.Errorf("failed to get agent uid: %w", err)
 		}
@@ -206,28 +209,31 @@ func (p *ReputationProcessor) dealWithNewFeedbackEvent(e types.Log) error {
 	blockTimestamp := uint64(e.BlockTimestamp)
 	scoreStr := newFeedbackEvent.Value.String()
 	scoreDecimals := newFeedbackEvent.ValueDecimals
-	score := calculateScore(newFeedbackEvent.Value, newFeedbackEvent.ValueDecimals)
+	score, err := calculateScore(newFeedbackEvent.Value, newFeedbackEvent.ValueDecimals)
+	if err != nil {
+		return fmt.Errorf("failed to calculate score: %w", err)
+	}
 
 	feedback := &model.Feedback{
 		ChainID:            p.chainID,
 		AgentUID:           agentUID,
 		AgentID:            newFeedbackEvent.AgentId.String(),
-		ReputationRegistry: p.reputationAddr.Hex(),
+		ReputationRegistry: p.reputationAddr.String(),
 		ClientAddress:      newFeedbackEvent.ClientAddress.String(),
 		FeedbackIndex:      newFeedbackEvent.FeedbackIndex,
-		Score:              score,
+		FormatValue:        score,
 		Value:              scoreStr,
-		ValueDecimals:      scoreDecimals,
+		ValueDecimals:      uint(scoreDecimals),
 		Tag1:               newFeedbackEvent.Tag1,
 		Tag2:               newFeedbackEvent.Tag2,
 		FeedbackURI:        newFeedbackEvent.FeedbackURI,
 		FeedbackHash:       common.BytesToHash(newFeedbackEvent.FeedbackHash[:]).String(),
-		Endpoint:           newFeedbackEvent.Endpoint,
-		Revoked:            false,
 		BlockNumber:        uint64(e.BlockNumber),
 		Index:              uint64(e.Index),
 		TxHash:             e.TxHash.String(),
 		Timestamps:         blockTimestamp,
+		Endpoint:           newFeedbackEvent.Endpoint,
+		IdentityRegistry:   p.identityAddr,
 	}
 
 	if err := model.CreateFeedback(feedback); err != nil {

@@ -41,15 +41,18 @@ func SetFeedback(request serverTypes.UploadFeedbackRequest) (string, string, err
 		AgentId:       int64(agentID),
 		ClientAddress: fmt.Sprintf("eip155:%s:%s", agent.ChainID, clientAddress),
 		CreatedAt:     strconv.FormatInt(time.Now().Unix(), 10),
-		Score:         request.Score,
+		Value:         request.Score,
+		ValueDecimals: 0,
 		Tag1:          request.Tag1,
 		Tag2:          request.Tag2,
 		Context:       request.Context,
-		Task:          request.Task,
-		Capability:    request.Capability,
 		Endpoint:      request.Endpoint,
-		Domain:        request.Domain,
-		Name:          request.Name,
+		ProofOfPayment: &types.ProofOfPayment{
+			FromAddress: common.HexToAddress(request.ProofOfPayment.FromAddress).String(),
+			ToAddress:   common.HexToAddress(request.ProofOfPayment.ToAddress).String(),
+			ChainId:     agent.ChainID,
+			TxHash:      request.ProofOfPayment.TxHash,
+		},
 	}
 
 	if request.ProofOfPayment != nil {

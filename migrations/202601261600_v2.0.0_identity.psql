@@ -1,0 +1,125 @@
+Drop table if exists agents;
+Drop table if exists agent_vectors;
+Drop table if exists agent_metadatas;
+
+Drop table if exists services;
+Drop table if exists oasf_skills;
+Drop table if exists oasf_domains;
+Drop table if exists trust_models;
+Drop table if exists feedbacks;
+
+-- Agent 表
+CREATE TABLE IF NOT EXISTS agents (
+  uid serial PRIMARY KEY,
+  chain_id varchar(255),
+  identity_registry varchar(255),
+  agent_id varchar(255),
+  owner varchar(255),
+
+  agent_uri text,
+  agent_wallet varchar(255),
+
+  type varchar(255),
+  name varchar(255),
+  description text,
+  image varchar(255),
+  x402_support boolean,
+  active boolean,
+  feedback_count bigint DEFAULT 0,
+
+  block_number bigint NOT NULL,
+  index bigint NOT NULL,
+  tx_hash char(66) NOT NULL,
+  timestamps bigint,
+  inserted boolean
+);
+
+CREATE INDEX IF NOT EXISTS idx_agents_owner ON agents(owner);
+CREATE INDEX IF NOT EXISTS idx_agents_chain_id ON agents(chain_id);
+CREATE INDEX IF NOT EXISTS idx_agents_identity_registry ON agents(identity_registry);
+CREATE INDEX IF NOT EXISTS idx_agents_item ON agents(chain_id,identity_registry,agent_id);
+CREATE INDEX IF NOT EXISTS idx_agents_agent_wallet ON agents(agent_wallet);
+
+CREATE TABLE IF NOT EXISTS services (
+  agent_uid bigint,
+  service_name varchar(255),
+  endpoint text,
+  version varchar(255),
+  primary key (agent_uid, service_name, version)
+);
+
+CREATE TABLE IF NOT EXISTS oasf_skills (
+  agent_uid bigint,
+  skill_name varchar(255),
+  version varchar(255),
+  primary key (agent_uid, skill_name, version)
+);
+
+CREATE TABLE IF NOT EXISTS oasf_domains (
+  agent_uid bigint,
+  domain varchar(255),
+  version varchar(255),
+  primary key (agent_uid, domain, version)
+);
+
+CREATE INDEX IF NOT EXISTS idx_oasf_domains_agent_uid ON oasf_domains(agent_uid);
+
+
+CREATE TABLE IF NOT EXISTS trust_models (
+  agent_uid bigint NOT NULL,
+  trust_model varchar(255) NOT NULL,
+  PRIMARY KEY (agent_uid, trust_model)
+);
+CREATE INDEX IF NOT EXISTS idx_trust_models_agent_uid ON trust_models(agent_uid);
+
+CREATE TABLE IF NOT EXISTS agent_metadatas (
+  chain_id char(42) NOT NULL,
+  identity_registry char(42) NOT NULL,
+  agent_id varchar(255) NOT NULL,
+  key varchar(255) NOT NULL,
+  value text NOT NULL,
+  block bigint NOT NULL,
+  index bigint NOT NULL,
+  tx_hash char(66) NOT NULL,
+  PRIMARY KEY (chain_id, identity_registry, agent_id,key)
+);
+
+
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE IF NOT EXISTS agent_vectors (
+  uid serial PRIMARY KEY,
+  agent_uid bigint NOT NULL UNIQUE,
+  identity_registry varchar(255) NOT NULL,
+  chain_id varchar(255) NOT NULL,
+  create_timestamp bigint NOT NULL,
+  embedding vector(1536) NOT NULL,
+  content text,
+  metadata jsonb,
+  created_at bigint
+);
+
+CREATE INDEX IF NOT EXISTS idx_agent_vectors_agent_uid ON agent_vectors(agent_uid);
+CREATE INDEX IF NOT EXISTS idx_agent_vectors_identity_registry ON agent_vectors(identity_registry);
+CREATE INDEX IF NOT EXISTS idx_agent_vectors_chain_id ON agent_vectors(chain_id);
+CREATE INDEX IF NOT EXISTS idx_agent_vectors_create_timestamp ON agent_vectors(create_timestamp);
+
+CREATE INDEX IF NOT EXISTS idx_agent_vectors_chain_identity ON agent_vectors(chain_id, identity_registry);
+CREATE INDEX IF NOT EXISTS idx_agent_vectors_agent_chain ON agent_vectors(agent_uid, chain_id);
+
+-- 为 agent_vectors 表的 agent_uid 字段添加唯一约束
+-- 注意：如果表中已有重复的 agent_uid，需要先清理重复数据
+
+-- 检查并删除重复的 agent_uid（保留最新的记录）
+DELETE FROM agent_vectors a
+USING agent_vectors b
+WHERE a.uid < b.uid
+  AND a.agent_uid = b.agent_uid;
+
+-- 添加唯一约束
+ALTER TABLE agent_vectors 
+
+ADD CONSTRAINT agent_vectors_agent_uid_unique UNIQUE (agent_uid);
+
+
+-- Feedback 表

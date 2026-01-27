@@ -8,7 +8,6 @@ import (
 	serverTypes "agent_identity/server/api/types"
 	"encoding/json"
 	"fmt"
-	"math"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -60,17 +59,12 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 		return nil, fmt.Errorf("agent not found")
 	}
 
-	skills, err := model.GetSkillsByAgentUID(agentUID)
+	skills, err := model.GetOASFSkillsByAgentUID(agentUID)
 	if err != nil {
 		return nil, fmt.Errorf("fail to get skills by agent uid: %v", err)
 	}
 
-	skillTags, err := model.GetSkillTagsByAgentUID(agentUID)
-	if err != nil {
-		return nil, fmt.Errorf("fail to get skill tags by agent uid: %v", err)
-	}
-
-	provider, err := model.GetProviderByAgentUID(agentUID)
+	provider, err := model.GetA2AProviderByAgentUID(agentUID)
 	if err != nil {
 		return nil, fmt.Errorf("fail to get provider by agent uid: %v", err)
 	}
@@ -83,11 +77,6 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 	metadataRaw, err := model.GetMetadata(agent.ChainID, agent.IdentityRegistry, agent.AgentID)
 	if err != nil {
 		return nil, fmt.Errorf("fail to get metadata by agent uid: %v", err)
-	}
-
-	tokenURL, err := model.GetTokenURL(agent.ChainID, agent.IdentityRegistry, agent.AgentID)
-	if err != nil {
-		return nil, fmt.Errorf("fail to get token url by agent uid: %v", err)
 	}
 
 	var metadataResponse = make([]serverTypes.MetadataResponse, 0)
@@ -111,26 +100,17 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 
 	var skillTagsResponse = make([]serverTypes.SkillTagResponse, 0)
 	for _, skill := range skills {
-		var tags = make([]string, 0)
-		for _, skillTag := range skillTags[skill.ID] {
-			tags = append(tags, skillTag.Tag)
-		}
 		skillTagsResponse = append(skillTagsResponse, serverTypes.SkillTagResponse{
-			ID:          skill.ID,
-			Name:        skill.Name,
-			Description: skill.Description,
-			Tags:        tags,
+			ID:          skill.SkillName,
+			Name:        skill.SkillName,
+			Description: "OASF Skill",
+			Tags:        []string{skill.SkillName},
 		})
 	}
 
 	var trustModelsResponse = make([]string, 0)
 	for _, trustModel := range trustModels {
 		trustModelsResponse = append(trustModelsResponse, trustModel.TrustModel)
-	}
-
-	score := 0.0
-	if agent.CommentCount > 0 {
-		score = math.Round(float64(agent.Score)/float64(agent.CommentCount)*10) / 10
 	}
 
 	var providerResponse serverTypes.ProviderResponse
@@ -143,57 +123,63 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 		providerResponse = serverTypes.ProviderResponse{}
 	}
 
+	services, err := model.GetServicesByAgentUID(agent.UID)
+	if err != nil {
+		return nil, fmt.Errorf("fail to get services by agent uid: %v", err)
+	}
+	var uri string
+	var mcpEndpoint string
+	var oasfEndpoint string
+	var a2aEndpoint string
+	var version string
+
+	for _, _service := range services {
+		if _service.ServiceName == "a2a" {
+			a2aEndpoint = _service.Endpoint
+			version = _service.Version
+		}
+		if _service.ServiceName == "mcp" {
+			mcpEndpoint = _service.Endpoint
+		}
+		if _service.ServiceName == "oasf" {
+			oasfEndpoint = _service.Endpoint
+		}
+		if _service.ServiceName == "web" {
+			uri = _service.Endpoint
+		}
+	}
+
 	chainInfo, _ := config.GetChainInfo(agent.ChainID)
 
 	deployerInfo := config.GetContractsDeployerInfo(agent.ChainID, common.HexToAddress(agent.IdentityRegistry).String())
 
 	resp := serverTypes.AgentResponse{
-		UID:              agent.UID,
-		AgentID:          agent.AgentID,
-		A2AEndpoint:      agent.A2AEndpoint,
-		WalletAddress:    agent.AgentWallet,
-		Owner:            agent.Owner,
-		ChainID:          agent.ChainID,
-		ChainName:        chainInfo.ChainName,
-		ChainLogo:        chainInfo.ChainLogo,
-		Namespace:        agent.Namespace,
-		Name:             agent.Name,
-		Description:      agent.Description,
-		URL:              agent.URL,
-		Provider:         providerResponse,
-		IconURL:          agent.Image,
-		Version:          agent.Version,
-		DocumentationURL: agent.DocumentationURL,
-		Skills:           skillTagsResponse,
-		TrustModels:      trustModelsResponse,
-		Score:            score,
-		UserInterface:    agent.UserInterfaceURL,
-		IdentityRegistry: agent.IdentityRegistry,
-		Metadata:         metadataResponse,
-		TokenURL:         tokenURL,
-		Deployer:         deployerInfo.Deployer,
-		DeployerLogo:     deployerInfo.LogoURL,
-
-		WalletAddressScanURL:        fmt.Sprintf("%s/address/%s", chainInfo.ScanPrefix, agent.AgentWallet),
-		WalletAddressExpirationTime: agent.AgentWalletExpirationTime,
-		ReputationRegistry:          deployerInfo.ReputationAddress,
+		UID:                agent.UID,
+		AgentID:            agent.AgentID,
+		A2AEndpoint:        a2aEndpoint,
+		WalletAddress:      agent.AgentWallet,
+		Owner:              agent.Owner,
+		ChainID:            agent.ChainID,
+		ChainName:          chainInfo.ChainName,
+		ChainLogo:          chainInfo.ChainLogo,
+		Name:               agent.Name,
+		Description:        agent.Description,
+		URL:                uri,
+		Provider:           providerResponse,
+		IconURL:            agent.Image,
+		Version:            version,
+		DocumentationURL:   agent.A2ADocumentationURL,
+		Skills:             skillTagsResponse,
+		TrustModels:        trustModelsResponse,
+		IdentityRegistry:   agent.IdentityRegistry,
+		Metadata:           metadataResponse,
+		TokenURL:           agent.A2AURI,
+		Deployer:           deployerInfo.Deployer,
+		DeployerLogo:       deployerInfo.LogoURL,
+		MCPEndpoint:        mcpEndpoint,
+		OASFEndpoint:       oasfEndpoint,
+		ReputationRegistry: deployerInfo.ReputationAddress,
 	}
-
-	mcpEndpoint, err := model.GetMCPEndpointByAgentUID(agent.UID)
-	if err != nil {
-		return nil, fmt.Errorf("fail to get mcp endpoint by agent uid: %v", err)
-	}
-	oasfEndpoint, err := model.GetOASFEndpointByAgentUID(agent.UID)
-	if err != nil {
-		return nil, fmt.Errorf("fail to get oasf endpoint by agent uid: %v", err)
-	}
-	if mcpEndpoint != nil {
-		resp.MACEndpoint = mcpEndpoint.Endpoint
-	}
-	if oasfEndpoint != nil {
-		resp.OASFEndpoint = oasfEndpoint.Endpoint
-	}
-
 	return &resp, nil
 }
 
@@ -235,11 +221,11 @@ func FilterSearchAgentListBySemantic(desc string, limit int, threshold float64, 
 		return nil, err
 	}
 
-	cards, err := formatAgentResponse(agents)
+	formattedAgents, err := formatAgentResponse(agents)
 	if err != nil {
 		return nil, err
 	}
-	return cards, nil
+	return formattedAgents, nil
 }
 
 func UploadAgentProfile(request serverTypes.UploadAgentProfileRequest, logoData []byte) (tokenURI string, err error) {
