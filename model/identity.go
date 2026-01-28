@@ -76,6 +76,11 @@ func GetUnInsertedAgents(chainID string, identityRegistry string, limit int) (ag
 }
 
 func UpdateAgent(chainID, identityRegistry, agentID string, agentProfile *agentcard.TokenURLResponse) (agent *Agent, err error) {
+	// 检查 agentProfile 是否为 nil
+	if agentProfile == nil {
+		return nil, gorm.ErrRecordNotFound
+	}
+
 	var updatedAgent Agent
 	err = db.Transaction(func(tx *gorm.DB) error {
 		// 检查是否已存在相同 chain_id, identity_registry, agent_id 的记录
