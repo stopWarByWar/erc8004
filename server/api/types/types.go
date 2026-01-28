@@ -30,6 +30,7 @@ type AgentResponse struct {
 	MCPEndpoint        string             `json:"mcpEndpoint,omitempty"`
 	OASFEndpoint       string             `json:"oasfEndpoint,omitempty"`
 	ReputationRegistry string             `json:"reputationRegistry"`
+	Status             string             `json:"status"`
 }
 
 type SkillTagResponse struct {

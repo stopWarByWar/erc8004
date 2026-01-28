@@ -99,6 +99,13 @@ func formatAgentResponse(agents []*model.Agent) ([]*serverTypes.AgentResponse, e
 
 		deployerInfo := config.GetContractsDeployerInfo(agent.ChainID, common.HexToAddress(agent.IdentityRegistry).String())
 
+		var status string
+		if agent.Active {
+			status = "active"
+		} else {
+			status = "inactive"
+		}
+
 		resp = append(resp, &serverTypes.AgentResponse{
 			UID:              agent.UID,
 			AgentID:          agent.AgentID,
@@ -124,6 +131,7 @@ func formatAgentResponse(agents []*model.Agent) ([]*serverTypes.AgentResponse, e
 
 			WalletAddressScanURL: fmt.Sprintf("%s/address/%s", chainInfo.ScanPrefix, agent.AgentWallet),
 			ReputationRegistry:   deployerInfo.ReputationAddress,
+			Status:               status,
 		})
 	}
 

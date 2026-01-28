@@ -92,3 +92,41 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 CREATE TRIGGER update_agent_feedback_count_on_feedback_revoked_trigger AFTER UPDATE ON feedbacks FOR EACH ROW EXECUTE FUNCTION update_agent_feedback_count_on_feedback_revoked();
+
+CREATE Table if not exists feedback_tag_scores (
+  agent_uid bigint not null,
+  tag varchar(255) not null,
+  score numeric(36, 8) not null,
+  updated_at bigint not null,
+  feedback_count bigint not null,
+  unique_feedback_client_address_count bigint not null,
+  primary key (agent_uid, tag)
+);
+
+
+CREATE INDEX IF NOT EXISTS idx_feedback_tag_scores_feedback_count ON feedback_tag_scores(feedback_count);
+CREATE INDEX IF NOT EXISTS idx_feedback_tag_scores_unique_feedback_client_address_count ON feedback_tag_scores(unique_feedback_client_address_count);
+
+CREATE INDEX IF NOT EXISTS idx_feedback_tag_scores ON feedback_tag_scores(score);
+
+//创建一个函数，在插入feedback的时候，更新feedback_tag_scores表
+//1.检查feedback_tag_scores表中是否存在agent_uid和tag
+//2.如果存在，则更新：
+    -- a.score = (score * feedback_count + feedback.format_value) / (feedback_count + 1)
+    -- b.feedback_count = feedback_count + 1
+    -- c.updated_at = feedback.timestamps
+    -- d.检查feedback_tag_scores.agent_uid = feedback.agent_uid and feedback_tag_scores.tag = feedback.tag and feedback_tag_scores.client_address = feedback.client_address是否存在
+    --   if不存在，则插入新的记录：unique_feedback_client_address_count = unique_feedback_client_address_count+1，否不变
+//3.如果不存在，则插入新的记录
+    -- a.score = feedback.format_value
+    -- b.feedback_count = 1
+    -- c.unique_feedback_client_address_count = 1
+    -- d.updated_at = feedback.timestamps
+
+
+//创建一个函数，当feedabck被revoked的时候，更新feedback_tag_scores表
+    -- a.score = (score * feedback_count - feedback.format_value) / (feedback_count - 1)
+    -- b.feedback_count = feedback_count - 1
+    -- c.updated_at = feedback.timestamps
+    -- d.检查feedback_tag_scores.agent_uid = feedback.agent_uid and feedback_tag_scores.tag = feedback.tag and feedback_tag_scores.client_address = feedback.client_address的数量
+    --   如果为1，unique_feedback_client_address_count = unique_feedback_client_address_count-1 否则不变

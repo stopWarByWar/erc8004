@@ -153,6 +153,13 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 
 	deployerInfo := config.GetContractsDeployerInfo(agent.ChainID, common.HexToAddress(agent.IdentityRegistry).String())
 
+	var status string
+	if agent.Active {
+		status = "active"
+	} else {
+		status = "inactive"
+	}
+
 	resp := serverTypes.AgentResponse{
 		UID:                agent.UID,
 		AgentID:            agent.AgentID,
@@ -179,6 +186,7 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 		MCPEndpoint:        mcpEndpoint,
 		OASFEndpoint:       oasfEndpoint,
 		ReputationRegistry: deployerInfo.ReputationAddress,
+		Status:             status,
 	}
 	return &resp, nil
 }

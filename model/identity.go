@@ -277,11 +277,11 @@ func CreateMetadata(metadata *Metadata) error {
 //
 
 func GetAgentByUID(uid uint64) (*Agent, error) {
-	var agentCards *Agent
-	if err := db.Where("uid = ?", uid).Find(&agentCards).Error; err != nil {
+	var agent *Agent
+	if err := db.Where("uid = ?", uid).Find(&agent).Error; err != nil {
 		return nil, err
 	}
-	return agentCards, nil
+	return agent, nil
 }
 
 func GetAgentsByUIDs(uids []uint64) ([]*Agent, error) {

@@ -39,9 +39,9 @@ func TestProcessor(t *testing.T) {
 
 	sendChan := make(chan uint64, 10)
 	idx := NewCreateAgentProcessor(common.HexToAddress(config.Identity.Addr).String(), ethClient, config.Identity.FetchBlockInterval, config.Identity.StartBlock, _logger, sendChan)
-	// idx.Process()
+	idx.Process()
 
-	idx.setAgentCardInserted()
+	// idx.setAgentCardInserted()
 }
 
 type Config struct {
