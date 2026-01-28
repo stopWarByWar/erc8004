@@ -103,11 +103,15 @@ func UpdateAgent(chainID, identityRegistry, agentID string, agentProfile *agentc
 		var oasfSkills []OASFSkill
 		var oasfDomains []OASFDomain
 		for _, service := range agentProfile.Services {
+			var version string
+			if service.Version != nil {
+				version = *service.Version
+			}
 			services = append(services, Service{
 				AgentUID:    existingAgent.UID,
 				ServiceName: service.Name,
 				Endpoint:    service.Endpoint,
-				Version:     *service.Version,
+				Version:     version,
 			})
 
 			if service.Name == "oasf" {
