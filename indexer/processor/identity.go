@@ -320,7 +320,7 @@ func (idx *IdentityProcessor) setAgentCardInserted() {
 				"error":            err,
 				"chainID":          idx.chainID,
 				"identityRegistry": idx.identityAddr.String(),
-			}).Error("failed to get un inserted agent registry")
+			}).Error("failed to get un-inserted agents")
 			return
 		}
 
@@ -337,15 +337,12 @@ func (idx *IdentityProcessor) setAgentCardInserted() {
 					"identityRegistry": idx.identityAddr.String(),
 					"agentID":          agentRegistry.AgentID,
 					"agentURI":         agentRegistry.AgentURI,
-				}).Error("failed to get agent card from token url")
+				}).Error("failed to get agent profile from agent url")
 			}
 
-			var agentUID uint64
 			// upload agent to gemini file api
 			if agentProfile != nil {
-				var agent *model.Agent
-				var err error
-				if agent, err = model.UpdateAgent(agentRegistry.ChainID, agentRegistry.IdentityRegistry, agentRegistry.AgentID, agentProfile); err != nil {
+				if _, err := model.UpdateAgent(agentRegistry.ChainID, agentRegistry.IdentityRegistry, agentRegistry.AgentID, agentProfile); err != nil {
 					idx.logger.WithFields(logrus.Fields{
 						"error":            err,
 						"chainID":          agentRegistry.ChainID,
@@ -355,7 +352,6 @@ func (idx *IdentityProcessor) setAgentCardInserted() {
 					}).Error("failed to update agent")
 					continue
 				}
-				agentUID = agent.UID
 
 				// err = model.InsertAgentVector(agent.UID, agent.IdentityRegistry, agent.ChainID, agent.Timestamps, agent.Description, nil)
 				// if err != nil {
@@ -370,12 +366,12 @@ func (idx *IdentityProcessor) setAgentCardInserted() {
 				// }
 			}
 
-			if err := model.UpdateAgentInserted([]uint64{agentUID}); err != nil {
+			if err := model.UpdateAgentInserted([]uint64{agentRegistry.UID}); err != nil {
 				idx.logger.WithFields(logrus.Fields{
 					"error":            err,
 					"chainID":          idx.chainID,
 					"identityRegistry": idx.identityAddr.String(),
-					"agentUID":         agentUID,
+					"agentUID":         agentRegistry.UID,
 					"agentURI":         agentRegistry.AgentURI,
 				}).Error("failed to update agent registry inserted")
 				continue

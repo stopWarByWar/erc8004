@@ -202,6 +202,9 @@ func UpdateAgent(chainID, identityRegistry, agentID string, agentProfile *agentc
 }
 
 func UpdateAgentInserted(agentUIDs []uint64) error {
+	if len(agentUIDs) == 0 {
+		return nil
+	}
 	return db.Model(&Agent{}).Where("uid IN (?)", agentUIDs).Update("inserted", true).Error
 }
 
