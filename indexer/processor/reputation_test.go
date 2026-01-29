@@ -34,6 +34,7 @@ func TestReputationProcessor(t *testing.T) {
 	}
 
 	identityExecBlockChan := make(chan uint64, 10)
+	identityExecBlockChan <- 1000000000000000
 	processor := NewReputationProcessor(config.Reputation.Addr, config.Identity.Addr, ethClient, config.Reputation.FetchBlockInterval, config.Reputation.StartBlock, _logger, identityExecBlockChan)
 	processor.Process()
 }
