@@ -3,6 +3,12 @@ alter table agents add column a2a_version varchar(255);
 alter table agents add column a2a_documentation_url text;
 alter table agents add column a2a_inserted boolean default false;
 
+
+drop table if exists a2a_skills;
+drop table if exists a2a_skill_tags;
+drop table if exists a2a_providers;
+drop table if exists a2a_extensions;
+
 CREATE TABLE IF NOT EXISTS a2a_skills (
   agent_uid bigint NOT NULL,
   id varchar(255) NOT NULL,

@@ -109,24 +109,152 @@ CREATE INDEX IF NOT EXISTS idx_feedback_tag_scores_unique_feedback_client_addres
 
 CREATE INDEX IF NOT EXISTS idx_feedback_tag_scores ON feedback_tag_scores(score);
 
-//创建一个函数，在插入feedback的时候，更新feedback_tag_scores表
-//1.检查feedback_tag_scores表中是否存在agent_uid和tag
-//2.如果存在，则更新：
-    -- a.score = (score * feedback_count + feedback.format_value) / (feedback_count + 1)
-    -- b.feedback_count = feedback_count + 1
-    -- c.updated_at = feedback.timestamps
-    -- d.检查feedback_tag_scores.agent_uid = feedback.agent_uid and feedback_tag_scores.tag = feedback.tag and feedback_tag_scores.client_address = feedback.client_address是否存在
-    --   if不存在，则插入新的记录：unique_feedback_client_address_count = unique_feedback_client_address_count+1，否不变
-//3.如果不存在，则插入新的记录
-    -- a.score = feedback.format_value
-    -- b.feedback_count = 1
-    -- c.unique_feedback_client_address_count = 1
-    -- d.updated_at = feedback.timestamps
+-- 创建函数：在插入 feedback 时更新 feedback_tag_scores 表（按 agent_uid + tag1 聚合）
+-- 这里将 feedback.tag1 视为统计用的 tag 字段
+CREATE OR REPLACE FUNCTION update_feedback_tag_scores_on_insert() RETURNS TRIGGER AS $$
+DECLARE
+  v_score_record feedback_tag_scores%ROWTYPE;
+  v_has_existing_client boolean;
+BEGIN
+  -- 没有 tag1 或没有格式化分数时，不参与统计
+  IF NEW.tag1 IS NULL OR NEW.format_value IS NULL THEN
+    RETURN NEW;
+  END IF;
+
+  -- 检查该 agent + tag1 + client_address 是否已经有历史反馈（不含当前这条）
+  SELECT EXISTS (
+    SELECT 1 FROM feedbacks
+    WHERE agent_uid = NEW.agent_uid
+      AND tag1 = NEW.tag1
+      AND client_address = NEW.client_address
+      AND uid <> NEW.uid
+  ) INTO v_has_existing_client;
+
+  -- 锁定对应的聚合行
+  SELECT * INTO v_score_record
+  FROM feedback_tag_scores
+  WHERE agent_uid = NEW.agent_uid AND tag = NEW.tag1
+  FOR UPDATE;
+
+  IF FOUND THEN
+    -- 已存在则更新加权平均分与计数
+    IF v_score_record.feedback_count IS NULL OR v_score_record.feedback_count < 0 THEN
+      v_score_record.feedback_count := 0;
+    END IF;
+
+    v_score_record.score := (v_score_record.score * v_score_record.feedback_count + NEW.format_value)
+                            / (v_score_record.feedback_count + 1);
+    v_score_record.feedback_count := v_score_record.feedback_count + 1;
+
+    -- 如果这是该 agent + tag1 组合下该 client_address 的第一次反馈，则唯一用户数 +1
+    IF NOT v_has_existing_client THEN
+      v_score_record.unique_feedback_client_address_count :=
+        v_score_record.unique_feedback_client_address_count + 1;
+    END IF;
+
+    v_score_record.updated_at := NEW.timestamps;
+
+    UPDATE feedback_tag_scores
+    SET score = v_score_record.score,
+        feedback_count = v_score_record.feedback_count,
+        unique_feedback_client_address_count = v_score_record.unique_feedback_client_address_count,
+        updated_at = v_score_record.updated_at
+    WHERE agent_uid = NEW.agent_uid AND tag = NEW.tag1;
+  ELSE
+    -- 不存在则插入新行
+    INSERT INTO feedback_tag_scores (
+      agent_uid,
+      tag,
+      score,
+      updated_at,
+      feedback_count,
+      unique_feedback_client_address_count
+    ) VALUES (
+      NEW.agent_uid,
+      NEW.tag1,
+      NEW.format_value,
+      NEW.timestamps,
+      1,
+      1
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_feedback_tag_scores_on_insert_trigger
+AFTER INSERT ON feedbacks
+FOR EACH ROW
+EXECUTE FUNCTION update_feedback_tag_scores_on_insert();
 
 
-//创建一个函数，当feedabck被revoked的时候，更新feedback_tag_scores表
-    -- a.score = (score * feedback_count - feedback.format_value) / (feedback_count - 1)
-    -- b.feedback_count = feedback_count - 1
-    -- c.updated_at = feedback.timestamps
-    -- d.检查feedback_tag_scores.agent_uid = feedback.agent_uid and feedback_tag_scores.tag = feedback.tag and feedback_tag_scores.client_address = feedback.client_address的数量
-    --   如果为1，unique_feedback_client_address_count = unique_feedback_client_address_count-1 否则不变
+-- 创建函数：当 feedback 被 revoked 时，回滚对应的聚合统计
+CREATE OR REPLACE FUNCTION update_feedback_tag_scores_on_revoke() RETURNS TRIGGER AS $$
+DECLARE
+  v_score_record feedback_tag_scores%ROWTYPE;
+  v_other_active_count bigint;
+BEGIN
+  -- 仅在 revoked 从 false 变为 true 时处理
+  IF OLD.revoked IS DISTINCT FROM TRUE AND NEW.revoked = TRUE THEN
+    -- 没有 tag1 或没有格式化分数时，不参与统计
+    IF NEW.tag1 IS NULL OR NEW.format_value IS NULL THEN
+      RETURN NEW;
+    END IF;
+
+    -- 锁定对应的聚合行
+    SELECT * INTO v_score_record
+    FROM feedback_tag_scores
+    WHERE agent_uid = NEW.agent_uid AND tag = NEW.tag1
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+      RETURN NEW;
+    END IF;
+
+    IF v_score_record.feedback_count IS NULL OR v_score_record.feedback_count <= 0 THEN
+      RETURN NEW;
+    END IF;
+
+    -- 回滚该条反馈对平均分和计数的影响
+    IF v_score_record.feedback_count = 1 THEN
+      -- 只剩这一条的极端情况：重置为 0
+      v_score_record.score := 0;
+      v_score_record.feedback_count := 0;
+    ELSE
+      v_score_record.score := (v_score_record.score * v_score_record.feedback_count - NEW.format_value)
+                              / (v_score_record.feedback_count - 1);
+      v_score_record.feedback_count := v_score_record.feedback_count - 1;
+    END IF;
+
+    -- 检查该 client 在该 agent + tag1 组合下是否还有其他未撤销的反馈
+    SELECT COUNT(*) INTO v_other_active_count
+    FROM feedbacks
+    WHERE agent_uid = NEW.agent_uid
+      AND tag1 = NEW.tag1
+      AND client_address = NEW.client_address
+      AND revoked = FALSE;
+
+    IF v_other_active_count = 0 THEN
+      v_score_record.unique_feedback_client_address_count :=
+        GREATEST(v_score_record.unique_feedback_client_address_count - 1, 0);
+    END IF;
+
+    v_score_record.updated_at := NEW.timestamps;
+
+    UPDATE feedback_tag_scores
+    SET score = v_score_record.score,
+        feedback_count = v_score_record.feedback_count,
+        unique_feedback_client_address_count = v_score_record.unique_feedback_client_address_count,
+        updated_at = v_score_record.updated_at
+    WHERE agent_uid = NEW.agent_uid AND tag = NEW.tag1;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_feedback_tag_scores_on_revoke_trigger
+AFTER UPDATE ON feedbacks
+FOR EACH ROW
+EXECUTE FUNCTION update_feedback_tag_scores_on_revoke();

@@ -187,6 +187,7 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 		OASFEndpoint:       oasfEndpoint,
 		ReputationRegistry: deployerInfo.ReputationAddress,
 		Status:             status,
+		X402Support:        agent.X402Support,
 	}
 	return &resp, nil
 }

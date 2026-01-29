@@ -187,9 +187,13 @@ func (p *ValidationRegistryProcessor) dealWithValidationRequestEvent(e types.Log
 			return nil
 		} else {
 			p.logger.WithFields(logrus.Fields{
-				"error": err,
-				"block": e.BlockNumber,
-				"index": e.Index,
+				"agentID":           event.AgentId.String(),
+				"identityRegistry":  p.identityAddr,
+				"chainID":           p.chainID,
+				"error":             err,
+				"block":             e.BlockNumber,
+				"index":             e.Index,
+				"identityExecBlock": p.identityExecBlock,
 			}).Error("failed to get agent uid")
 			return err
 		}

@@ -31,6 +31,7 @@ type AgentResponse struct {
 	OASFEndpoint       string             `json:"oasfEndpoint,omitempty"`
 	ReputationRegistry string             `json:"reputationRegistry"`
 	Status             string             `json:"status"`
+	X402Support        bool               `json:"x402Support"`
 }
 
 type SkillTagResponse struct {

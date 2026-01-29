@@ -132,6 +132,7 @@ func formatAgentResponse(agents []*model.Agent) ([]*serverTypes.AgentResponse, e
 			WalletAddressScanURL: fmt.Sprintf("%s/address/%s", chainInfo.ScanPrefix, agent.AgentWallet),
 			ReputationRegistry:   deployerInfo.ReputationAddress,
 			Status:               status,
+			X402Support:          agent.X402Support,
 		})
 	}
 

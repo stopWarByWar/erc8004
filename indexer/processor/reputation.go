@@ -195,12 +195,13 @@ func (p *ReputationProcessor) dealWithNewFeedbackEvent(e types.Log) error {
 			return nil
 		} else {
 			p.logger.WithFields(logrus.Fields{
-				"agentID":          newFeedbackEvent.AgentId.String(),
-				"identityRegistry": p.identityAddr,
-				"chainID":          p.chainID,
-				"error":            err,
-				"block":            e.BlockNumber,
-				"index":            e.Index,
+				"agentID":           newFeedbackEvent.AgentId.String(),
+				"identityRegistry":  p.identityAddr,
+				"chainID":           p.chainID,
+				"error":             err,
+				"block":             e.BlockNumber,
+				"index":             e.Index,
+				"identityExecBlock": p.identityExecBlock,
 			}).Error("failed to get agent uid")
 			return fmt.Errorf("failed to get agent uid: %w", err)
 		}
