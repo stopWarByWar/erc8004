@@ -353,17 +353,14 @@ func (idx *IdentityProcessor) setAgentCardInserted() {
 					continue
 				}
 
-				// err = model.InsertAgentVector(agent.UID, agent.IdentityRegistry, agent.ChainID, agent.Timestamps, agent.Description, nil)
-				// if err != nil {
-				// 	idx.logger.WithFields(logrus.Fields{
-				// 		"error":            err,
-				// 		"chainID":          agentRegistry.ChainID,
-				// 		"identityRegistry": agentRegistry.IdentityRegistry,
-				// 		"agentID":          agentRegistry.AgentID,
-				// 		"agentURI":         agentRegistry.AgentURI,
-				// 	}).Error("failed to insert agent vector")
-				// 	continue
-				// }
+				err = model.InsertAgentVector(agentRegistry.UID, agentRegistry.IdentityRegistry, agentRegistry.ChainID, agentRegistry.Timestamps, agentRegistry.Description, nil)
+				if err != nil {
+					idx.logger.WithFields(logrus.Fields{
+						"error": err,
+						"uid":   agentRegistry.UID,
+					}).Error("failed to insert agent vector")
+					continue
+				}
 			}
 
 			if err := model.UpdateAgentInserted([]uint64{agentRegistry.UID}); err != nil {
