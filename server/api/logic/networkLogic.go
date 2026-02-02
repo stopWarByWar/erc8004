@@ -3,10 +3,7 @@ package logic
 import (
 	"agent_identity/config"
 	"agent_identity/server/api/types"
-	apiUtils "agent_identity/server/api/utils"
 	"fmt"
-
-	"github.com/gin-gonic/gin"
 )
 
 func GetNetworkList() ([]types.NetworkResponse, error) {
@@ -40,7 +37,7 @@ func GetNetworkList() ([]types.NetworkResponse, error) {
 	return networkList, nil
 }
 
-func GetAgentAmountForEachChain(c *gin.Context) {
+func GetAgentAmountForEachChain() ([]config.ChainInfo, uint64) {
 	chainInfoMap := config.GetChainInfoMap()
 	chainInfos := make([]config.ChainInfo, 0)
 	total := uint64(0)
@@ -49,8 +46,5 @@ func GetAgentAmountForEachChain(c *gin.Context) {
 		total += info.AgentAmount
 	}
 
-	apiUtils.SuccessResp(gin.H{
-		"chains": chainInfos,
-		"total":  total,
-	}, c)
+	return chainInfos, total
 }

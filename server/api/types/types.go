@@ -1,7 +1,5 @@
 package types
 
-import "agent_identity/config"
-
 type AgentResponse struct {
 	UID                  uint64 // uid
 	AgentID              string `json:"agentId"` // agent id in contract json file
@@ -212,9 +210,4 @@ type ValidatorListInfo struct {
 	Address        string `json:"address"`
 	PendingAmount  uint64 `json:"pendingAmount"`
 	FinishedAmount uint64 `json:"finishedAmount"`
-}
-
-type GetAgentAmountForEachChainResponse struct {
-	Chains []config.ChainInfo `json:"chains"`
-	Total  uint64             `json:"total"`
 }

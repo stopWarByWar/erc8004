@@ -39,7 +39,7 @@ func Run(_cors []string, port string) {
 	r.GET("agent/identity/search/name", handle.GetAgentCardsSearchByNameHandler)
 	r.POST("agent/identity/search/semantic", handle.GetAgentCardsSearchBySemanticHandler)
 	r.GET("agent/identity/detail/feedbacks", handle.GetAgentFeedbacksHandler)
-	r.GET("agent/identity/general/info", handle.GetGeneralInfoHandler)
+	r.GET("agent/identity/general/info", handle.GetAgentAmountForEachChainHandler)
 
 	r.POST("agent/identity/set/feedback", handle.UploadFeedbackHandler)
 	r.POST("agent/identity/set/profile", handle.UploadAgentProfileHandler)
