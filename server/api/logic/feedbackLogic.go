@@ -47,12 +47,6 @@ func SetFeedback(request serverTypes.UploadFeedbackRequest) (string, string, err
 		Tag2:          request.Tag2,
 		Context:       request.Context,
 		Endpoint:      request.Endpoint,
-		ProofOfPayment: &types.ProofOfPayment{
-			FromAddress: common.HexToAddress(request.ProofOfPayment.FromAddress).String(),
-			ToAddress:   common.HexToAddress(request.ProofOfPayment.ToAddress).String(),
-			ChainId:     agent.ChainID,
-			TxHash:      request.ProofOfPayment.TxHash,
-		},
 	}
 
 	if request.ProofOfPayment != nil {
