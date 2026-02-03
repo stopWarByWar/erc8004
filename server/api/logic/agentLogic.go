@@ -13,32 +13,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-func FilterSearchAgentListByFilter(name string, page, pageSize int, trustModelIDs, chainIDs []string) ([]*serverTypes.AgentResponse, int64, error) {
-	agents, total, err := model.FilterSearchAgentsByName(name, page, pageSize, trustModelIDs, chainIDs)
-	if err != nil {
-		return nil, 0, err
-	}
-	cards, err := formatAgentResponse(agents)
-	if err != nil {
-		return nil, 0, err
-	}
-	return cards, total, nil
-}
-
-func GetAgentListByFilter(page, pageSize int, trustModel []string, chains []string) ([]*serverTypes.AgentResponse, int64, error) {
-	agents, total, err := model.GetAgentsByFilter(page, pageSize, trustModel, chains)
-	if err != nil {
-		return nil, 0, err
-	}
-	resp, err := formatAgentResponse(agents)
-	if err != nil {
-		return nil, 0, err
-	}
-	return resp, total, nil
-}
-
-func GetAgentList(page, pageSize int) ([]*serverTypes.AgentResponse, int64, error) {
-	agents, total, err := model.GetAgentList(page, pageSize)
+func GetAgentListByFilter(page, pageSize int, name *string, trustModel, chains, skills *[]string, x402Support, active, haveFeedback *bool) ([]*serverTypes.AgentResponse, int64, error) {
+	agents, total, err := model.GetAgentsByFilter(name, page, pageSize, trustModel, chains, skills, x402Support, active, haveFeedback)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -204,22 +180,14 @@ func SearchAgentListBySkill(skill string, page, pageSize int) ([]*serverTypes.Ag
 	return cards, total, nil
 }
 
-func SearchAgentListByName(name string, page, pageSize int) ([]*serverTypes.AgentResponse, int, error) {
-	agents, total, err := model.SearchAgentsByName(name, page, pageSize)
-	if err != nil {
-		return nil, 0, err
-	}
-	cards, err := formatAgentResponse(agents)
-	if err != nil {
-		return nil, 0, err
-	}
-	return cards, total, nil
-}
-
-func FilterSearchAgentListBySemantic(desc string, limit int, threshold float64, trustModelIDs, chainIDs []string) ([]*serverTypes.AgentResponse, error) {
+func FilterSearchAgentListBySemantic(desc string, limit int, threshold float64, trustModelIDs *[]string, chainIDs *[]string, skills *[]string, x402Support *bool, active *bool, haveFeedback *bool) ([]*serverTypes.AgentResponse, error) {
 	filters := &model.VectorSearchFilters{
-		TrustModel: trustModelIDs,
-		ChainID:    chainIDs,
+		TrustModel:   trustModelIDs,
+		ChainID:      chainIDs,
+		Skills:       skills,
+		X402Support:  x402Support,
+		Active:       active,
+		HaveFeedback: haveFeedback,
 	}
 	agentUIDs, err := model.SearchSimilarVectors(desc, limit, threshold, filters)
 	if err != nil {

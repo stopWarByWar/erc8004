@@ -1,8 +1,6 @@
 package model
 
 import (
-	"strings"
-
 	agentcard "agent_identity/agentCard"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -109,40 +107,20 @@ func UpdateAgent(chainID, identityRegistry, agentID string, agentProfile *agentc
 		var services []Service
 		var oasfSkills []OASFSkill
 		var oasfDomains []OASFDomain
-		seenService := make(map[string]struct{}) // 按 (name, version) 去重，避免违反 services 主键
 		for _, service := range agentProfile.Services {
-			serviceName := strings.TrimSpace(service.Name)
-			if serviceName == "" {
-				continue
-			}
 			var version string
 			if service.Version != nil {
 				version = *service.Version
 			}
-			svcKey := serviceName + "\x00" + version
-			if _, ok := seenService[svcKey]; ok {
-				continue
-			}
-			seenService[svcKey] = struct{}{}
 			services = append(services, Service{
 				AgentUID:    existingAgent.UID,
-				ServiceName: serviceName,
+				ServiceName: service.Name,
 				Endpoint:    service.Endpoint,
 				Version:     version,
 			})
 
-			if strings.ToLower(serviceName) == "oasf" {
-				seenSkill := make(map[string]struct{})
+			if service.Name == "oasf" {
 				for _, skill := range service.Skills {
-					skill = strings.TrimSpace(skill)
-					if skill == "" {
-						continue
-					}
-					skillKey := skill + "\x00" + version
-					if _, ok := seenSkill[skillKey]; ok {
-						continue
-					}
-					seenSkill[skillKey] = struct{}{}
 					newOasfSkill := OASFSkill{
 						AgentUID:  existingAgent.UID,
 						SkillName: skill,
@@ -152,17 +130,7 @@ func UpdateAgent(chainID, identityRegistry, agentID string, agentProfile *agentc
 					}
 					oasfSkills = append(oasfSkills, newOasfSkill)
 				}
-				seenDomain := make(map[string]struct{})
 				for _, domain := range service.Domains {
-					domain = strings.TrimSpace(domain)
-					if domain == "" {
-						continue
-					}
-					domainKey := domain + "\x00" + version
-					if _, ok := seenDomain[domainKey]; ok {
-						continue
-					}
-					seenDomain[domainKey] = struct{}{}
 					newOasfDomain := OASFDomain{
 						AgentUID: existingAgent.UID,
 						Domain:   domain,
@@ -428,59 +396,32 @@ func GetServicesByAgentUID(uid uint64) ([]*Service, error) {
 	return services, nil
 }
 
-func FilterSearchAgentsByName(name string, page, pageSize int, trustModelIDs, chainIDs []string) ([]*Agent, int64, error) {
-	buildBaseQuery := func() *gorm.DB {
-		query := db.Model(&Agent{}).Distinct("agents.uid").
-			Where("LOWER(agents.name) LIKE LOWER(?)", "%"+name+"%")
-		if len(trustModelIDs) > 0 {
-			query = query.Joins("INNER JOIN trust_models ON agents.uid = trust_models.agent_uid").
-				Where("trust_models.trust_model IN (?)", trustModelIDs)
-		}
-		if len(chainIDs) > 0 {
-			query = query.Where("agents.chain_id IN (?)", chainIDs)
-		}
-		return query
-	}
-
-	// 查询总数（创建新的查询对象）
-	var count int64
-	countQuery := buildBaseQuery()
-	if err := countQuery.Select("COUNT(DISTINCT agents.uid)").Scan(&count).Error; err != nil {
-		return nil, 0, err
-	}
-
-	if count == 0 {
-		return []*Agent{}, 0, nil
-	}
-
-	// 分页查询 agent_uid（创建新的查询对象）
-	var agentUIDs []uint64
-	dataQuery := buildBaseQuery()
-	if err := dataQuery.Select("agents.uid").
-		Limit(pageSize).
-		Offset((page - 1) * pageSize).
-		Scan(&agentUIDs).Error; err != nil {
-		return nil, 0, err
-	}
-
-	var agents []*Agent
-	if err := db.Where("uid IN (?)", agentUIDs).Find(&agents).Error; err != nil {
-		return nil, 0, err
-	}
-
-	return agents, count, nil
-}
-
-func GetAgentsByFilter(page, pageSize int, trustModelIDs, chainIDs []string) ([]*Agent, int64, error) {
+func GetAgentsByFilter(name *string, page, pageSize int, trustModelIDs, chainIDs, skills *[]string, x402Support, active, haveFeedback *bool) ([]*Agent, int64, error) {
 	// 构建基础查询的辅助函数
 	buildBaseQuery := func() *gorm.DB {
 		query := db.Model(&Agent{}).Distinct("agents.uid")
-		if len(trustModelIDs) > 0 {
-			query = query.Joins("INNER JOIN trust_models ON agents.uid = trust_models.agent_uid").
-				Where("trust_models.trust_model IN (?)", trustModelIDs)
+		if name != nil && *name != "" {
+			query = query.Where("LOWER(agents.name) LIKE LOWER(?)", "%"+*name+"%")
 		}
-		if len(chainIDs) > 0 {
-			query = query.Where("agents.chain_id IN (?)", chainIDs)
+		if trustModelIDs != nil && len(*trustModelIDs) > 0 {
+			query = query.Joins("INNER JOIN trust_models ON agents.uid = trust_models.agent_uid").
+				Where("trust_models.trust_model IN (?)", *trustModelIDs)
+		}
+		if chainIDs != nil && len(*chainIDs) > 0 {
+			query = query.Where("agents.chain_id IN (?)", *chainIDs)
+		}
+		if skills != nil && len(*skills) > 0 {
+			query = query.Joins("INNER JOIN oasf_skills ON agents.uid = oasf_skills.agent_uid").
+				Where("oasf_skills.skill_name IN (?)", *skills)
+		}
+		if x402Support != nil && *x402Support {
+			query = query.Where("agents.x402_support = ?", *x402Support)
+		}
+		if active != nil && *active {
+			query = query.Where("agents.active = ?", *active)
+		}
+		if haveFeedback != nil && *haveFeedback {
+			query = query.Where("agents.feedback_count > 0")
 		}
 		return query
 	}
@@ -498,17 +439,13 @@ func GetAgentsByFilter(page, pageSize int, trustModelIDs, chainIDs []string) ([]
 	}
 
 	// 分页查询 agent_uid（创建新的查询对象）
-	var agentUIDs []uint64
-	dataQuery := buildBaseQuery()
-	if err := dataQuery.Select("agents.uid").
-		Limit(pageSize).
-		Offset((page - 1) * pageSize).
-		Scan(&agentUIDs).Error; err != nil {
-		return nil, 0, err
-	}
-
 	var agentCards []*Agent
-	if err := db.Where("uid IN (?)", agentUIDs).Find(&agentCards).Error; err != nil {
+	dataQuery := buildBaseQuery().
+		Order("agents.uid DESC").
+		Offset((page - 1) * pageSize).
+		Limit(pageSize)
+
+	if err := dataQuery.Find(&agentCards).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -581,4 +518,134 @@ func SearchAgentsByName(name string, page, pageSize int) ([]*Agent, int, error) 
 		return nil, 0, err
 	}
 	return agents, int(count), nil
+}
+
+type FilterInfoAmount struct {
+	Name   string `json:"name" yaml:"name"`
+	Amount int64  `json:"amount" yaml:"amount"`
+}
+
+func GetAgentAmountForEachTrustModel() ([]FilterInfoAmount, error) {
+	var result []FilterInfoAmount
+	if err := db.Model(&TrustModel{}).
+		Select("trust_model AS name, COUNT(*) AS amount").
+		Where("trust_model IN (?)", []string{
+			agentcard.TrustModelFeedback,
+			agentcard.TrustModelInferenceValidation,
+			agentcard.TrustModelTeeAttestation,
+		}).
+		Group("trust_model").
+		Scan(&result).Error; err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func GetActiveAgentAmount() (int64, error) {
+	var result int64
+	if err := db.Model(&Agent{}).
+		Select("COUNT(*) AS amount").
+		Where("active = ?", true).
+		Scan(&result).Error; err != nil {
+		return 0, err
+	}
+	return result, nil
+}
+
+func GetX402SupportAgentAmount() (int64, error) {
+	var result int64
+	if err := db.Model(&Agent{}).
+		Select("COUNT(*) AS amount").
+		Where("x402_support = ?", true).
+		Scan(&result).Error; err != nil {
+		return 0, err
+	}
+	return result, nil
+}
+
+func GetAgentAmountForEachSkill(limit int) ([]FilterInfoAmount, error) {
+	var result []FilterInfoAmount
+	query := db.Model(&OASFSkill{}).
+		Select("skill_name AS name, COUNT(DISTINCT agent_uid) AS amount").
+		Group("skill_name").
+		Order("amount DESC")
+
+	if limit > 0 {
+		query = query.Limit(limit)
+	}
+
+	if err := query.Scan(&result).Error; err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func GetAgentAmountWithFeedback() (int64, error) {
+	var result int64
+	if err := db.Model(&Agent{}).
+		Select("COUNT(*) AS amount").
+		Where("feedback_count > 0").
+		Scan(&result).Error; err != nil {
+		return 0, err
+	}
+	return result, nil
+}
+
+func SearchSkills(skill string, offset, limit int) ([]FilterInfoAmount, int, error) {
+	if limit <= 0 {
+		limit = 50
+	}
+
+	if offset < 0 {
+		offset = 0
+	}
+
+	// 基础查询：按名称模糊匹配
+	baseQuery := db.Model(&OASFSkill{}).
+		Where("LOWER(skill_name) LIKE LOWER(?)", "%"+skill+"%")
+
+	// 统计去重后的 skill 数量，用于总数
+	var total int64
+	if err := baseQuery.
+		Select("COUNT(DISTINCT skill_name)").
+		Scan(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// 按 skill 分组，按拥有该 skill 的 agent 数量倒序排序，并分页
+	var result []FilterInfoAmount
+	query := baseQuery.
+		Select("skill_name AS name, COUNT(DISTINCT agent_uid) AS amount").
+		Group("skill_name").
+		Order("amount DESC").
+		Offset(offset).
+		Limit(limit)
+
+	if err := query.Scan(&result).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return result, int(total), nil
+}
+
+func GetAgentAmountForEachChain(chainIds []string) (map[string]int64, error) {
+	type chainAmount struct {
+		ChainID string
+		Amount  int64
+	}
+
+	var rows []chainAmount
+	if err := db.Model(&Agent{}).
+		Select("chain_id, COUNT(*) as amount").
+		Where("chain_id IN (?)", chainIds).
+		Group("chain_id").
+		Scan(&rows).Error; err != nil {
+		return nil, err
+	}
+
+	amounts := make(map[string]int64, len(rows))
+	for _, row := range rows {
+		amounts[row.ChainID] = row.Amount
+	}
+	return amounts, nil
 }

@@ -11,7 +11,7 @@ func TestGetAgentFeedbacksList(t *testing.T) {
 	agentUID := uint64(1)
 	page := 1
 	pageSize := 10
-	feedbacks, total, err := GetAgentFeedbacksList(agentUID, page, pageSize)
+	feedbacks, total, err := GetAgentFeedbacksList(agentUID, "", page, pageSize)
 	if err != nil {
 		t.Errorf("GetAgentFeedbacksList error: %v", err)
 	}

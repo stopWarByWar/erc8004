@@ -250,3 +250,14 @@ type Validator struct {
 }
 
 func (Validator) TableName() string { return "validators" }
+
+type FeedbackTagScore struct {
+	AgentUID                         uint64  `gorm:"column:agent_uid;type:bigint;primaryKey"`
+	Tag                              string  `gorm:"column:tag;type:varchar(255);primaryKey"`
+	Score                            float64 `gorm:"column:score;type:numeric(36, 8)"`
+	UpdatedAt                        uint64  `gorm:"column:updated_at;type:bigint"`
+	FeedbackCount                    uint64  `gorm:"column:feedback_count;type:bigint"`
+	UniqueFeedbackClientAddressCount uint64  `gorm:"column:unique_feedback_client_address_count;type:bigint"`
+}
+
+func (FeedbackTagScore) TableName() string { return "feedback_tag_scores" }

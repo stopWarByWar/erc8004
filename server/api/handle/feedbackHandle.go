@@ -16,6 +16,8 @@ func GetAgentFeedbacksHandler(c *gin.Context) {
 		serverUtils.ErrResp(nil, "fail to get agent uid", "Invalid Request", c)
 		return
 	}
+
+	tag1 := c.Query("tag1")
 	page := c.Query("page")
 	pageSize := c.Query("page_size")
 	pageInt, err := strconv.Atoi(page)
@@ -36,7 +38,7 @@ func GetAgentFeedbacksHandler(c *gin.Context) {
 		pageSizeInt = 10
 	}
 
-	feedbacks, total, err := serverLogic.GetAgentFeedbacksList(agentUID, pageInt, pageSizeInt)
+	feedbacks, total, err := serverLogic.GetAgentFeedbacksList(agentUID, tag1, pageInt, pageSizeInt)
 	if err != nil {
 		serverUtils.ErrResp(logrus.Fields{"error": err}, "fail to get agent feedbacks", "Internal Error", c)
 		return
@@ -46,6 +48,23 @@ func GetAgentFeedbacksHandler(c *gin.Context) {
 		"total":     total,
 	}, c)
 
+}
+
+func GetFeedbackScoresHandler(c *gin.Context) {
+	agentUID, err := strconv.ParseUint(c.Query("uid"), 10, 64)
+	if err != nil {
+		serverUtils.ErrResp(nil, "fail to get agent uid", "Invalid Request", c)
+		return
+	}
+
+	scores, err := serverLogic.GetAgentScoreForEachTag1(agentUID, 0, 50)
+	if err != nil {
+		serverUtils.ErrResp(logrus.Fields{"error": err}, "fail to get feedback scores", "Internal Error", c)
+		return
+	}
+	serverUtils.SuccessResp(gin.H{
+		"scores": scores,
+	}, c)
 }
 
 func UploadFeedbackHandler(c *gin.Context) {
