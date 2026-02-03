@@ -1,6 +1,8 @@
 package model
 
 import (
+	"strings"
+
 	agentcard "agent_identity/agentCard"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -108,19 +110,33 @@ func UpdateAgent(chainID, identityRegistry, agentID string, agentProfile *agentc
 		var oasfSkills []OASFSkill
 		var oasfDomains []OASFDomain
 		for _, service := range agentProfile.Services {
+			serviceName := strings.TrimSpace(service.Name)
+			if serviceName == "" {
+				continue
+			}
 			var version string
 			if service.Version != nil {
 				version = *service.Version
 			}
 			services = append(services, Service{
 				AgentUID:    existingAgent.UID,
-				ServiceName: service.Name,
+				ServiceName: serviceName,
 				Endpoint:    service.Endpoint,
 				Version:     version,
 			})
 
-			if service.Name == "oasf" {
+			if strings.ToLower(serviceName) == "oasf" {
+				seenSkill := make(map[string]struct{})
 				for _, skill := range service.Skills {
+					skill = strings.TrimSpace(skill)
+					if skill == "" {
+						continue
+					}
+					skillKey := skill + "\x00" + version
+					if _, ok := seenSkill[skillKey]; ok {
+						continue
+					}
+					seenSkill[skillKey] = struct{}{}
 					newOasfSkill := OASFSkill{
 						AgentUID:  existingAgent.UID,
 						SkillName: skill,
@@ -130,7 +146,17 @@ func UpdateAgent(chainID, identityRegistry, agentID string, agentProfile *agentc
 					}
 					oasfSkills = append(oasfSkills, newOasfSkill)
 				}
+				seenDomain := make(map[string]struct{})
 				for _, domain := range service.Domains {
+					domain = strings.TrimSpace(domain)
+					if domain == "" {
+						continue
+					}
+					domainKey := domain + "\x00" + version
+					if _, ok := seenDomain[domainKey]; ok {
+						continue
+					}
+					seenDomain[domainKey] = struct{}{}
 					newOasfDomain := OASFDomain{
 						AgentUID: existingAgent.UID,
 						Domain:   domain,

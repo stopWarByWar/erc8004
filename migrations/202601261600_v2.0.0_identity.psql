@@ -41,11 +41,11 @@ CREATE INDEX IF NOT EXISTS idx_agents_item ON agents(chain_id,identity_registry,
 CREATE INDEX IF NOT EXISTS idx_agents_agent_wallet ON agents(agent_wallet);
 
 CREATE TABLE IF NOT EXISTS services (
+  uid serial PRIMARY KEY,
   agent_uid bigint,
   service_name varchar(255),
   endpoint text,
   version varchar(255),
-  primary key (agent_uid, service_name, version)
 );
 
 CREATE TABLE IF NOT EXISTS oasf_skills (
