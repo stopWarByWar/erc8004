@@ -87,17 +87,21 @@ func (idx *IdentityProcessor) Process() {
 		"index": execIndex,
 	}).Info("start run identity registry processor")
 
-	ticker := time.NewTicker(20 * time.Second)
+	processInterval := 20 * time.Second
+	ticker := time.NewTicker(1)
 	defer ticker.Stop()
 
-	fetchAgentCardTicker := time.NewTicker(20 * time.Second)
+	fetchAgentProfileInterval := 20 * time.Second
+	fetchAgentCardTicker := time.NewTicker(fetchAgentProfileInterval)
 	defer fetchAgentCardTicker.Stop()
 
-	logExecBlockTicker := time.NewTicker(60 * time.Second)
+	logExecBlockInterval := 60 * time.Second
+	logExecBlockTicker := time.NewTicker(2)
 	defer logExecBlockTicker.Stop()
 	for {
 		select {
 		case <-ticker.C:
+			ticker.Stop()
 			currentBlock, err := idx.ethClient.BlockNumber(ctx)
 			if err != nil {
 				idx.logger.WithFields(logrus.Fields{
@@ -119,13 +123,18 @@ func (idx *IdentityProcessor) Process() {
 			if execBlock < uint64(currentBlock) {
 				idx.process(int64(currentBlock))
 			}
+			ticker.Reset(processInterval)
 		case <-fetchAgentCardTicker.C:
+			fetchAgentCardTicker.Stop()
 			idx.setAgentCardInserted()
+			fetchAgentCardTicker.Reset(fetchAgentProfileInterval)
 		case <-logExecBlockTicker.C:
+			logExecBlockTicker.Stop()
 			idx.logger.WithFields(logrus.Fields{
 				"block": idx.execBlock,
 				"index": idx.execIndex,
 			}).Info("identity registry processor exec block")
+			logExecBlockTicker.Reset(logExecBlockInterval)
 		}
 	}
 }

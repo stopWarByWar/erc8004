@@ -33,15 +33,14 @@ func Run(_cors []string, port string) {
 
 	r.GET("agent/identity/list", handle.GetAgentCardListHandler)
 	r.GET("agent/identity/detail", handle.GetAgentCardDetailHandler)
-	r.GET("agent/identity/trustModel", handle.GetTrustModelListHandler)
-	r.GET("agent/identity/chains", handle.GetChainListHandler)
-	r.GET("agent/identity/search/skill", handle.GetAgentCardsSearchBySkillHandler)
-	r.GET("agent/identity/search/name", handle.GetAgentCardsSearchByNameHandler)
+	// r.GET("agent/identity/trustModel", handle.GetTrustModelListHandler)
+	r.GET("agent/identity/filter/info", handle.GetFilterInfoHandler)
+	// r.GET("agent/identity/search/skill", handle.GetAgentCardsSearchBySkillHandler)
+	// r.GET("agent/identity/search/name", handle.GetAgentCardsSearchByNameHandler)
 	r.POST("agent/identity/search/semantic", handle.GetAgentCardsSearchBySemanticHandler)
-	r.GET("agent/identity/detail/feedbacks", handle.GetAgentFeedbacksHandler)
+
 	r.GET("agent/identity/general/info", handle.GetAgentAmountForEachChainHandler)
 
-	r.POST("agent/identity/set/feedback", handle.UploadFeedbackHandler)
 	r.POST("agent/identity/set/profile", handle.UploadAgentProfileHandler)
 
 	r.GET("agent/identity/detail/validation/list", handle.GetAgentValidationListHandler)
@@ -51,6 +50,12 @@ func Run(_cors []string, port string) {
 
 	r.GET("agent/network/list", handle.GetNetworkListHandler)
 
+	r.GET("agent/identity/detail/feedback/scores", handle.GetFeedbackScoresHandler)
+	r.GET("agent/identity/detail/feedbacks", handle.GetAgentFeedbacksHandler)
+	r.POST("agent/identity/set/feedback", handle.UploadFeedbackHandler)
+
+	r.GET("agent/identity/filter/info", handle.GetFilterInfoHandler)
+	r.GET("agent/identity/filter/search/skill", handle.GetSkillsForFilterHandler)
 	go apiUtils.UpdateGeneralInfo()
 	r.Run(fmt.Sprintf(":%s", port))
 }

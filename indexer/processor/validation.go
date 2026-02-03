@@ -80,15 +80,18 @@ func (p *ValidationRegistryProcessor) Process() {
 		"index": p.execIndex,
 	}).Info("start run validation registry processor")
 
-	ticker := time.NewTicker(20 * time.Second)
+	processInterval := 20 * time.Second
+	ticker := time.NewTicker(processInterval)
 	defer ticker.Stop()
 
-	logExecBlockTicker := time.NewTicker(60 * time.Second)
+	logExecBlockInterval := 60 * time.Second
+	logExecBlockTicker := time.NewTicker(logExecBlockInterval)
 	defer logExecBlockTicker.Stop()
 
 	for {
 		select {
 		case <-ticker.C:
+			ticker.Stop()
 			currentBlock, err := p.ethClient.BlockNumber(ctx)
 			if err != nil {
 				p.logger.WithFields(logrus.Fields{
@@ -99,15 +102,18 @@ func (p *ValidationRegistryProcessor) Process() {
 			if p.execBlock < uint64(currentBlock) {
 				p.process(int64(currentBlock))
 			}
+			ticker.Reset(processInterval)
 		case identityBlock := <-p.identityExecBlockChan:
 			// 接收identity processor发送的execBlock更新
 			p.identityExecBlock = identityBlock
 		case <-logExecBlockTicker.C:
+			logExecBlockTicker.Stop()
 			p.logger.WithFields(logrus.Fields{
 				"identityBlock": p.identityExecBlock,
 				"block":         p.execBlock,
 				"index":         p.execIndex,
 			}).Info("validation registry processor exec block")
+			logExecBlockTicker.Reset(logExecBlockInterval)
 		}
 	}
 }

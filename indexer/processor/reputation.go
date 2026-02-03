@@ -81,18 +81,22 @@ func (p *ReputationProcessor) Process() {
 		"index": p.execIndex,
 	}).Info("start run reputation registry processor")
 
-	ticker := time.NewTicker(20 * time.Second)
+	processInterval := 20 * time.Second
+	ticker := time.NewTicker(processInterval)
 	defer ticker.Stop()
 
-	fetchFeedbackAndResponseTicker := time.NewTicker(20 * time.Second)
+	fetchFeedbackAndResponseInterval := 20 * time.Second
+	fetchFeedbackAndResponseTicker := time.NewTicker(fetchFeedbackAndResponseInterval)
 	defer fetchFeedbackAndResponseTicker.Stop()
 
-	logExecBlockTicker := time.NewTicker(60 * time.Second)
+	logExecBlockInterval := 60 * time.Second
+	logExecBlockTicker := time.NewTicker(logExecBlockInterval)
 	defer logExecBlockTicker.Stop()
 
 	for {
 		select {
 		case <-ticker.C:
+			ticker.Stop()
 			currentBlock, err := p.ethClient.BlockNumber(ctx)
 			if err != nil {
 				p.logger.WithFields(logrus.Fields{
@@ -103,17 +107,22 @@ func (p *ReputationProcessor) Process() {
 			if p.execBlock < uint64(currentBlock) {
 				p.process(int64(currentBlock))
 			}
+			ticker.Reset(processInterval)
 		case <-fetchFeedbackAndResponseTicker.C:
+			fetchFeedbackAndResponseTicker.Stop()
 			p.fetchFeedbackAndResponse()
+			fetchFeedbackAndResponseTicker.Reset(fetchFeedbackAndResponseInterval)
 		case identityBlock := <-p.identityExecBlockChan:
 			// 接收identity processor发送的execBlock更新
 			p.identityExecBlock = identityBlock
 		case <-logExecBlockTicker.C:
+			logExecBlockTicker.Stop()
 			p.logger.WithFields(logrus.Fields{
 				"identityBlock": p.identityExecBlock,
 				"block":         p.execBlock,
 				"index":         p.execIndex,
 			}).Info("reputation registry processor exec block")
+			logExecBlockTicker.Reset(logExecBlockInterval)
 		}
 	}
 }
@@ -148,9 +157,10 @@ loop:
 
 			if err := p.dealWithEvent(e); err != nil {
 				p.logger.WithFields(logrus.Fields{
-					"error": err,
-					"block": e.BlockNumber,
-					"index": e.Index,
+					"error":  err,
+					"block":  e.BlockNumber,
+					"index":  e.Index,
+					"txHash": e.TxHash.String(),
 				}).Error("fail to deal with event")
 				return
 			}

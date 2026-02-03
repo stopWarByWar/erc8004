@@ -1,14 +1,11 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"agent_identity/config"
 	"agent_identity/logger"
-	"agent_identity/model"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -48,35 +45,9 @@ func SuccessRespWithMsg(code int, msg string, c *gin.Context) {
 	})
 }
 
-var generalInfo = make(map[string]any)
-
-func GetGeneralInfo() map[string]any {
-	return generalInfo
-}
-
 func UpdateGeneralInfo() {
 	for {
-		agentAmounts, err := model.GetAgentAmountForEachChain()
-		if err != nil {
-			fmt.Println("failed to get agent amount for each chain", err)
-			time.Sleep(5 * time.Minute)
-			continue
-		}
-
-		total := int64(0)
-		for chainID, amount := range agentAmounts {
-			chainInfo, ok := config.GetChainInfo(chainID)
-			if !ok {
-				continue
-			}
-			chainName := strings.Replace(chainInfo.ChainName, " ", "_", -1)
-			if len(chainName) > 0 {
-				generalInfo[chainName] = amount
-				total += amount
-			}
-			config.SetChainAgentAmount(chainID, amount)
-		}
-		generalInfo["total"] = total
+		config.UpdateGeneralInfo()
 		time.Sleep(5 * time.Minute)
 	}
 }
