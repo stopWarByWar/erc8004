@@ -81,15 +81,15 @@ func CreateResponse(chainID string, response *Response) error {
 //
 //
 
-func GetFeedbacksByAgentUID(uid uint64, tag1 string, page, pageSize int) ([]*FeedbackResp, int64, error) {
+func GetFeedbacksByAgentUID(uid uint64, tag1s []string, page, pageSize int) ([]*FeedbackResp, int64, error) {
 	if page <= 0 || pageSize <= 0 {
 		return nil, 0, errors.New("invalid page or pageSize")
 	}
 	// 基础查询（不含分页），用于统计总数和复用条件
 	baseQuery := db.Model(&Feedback{}).
 		Where("agent_uid = ? and revoked = ?", uid, false)
-	if tag1 != "" {
-		baseQuery = baseQuery.Where("tag1 = ?", tag1)
+	if len(tag1s) > 0 {
+		baseQuery = baseQuery.Where("tag1 IN (?)", tag1s)
 	}
 
 	var total int64
@@ -160,14 +160,15 @@ func GetScoreForEachTag1(agentUID uint64, offset, limit int) ([]ScoreInfo, error
 		Scan(&scores).Error; err != nil {
 		return nil, err
 	}
+	// 按 scores 长度预分配切片，使用下标赋值，避免前半段出现零值元素
 	scoresInfo := make([]ScoreInfo, len(scores))
-	for _, score := range scores {
-		scoresInfo = append(scoresInfo, ScoreInfo{
+	for i, score := range scores {
+		scoresInfo[i] = ScoreInfo{
 			Tag:                              score.Tag,
 			Score:                            score.Score,
 			UniqueFeedbackClientAddressCount: score.UniqueFeedbackClientAddressCount,
 			FeedbackCount:                    score.FeedbackCount,
-		})
+		}
 	}
 	return scoresInfo, nil
 }

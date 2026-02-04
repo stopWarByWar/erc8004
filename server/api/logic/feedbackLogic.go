@@ -14,8 +14,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-func GetAgentFeedbacksList(agentUID uint64, tag1 string, page, pageSize int) ([]*model.FeedbackResp, int64, error) {
-	feedbacks, total, err := model.GetFeedbacksByAgentUID(agentUID, tag1, page, pageSize)
+func GetAgentFeedbacksList(agentUID uint64, tag1s []string, page, pageSize int) ([]*model.FeedbackResp, int64, error) {
+	feedbacks, total, err := model.GetFeedbacksByAgentUID(agentUID, tag1s, page, pageSize)
 	if err != nil {
 		return nil, 0, fmt.Errorf("fail to get agent feedbacks list: %v", err)
 	}

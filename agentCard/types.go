@@ -26,6 +26,6 @@ type Service struct {
 	Domains      []string               `json:"domains,omitempty"`
 }
 
-const TrustModelFeedback = "feedback"
-const TrustModelInferenceValidation = "inference-validation"
+const TrustModelReputation = "reputation"
+const TrustModelCryptoEconomicValidation = "crypto-economic-validation"
 const TrustModelTeeAttestation = "tee-attestation"

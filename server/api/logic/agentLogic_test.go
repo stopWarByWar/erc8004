@@ -18,18 +18,18 @@ func TestUpdateFilterInfo(t *testing.T) {
 }
 
 var name = "Agent"
-var trustModelIDs = []string{}
-var chainIDs = []string{"11155111"}
+var trustModelIDs = []string{agentcard.TrustModelReputation, agentcard.TrustModelCryptoEconomicValidation, agentcard.TrustModelTeeAttestation}
+var chainIDs = []string{"1"}
 var skills = []string{}
-var x402Support = false
-var active = false
-var haveFeedback = false
+var x402Support = true
+var active = true
+var haveFeedback = true
 
 func TestFilterSearchAgentListByFilter(t *testing.T) {
 	initTest()
 	page := 1
 	pageSize := 10
-	agents, total, err := GetAgentListByFilter(page, pageSize, &name, &trustModelIDs, &chainIDs, &skills, &x402Support, &active, &haveFeedback)
+	agents, total, err := GetAgentListByFilter(page, pageSize, nil, nil, &chainIDs, nil, &x402Support, &active, &haveFeedback)
 	if err != nil {
 		t.Errorf("GetAgentListByFilter error: %v", err)
 	}
@@ -63,10 +63,10 @@ func TestGetCardResponse(t *testing.T) {
 
 func TestFilterSearchAgentListBySemantic(t *testing.T) {
 	initTest()
-	desc := "test"
+	desc := "AI agent"
 	limit := 10
 	threshold := 0.5
-	agents, err := FilterSearchAgentListBySemantic(desc, limit, threshold, &trustModelIDs, &chainIDs, &skills, &x402Support, &active, &haveFeedback)
+	agents, err := FilterSearchAgentListBySemantic(desc, limit, threshold, &trustModelIDs, &chainIDs, &skills, nil, nil, &haveFeedback)
 	if err != nil {
 		t.Errorf("FilterSearchAgentListBySemantic error: %v", err)
 	}

@@ -423,9 +423,9 @@ func GetServicesByAgentUID(uid uint64) ([]*Service, error) {
 }
 
 func GetAgentsByFilter(name *string, page, pageSize int, trustModelIDs, chainIDs, skills *[]string, x402Support, active, haveFeedback *bool) ([]*Agent, int64, error) {
-	// 构建基础查询的辅助函数
+	// 构建基础查询的辅助函数（不加 DISTINCT，由具体查询决定是否去重）
 	buildBaseQuery := func() *gorm.DB {
-		query := db.Model(&Agent{}).Distinct("agents.uid")
+		query := db.Model(&Agent{})
 		if name != nil && *name != "" {
 			query = query.Where("LOWER(agents.name) LIKE LOWER(?)", "%"+*name+"%")
 		}
@@ -452,10 +452,10 @@ func GetAgentsByFilter(name *string, page, pageSize int, trustModelIDs, chainIDs
 		return query
 	}
 
-	// 查询总数（创建新的查询对象）
+	// 查询总数：按 uid 去重后 Count
 	var total int64
-	countQuery := buildBaseQuery()
-	if err := countQuery.Select("COUNT(DISTINCT agents.uid)").Scan(&total).Error; err != nil {
+	countQuery := buildBaseQuery().Distinct("agents.uid")
+	if err := countQuery.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -464,18 +464,19 @@ func GetAgentsByFilter(name *string, page, pageSize int, trustModelIDs, chainIDs
 		return []*Agent{}, 0, nil
 	}
 
-	// 分页查询 agent_uid（创建新的查询对象）
-	var agentCards []*Agent
+	// 分页查询 agent（创建新的查询对象），对 agents.* 去重，避免 join 导致重复
+	var agents []*Agent
 	dataQuery := buildBaseQuery().
+		Distinct().
 		Order("agents.uid DESC").
 		Offset((page - 1) * pageSize).
 		Limit(pageSize)
 
-	if err := dataQuery.Find(&agentCards).Error; err != nil {
+	if err := dataQuery.Find(&agents).Error; err != nil {
 		return nil, 0, err
 	}
 
-	return agentCards, total, nil
+	return agents, total, nil
 }
 
 func GetAgentList(page, pageSize int) ([]*Agent, int64, error) {
@@ -556,8 +557,8 @@ func GetAgentAmountForEachTrustModel() ([]FilterInfoAmount, error) {
 	if err := db.Model(&TrustModel{}).
 		Select("trust_model AS name, COUNT(*) AS amount").
 		Where("trust_model IN (?)", []string{
-			agentcard.TrustModelFeedback,
-			agentcard.TrustModelInferenceValidation,
+			agentcard.TrustModelReputation,
+			agentcard.TrustModelCryptoEconomicValidation,
 			agentcard.TrustModelTeeAttestation,
 		}).
 		Group("trust_model").

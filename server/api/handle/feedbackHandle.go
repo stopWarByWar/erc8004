@@ -5,6 +5,7 @@ import (
 	serverTypes "agent_identity/server/api/types"
 	serverUtils "agent_identity/server/api/utils"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -17,7 +18,16 @@ func GetAgentFeedbacksHandler(c *gin.Context) {
 		return
 	}
 
-	tag1 := c.Query("tag1")
+	tag1Raws := c.QueryArray("tag1s")
+	tag1s := make([]string, 0)
+	for _, v := range tag1Raws {
+		for _, id := range strings.Split(v, ",") {
+			if id != "" {
+				tag1s = append(tag1s, id)
+			}
+		}
+	}
+
 	page := c.Query("page")
 	pageSize := c.Query("page_size")
 	pageInt, err := strconv.Atoi(page)
@@ -38,7 +48,7 @@ func GetAgentFeedbacksHandler(c *gin.Context) {
 		pageSizeInt = 10
 	}
 
-	feedbacks, total, err := serverLogic.GetAgentFeedbacksList(agentUID, tag1, pageInt, pageSizeInt)
+	feedbacks, total, err := serverLogic.GetAgentFeedbacksList(agentUID, tag1s, pageInt, pageSizeInt)
 	if err != nil {
 		serverUtils.ErrResp(logrus.Fields{"error": err}, "fail to get agent feedbacks", "Internal Error", c)
 		return

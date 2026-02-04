@@ -16,6 +16,10 @@ var ctx = context.Background()
 
 func InsertAgentVector(agentUID uint64, identityRegistry, chainID string, createTimestamp uint64, content string, metadata map[string]interface{}) error {
 	// 检查是否已存在向量记录
+	if len(content) == 0 {
+		return nil
+	}
+
 	var existing AgentVector
 	checkErr := db.Where("agent_uid = ?", agentUID).First(&existing).Error
 	recordExists := checkErr == nil
@@ -112,23 +116,39 @@ func SearchSimilarVectors(desc string, limit int, threshold float64, filters *Ve
 		// 如果提供了 TrustModel 过滤条件，需要通过 JOIN trust_models 表
 		if filters.TrustModel != nil && len(*filters.TrustModel) > 0 {
 			needJoinTrustModels = true
-			whereConditions = append(whereConditions, "tm.trust_model IN (?)")
-			args = append(args, filters.TrustModel)
+			placeholders := make([]string, 0, len(*filters.TrustModel))
+			for _, tmID := range *filters.TrustModel {
+				placeholders = append(placeholders, "?")
+				args = append(args, tmID)
+			}
+			whereConditions = append(whereConditions, "tm.trust_model IN ("+strings.Join(placeholders, ",")+")")
 		}
 		// 使用 AgentVector 表中的字段进行过滤
 		if filters.IdentityRegistry != nil && len(*filters.IdentityRegistry) > 0 {
-			whereConditions = append(whereConditions, "av.identity_registry IN (?)")
-			args = append(args, filters.IdentityRegistry)
+			placeholders := make([]string, 0, len(*filters.IdentityRegistry))
+			for _, r := range *filters.IdentityRegistry {
+				placeholders = append(placeholders, "?")
+				args = append(args, r)
+			}
+			whereConditions = append(whereConditions, "av.identity_registry IN ("+strings.Join(placeholders, ",")+")")
 		}
 		if filters.ChainID != nil && len(*filters.ChainID) > 0 {
-			whereConditions = append(whereConditions, "av.chain_id IN (?)")
-			args = append(args, filters.ChainID)
+			placeholders := make([]string, 0, len(*filters.ChainID))
+			for _, cid := range *filters.ChainID {
+				placeholders = append(placeholders, "?")
+				args = append(args, cid)
+			}
+			whereConditions = append(whereConditions, "av.chain_id IN ("+strings.Join(placeholders, ",")+")")
 		}
 		// 根据技能过滤，需要 JOIN oasf_skills 表
 		if filters.Skills != nil && len(*filters.Skills) > 0 {
 			needJoinSkills = true
-			whereConditions = append(whereConditions, "os.skill_name IN (?)")
-			args = append(args, filters.Skills)
+			placeholders := make([]string, 0, len(*filters.Skills))
+			for _, skill := range *filters.Skills {
+				placeholders = append(placeholders, "?")
+				args = append(args, skill)
+			}
+			whereConditions = append(whereConditions, "os.skill_name IN ("+strings.Join(placeholders, ",")+")")
 		}
 		// 根据 Agent 状态过滤，需要 JOIN agents 表
 		if filters.X402Support != nil && *filters.X402Support {
@@ -187,13 +207,17 @@ func SearchSimilarVectors(desc string, limit int, threshold float64, filters *Ve
 
 	sql += whereClause + `
 		1 - (av.embedding <=> ?::vector) >= ?
-		ORDER BY av.embedding <=> ?::vector
+		ORDER BY similarity DESC
 		LIMIT ?
 	`
 
 	allArgs := []interface{}{queryVector}
 	allArgs = append(allArgs, args...)
-	allArgs = append(allArgs, queryVector, threshold, queryVector, limit)
+	// 后续占位符顺序依次为：
+	// 1) WHERE 中的 ?::vector（再次使用 queryVector）
+	// 2) WHERE 中的 阈值 ?
+	// 3) LIMIT 中的 ?
+	allArgs = append(allArgs, queryVector, threshold, limit)
 
 	var results []struct {
 		AgentUID   uint64  `gorm:"column:agent_uid"`
