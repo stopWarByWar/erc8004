@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+      "ckg": {
+        "url": "http://localhost:8000/mcp",
+        "transport": "streamable",
+        "headers": {
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzcyNjQxMzY2LCJpYXQiOjE3NzAwNDkzNjZ9.GwVTnRihX3kAiG-RbusBPJBXzZ3E6UQKZRrtpTpIQaE"
+        }
+      }
+    }
+  }

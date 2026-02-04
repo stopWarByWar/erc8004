@@ -7,15 +7,19 @@ chain_list:
     chain_name: "BSC"
     chain_logo: "https://bnbattest.s3.ap-southeast-1.amazonaws.com/agentCard/chain/bsc.png"
     scan_prefix: "https://bscscan.com/"
+  - chain_id: "8453"
+    chain_name: "Base"
+    chain_logo: "https://bnbattest.s3.ap-southeast-1.amazonaws.com/agentCard/chain/base.png"
+    scan_prefix: "https://basescan.org/"
 
 register_list:
   - chain_id: "56"
-    identity_address: "0x8004A23C091B5F4f92F9FD95E3d48C2b31562e84"
-    reputation_address: "0x8004B2EBDaA1E272cb300fF8Ec76FD66E1720daa"
-    validation_address: "0x8004C8C4826e3a1cBa28177395B2E9d80D8632c4"
-    name: "BAS"
-    description: "BAS Official Registry"
-    logo_url: "https://bnbattest.s3.ap-southeast-1.amazonaws.com/agentCard/org/bas.png"
+    identity_address: "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432"
+    reputation_address: "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63"
+    validation_address: ""
+    name:  "ETH Foundation"
+    description: "ETH Foundation Official Registry"
+    logo_url: "https://bnbattest.s3.ap-southeast-1.amazonaws.com/agentCard/org/eth.png"
 
   - chain_id: "1"
     identity_address: "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432"
@@ -24,3 +28,13 @@ register_list:
     name: "ETH Foundation"
     description: "ETH Foundation Official Registry"
     logo_url: "https://bnbattest.s3.ap-southeast-1.amazonaws.com/agentCard/org/eth.png"
+
+  - chain_id: "8453"
+    identity_address: "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432"
+    reputation_address: "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63"
+    validation_address: ""
+    name: "ETH Foundation"
+    description: "ETH Foundation Official Registry"
+    logo_url: "https://bnbattest.s3.ap-southeast-1.amazonaws.com/agentCard/org/eth.png"
+
+  
