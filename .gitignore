@@ -16,3 +16,5 @@
 /model/config.yaml
 /server/api/logic/config.yaml
 .vscode/
+.cursor/
+.idea/
