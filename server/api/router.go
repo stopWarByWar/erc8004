@@ -31,10 +31,10 @@ func Run(_cors []string, port string) {
 		c.String(http.StatusOK, "pong")
 	})
 
-	r.GET("agent/identity/list", handle.GetAgentCardListHandler)
+	r.POST("agent/identity/list", handle.GetAgentCardListHandler)
 	r.GET("agent/identity/detail", handle.GetAgentCardDetailHandler)
 	// r.GET("agent/identity/trustModel", handle.GetTrustModelListHandler)
-	r.GET("agent/identity/filter/info", handle.GetFilterInfoHandler)
+	// r.GET("agent/identity/filter/info", handle.GetFilterInfoHandler)
 	// r.GET("agent/identity/search/skill", handle.GetAgentCardsSearchBySkillHandler)
 	// r.GET("agent/identity/search/name", handle.GetAgentCardsSearchByNameHandler)
 	r.POST("agent/identity/search/semantic", handle.GetAgentCardsSearchBySemanticHandler)

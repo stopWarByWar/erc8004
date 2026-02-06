@@ -168,18 +168,6 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 	return &resp, nil
 }
 
-func SearchAgentListBySkill(skill string, page, pageSize int) ([]*serverTypes.AgentResponse, int, error) {
-	agents, total, err := model.SearchAgentsBySkill(skill, page, pageSize)
-	if err != nil {
-		return nil, 0, err
-	}
-	cards, err := formatAgentResponse(agents)
-	if err != nil {
-		return nil, 0, err
-	}
-	return cards, total, nil
-}
-
 func FilterSearchAgentListBySemantic(desc string, limit int, threshold float64, trustModelIDs *[]string, chainIDs *[]string, skills *[]string, x402Support *bool, active *bool, haveFeedback *bool) ([]*serverTypes.AgentResponse, error) {
 	filters := &model.VectorSearchFilters{
 		TrustModel:   trustModelIDs,
