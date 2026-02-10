@@ -37,7 +37,7 @@ func GetAgentAmountForEachChainHandler(c *gin.Context) {
 
 func GetFilterInfoHandler(c *gin.Context) {
 	apiUtils.SuccessResp(gin.H{
-		"filter_info": config.GetGeneralInfo(),
+		"filter_info": config.GetFilterInfo(),
 	}, c)
 }
 
@@ -53,5 +53,11 @@ func GetSkillsForFilterHandler(c *gin.Context) {
 	apiUtils.SuccessResp(gin.H{
 		"skills": skills,
 		"total":  total,
+	}, c)
+}
+
+func GetLeaderboardInfoHandler(c *gin.Context) {
+	apiUtils.SuccessResp(gin.H{
+		"leaderboard_info": apiUtils.GetLeaderboardInfo(),
 	}, c)
 }

@@ -5,16 +5,17 @@ import (
 	"testing"
 
 	agentcard "agent_identity/agentCard"
-	"agent_identity/server/api/types"
-
 	"agent_identity/config"
+	"agent_identity/server/api/types"
+	apiUtils "agent_identity/server/api/utils"
 )
 
 func TestUpdateFilterInfo(t *testing.T) {
 	initTest()
-	config.UpdateGeneralInfo()
-	fmt.Printf("generalInfo: %+v\n", config.GetGeneralInfo())
-
+	config.UpdateFilterInfo()
+	fmt.Printf("filterInfo: %+v\n", config.GetFilterInfo())
+	apiUtils.UpdateLeaderboardInfo()
+	fmt.Printf("leaderboardInfo: %+v\n", apiUtils.GetLeaderboardInfo())
 }
 
 var name = "Agent"

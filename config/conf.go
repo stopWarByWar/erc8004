@@ -39,8 +39,8 @@ type FilterInfoAmount struct {
 }
 
 type FilterStatusInfo struct {
-	Active      int64 `json:"active" yaml:"active"`
-	HasFeedback int64 `json:"has_feedback" yaml:"has_feedback"`
+	Active       int64 `json:"active" yaml:"active"`
+	HaveFeedback int64 `json:"have_feedback" yaml:"have_feedback"`
 }
 
 type FilterInfo struct {
@@ -51,7 +51,7 @@ type FilterInfo struct {
 	Skills      []FilterInfoAmount `yaml:"skills"`
 }
 
-var generalInfo = FilterInfo{}
+var filterInfo = FilterInfo{}
 
 var RegisterMap = make(map[string]map[string]ContractInfo)
 var ChainMap = make(map[string]ChainInfo)
@@ -131,8 +131,8 @@ func GetIdentityAddressByValidationAddress(chainID, ValidationAddress string) st
 	return registry.IdentityAddress
 }
 
-func UpdateGeneralInfo() {
-	var newGeneralInfo = FilterInfo{}
+func UpdateFilterInfo() {
+	var newFilterInfo = FilterInfo{}
 	var chainIds []string
 	for chainId := range ChainMap {
 		chainIds = append(chainIds, chainId)
@@ -152,28 +152,28 @@ func UpdateGeneralInfo() {
 		chainInfo.AgentAmount = uint64(agentAmount)
 		chainInfos = append(chainInfos, chainInfo)
 	}
-	newGeneralInfo.Networks = chainInfos
+	newFilterInfo.Networks = chainInfos
 
 	trustModelAmounts, err := model.GetAgentAmountForEachTrustModel()
 	if err != nil {
 		fmt.Println("failed to get agent amount for each trust model", err)
 		return
 	}
-	var trustModelInfos []FilterInfoAmount
+	var trustModelAmountInfos []FilterInfoAmount
 	for _, trustModelAmount := range trustModelAmounts {
-		trustModelInfos = append(trustModelInfos, FilterInfoAmount{
+		trustModelAmountInfos = append(trustModelAmountInfos, FilterInfoAmount{
 			Name:   trustModelAmount.Name,
 			Amount: trustModelAmount.Amount,
 		})
 	}
-	newGeneralInfo.TrustModels = trustModelInfos
+	newFilterInfo.TrustModels = trustModelAmountInfos
 
 	activeAgentAmount, err := model.GetActiveAgentAmount()
 	if err != nil {
 		fmt.Println("failed to get active agent amount", err)
 		return
 	}
-	newGeneralInfo.Status.Active = activeAgentAmount
+	newFilterInfo.Status.Active = activeAgentAmount
 
 	feedbackCount, err := model.GetAgentAmountWithFeedback()
 	if err != nil {
@@ -181,14 +181,14 @@ func UpdateGeneralInfo() {
 		return
 	}
 
-	newGeneralInfo.Status.HasFeedback = feedbackCount
+	newFilterInfo.Status.HaveFeedback = feedbackCount
 
 	x402SupportAgentAmount, err := model.GetX402SupportAgentAmount()
 	if err != nil {
 		fmt.Println("failed to get x402 support agent amount", err)
 		return
 	}
-	newGeneralInfo.X402Support = x402SupportAgentAmount
+	newFilterInfo.X402Support = x402SupportAgentAmount
 
 	skillAmounts, err := model.GetAgentAmountForEachSkill(50)
 	if err != nil {
@@ -202,8 +202,8 @@ func UpdateGeneralInfo() {
 			Amount: skillAmount.Amount,
 		})
 	}
-	newGeneralInfo.Skills = skillInfos
-	generalInfo = newGeneralInfo
+	newFilterInfo.Skills = skillInfos
+	filterInfo = newFilterInfo
 }
 
 type IndexerConfig struct {
@@ -239,6 +239,6 @@ type IndexerConfig struct {
 	} `yaml:"validation"`
 }
 
-func GetGeneralInfo() FilterInfo {
-	return generalInfo
+func GetFilterInfo() FilterInfo {
+	return filterInfo
 }

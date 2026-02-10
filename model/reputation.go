@@ -172,3 +172,13 @@ func GetScoreForEachTag1(agentUID uint64, offset, limit int) ([]ScoreInfo, error
 	}
 	return scoresInfo, nil
 }
+
+func GetFeedbackCount() (int64, error) {
+	var result int64
+	if err := db.Model(&Feedback{}).
+		Select("COUNT(*) AS amount").
+		Scan(&result).Error; err != nil {
+		return 0, err
+	}
+	return result, nil
+}

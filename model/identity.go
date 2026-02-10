@@ -2,6 +2,7 @@ package model
 
 import (
 	"strings"
+	"time"
 
 	agentcard "agent_identity/agentCard"
 
@@ -675,4 +676,59 @@ func GetAgentAmountForEachChain(chainIds []string) (map[string]int64, error) {
 		amounts[row.ChainID] = row.Amount
 	}
 	return amounts, nil
+}
+
+func GetAgentAmountWithIn7Days() (int64, error) {
+	var result int64
+	if err := db.Model(&Agent{}).
+		Select("COUNT(*) AS amount").
+		Where("timestamps > ?", time.Now().AddDate(0, 0, -7).Unix()).
+		Scan(&result).Error; err != nil {
+		return 0, err
+	}
+	return result, nil
+}
+
+// GetAgentAgentListBy 按 filter 分页获取 Agent 列表并返回总数。
+// filter[0]: 时间/uid — -1 按 uid 倒序，1 按 uid 正序，0 不按此排序
+// filter[1]: 反馈数量 — -1 按 feedback_count 倒序，1 正序，0 不按此排序
+// filter[2]: 最新 feedback 时间 — -1 按最新 feedback 时间倒序，1 正序，0 不按此排序
+func GetAgentAgentListBy(offset, limit int, filter []int8) ([]*Agent, error) {
+	var agents []*Agent
+	query := db.Model(&Agent{})
+
+	if len(filter) > 2 && filter[2] != 0 {
+		query = query.Joins("LEFT JOIN (SELECT agent_uid, MAX(timestamps) AS latest_feedback_ts FROM feedbacks WHERE revoked = false GROUP BY agent_uid) AS agent_latest_feedback ON agents.uid = agent_latest_feedback.agent_uid")
+	}
+
+	var orders []string
+	if len(filter) > 0 && filter[0] != 0 {
+		if filter[0] == -1 {
+			orders = append(orders, "agents.uid DESC")
+		} else {
+			orders = append(orders, "agents.uid ASC")
+		}
+	}
+	if len(filter) > 1 && filter[1] != 0 {
+		if filter[1] == -1 {
+			orders = append(orders, "agents.feedback_count DESC")
+		} else {
+			orders = append(orders, "agents.feedback_count ASC")
+		}
+	}
+	if len(filter) > 2 && filter[2] != 0 {
+		if filter[2] == -1 {
+			orders = append(orders, "agent_latest_feedback.latest_feedback_ts DESC NULLS LAST")
+		} else {
+			orders = append(orders, "agent_latest_feedback.latest_feedback_ts ASC NULLS LAST")
+		}
+	}
+	if len(orders) == 0 {
+		orders = append(orders, "agents.uid DESC")
+	}
+
+	if err := query.Order(strings.Join(orders, ", ")).Offset(offset).Limit(limit).Find(&agents).Error; err != nil {
+		return nil, err
+	}
+	return agents, nil
 }

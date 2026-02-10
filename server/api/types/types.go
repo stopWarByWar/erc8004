@@ -211,3 +211,23 @@ type ValidatorListInfo struct {
 	PendingAmount  uint64 `json:"pendingAmount"`
 	FinishedAmount uint64 `json:"finishedAmount"`
 }
+
+type LeaderboardInfo struct {
+	AgentAmount              int64
+	FeedbackAmount           int64
+	AgentAmountWithIn7Days   int64
+	NetworkAmount            int64
+	NewCreatedAgents         []SimpleAgentInfo
+	TrendingAgents           []SimpleAgentInfo
+	AgentsWithNewestFeedback []SimpleAgentInfo
+}
+
+type SimpleAgentInfo struct {
+	UID              uint64
+	AgentID          string
+	AgentName        string
+	AgentDescription string
+	ChainID          string
+	ChainName        string
+	ChainLogo        string
+}

@@ -6,12 +6,15 @@ import (
 
 	"agent_identity/config"
 	"agent_identity/logger"
+	"agent_identity/model"
+	"agent_identity/server/api/types"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
 var _logger *logger.Logger
+var leaderboardInfo types.LeaderboardInfo
 
 func Init(nlogger *logger.Logger) {
 	_logger = nlogger
@@ -47,7 +50,87 @@ func SuccessRespWithMsg(code int, msg string, c *gin.Context) {
 
 func UpdateGeneralInfo() {
 	for {
-		config.UpdateGeneralInfo()
+		config.UpdateFilterInfo()
+		UpdateLeaderboardInfo()
 		time.Sleep(5 * time.Minute)
 	}
+}
+
+func UpdateLeaderboardInfo() {
+	filterInfo := config.GetFilterInfo()
+	for _, chainInfo := range filterInfo.Networks {
+		leaderboardInfo.AgentAmount += int64(chainInfo.AgentAmount)
+	}
+
+	leaderboardInfo.NetworkAmount = int64(len(filterInfo.Networks))
+
+	feedbackAmount, err := model.GetAgentAmountWithFeedback()
+	if err != nil {
+		_logger.WithFields(logrus.Fields{
+			"error": err.Error(),
+		}).Error("failed to get agent amount with feedback")
+		return
+	}
+	leaderboardInfo.FeedbackAmount = feedbackAmount
+
+	agentAmountWithIn7Days, err := model.GetAgentAmountWithIn7Days()
+	if err != nil {
+		_logger.WithFields(logrus.Fields{
+			"error": err.Error(),
+		}).Error("failed to get agent amount with in 7 days")
+		return
+	}
+	leaderboardInfo.AgentAmountWithIn7Days = agentAmountWithIn7Days
+
+	newCreatedAgents, err := model.GetAgentAgentListBy(0, 10, []int8{0, 0, 0})
+	if err != nil {
+		_logger.WithFields(logrus.Fields{
+			"error": err.Error(),
+		}).Error("failed to get new created agents")
+		return
+	}
+	leaderboardInfo.NewCreatedAgents = formatSimpleAgentInfo(newCreatedAgents)
+
+	trendingAgents, err := model.GetAgentAgentListBy(0, 10, []int8{0, 0, 0})
+	if err != nil {
+		_logger.WithFields(logrus.Fields{
+			"error": err.Error(),
+		}).Error("failed to get trending agents")
+		return
+	}
+
+	leaderboardInfo.TrendingAgents = formatSimpleAgentInfo(trendingAgents)
+
+	agentsWithNewestFeedback, err := model.GetAgentAgentListBy(0, 10, []int8{0, 0, 0})
+	if err != nil {
+		_logger.WithFields(logrus.Fields{
+			"error": err.Error(),
+		}).Error("failed to get agents with newest feedback")
+		return
+	}
+	leaderboardInfo.AgentsWithNewestFeedback = formatSimpleAgentInfo(agentsWithNewestFeedback)
+}
+
+func GetLeaderboardInfo() types.LeaderboardInfo {
+	return leaderboardInfo
+}
+
+func formatSimpleAgentInfo(agents []*model.Agent) []types.SimpleAgentInfo {
+	var simpleAgentInfos []types.SimpleAgentInfo
+	for _, agent := range agents {
+		chainInfo, ok := config.GetChainInfo(agent.ChainID)
+		if !ok {
+			continue
+		}
+		simpleAgentInfos = append(simpleAgentInfos, types.SimpleAgentInfo{
+			UID:              agent.UID,
+			AgentID:          agent.AgentID,
+			AgentName:        agent.Name,
+			AgentDescription: agent.Description,
+			ChainID:          agent.ChainID,
+			ChainName:        chainInfo.ChainName,
+			ChainLogo:        chainInfo.ChainLogo,
+		})
+	}
+	return simpleAgentInfos
 }

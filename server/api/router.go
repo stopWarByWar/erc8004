@@ -56,6 +56,7 @@ func Run(_cors []string, port string) {
 
 	r.GET("agent/identity/filter/info", handle.GetFilterInfoHandler)
 	r.GET("agent/identity/filter/search/skill", handle.GetSkillsForFilterHandler)
+	r.GET("agent/leaderboard", handle.GetLeaderboardInfoHandler)
 	go apiUtils.UpdateGeneralInfo()
 	r.Run(fmt.Sprintf(":%s", port))
 }
