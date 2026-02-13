@@ -136,6 +136,7 @@ func formatSimpleAgentInfo(agents []*model.Agent) []types.SimpleAgentInfo {
 			AgentID:          agent.AgentID,
 			AgentName:        agent.Name,
 			AgentDescription: agent.Description,
+			AgentImage:       agent.Image,
 			ChainID:          agent.ChainID,
 			ChainName:        chainInfo.ChainName,
 			ChainLogo:        chainInfo.ChainLogo,

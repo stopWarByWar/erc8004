@@ -229,6 +229,7 @@ type SimpleAgentInfo struct {
 	UID              uint64
 	AgentID          string
 	AgentName        string
+	AgentImage       string
 	AgentDescription string
 	ChainID          string
 	ChainName        string
