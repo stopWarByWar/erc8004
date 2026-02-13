@@ -213,13 +213,16 @@ type ValidatorListInfo struct {
 }
 
 type LeaderboardInfo struct {
-	AgentAmount              int64
-	FeedbackAmount           int64
-	AgentAmountWithIn7Days   int64
-	NetworkAmount            int64
-	NewCreatedAgents         []SimpleAgentInfo
-	TrendingAgents           []SimpleAgentInfo
-	AgentsWithNewestFeedback []SimpleAgentInfo
+	AgentAmount            int64
+	FeedbackAmount         int64
+	AgentAmountWithIn7Days int64
+	NetworkAmount          int64
+	Leaderboard            []LeaderboardAgentInfo
+}
+
+type LeaderboardAgentInfo struct {
+	Name string
+	Data []SimpleAgentInfo
 }
 
 type SimpleAgentInfo struct {

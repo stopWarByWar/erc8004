@@ -82,16 +82,19 @@ func UpdateLeaderboardInfo() {
 	}
 	leaderboardInfo.AgentAmountWithIn7Days = agentAmountWithIn7Days
 
-	newCreatedAgents, err := model.GetAgentAgentListBy(0, 10, []int8{0, 0, 0})
+	newCreatedAgents, err := model.GetAgentListBy(0, 10, []int8{-1, 0, 0})
 	if err != nil {
 		_logger.WithFields(logrus.Fields{
 			"error": err.Error(),
 		}).Error("failed to get new created agents")
 		return
 	}
-	leaderboardInfo.NewCreatedAgents = formatSimpleAgentInfo(newCreatedAgents)
+	leaderboardInfo.Leaderboard = append(leaderboardInfo.Leaderboard, types.LeaderboardAgentInfo{
+		Name: "Newest Agents",
+		Data: formatSimpleAgentInfo(newCreatedAgents),
+	})
 
-	trendingAgents, err := model.GetAgentAgentListBy(0, 10, []int8{0, 0, 0})
+	trendingAgents, err := model.GetAgentListBy(0, 10, []int8{0, -1, 0})
 	if err != nil {
 		_logger.WithFields(logrus.Fields{
 			"error": err.Error(),
@@ -99,16 +102,22 @@ func UpdateLeaderboardInfo() {
 		return
 	}
 
-	leaderboardInfo.TrendingAgents = formatSimpleAgentInfo(trendingAgents)
+	leaderboardInfo.Leaderboard = append(leaderboardInfo.Leaderboard, types.LeaderboardAgentInfo{
+		Name: "Trending Agents",
+		Data: formatSimpleAgentInfo(trendingAgents),
+	})
 
-	agentsWithNewestFeedback, err := model.GetAgentAgentListBy(0, 10, []int8{0, 0, 0})
+	agentsWithNewestFeedback, err := model.GetAgentListBy(0, 10, []int8{0, 0, -1})
 	if err != nil {
 		_logger.WithFields(logrus.Fields{
 			"error": err.Error(),
 		}).Error("failed to get agents with newest feedback")
 		return
 	}
-	leaderboardInfo.AgentsWithNewestFeedback = formatSimpleAgentInfo(agentsWithNewestFeedback)
+	leaderboardInfo.Leaderboard = append(leaderboardInfo.Leaderboard, types.LeaderboardAgentInfo{
+		Name: "Active Agents",
+		Data: formatSimpleAgentInfo(agentsWithNewestFeedback),
+	})
 }
 
 func GetLeaderboardInfo() types.LeaderboardInfo {

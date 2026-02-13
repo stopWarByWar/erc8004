@@ -693,7 +693,7 @@ func GetAgentAmountWithIn7Days() (int64, error) {
 // filter[0]: 时间/uid — -1 按 uid 倒序，1 按 uid 正序，0 不按此排序
 // filter[1]: 反馈数量 — -1 按 feedback_count 倒序，1 正序，0 不按此排序
 // filter[2]: 最新 feedback 时间 — -1 按最新 feedback 时间倒序，1 正序，0 不按此排序
-func GetAgentAgentListBy(offset, limit int, filter []int8) ([]*Agent, error) {
+func GetAgentListBy(offset, limit int, filter []int8) ([]*Agent, error) {
 	var agents []*Agent
 	query := db.Model(&Agent{})
 
