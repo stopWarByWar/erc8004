@@ -93,6 +93,7 @@ func UpdateLeaderboardInfo() {
 	}
 	leaderboardInfo.Leaderboard = append(leaderboardInfo.Leaderboard, types.LeaderboardAgentInfo{
 		Name: "Newest Agents",
+		Key:  "newest",
 		Data: formatSimpleAgentInfo(newCreatedAgents),
 	})
 
@@ -106,6 +107,7 @@ func UpdateLeaderboardInfo() {
 
 	leaderboardInfo.Leaderboard = append(leaderboardInfo.Leaderboard, types.LeaderboardAgentInfo{
 		Name: "Trending Agents",
+		Key:  "trending",
 		Data: formatSimpleAgentInfo(trendingAgents),
 	})
 
@@ -118,6 +120,7 @@ func UpdateLeaderboardInfo() {
 	}
 	leaderboardInfo.Leaderboard = append(leaderboardInfo.Leaderboard, types.LeaderboardAgentInfo{
 		Name: "Active Agents",
+		Key:  "active",
 		Data: formatSimpleAgentInfo(agentsWithNewestFeedback),
 	})
 }

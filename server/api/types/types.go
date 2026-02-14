@@ -222,6 +222,7 @@ type LeaderboardInfo struct {
 
 type LeaderboardAgentInfo struct {
 	Name string
+	Key  string
 	Data []SimpleAgentInfo
 }
 
