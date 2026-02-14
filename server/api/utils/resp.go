@@ -82,6 +82,8 @@ func UpdateLeaderboardInfo() {
 	}
 	leaderboardInfo.AgentAmountWithIn7Days = agentAmountWithIn7Days
 
+	leaderboardInfo.Leaderboard = make([]types.LeaderboardAgentInfo, 0, 3)
+
 	newCreatedAgents, err := model.GetAgentListBy(0, 10, []int8{-1, 0, 0})
 	if err != nil {
 		_logger.WithFields(logrus.Fields{
