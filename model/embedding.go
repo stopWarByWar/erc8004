@@ -15,11 +15,6 @@ var openAIClient *openai.Client
 var ctx = context.Background()
 
 func InsertAgentVector(agentUID uint64, identityRegistry, chainID string, createTimestamp uint64, content string, metadata map[string]interface{}) error {
-	// 检查是否已存在向量记录
-	if len(content) == 0 {
-		return nil
-	}
-
 	var existing AgentVector
 	checkErr := db.Where("agent_uid = ?", agentUID).First(&existing).Error
 	recordExists := checkErr == nil
@@ -27,15 +22,12 @@ func InsertAgentVector(agentUID uint64, identityRegistry, chainID string, create
 	// 如果 content 为空，删除已存在的记录（如果有）
 	if len(content) == 0 {
 		if recordExists {
-			// 记录存在，删除它
 			return db.Where("agent_uid = ?", agentUID).Delete(&AgentVector{}).Error
-		} else if errors.Is(checkErr, gorm.ErrRecordNotFound) {
-			// 记录不存在，无需操作
-			return nil
-		} else {
-			// 查询出错
-			return checkErr
 		}
+		if errors.Is(checkErr, gorm.ErrRecordNotFound) {
+			return nil
+		}
+		return checkErr
 	}
 
 	// content 不为空，生成 embedding
@@ -80,7 +72,7 @@ func InsertAgentVector(agentUID uint64, identityRegistry, chainID string, create
 		// 记录不存在，插入新记录
 		return db.Create(&agentVector).Error
 	} else {
-		// 查询出错（这种情况不应该发生，因为 content 为空时已经处理了）
+		// 查询出错（如网络超时、连接断开等）
 		return checkErr
 	}
 }

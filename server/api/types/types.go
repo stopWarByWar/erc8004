@@ -32,6 +32,12 @@ type AgentResponse struct {
 	ReputationRegistry string             `json:"reputationRegistry"`
 	Status             string             `json:"status"`
 	X402Support        bool               `json:"x402Support"`
+	Endpoints          []EndpointResponse `json:"endpoints"`
+}
+
+type EndpointResponse struct {
+	Name     string `json:"name"`
+	Endpoint string `json:"endpoint"`
 }
 
 type SkillTagResponse struct {

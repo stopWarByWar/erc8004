@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -109,6 +110,8 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 	var a2aEndpoint string
 	var version string
 
+	var endpoints = make([]serverTypes.EndpointResponse, 0)
+
 	for _, _service := range services {
 		if _service.ServiceName == "a2a" {
 			a2aEndpoint = _service.Endpoint
@@ -122,6 +125,12 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 		}
 		if _service.ServiceName == "web" {
 			uri = _service.Endpoint
+		}
+		if len(strings.TrimSpace(_service.ServiceName)) > 0 {
+			endpoints = append(endpoints, serverTypes.EndpointResponse{
+				Name:     strings.ToLower(_service.ServiceName),
+				Endpoint: _service.Endpoint,
+			})
 		}
 	}
 
@@ -164,6 +173,7 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 		ReputationRegistry: deployerInfo.ReputationAddress,
 		Status:             status,
 		X402Support:        agent.X402Support,
+		Endpoints:          endpoints,
 	}
 	return &resp, nil
 }
