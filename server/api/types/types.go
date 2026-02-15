@@ -36,6 +36,7 @@ type AgentResponse struct {
 }
 
 type EndpointResponse struct {
+	No       int    `json:"no"`
 	Name     string `json:"name"`
 	Endpoint string `json:"endpoint"`
 }

@@ -112,7 +112,7 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 
 	var endpoints = make([]serverTypes.EndpointResponse, 0)
 
-	for _, _service := range services {
+	for i, _service := range services {
 		if _service.ServiceName == "a2a" {
 			a2aEndpoint = _service.Endpoint
 			version = _service.Version
@@ -128,6 +128,7 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 		}
 		if len(strings.TrimSpace(_service.ServiceName)) > 0 {
 			endpoints = append(endpoints, serverTypes.EndpointResponse{
+				No:       i + 1,
 				Name:     strings.ToLower(_service.ServiceName),
 				Endpoint: _service.Endpoint,
 			})
