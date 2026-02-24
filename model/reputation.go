@@ -9,7 +9,7 @@ import (
 
 func GetLatestFeedbackAndResponse(chainID string, reputationRegistry string) (uint64, uint64, error) {
 	var feedback *Feedback
-	err := db.Where("chain_id = ? and (reputation_registry = ? or reputation_registry = ?)", chainID, common.HexToAddress(reputationRegistry).String(), common.HexToAddress(reputationRegistry).String()).Order("block_number DESC, index DESC").First(&feedback).Error
+	err := db.Where("chain_id = ? and reputation_registry = ?", chainID, common.HexToAddress(reputationRegistry).String()).Order("block_number DESC, index DESC").First(&feedback).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, 0, nil
 	} else if err != nil {
@@ -17,7 +17,7 @@ func GetLatestFeedbackAndResponse(chainID string, reputationRegistry string) (ui
 	}
 
 	var response *Response
-	err = db.Where("chain_id = ? and (reputation_registry = ? or reputation_registry = ?)", chainID, common.HexToAddress(reputationRegistry).String(), common.HexToAddress(reputationRegistry).String()).Order("block_number DESC, index DESC").First(&response).Error
+	err = db.Where("chain_id = ? and reputation_registry = ?", chainID, common.HexToAddress(reputationRegistry).String()).Order("block_number DESC, index DESC").First(&response).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, 0, nil
 	} else if err != nil {
