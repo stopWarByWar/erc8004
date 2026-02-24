@@ -13,7 +13,7 @@ type TokenURLResponse struct {
 }
 
 type Registration struct {
-	AgentID       uint64 `json:"agentId"`
+	AgentID       any    `json:"agentId"`
 	AgentRegistry string `json:"agentRegistry"`
 }
 

@@ -7,7 +7,7 @@ import (
 )
 
 func TestGetAgentProfile(t *testing.T) {
-	agent, err := GetAgentProfile("ipfs://QmNfTaioEdMfdnSRTHXJy6juAw4xFNGeCnAnfkqckjZHth")
+	agent, err := GetAgentProfile("ipfs://QmcLpNkoqchCXjJS5diuP61hAwnUDaJnrAGTDn4PzkHKzn")
 	if err != nil {
 		panic(err)
 	}
