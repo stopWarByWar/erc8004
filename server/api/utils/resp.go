@@ -50,7 +50,12 @@ func SuccessRespWithMsg(code int, msg string, c *gin.Context) {
 
 func UpdateGeneralInfo() {
 	for {
-		config.UpdateFilterInfo()
+		err := config.UpdateFilterInfo()
+		if err != nil {
+			_logger.WithFields(logrus.Fields{
+				"error": err.Error(),
+			}).Error("failed to update filter info")
+		}
 		UpdateLeaderboardInfo()
 		time.Sleep(5 * time.Minute)
 	}
@@ -148,4 +153,8 @@ func formatSimpleAgentInfo(agents []*model.Agent) []types.SimpleAgentInfo {
 		})
 	}
 	return simpleAgentInfos
+}
+
+func GetLogger() *logger.Logger {
+	return _logger
 }

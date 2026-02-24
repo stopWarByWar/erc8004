@@ -131,7 +131,7 @@ func GetIdentityAddressByValidationAddress(chainID, ValidationAddress string) st
 	return registry.IdentityAddress
 }
 
-func UpdateFilterInfo() {
+func UpdateFilterInfo() error {
 	var newFilterInfo = FilterInfo{}
 	var chainIds []string
 	for chainId := range ChainMap {
@@ -139,8 +139,7 @@ func UpdateFilterInfo() {
 	}
 	agentAmounts, err := model.GetAgentAmountForEachChain(chainIds)
 	if err != nil {
-		fmt.Println("failed to get agent amount for each chain", err)
-		return
+		return fmt.Errorf("failed to get agent amount for each chain: %w", err)
 	}
 
 	var chainInfos []ChainInfo
@@ -156,8 +155,7 @@ func UpdateFilterInfo() {
 
 	trustModelAmounts, err := model.GetAgentAmountForEachTrustModel()
 	if err != nil {
-		fmt.Println("failed to get agent amount for each trust model", err)
-		return
+		return fmt.Errorf("failed to get agent amount for each trust model: %w", err)
 	}
 	var trustModelAmountInfos []FilterInfoAmount
 	for _, trustModelAmount := range trustModelAmounts {
@@ -171,14 +169,14 @@ func UpdateFilterInfo() {
 	activeAgentAmount, err := model.GetActiveAgentAmount()
 	if err != nil {
 		fmt.Println("failed to get active agent amount", err)
-		return
+		return fmt.Errorf("failed to get active agent amount: %w", err)
 	}
 	newFilterInfo.Status.Active = activeAgentAmount
 
 	feedbackCount, err := model.GetAgentAmountWithFeedback()
 	if err != nil {
 		fmt.Println("failed to get agent amount with feedback", err)
-		return
+		return fmt.Errorf("failed to get agent amount with feedback: %w", err)
 	}
 
 	newFilterInfo.Status.HaveFeedback = feedbackCount
@@ -186,14 +184,14 @@ func UpdateFilterInfo() {
 	x402SupportAgentAmount, err := model.GetX402SupportAgentAmount()
 	if err != nil {
 		fmt.Println("failed to get x402 support agent amount", err)
-		return
+		return fmt.Errorf("failed to get x402 support agent amount: %w", err)
 	}
 	newFilterInfo.X402Support = x402SupportAgentAmount
 
 	skillAmounts, err := model.GetAgentAmountForEachSkill(50)
 	if err != nil {
 		fmt.Println("failed to get agent amount for each skill", err)
-		return
+		return fmt.Errorf("failed to get agent amount for each skill: %w", err)
 	}
 	var skillInfos []FilterInfoAmount
 	for _, skillAmount := range skillAmounts {
@@ -204,6 +202,7 @@ func UpdateFilterInfo() {
 	}
 	newFilterInfo.Skills = skillInfos
 	filterInfo = newFilterInfo
+	return nil
 }
 
 type IndexerConfig struct {
