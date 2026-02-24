@@ -78,7 +78,11 @@ func ParseDataURL(dataURL string) (*DataURLResult, error) {
 	s := dataURL[len(prefix):]
 	idx := strings.Index(s, ",")
 	if idx < 0 {
-		return nil, fmt.Errorf("invalid data URL: no comma")
+		idx = strings.Index(s, " ")
+		if idx < 0 {
+			return nil, fmt.Errorf("invalid data URL: no comma or space")
+		}
+
 	}
 	header, payload := strings.TrimSpace(s[:idx]), s[idx+1:]
 	if payload == "" {

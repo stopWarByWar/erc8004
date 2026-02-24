@@ -41,12 +41,12 @@ type Registration struct {
 }
 
 type Service struct {
-	Name         string                 `json:"name"`
-	Endpoint     string                 `json:"endpoint"`
-	Version      *string                `json:"version,omitempty"`
-	Capabilities map[string]interface{} `json:"capabilities,omitempty"`
-	Skills       []string               `json:"skills,omitempty"`
-	Domains      []string               `json:"domains,omitempty"`
+	Name     string  `json:"name"`
+	Endpoint string  `json:"endpoint"`
+	Version  *string `json:"version,omitempty"`
+	// Capabilities map[string]interface{} `json:"capabilities,omitempty"`
+	Skills  []string `json:"skills,omitempty"`
+	Domains []string `json:"domains,omitempty"`
 }
 
 const TrustModelReputation = "reputation"
