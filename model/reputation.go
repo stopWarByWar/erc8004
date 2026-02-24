@@ -19,7 +19,7 @@ func GetLatestFeedbackAndResponse(chainID string, reputationRegistry string) (ui
 	var response *Response
 	err = db.Where("chain_id = ? and reputation_registry = ?", chainID, common.HexToAddress(reputationRegistry).String()).Order("block_number DESC, index DESC").First(&response).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return 0, 0, nil
+		return feedback.BlockNumber, feedback.Index, nil
 	} else if err != nil {
 		return 0, 0, err
 	}

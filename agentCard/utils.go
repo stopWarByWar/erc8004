@@ -27,7 +27,7 @@ func GetAgentProfile(tokenURL string) (*TokenURLResponse, error) {
 		return getAgentProfileFromEncodedData(tokenURL)
 	}
 
-	if strings.Contains(tokenURL, " ") {
+	if strings.Contains(tokenURL, "name") {
 		return decodeAgentProfileData([]byte(tokenURL))
 	}
 
