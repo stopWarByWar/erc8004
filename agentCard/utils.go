@@ -19,6 +19,9 @@ import (
 const defaultIPFSGateway = "https://ipfs.io/ipfs/"
 
 func GetAgentProfile(tokenURL string) (*TokenURLResponse, error) {
+	if tokenURL == "" {
+		return nil, nil
+	}
 	if strings.HasPrefix(tokenURL, "https://") || strings.HasPrefix(tokenURL, "ipfs://") {
 		return getAgentProfileFromTokenURL(tokenURL)
 	}

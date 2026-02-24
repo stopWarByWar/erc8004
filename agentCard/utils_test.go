@@ -23,7 +23,7 @@ func TestGetAgentProfile(t *testing.T) {
 }
 
 func TestDecodeDataURLPayload(t *testing.T) {
-	payload := "data:application/json;base64,eyJ0eXBlIjoiaHR0cHM6Ly9laXBzLmV0aGVyZXVtLm9yZy9FSVBTL2VpcC04MDA0I3JlZ2lzdHJhdGlvbi12MSIsIm5hbWUiOiJlYnVhbGQiLCJkZXNjcmlwdGlvbiI6IkknbSBlYnVhbGQgZnJvbSBkZ3JpZC5haSFJJ20gY3VycmVudGx5IGhlbHBpbmcgbXkgb3duZXIgc2NvcmUvdm90ZSBvbiBBSSBtb2RlbHMgYXQgZGdyaWQuYWkvYXJlbmEgdG8gZWFybiBVU0RULiIsImltYWdlIjoiaHR0cHM6Ly9hZ2VudC1pbWFnZS5kZ3JpZC5haS9hZ2VudC9lYnVhbGQvbG9nby5wbmciLCJhY3RpdmUiOnRydWUsInN1cHBvcnRlZFRydXN0IjpbInJlcHV0YXRpb24iXX0="
+	payload := "data:application/json;base64,eyJ0eXBlIjoiaHR0cHM6Ly9laXBzLmV0aGVyZXVtLm9yZy9FSVBTL2VpcC04MDA0I3JlZ2lzdHJhdGlvbi12MSIsIm5hbWUiOiJDcnlwdG9NYXN0ZXIgQWdlbnQgIzE2NyIsImRlc2NyaXB0aW9uIjoiQXV0b21hdGVkIHRyYWRpbmcgYWdlbnQgcG93ZXJlZCBieSBDcnlwdG9NYXN0ZXIiLCJzZXJ2aWNlcyI6WyJ0cmFkaW5nIiwiZGVmaSJdLCJhY3RpdmUiOnRydWUsInN1cHBvcnRlZFRydXN0IjpbInJlcHV0YXRpb24iXX0="
 	fmt.Println(payload)
 	data, err := decodeDataURLPayload(payload)
 	if err != nil {
@@ -52,4 +52,22 @@ func TestDecodeAgentProfileData(t *testing.T) {
 	fmt.Println(encoded.Active)
 	fmt.Println(encoded.Registrations)
 	fmt.Println(encoded.SupportedTrust)
+}
+
+func Test_getAgentProfileFromEncodedData(t *testing.T) {
+	payload := "data:application/json;base64,eyJ0eXBlIjoiaHR0cHM6Ly9laXBzLmV0aGVyZXVtLm9yZy9FSVBTL2VpcC04MDA0I3JlZ2lzdHJhdGlvbi12MSIsIm5hbWUiOiJDcnlwdG9NYXN0ZXIgQWdlbnQgIzE2NyIsImRlc2NyaXB0aW9uIjoiQXV0b21hdGVkIHRyYWRpbmcgYWdlbnQgcG93ZXJlZCBieSBDcnlwdG9NYXN0ZXIiLCJzZXJ2aWNlcyI6WyJ0cmFkaW5nIiwiZGVmaSJdLCJhY3RpdmUiOnRydWUsInN1cHBvcnRlZFRydXN0IjpbInJlcHV0YXRpb24iXX0="
+	fmt.Println(payload)
+	data, err := getAgentProfileFromEncodedData(payload)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(data.Type)
+	fmt.Println(data.Name)
+	fmt.Println(data.Description)
+	fmt.Println(data.Image)
+	fmt.Println(data.Services)
+	fmt.Println(data.X402Support)
+	fmt.Println(data.Active)
+	fmt.Println(data.Registrations)
+	fmt.Println(data.SupportedTrust)
 }

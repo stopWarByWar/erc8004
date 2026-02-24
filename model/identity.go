@@ -727,7 +727,7 @@ func GetAgentListBy(offset, limit int, filter []int8) ([]*Agent, error) {
 		orders = append(orders, "agents.uid DESC")
 	}
 
-	if err := query.Order(strings.Join(orders, ", ")).Offset(offset).Limit(limit).Find(&agents).Error; err != nil {
+	if err := query.Where("length(name) <> 0").Order(strings.Join(orders, ", ")).Offset(offset).Limit(limit).Find(&agents).Error; err != nil {
 		return nil, err
 	}
 	return agents, nil
