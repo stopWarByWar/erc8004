@@ -1,5 +1,6 @@
 Drop table if exists feedbacks;
 Drop table if exists responses;
+Drop table if exists feedback_tag_scores;
 
 -- Feedback 表
 CREATE TABLE IF NOT EXISTS feedbacks (

@@ -8,10 +8,10 @@ import (
 
 func TestGetAgentFeedbacksList(t *testing.T) {
 	initTest()
-	agentUID := uint64(1)
+	agentUID := uint64(19838)
 	page := 1
 	pageSize := 10
-	feedbacks, total, err := GetAgentFeedbacksList(agentUID, page, pageSize)
+	feedbacks, total, err := GetAgentFeedbacksList(agentUID, []string{"nice", "Good"}, page, pageSize)
 	if err != nil {
 		t.Errorf("GetAgentFeedbacksList error: %v", err)
 	}
@@ -42,4 +42,16 @@ func TestSetFeedback(t *testing.T) {
 		t.Errorf("SetFeedback error: %v", err)
 	}
 	fmt.Println(feedbackURI, feedbackHash)
+}
+
+func TestGetAgentScoreForEachTag1(t *testing.T) {
+	initTest()
+	agentUID := uint64(19838)
+	offset := 0
+	limit := 10
+	scores, err := GetAgentScoreForEachTag1(agentUID, offset, limit)
+	if err != nil {
+		t.Errorf("GetAgentScoreForEachTag1 error: %v", err)
+	}
+	fmt.Println(scores)
 }

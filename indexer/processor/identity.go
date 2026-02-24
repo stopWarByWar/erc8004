@@ -87,17 +87,21 @@ func (idx *IdentityProcessor) Process() {
 		"index": execIndex,
 	}).Info("start run identity registry processor")
 
-	ticker := time.NewTicker(20 * time.Second)
+	processInterval := 20 * time.Second
+	ticker := time.NewTicker(1)
 	defer ticker.Stop()
 
-	fetchAgentCardTicker := time.NewTicker(20 * time.Second)
+	fetchAgentProfileInterval := 20 * time.Second
+	fetchAgentCardTicker := time.NewTicker(fetchAgentProfileInterval)
 	defer fetchAgentCardTicker.Stop()
 
-	logExecBlockTicker := time.NewTicker(60 * time.Second)
+	logExecBlockInterval := 60 * time.Second
+	logExecBlockTicker := time.NewTicker(2)
 	defer logExecBlockTicker.Stop()
 	for {
 		select {
 		case <-ticker.C:
+			ticker.Stop()
 			currentBlock, err := idx.ethClient.BlockNumber(ctx)
 			if err != nil {
 				idx.logger.WithFields(logrus.Fields{
@@ -119,13 +123,18 @@ func (idx *IdentityProcessor) Process() {
 			if execBlock < uint64(currentBlock) {
 				idx.process(int64(currentBlock))
 			}
+			ticker.Reset(processInterval)
 		case <-fetchAgentCardTicker.C:
+			fetchAgentCardTicker.Stop()
 			idx.setAgentCardInserted()
+			fetchAgentCardTicker.Reset(fetchAgentProfileInterval)
 		case <-logExecBlockTicker.C:
+			logExecBlockTicker.Stop()
 			idx.logger.WithFields(logrus.Fields{
 				"block": idx.execBlock,
 				"index": idx.execIndex,
 			}).Info("identity registry processor exec block")
+			logExecBlockTicker.Reset(logExecBlockInterval)
 		}
 	}
 }
@@ -314,7 +323,7 @@ func (idx *IdentityProcessor) dealWithTransferOwnerShipEvent(e types.Log) error 
 func (idx *IdentityProcessor) setAgentCardInserted() {
 	var limit = 100
 	for {
-		agentRegistries, err := model.GetUnInsertedAgents(idx.chainID, idx.identityAddr.String(), limit)
+		agents, err := model.GetUnInsertedAgents(idx.chainID, idx.identityAddr.String(), limit)
 		if err != nil {
 			idx.logger.WithFields(logrus.Fields{
 				"error":            err,
@@ -324,52 +333,52 @@ func (idx *IdentityProcessor) setAgentCardInserted() {
 			return
 		}
 
-		if len(agentRegistries) == 0 {
+		if len(agents) == 0 {
 			break
 		}
 
-		for _, agentRegistry := range agentRegistries {
-			agentProfile, err := agentcard.GetAgentProfile(agentRegistry.AgentURI)
+		for _, agent := range agents {
+			agentProfile, err := agentcard.GetAgentProfile(agent.AgentURI)
 			if err != nil {
 				idx.logger.WithFields(logrus.Fields{
 					"error":            err,
 					"chainID":          idx.chainID,
 					"identityRegistry": idx.identityAddr.String(),
-					"agentID":          agentRegistry.AgentID,
-					"agentURI":         agentRegistry.AgentURI,
+					"agentID":          agent.AgentID,
+					"agentURI":         agent.AgentURI,
 				}).Error("failed to get agent profile from agent url")
 			}
 
 			// upload agent to gemini file api
 			if agentProfile != nil {
-				if _, err := model.UpdateAgent(agentRegistry.ChainID, agentRegistry.IdentityRegistry, agentRegistry.AgentID, agentProfile); err != nil {
+				if _, err := model.UpdateAgent(agent.ChainID, agent.IdentityRegistry, agent.AgentID, agentProfile); err != nil {
 					idx.logger.WithFields(logrus.Fields{
 						"error":            err,
-						"chainID":          agentRegistry.ChainID,
-						"identityRegistry": agentRegistry.IdentityRegistry,
-						"agentID":          agentRegistry.AgentID,
-						"agentURI":         agentRegistry.AgentURI,
+						"chainID":          agent.ChainID,
+						"identityRegistry": agent.IdentityRegistry,
+						"agentID":          agent.AgentID,
+						"agentURI":         agent.AgentURI,
 					}).Error("failed to update agent")
 					continue
 				}
 
-				err = model.InsertAgentVector(agentRegistry.UID, agentRegistry.IdentityRegistry, agentRegistry.ChainID, agentRegistry.Timestamps, agentRegistry.Description, nil)
+				err = model.InsertAgentVector(agent.UID, agent.IdentityRegistry, agent.ChainID, agent.Timestamps, agent.Description, nil)
 				if err != nil {
 					idx.logger.WithFields(logrus.Fields{
 						"error": err,
-						"uid":   agentRegistry.UID,
+						"uid":   agent.UID,
 					}).Error("failed to insert agent vector")
 					continue
 				}
 			}
 
-			if err := model.UpdateAgentInserted([]uint64{agentRegistry.UID}); err != nil {
+			if err := model.UpdateAgentInserted([]uint64{agent.UID}); err != nil {
 				idx.logger.WithFields(logrus.Fields{
 					"error":            err,
 					"chainID":          idx.chainID,
 					"identityRegistry": idx.identityAddr.String(),
-					"agentUID":         agentRegistry.UID,
-					"agentURI":         agentRegistry.AgentURI,
+					"agentUID":         agent.UID,
+					"agentURI":         agent.AgentURI,
 				}).Error("failed to update agent registry inserted")
 				continue
 			}

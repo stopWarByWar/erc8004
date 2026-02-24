@@ -1,6 +1,8 @@
 package agentcard
 
 import (
+	"encoding/json"
+	"fmt"
 	"testing"
 )
 
@@ -18,4 +20,36 @@ func TestGetAgentProfile(t *testing.T) {
 	t.Log(agent.Active)
 	t.Log(agent.Registrations)
 	t.Log(agent.SupportedTrust)
+}
+
+func TestDecodeDataURLPayload(t *testing.T) {
+	payload := "data:application/json;base64,eyJ0eXBlIjoiaHR0cHM6Ly9laXBzLmV0aGVyZXVtLm9yZy9FSVBTL2VpcC04MDA0I3JlZ2lzdHJhdGlvbi12MSIsIm5hbWUiOiJlYnVhbGQiLCJkZXNjcmlwdGlvbiI6IkknbSBlYnVhbGQgZnJvbSBkZ3JpZC5haSFJJ20gY3VycmVudGx5IGhlbHBpbmcgbXkgb3duZXIgc2NvcmUvdm90ZSBvbiBBSSBtb2RlbHMgYXQgZGdyaWQuYWkvYXJlbmEgdG8gZWFybiBVU0RULiIsImltYWdlIjoiaHR0cHM6Ly9hZ2VudC1pbWFnZS5kZ3JpZC5haS9hZ2VudC9lYnVhbGQvbG9nby5wbmciLCJhY3RpdmUiOnRydWUsInN1cHBvcnRlZFRydXN0IjpbInJlcHV0YXRpb24iXX0="
+	fmt.Println(payload)
+	data, err := decodeDataURLPayload(payload)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(string(data))
+	var tokenURLResponse TokenURLResponse
+	if err := json.Unmarshal(data, &tokenURLResponse); err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(tokenURLResponse)
+}
+
+func TestDecodeAgentProfileData(t *testing.T) {
+	tokenURLResponse := `{"type":"https://eips.ethereum.org/EIPS/eip-8004#registration-v1","name":"Vector Zero","description":"Strategic Technogist | Revenue & Runway Optimization","image":"https://i.ibb.co/CKN66Mg3/DB8-DC218-52-A2-4824-B793-C9942336641-A5.png","services":[]}`
+	encoded, err := decodeAgentProfileData([]byte(tokenURLResponse))
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(encoded.Type)
+	fmt.Println(encoded.Name)
+	fmt.Println(encoded.Description)
+	fmt.Println(encoded.Image)
+	fmt.Println(encoded.Services)
+	fmt.Println(encoded.X402Support)
+	fmt.Println(encoded.Active)
+	fmt.Println(encoded.Registrations)
+	fmt.Println(encoded.SupportedTrust)
 }

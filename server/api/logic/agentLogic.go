@@ -9,36 +9,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 )
 
-func FilterSearchAgentListByFilter(name string, page, pageSize int, trustModelIDs, chainIDs []string) ([]*serverTypes.AgentResponse, int64, error) {
-	agents, total, err := model.FilterSearchAgentsByName(name, page, pageSize, trustModelIDs, chainIDs)
-	if err != nil {
-		return nil, 0, err
-	}
-	cards, err := formatAgentResponse(agents)
-	if err != nil {
-		return nil, 0, err
-	}
-	return cards, total, nil
-}
-
-func GetAgentListByFilter(page, pageSize int, trustModel []string, chains []string) ([]*serverTypes.AgentResponse, int64, error) {
-	agents, total, err := model.GetAgentsByFilter(page, pageSize, trustModel, chains)
-	if err != nil {
-		return nil, 0, err
-	}
-	resp, err := formatAgentResponse(agents)
-	if err != nil {
-		return nil, 0, err
-	}
-	return resp, total, nil
-}
-
-func GetAgentList(page, pageSize int) ([]*serverTypes.AgentResponse, int64, error) {
-	agents, total, err := model.GetAgentList(page, pageSize)
+func GetAgentListByFilter(page, pageSize int, name *string, trustModel, chains, skills *[]string, x402Support, active, haveFeedback *bool) ([]*serverTypes.AgentResponse, int64, error) {
+	agents, total, err := model.GetAgentsByFilter(name, page, pageSize, trustModel, chains, skills, x402Support, active, haveFeedback)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -133,7 +110,9 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 	var a2aEndpoint string
 	var version string
 
-	for _, _service := range services {
+	var endpoints = make([]serverTypes.EndpointResponse, 0)
+
+	for i, _service := range services {
 		if _service.ServiceName == "a2a" {
 			a2aEndpoint = _service.Endpoint
 			version = _service.Version
@@ -146,6 +125,13 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 		}
 		if _service.ServiceName == "web" {
 			uri = _service.Endpoint
+		}
+		if len(strings.TrimSpace(_service.ServiceName)) > 0 {
+			endpoints = append(endpoints, serverTypes.EndpointResponse{
+				No:       i + 1,
+				Name:     strings.ToLower(_service.ServiceName),
+				Endpoint: _service.Endpoint,
+			})
 		}
 	}
 
@@ -180,7 +166,7 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 		TrustModels:        trustModelsResponse,
 		IdentityRegistry:   agent.IdentityRegistry,
 		Metadata:           metadataResponse,
-		TokenURL:           agent.A2AURI,
+		TokenURL:           agent.AgentURI,
 		Deployer:           deployerInfo.Deployer,
 		DeployerLogo:       deployerInfo.LogoURL,
 		MCPEndpoint:        mcpEndpoint,
@@ -188,38 +174,19 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 		ReputationRegistry: deployerInfo.ReputationAddress,
 		Status:             status,
 		X402Support:        agent.X402Support,
+		Endpoints:          endpoints,
 	}
 	return &resp, nil
 }
 
-func SearchAgentListBySkill(skill string, page, pageSize int) ([]*serverTypes.AgentResponse, int, error) {
-	agents, total, err := model.SearchAgentsBySkill(skill, page, pageSize)
-	if err != nil {
-		return nil, 0, err
-	}
-	cards, err := formatAgentResponse(agents)
-	if err != nil {
-		return nil, 0, err
-	}
-	return cards, total, nil
-}
-
-func SearchAgentListByName(name string, page, pageSize int) ([]*serverTypes.AgentResponse, int, error) {
-	agents, total, err := model.SearchAgentsByName(name, page, pageSize)
-	if err != nil {
-		return nil, 0, err
-	}
-	cards, err := formatAgentResponse(agents)
-	if err != nil {
-		return nil, 0, err
-	}
-	return cards, total, nil
-}
-
-func FilterSearchAgentListBySemantic(desc string, limit int, threshold float64, trustModelIDs, chainIDs []string) ([]*serverTypes.AgentResponse, error) {
+func FilterSearchAgentListBySemantic(desc string, limit int, threshold float64, trustModelIDs *[]string, chainIDs *[]string, skills *[]string, x402Support *bool, active *bool, haveFeedback *bool) ([]*serverTypes.AgentResponse, error) {
 	filters := &model.VectorSearchFilters{
-		TrustModel: trustModelIDs,
-		ChainID:    chainIDs,
+		TrustModel:   trustModelIDs,
+		ChainID:      chainIDs,
+		Skills:       skills,
+		X402Support:  x402Support,
+		Active:       active,
+		HaveFeedback: haveFeedback,
 	}
 	agentUIDs, err := model.SearchSimilarVectors(desc, limit, threshold, filters)
 	if err != nil {

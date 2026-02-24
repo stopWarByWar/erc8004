@@ -62,16 +62,20 @@ func DecodeCommentEvent(reputationRegistry string, data []byte) (*Comment, error
 }
 
 func calculateScore(value *big.Int, valueDecimals uint8) (float64, error) {
+	if value == nil {
+		return 0, fmt.Errorf("value is nil")
+	}
 	if valueDecimals == 0 {
 		result, _ := new(big.Float).SetInt(value).Float64()
 		return result, nil
 	}
-	// Use big.Float for precision
+	// 用 big.Float 做除法，再转 float64；float64 精度有限，不要求 Exact，按 valueDecimals 舍入到合理小数位
 	vf := new(big.Float).SetInt(value)
 	divisor := new(big.Float).SetFloat64(math.Pow10(int(valueDecimals)))
-	result, accuracy := new(big.Float).Quo(vf, divisor).Float64()
-	if accuracy != big.Exact {
-		return 0, fmt.Errorf("calculate score accuracy is not exact")
-	}
+	quo := new(big.Float).Quo(vf, divisor)
+	result, _ := quo.Float64()
+	// 舍入到 valueDecimals 位小数，避免浮点噪声
+	scale := math.Pow10(int(valueDecimals))
+	result = math.Round(result*scale) / scale
 	return result, nil
 }

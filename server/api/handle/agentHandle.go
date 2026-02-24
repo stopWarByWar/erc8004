@@ -6,75 +6,49 @@ import (
 	serverUtils "agent_identity/server/api/utils"
 	"io"
 	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/sirupsen/logrus"
 )
 
+type AgentListRequest struct {
+	Name         *string   `json:"name"`
+	TrustModel   *[]string `json:"trust_model"`
+	Chains       *[]string `json:"chains"`
+	Skills       *[]string `json:"skills"`
+	X402Support  *bool     `json:"x402_support"`
+	Active       *bool     `json:"active"`
+	HaveFeedback *bool     `json:"have_feedback"`
+	Page         int       `json:"page" binding:"required"`
+	PageSize     int       `json:"page_size" binding:"required"`
+}
+
 func GetAgentCardListHandler(c *gin.Context) {
-	name := c.Query("name")
-	page := c.Query("page")
-	pageSize := c.Query("page_size")
-	pageInt, err := strconv.Atoi(page)
-	if err != nil {
-		serverUtils.ErrResp(nil, "fail to get page", "Invalid Request", c)
+	var req AgentListRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		serverUtils.ErrResp(logrus.Fields{
+			"error":   err.Error(),
+			"request": req,
+		}, "fail to bind request", "Invalid Request", c)
 		return
-	}
-	pageSizeInt, err := strconv.Atoi(pageSize)
-	if err != nil {
-		serverUtils.ErrResp(nil, "fail to get page_size", "Invalid Request", c)
-		return
-	}
-
-	trustModels := c.QueryArray("trust_model")
-	chains := c.QueryArray("chains")
-
-	trustModelIDs := make([]string, 0)
-	for _, v := range trustModels {
-		for _, id := range strings.Split(v, ",") {
-			if id != "" {
-				trustModelIDs = append(trustModelIDs, id)
-			}
-		}
-	}
-
-	chainIDs := make([]string, 0)
-	for _, v := range chains {
-		for _, id := range strings.Split(v, ",") {
-			if id != "" {
-				chainIDs = append(chainIDs, id)
-			}
-		}
 	}
 
 	var agents []*serverTypes.AgentResponse
 	var total int64
 
-	if name != "" {
-		agents, total, err = serverLogic.FilterSearchAgentListByFilter(name, pageInt, pageSizeInt, trustModelIDs, chainIDs)
-		if err != nil {
-			serverUtils.ErrResp(nil, "fail to get agent card list by name", "Internal Error", c)
-			return
-		}
-	} else if name == "" && (len(trustModelIDs) != 0 || len(chainIDs) != 0) {
-		agents, total, err = serverLogic.GetAgentListByFilter(pageInt, pageSizeInt, trustModelIDs, chainIDs)
-		if err != nil {
-			serverUtils.ErrResp(nil, "fail to get agent card list by filter", "Internal Error", c)
-			return
-		}
-	} else {
-		agents, total, err = serverLogic.GetAgentList(pageInt, pageSizeInt)
-		if err != nil {
-			serverUtils.ErrResp(nil, "fail to get agent card list", "Internal Error", c)
-			return
-		}
+	agents, total, err := serverLogic.GetAgentListByFilter(req.Page, req.PageSize, req.Name, req.TrustModel, req.Chains, req.Skills, req.X402Support, req.Active, req.HaveFeedback)
+	if err != nil {
+		serverUtils.ErrResp(logrus.Fields{
+			"error":   err.Error(),
+			"request": req,
+		}, "fail to get agent card list", "Internal Error", c)
+		return
 	}
 	serverUtils.SuccessResp(gin.H{
 		"agent_list":   agents,
 		"total":        total,
-		"current_page": pageInt,
+		"current_page": req.Page,
 	}, c)
 }
 
@@ -91,60 +65,6 @@ func GetAgentCardDetailHandler(c *gin.Context) {
 	}
 	serverUtils.SuccessResp(gin.H{
 		"agent": agentCard,
-	}, c)
-}
-
-func GetAgentCardsSearchBySkillHandler(c *gin.Context) {
-	skill := c.Query("skill")
-	page := c.Query("page")
-	pageSize := c.Query("page_size")
-
-	pageInt, err := strconv.Atoi(page)
-	if err != nil {
-		serverUtils.ErrResp(nil, "fail to get page", "Invalid Request", c)
-		return
-	}
-	pageSizeInt, err := strconv.Atoi(pageSize)
-	if err != nil {
-		serverUtils.ErrResp(nil, "fail to get page_size", "Invalid Request", c)
-		return
-	}
-
-	agents, total, err := serverLogic.SearchAgentListBySkill(skill, pageInt, pageSizeInt)
-	if err != nil {
-		serverUtils.ErrResp(nil, "fail to get agent card list by skill", "Internal Error", c)
-		return
-	}
-	serverUtils.SuccessResp(gin.H{
-		"agent_list":   agents,
-		"total":        total,
-		"current_page": pageInt,
-	}, c)
-}
-
-func GetAgentCardsSearchByNameHandler(c *gin.Context) {
-	name := c.Query("name")
-	page := c.Query("page")
-	pageSize := c.Query("page_size")
-	pageInt, err := strconv.Atoi(page)
-	if err != nil {
-		serverUtils.ErrResp(nil, "fail to get page", "Invalid Request", c)
-		return
-	}
-	pageSizeInt, err := strconv.Atoi(pageSize)
-	if err != nil {
-		serverUtils.ErrResp(nil, "fail to get page_size", "Invalid Request", c)
-		return
-	}
-	agents, total, err := serverLogic.SearchAgentListByName(name, pageInt, pageSizeInt)
-	if err != nil {
-		serverUtils.ErrResp(nil, "fail to get agent card list by name", "Internal Error", c)
-		return
-	}
-	serverUtils.SuccessResp(gin.H{
-		"agent_list":   agents,
-		"total":        total,
-		"current_page": pageInt,
 	}, c)
 }
 
@@ -197,11 +117,15 @@ func UploadAgentProfileHandler(c *gin.Context) {
 
 // SemanticSearchRequest 语义搜索请求体
 type SemanticSearchRequest struct {
-	Desc       string   `json:"desc" binding:"required"`
-	Limit      int      `json:"limit" binding:"required"`
-	Threshold  float64  `json:"threshold" binding:"required"`
-	TrustModel []string `json:"trust_models"`
-	Chains     []string `json:"chains"`
+	Desc         string    `json:"desc" binding:"required"`
+	Limit        int       `json:"limit" binding:"required"`
+	Threshold    float64   `json:"threshold" binding:"required"`
+	TrustModel   *[]string `json:"trust_models"`
+	Chains       *[]string `json:"chains"`
+	Skills       *[]string `json:"skills"`
+	X402Support  *bool     `json:"x402_support"`
+	Active       *bool     `json:"active"`
+	HaveFeedback *bool     `json:"have_feedback"`
 }
 
 func GetAgentCardsSearchBySemanticHandler(c *gin.Context) {
@@ -223,7 +147,7 @@ func GetAgentCardsSearchBySemanticHandler(c *gin.Context) {
 		return
 	}
 
-	agents, err := serverLogic.FilterSearchAgentListBySemantic(req.Desc, req.Limit, req.Threshold, req.TrustModel, req.Chains)
+	agents, err := serverLogic.FilterSearchAgentListBySemantic(req.Desc, req.Limit, req.Threshold, req.TrustModel, req.Chains, req.Skills, req.X402Support, req.Active, req.HaveFeedback)
 	if err != nil {
 		serverUtils.ErrResp(logrus.Fields{
 			"error":   err.Error(),

@@ -5,36 +5,44 @@ import (
 	"testing"
 
 	agentcard "agent_identity/agentCard"
+	"agent_identity/config"
 	"agent_identity/server/api/types"
+	apiUtils "agent_identity/server/api/utils"
 )
+
+func TestUpdateFilterInfo(t *testing.T) {
+	initTest()
+	config.UpdateFilterInfo()
+	fmt.Printf("filterInfo: %+v\n", config.GetFilterInfo())
+	apiUtils.UpdateLeaderboardInfo()
+	fmt.Printf("leaderboardInfo: %+v\n", apiUtils.GetLeaderboardInfo())
+}
+
+var name = "Agent"
+var trustModelIDs = []string{agentcard.TrustModelReputation, agentcard.TrustModelCryptoEconomicValidation, agentcard.TrustModelTeeAttestation}
+var chainIDs = []string{"1"}
+var skills = []string{}
+var x402Support = true
+var active = true
+var haveFeedback = true
 
 func TestFilterSearchAgentListByFilter(t *testing.T) {
 	initTest()
-	name := "Agent"
 	page := 1
 	pageSize := 10
-	trustModelIDs := []string{}
-	chainIDs := []string{"11155111"}
-
-	agents, total, err := FilterSearchAgentListByFilter(name, page, pageSize, trustModelIDs, chainIDs)
+	agents, total, err := GetAgentListByFilter(page, pageSize, nil, nil, &chainIDs, nil, &x402Support, &active, &haveFeedback)
 	if err != nil {
-		t.Errorf("FilterSearchAgentListByFilter error: %v", err)
+		t.Errorf("GetAgentListByFilter error: %v", err)
 	}
-	if len(agents) > 1 {
-		fmt.Printf("agents: %+v, total: %d\n", agents[0], total)
-	} else {
-		t.Errorf("agents: %+v, total: %d\n", agents, total)
-	}
+	fmt.Println(agents, total)
 }
 
 func TestGetAgentListByFilter(t *testing.T) {
 	initTest()
 	page := 1
 	pageSize := 10
-	trustModel := []string{"reputation"}
-	chains := []string{"11155111"}
 
-	agents, total, err := GetAgentListByFilter(page, pageSize, trustModel, chains)
+	agents, total, err := GetAgentListByFilter(page, pageSize, &name, &trustModelIDs, &chainIDs, &skills, &x402Support, &active, &haveFeedback)
 	if err != nil {
 		t.Errorf("GetAgentListByFilter error: %v", err)
 	}
@@ -44,22 +52,6 @@ func TestGetAgentListByFilter(t *testing.T) {
 		t.Errorf("agents: %+v, total: %d\n", agents, total)
 	}
 }
-
-func TestGetAgentList(t *testing.T) {
-	initTest()
-	page := 1
-	pageSize := 10
-	agents, total, err := GetAgentList(page, pageSize)
-	if err != nil {
-		t.Errorf("GetAgentList error: %v", err)
-	}
-	if len(agents) > 1 {
-		fmt.Printf("agents: %+v, total: %d\n", agents[0], total)
-	} else {
-		t.Errorf("agents: %+v, total: %d\n", agents, total)
-	}
-}
-
 func TestGetCardResponse(t *testing.T) {
 	initTest()
 	agentUID := uint64(1)
@@ -70,46 +62,12 @@ func TestGetCardResponse(t *testing.T) {
 	fmt.Printf("agentCard: %+v\n", agentCard)
 }
 
-func TestSearchAgentListBySkill(t *testing.T) {
-	initTest()
-	skill := ""
-	page := 1
-	pageSize := 10
-	agents, total, err := SearchAgentListBySkill(skill, page, pageSize)
-	if err != nil {
-		t.Errorf("SearchAgentListBySkill error: %v", err)
-	}
-	if len(agents) > 1 {
-		fmt.Printf("agents: %+v, total: %d\n", agents[0], total)
-	} else {
-		t.Errorf("agents: %+v, total: %d\n", agents, total)
-	}
-}
-
-func TestSearchAgentListByName(t *testing.T) {
-	initTest()
-	name := "test"
-	page := 1
-	pageSize := 10
-	agents, total, err := SearchAgentListByName(name, page, pageSize)
-	if err != nil {
-		t.Errorf("SearchAgentListByName error: %v", err)
-	}
-	if len(agents) > 1 {
-		fmt.Printf("agents: %+v, total: %d\n", agents[0], total)
-	} else {
-		t.Errorf("agents: %+v, total: %d\n", agents, total)
-	}
-}
-
 func TestFilterSearchAgentListBySemantic(t *testing.T) {
 	initTest()
-	desc := "test"
+	desc := "AI agent"
 	limit := 10
 	threshold := 0.5
-	trustModelIDs := []string{agentcard.TrustModelTeeAttestation}
-	chainIDs := []string{"11155111"}
-	agents, err := FilterSearchAgentListBySemantic(desc, limit, threshold, trustModelIDs, chainIDs)
+	agents, err := FilterSearchAgentListBySemantic(desc, limit, threshold, &trustModelIDs, &chainIDs, &skills, nil, nil, &haveFeedback)
 	if err != nil {
 		t.Errorf("FilterSearchAgentListBySemantic error: %v", err)
 	}

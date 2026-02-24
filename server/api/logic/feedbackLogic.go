@@ -14,12 +14,20 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-func GetAgentFeedbacksList(agentUID uint64, page, pageSize int) ([]*model.FeedbackResp, int64, error) {
-	feedbacks, total, err := model.GetFeedbacksByAgentUID(agentUID, page, pageSize)
+func GetAgentFeedbacksList(agentUID uint64, tag1s []string, page, pageSize int) ([]*model.FeedbackResp, int64, error) {
+	feedbacks, total, err := model.GetFeedbacksByAgentUID(agentUID, tag1s, page, pageSize)
 	if err != nil {
 		return nil, 0, fmt.Errorf("fail to get agent feedbacks list: %v", err)
 	}
 	return feedbacks, total, nil
+}
+
+func GetAgentScoreForEachTag1(agentUID uint64, offset, limit int) ([]model.ScoreInfo, error) {
+	scores, err := model.GetScoreForEachTag1(agentUID, offset, limit)
+	if err != nil {
+		return nil, fmt.Errorf("fail to get agent score for each tag1: %v", err)
+	}
+	return scores, nil
 }
 
 func SetFeedback(request serverTypes.UploadFeedbackRequest) (string, string, error) {

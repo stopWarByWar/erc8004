@@ -7,8 +7,6 @@ import (
 	"agent_identity/model"
 	"os"
 
-	apiUtils "agent_identity/server/api/utils"
-
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
@@ -37,8 +35,6 @@ func initTest() {
 	helper.InitHelper(_config.S3Region, _config.S3BucketName, _config.AWSAccessKeyId, _config.AWSSecretAccessKey)
 
 	model.InitDB(_config.Dns, _config.OpenaiAPIKey)
-
-	go apiUtils.UpdateGeneralInfo()
 }
 
 type Config struct {

@@ -44,12 +44,23 @@ func TestSearchSimilarVectors(t *testing.T) {
 		panic(err)
 	}
 	InitDB(config.Dns, config.OpenaiAPIKey)
+	TrustModel := []string{}
+	IdentityRegistry := []string{}
+	ChainID := []string{}
+	Skills := []string{}
+	X402Support := false
+	Active := true
+	HaveFeedback := false
 	limit := 10
 	threshold := 0.5
 	filters := &VectorSearchFilters{
-		TrustModel:       []string{},
-		IdentityRegistry: []string{},
-		ChainID:          []string{},
+		TrustModel:       &TrustModel,
+		IdentityRegistry: &IdentityRegistry,
+		ChainID:          &ChainID,
+		Skills:           &Skills,
+		X402Support:      &X402Support,
+		Active:           &Active,
+		HaveFeedback:     &HaveFeedback,
 	}
 
 	desc := "transfer token from one address to another"

@@ -15,7 +15,6 @@ var openAIClient *openai.Client
 var ctx = context.Background()
 
 func InsertAgentVector(agentUID uint64, identityRegistry, chainID string, createTimestamp uint64, content string, metadata map[string]interface{}) error {
-	// 检查是否已存在向量记录
 	var existing AgentVector
 	checkErr := db.Where("agent_uid = ?", agentUID).First(&existing).Error
 	recordExists := checkErr == nil
@@ -23,15 +22,12 @@ func InsertAgentVector(agentUID uint64, identityRegistry, chainID string, create
 	// 如果 content 为空，删除已存在的记录（如果有）
 	if len(content) == 0 {
 		if recordExists {
-			// 记录存在，删除它
 			return db.Where("agent_uid = ?", agentUID).Delete(&AgentVector{}).Error
-		} else if errors.Is(checkErr, gorm.ErrRecordNotFound) {
-			// 记录不存在，无需操作
-			return nil
-		} else {
-			// 查询出错
-			return checkErr
 		}
+		if errors.Is(checkErr, gorm.ErrRecordNotFound) {
+			return nil
+		}
+		return checkErr
 	}
 
 	// content 不为空，生成 embedding
@@ -76,7 +72,7 @@ func InsertAgentVector(agentUID uint64, identityRegistry, chainID string, create
 		// 记录不存在，插入新记录
 		return db.Create(&agentVector).Error
 	} else {
-		// 查询出错（这种情况不应该发生，因为 content 为空时已经处理了）
+		// 查询出错（如网络超时、连接断开等）
 		return checkErr
 	}
 }
@@ -105,40 +101,92 @@ func SearchSimilarVectors(desc string, limit int, threshold float64, filters *Ve
 	whereConditions := []string{}
 	args := []interface{}{}
 	needJoinTrustModels := false
+	needJoinAgents := false
+	needJoinSkills := false
 
 	if filters != nil {
 		// 如果提供了 TrustModel 过滤条件，需要通过 JOIN trust_models 表
-		if len(filters.TrustModel) > 0 {
+		if filters.TrustModel != nil && len(*filters.TrustModel) > 0 {
 			needJoinTrustModels = true
-			whereConditions = append(whereConditions, "tm.trust_model IN (?)")
-			args = append(args, filters.TrustModel)
+			placeholders := make([]string, 0, len(*filters.TrustModel))
+			for _, tmID := range *filters.TrustModel {
+				placeholders = append(placeholders, "?")
+				args = append(args, tmID)
+			}
+			whereConditions = append(whereConditions, "tm.trust_model IN ("+strings.Join(placeholders, ",")+")")
 		}
 		// 使用 AgentVector 表中的字段进行过滤
-		if len(filters.IdentityRegistry) > 0 {
-			whereConditions = append(whereConditions, "av.identity_registry IN (?)")
-			args = append(args, filters.IdentityRegistry)
+		if filters.IdentityRegistry != nil && len(*filters.IdentityRegistry) > 0 {
+			placeholders := make([]string, 0, len(*filters.IdentityRegistry))
+			for _, r := range *filters.IdentityRegistry {
+				placeholders = append(placeholders, "?")
+				args = append(args, r)
+			}
+			whereConditions = append(whereConditions, "av.identity_registry IN ("+strings.Join(placeholders, ",")+")")
 		}
-		if len(filters.ChainID) > 0 {
-			whereConditions = append(whereConditions, "av.chain_id IN (?)")
-			args = append(args, filters.ChainID)
+		if filters.ChainID != nil && len(*filters.ChainID) > 0 {
+			placeholders := make([]string, 0, len(*filters.ChainID))
+			for _, cid := range *filters.ChainID {
+				placeholders = append(placeholders, "?")
+				args = append(args, cid)
+			}
+			whereConditions = append(whereConditions, "av.chain_id IN ("+strings.Join(placeholders, ",")+")")
+		}
+		// 根据技能过滤，需要 JOIN oasf_skills 表
+		if filters.Skills != nil && len(*filters.Skills) > 0 {
+			needJoinSkills = true
+			placeholders := make([]string, 0, len(*filters.Skills))
+			for _, skill := range *filters.Skills {
+				placeholders = append(placeholders, "?")
+				args = append(args, skill)
+			}
+			whereConditions = append(whereConditions, "os.skill_name IN ("+strings.Join(placeholders, ",")+")")
+		}
+		// 根据 Agent 状态过滤，需要 JOIN agents 表
+		if filters.X402Support != nil && *filters.X402Support {
+			needJoinAgents = true
+			whereConditions = append(whereConditions, "a.x402_support = ?")
+			args = append(args, true)
+		}
+		if filters.Active != nil && *filters.Active {
+			needJoinAgents = true
+			whereConditions = append(whereConditions, "a.active = ?")
+			args = append(args, true)
+		}
+		if filters.HaveFeedback != nil && *filters.HaveFeedback {
+			needJoinAgents = true
+			whereConditions = append(whereConditions, "a.feedback_count > 0")
 		}
 	}
 
 	// 构建 SQL 查询
-	// 如果需要进行 TrustModel 过滤，则 JOIN trust_models 表
-	var sql string
+	// 根据是否需要 JOIN 其他表决定是否使用 DISTINCT
+	needDistinct := needJoinTrustModels || needJoinSkills
+
+	sql := `
+		SELECT `
+	if needDistinct {
+		sql += `DISTINCT `
+	}
+	sql += `
+			av.agent_uid,
+			1 - (av.embedding <=> ?::vector) as similarity
+		FROM agent_vectors av
+	`
+
 	if needJoinTrustModels {
-		sql = `
-			SELECT DISTINCT av.agent_uid, 
-			       1 - (av.embedding <=> ?::vector) as similarity
-			FROM agent_vectors av
+		sql += `
 			INNER JOIN trust_models tm ON av.agent_uid = tm.agent_uid
 		`
-	} else {
-		sql = `
-			SELECT av.agent_uid, 
-			       1 - (av.embedding <=> ?::vector) as similarity
-			FROM agent_vectors av
+	}
+	if needJoinAgents {
+		sql += `
+			INNER JOIN agents a ON av.agent_uid = a.uid
+		`
+	}
+	if needJoinSkills {
+		sql += `
+			INNER JOIN oasf_skills os ON av.agent_uid = os.agent_uid
 		`
 	}
 
@@ -151,13 +199,17 @@ func SearchSimilarVectors(desc string, limit int, threshold float64, filters *Ve
 
 	sql += whereClause + `
 		1 - (av.embedding <=> ?::vector) >= ?
-		ORDER BY av.embedding <=> ?::vector
+		ORDER BY similarity DESC
 		LIMIT ?
 	`
 
 	allArgs := []interface{}{queryVector}
 	allArgs = append(allArgs, args...)
-	allArgs = append(allArgs, queryVector, threshold, queryVector, limit)
+	// 后续占位符顺序依次为：
+	// 1) WHERE 中的 ?::vector（再次使用 queryVector）
+	// 2) WHERE 中的 阈值 ?
+	// 3) LIMIT 中的 ?
+	allArgs = append(allArgs, queryVector, threshold, limit)
 
 	var results []struct {
 		AgentUID   uint64  `gorm:"column:agent_uid"`
@@ -178,9 +230,13 @@ func SearchSimilarVectors(desc string, limit int, threshold float64, filters *Ve
 }
 
 type VectorSearchFilters struct {
-	TrustModel       []string
-	IdentityRegistry []string
-	ChainID          []string
+	TrustModel       *[]string
+	IdentityRegistry *[]string
+	ChainID          *[]string
+	Skills           *[]string
+	X402Support      *bool
+	Active           *bool
+	HaveFeedback     *bool
 }
 
 // DeleteAgentVector 删除向量

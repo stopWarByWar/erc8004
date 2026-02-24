@@ -1,7 +1,9 @@
 package config
 
 import (
+	"agent_identity/model"
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -31,8 +33,26 @@ type Config struct {
 	RegisterList []ContractInfo `yaml:"register_list"`
 }
 
-var ChainList = []ChainInfo{}
-var RegisterList = []ContractInfo{}
+type FilterInfoAmount struct {
+	Name   string `json:"name" yaml:"name"`
+	Amount int64  `json:"amount" yaml:"amount"`
+}
+
+type FilterStatusInfo struct {
+	Active       int64 `json:"active" yaml:"active"`
+	HaveFeedback int64 `json:"have_feedback" yaml:"have_feedback"`
+}
+
+type FilterInfo struct {
+	Networks    []ChainInfo        `yaml:"networks"`
+	TrustModels []FilterInfoAmount `yaml:"trust_models"`
+	Status      FilterStatusInfo   `yaml:"status"`
+	X402Support int64              `yaml:"x402_support"`
+	Skills      []FilterInfoAmount `yaml:"skills"`
+}
+
+var filterInfo = FilterInfo{}
+
 var RegisterMap = make(map[string]map[string]ContractInfo)
 var ChainMap = make(map[string]ChainInfo)
 var ValidationRegistryMap = make(map[string]map[string]ContractInfo)
@@ -55,20 +75,17 @@ func Init(configPath string) error {
 		return errors.New("config file is invalid")
 	}
 
-	ChainList = config.ChainList
-	RegisterList = config.RegisterList
-
-	for _, register := range RegisterList {
+	for _, register := range config.RegisterList {
 		register.IdentityAddress = common.HexToAddress(register.IdentityAddress).String()
 		register.ReputationAddress = common.HexToAddress(register.ReputationAddress).String()
 		register.ValidationAddress = common.HexToAddress(register.ValidationAddress).String()
 	}
 
-	for _, chain := range ChainList {
+	for _, chain := range config.ChainList {
 		ChainMap[chain.ChainId] = chain
 	}
 
-	for _, register := range RegisterList {
+	for _, register := range config.RegisterList {
 		if RegisterMap[register.ChainId] == nil {
 			RegisterMap[register.ChainId] = make(map[string]ContractInfo)
 		}
@@ -84,7 +101,6 @@ func Init(configPath string) error {
 func GetChainInfoMap() map[string]ChainInfo {
 	return ChainMap
 }
-
 func GetChainInfo(chainId string) (ChainInfo, bool) {
 	chain, ok := ChainMap[chainId]
 	if !ok {
@@ -92,7 +108,6 @@ func GetChainInfo(chainId string) (ChainInfo, bool) {
 	}
 	return chain, true
 }
-
 func SetChainAgentAmount(chainId string, amount int64) {
 	chain, ok := ChainMap[chainId]
 	if !ok {
@@ -108,13 +123,87 @@ func GetContractsDeployerInfo(ChainID string, RegistryAddress string) ContractIn
 	}
 	return register
 }
-
 func GetIdentityAddressByValidationAddress(chainID, ValidationAddress string) string {
 	registry, ok := ValidationRegistryMap[chainID][ValidationAddress]
 	if !ok {
 		return ""
 	}
 	return registry.IdentityAddress
+}
+
+func UpdateFilterInfo() error {
+	var newFilterInfo = FilterInfo{}
+	var chainIds []string
+	for chainId := range ChainMap {
+		chainIds = append(chainIds, chainId)
+	}
+	agentAmounts, err := model.GetAgentAmountForEachChain(chainIds)
+	if err != nil {
+		return fmt.Errorf("failed to get agent amount for each chain: %w", err)
+	}
+
+	var chainInfos []ChainInfo
+	for chainId, agentAmount := range agentAmounts {
+		chainInfo, ok := ChainMap[chainId]
+		if !ok {
+			continue
+		}
+		chainInfo.AgentAmount = uint64(agentAmount)
+		chainInfos = append(chainInfos, chainInfo)
+		SetChainAgentAmount(chainId, int64(agentAmount))
+	}
+	newFilterInfo.Networks = chainInfos
+
+	trustModelAmounts, err := model.GetAgentAmountForEachTrustModel()
+	if err != nil {
+		return fmt.Errorf("failed to get agent amount for each trust model: %w", err)
+	}
+	var trustModelAmountInfos []FilterInfoAmount
+	for _, trustModelAmount := range trustModelAmounts {
+		trustModelAmountInfos = append(trustModelAmountInfos, FilterInfoAmount{
+			Name:   trustModelAmount.Name,
+			Amount: trustModelAmount.Amount,
+		})
+	}
+	newFilterInfo.TrustModels = trustModelAmountInfos
+
+	activeAgentAmount, err := model.GetActiveAgentAmount()
+	if err != nil {
+		fmt.Println("failed to get active agent amount", err)
+		return fmt.Errorf("failed to get active agent amount: %w", err)
+	}
+	newFilterInfo.Status.Active = activeAgentAmount
+
+	feedbackCount, err := model.GetAgentAmountWithFeedback()
+	if err != nil {
+		fmt.Println("failed to get agent amount with feedback", err)
+		return fmt.Errorf("failed to get agent amount with feedback: %w", err)
+	}
+
+	newFilterInfo.Status.HaveFeedback = feedbackCount
+
+	x402SupportAgentAmount, err := model.GetX402SupportAgentAmount()
+	if err != nil {
+		fmt.Println("failed to get x402 support agent amount", err)
+		return fmt.Errorf("failed to get x402 support agent amount: %w", err)
+	}
+	newFilterInfo.X402Support = x402SupportAgentAmount
+
+	skillAmounts, err := model.GetAgentAmountForEachSkill(50)
+	if err != nil {
+		fmt.Println("failed to get agent amount for each skill", err)
+		return fmt.Errorf("failed to get agent amount for each skill: %w", err)
+	}
+	var skillInfos []FilterInfoAmount
+	for _, skillAmount := range skillAmounts {
+		skillInfos = append(skillInfos, FilterInfoAmount{
+			Name:   skillAmount.Name,
+			Amount: skillAmount.Amount,
+		})
+	}
+	newFilterInfo.Skills = skillInfos
+	filterInfo = newFilterInfo
+	return nil
 }
 
 type IndexerConfig struct {
@@ -148,4 +237,8 @@ type IndexerConfig struct {
 		StartBlock         uint64 `yaml:"start_block"`
 		Run                bool   `yaml:"run"`
 	} `yaml:"validation"`
+}
+
+func GetFilterInfo() FilterInfo {
+	return filterInfo
 }

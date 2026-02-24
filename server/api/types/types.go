@@ -32,6 +32,13 @@ type AgentResponse struct {
 	ReputationRegistry string             `json:"reputationRegistry"`
 	Status             string             `json:"status"`
 	X402Support        bool               `json:"x402Support"`
+	Endpoints          []EndpointResponse `json:"endpoints"`
+}
+
+type EndpointResponse struct {
+	No       int    `json:"no"`
+	Name     string `json:"name"`
+	Endpoint string `json:"endpoint"`
 }
 
 type SkillTagResponse struct {
@@ -210,4 +217,29 @@ type ValidatorListInfo struct {
 	Address        string `json:"address"`
 	PendingAmount  uint64 `json:"pendingAmount"`
 	FinishedAmount uint64 `json:"finishedAmount"`
+}
+
+type LeaderboardInfo struct {
+	AgentAmount            int64
+	FeedbackAmount         int64
+	AgentAmountWithIn7Days int64
+	NetworkAmount          int64
+	Leaderboard            []LeaderboardAgentInfo
+}
+
+type LeaderboardAgentInfo struct {
+	Name string
+	Key  string
+	Data []SimpleAgentInfo
+}
+
+type SimpleAgentInfo struct {
+	UID              uint64
+	AgentID          string
+	AgentName        string
+	AgentImage       string
+	AgentDescription string
+	ChainID          string
+	ChainName        string
+	ChainLogo        string
 }

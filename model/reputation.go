@@ -81,22 +81,33 @@ func CreateResponse(chainID string, response *Response) error {
 //
 //
 
-func GetFeedbacksByAgentUID(uid uint64, page, pageSize int) ([]*FeedbackResp, int64, error) {
+func GetFeedbacksByAgentUID(uid uint64, tag1s []string, page, pageSize int) ([]*FeedbackResp, int64, error) {
 	if page <= 0 || pageSize <= 0 {
 		return nil, 0, errors.New("invalid page or pageSize")
 	}
+	// 基础查询（不含分页），用于统计总数和复用条件
+	baseQuery := db.Model(&Feedback{}).
+		Where("agent_uid = ? and revoked = ?", uid, false)
+	if len(tag1s) > 0 {
+		baseQuery = baseQuery.Where("tag1 IN (?)", tag1s)
+	}
+
+	var total int64
+	if err := baseQuery.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	if total == 0 {
+		return []*FeedbackResp{}, 0, nil
+	}
+
+	// 分页查询当前页数据
 	var feedbacks []*Feedback
-	if err := db.
-		Where("agent_uid = ? and revoked = ?", uid, false).
+	if err := baseQuery.
 		Order("timestamps DESC").
 		Offset((page - 1) * pageSize).
 		Limit(pageSize).
 		Find(&feedbacks).Error; err != nil {
-		return nil, 0, err
-	}
-
-	var total int64
-	if err := db.Model(&Feedback{}).Where("agent_uid = ? and revoked = ?", uid, false).Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -129,23 +140,45 @@ func GetFeedbacksByAgentUID(uid uint64, page, pageSize int) ([]*FeedbackResp, in
 	return feedbackResp, total, nil
 }
 
-func GetAgentAmountForEachChain() (map[string]int64, error) {
-	type chainAmount struct {
-		ChainID string
-		Amount  int64
-	}
+type ScoreInfo struct {
+	Tag                              string
+	Score                            float64
+	UniqueFeedbackClientAddressCount uint64
+	FeedbackCount                    uint64
+}
 
-	var rows []chainAmount
-	if err := db.Model(&Agent{}).
-		Select("chain_id, COUNT(*) as amount").
-		Group("chain_id").
-		Scan(&rows).Error; err != nil {
+func GetScoreForEachTag1(agentUID uint64, offset, limit int) ([]ScoreInfo, error) {
+	if offset < 0 || limit <= 0 {
+		return nil, errors.New("invalid offset or limit")
+	}
+	var scores []*FeedbackTagScore
+	if err := db.Model(&FeedbackTagScore{}).
+		Where("agent_uid = ?", agentUID).
+		Order("unique_feedback_client_address_count DESC, feedback_count DESC").
+		Offset(offset).
+		Limit(limit).
+		Scan(&scores).Error; err != nil {
 		return nil, err
 	}
-
-	amounts := make(map[string]int64, len(rows))
-	for _, row := range rows {
-		amounts[row.ChainID] = row.Amount
+	// 按 scores 长度预分配切片，使用下标赋值，避免前半段出现零值元素
+	scoresInfo := make([]ScoreInfo, len(scores))
+	for i, score := range scores {
+		scoresInfo[i] = ScoreInfo{
+			Tag:                              score.Tag,
+			Score:                            score.Score,
+			UniqueFeedbackClientAddressCount: score.UniqueFeedbackClientAddressCount,
+			FeedbackCount:                    score.FeedbackCount,
+		}
 	}
-	return amounts, nil
+	return scoresInfo, nil
+}
+
+func GetFeedbackCount() (int64, error) {
+	var result int64
+	if err := db.Model(&Feedback{}).
+		Select("COUNT(*) AS amount").
+		Scan(&result).Error; err != nil {
+		return 0, err
+	}
+	return result, nil
 }
