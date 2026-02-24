@@ -166,7 +166,7 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 		TrustModels:        trustModelsResponse,
 		IdentityRegistry:   agent.IdentityRegistry,
 		Metadata:           metadataResponse,
-		TokenURL:           agent.A2AURI,
+		TokenURL:           agent.AgentURI,
 		Deployer:           deployerInfo.Deployer,
 		DeployerLogo:       deployerInfo.LogoURL,
 		MCPEndpoint:        mcpEndpoint,
