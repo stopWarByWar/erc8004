@@ -28,7 +28,7 @@ type TokenURLResponse struct {
 	Name           string         `json:"name"`
 	Description    string         `json:"description"`
 	Image          string         `json:"image"`
-	Services       []Service      `json:"services"`
+	Services       Services       `json:"services"`
 	X402Support    bool           `json:"x402Support"`
 	Active         bool           `json:"active"`
 	Registrations  []Registration `json:"registrations"`

@@ -55,7 +55,7 @@ func TestDecodeAgentProfileData(t *testing.T) {
 }
 
 func Test_getAgentProfileFromEncodedData(t *testing.T) {
-	payload := "data:application/json;base64,eyJ0eXBlIjoiaHR0cHM6Ly9laXBzLmV0aGVyZXVtLm9yZy9FSVBTL2VpcC04MDA0I3JlZ2lzdHJhdGlvbi12MSIsIm5hbWUiOiJDcnlwdG9NYXN0ZXIgQWdlbnQgIzE2NyIsImRlc2NyaXB0aW9uIjoiQXV0b21hdGVkIHRyYWRpbmcgYWdlbnQgcG93ZXJlZCBieSBDcnlwdG9NYXN0ZXIiLCJzZXJ2aWNlcyI6WyJ0cmFkaW5nIiwiZGVmaSJdLCJhY3RpdmUiOnRydWUsInN1cHBvcnRlZFRydXN0IjpbInJlcHV0YXRpb24iXX0="
+	payload := "data:application/json;base64,eyJ0eXBlIjoiaHR0cHM6Ly9laXBzLmV0aGVyZXVtLm9yZy9FSVBTL2VpcC04MDA0I3JlZ2lzdHJhdGlvbi12MSIsIm5hbWUiOiJDcnlwdG9NYXN0ZXIgQWdlbnQgIzQ2IiwiZGVzY3JpcHRpb24iOiJBdXRvbWF0ZWQgdHJhZGluZyBhZ2VudCBwb3dlcmVkIGJ5IENyeXB0b01hc3RlciIsInNlcnZpY2VzIjpbInRyYWRpbmciLCJkZWZpIl0sImFjdGl2ZSI6dHJ1ZSwic3VwcG9ydGVkVHJ1c3QiOlsicmVwdXRhdGlvbiJdfQ=="
 	fmt.Println(payload)
 	data, err := getAgentProfileFromEncodedData(payload)
 	if err != nil {
@@ -65,7 +65,12 @@ func Test_getAgentProfileFromEncodedData(t *testing.T) {
 	fmt.Println(data.Name)
 	fmt.Println(data.Description)
 	fmt.Println(data.Image)
-	fmt.Println(data.Services)
+	fmt.Println("name: ", data.Services[0].Name)
+	fmt.Println("endpoint: ", data.Services[0].Endpoint)
+	fmt.Println("version: ", data.Services[0].Version)
+	fmt.Println("capabilities: ", data.Services[0].Capabilities)
+	fmt.Println("skills: ", data.Services[0].Skills)
+	fmt.Println("domains: ", data.Services[0].Domains)
 	fmt.Println(data.X402Support)
 	fmt.Println(data.Active)
 	fmt.Println(data.Registrations)
