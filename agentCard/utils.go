@@ -27,6 +27,10 @@ func GetAgentProfile(tokenURL string) (*TokenURLResponse, error) {
 		return getAgentProfileFromEncodedData(tokenURL)
 	}
 
+	if strings.Contains(tokenURL, " ") {
+		return decodeAgentProfileData([]byte(tokenURL))
+	}
+
 	return nil, fmt.Errorf("invalid token URL: %s", tokenURL)
 }
 
@@ -35,9 +39,12 @@ func getAgentProfileFromTokenURL(tokenURL string) (*TokenURLResponse, error) {
 	if err != nil {
 		return nil, err
 	}
+	return decodeAgentProfileData(body)
+}
 
+func decodeAgentProfileData(data []byte) (*TokenURLResponse, error) {
 	var tokenURLResponse TokenURLResponse
-	err = json.Unmarshal(body, &tokenURLResponse)
+	err := json.Unmarshal(data, &tokenURLResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +53,6 @@ func getAgentProfileFromTokenURL(tokenURL string) (*TokenURLResponse, error) {
 		tokenURLResponse.Services[i].Name = strings.ToLower(service.Name)
 	}
 	return &tokenURLResponse, nil
-
 }
 
 // DataURLResult 表示 RFC 2397 data URL 解码结果。
@@ -292,4 +298,8 @@ func resolveTokenURL(tokenURL string) (string, error) {
 		return tokenURL, nil
 	}
 	return "", fmt.Errorf("unsupported token URL scheme: %s", tokenURL)
+}
+
+func encodeAgentProfileData(data []byte) string {
+	return "data:application/json;base64," + base64.StdEncoding.EncodeToString(data)
 }

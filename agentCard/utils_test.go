@@ -36,3 +36,20 @@ func TestDecodeDataURLPayload(t *testing.T) {
 	}
 	fmt.Println(tokenURLResponse)
 }
+
+func TestDecodeAgentProfileData(t *testing.T) {
+	tokenURLResponse := `{"type":"https://eips.ethereum.org/EIPS/eip-8004#registration-v1","name":"Vector Zero","description":"Strategic Technogist | Revenue & Runway Optimization","image":"https://i.ibb.co/CKN66Mg3/DB8-DC218-52-A2-4824-B793-C9942336641-A5.png","services":[]}`
+	encoded, err := decodeAgentProfileData([]byte(tokenURLResponse))
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(encoded.Type)
+	fmt.Println(encoded.Name)
+	fmt.Println(encoded.Description)
+	fmt.Println(encoded.Image)
+	fmt.Println(encoded.Services)
+	fmt.Println(encoded.X402Support)
+	fmt.Println(encoded.Active)
+	fmt.Println(encoded.Registrations)
+	fmt.Println(encoded.SupportedTrust)
+}

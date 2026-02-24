@@ -150,6 +150,7 @@ func UpdateFilterInfo() error {
 		}
 		chainInfo.AgentAmount = uint64(agentAmount)
 		chainInfos = append(chainInfos, chainInfo)
+		SetChainAgentAmount(chainId, int64(agentAmount))
 	}
 	newFilterInfo.Networks = chainInfos
 
