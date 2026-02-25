@@ -14,7 +14,7 @@ var db *gorm.DB
 func InitDB(dns, openaiAPIKey string) {
 	var err error
 	db, err = gorm.Open(postgres.Open(dns), &gorm.Config{
-		Logger: gormLogger.Default.LogMode(gormLogger.Error),
+		Logger: gormLogger.Default.LogMode(gormLogger.Info),
 	})
 	if err != nil {
 		panic(err)

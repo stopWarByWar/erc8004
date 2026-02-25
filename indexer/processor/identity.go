@@ -256,6 +256,7 @@ func (idx *IdentityProcessor) dealWithAgentRegisteredEvent(e types.Log) error {
 		Index:            uint64(e.Index),
 		TxHash:           e.TxHash.String(),
 		Timestamps:       uint64(e.BlockTimestamp),
+		Inserted:         false,
 	}
 
 	if err := model.CreateAgent(registry); err != nil {

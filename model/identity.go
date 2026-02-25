@@ -74,7 +74,8 @@ func TransferOwnerShip(chainID, identityRegistry, agentID, newOwner string, bloc
 }
 
 func GetUnInsertedAgents(chainID string, identityRegistry string, limit int) (agents []*Agent, err error) {
-	err = db.Where("chain_id = ? and identity_registry = ? and inserted = ? and length(agent_uri) <> 0", chainID, identityRegistry, false).Limit(limit).Find(&agents).Error
+	// inserted IS NOT TRUE 会匹配 NULL 和 false（SQL 中 NULL <> true 为 NULL，不会匹配）
+	err = db.Where("chain_id = ? and identity_registry = ? and inserted IS NOT TRUE and length(agent_uri) <> 0", chainID, identityRegistry).Limit(limit).Find(&agents).Error
 	return agents, err
 }
 

@@ -28,6 +28,8 @@ type Agent struct {
 	A2AURI              string `gorm:"column:a2a_uri;type:text"`
 	A2AVersion          string `gorm:"column:a2a_version;type:varchar(255)"`
 	A2ADocumentationURL string `gorm:"column:a2a_documentation_url;type:text"`
+
+	Inserted bool `gorm:"column:inserted;type:boolean"`
 }
 
 func (Agent) TableName() string { return "agents" }
