@@ -63,6 +63,8 @@ func UpdateGeneralInfo() {
 
 func UpdateLeaderboardInfo() {
 	filterInfo := config.GetFilterInfo()
+	leaderboardInfo.AgentAmount = 0
+
 	for _, chainInfo := range filterInfo.Networks {
 		leaderboardInfo.AgentAmount += int64(chainInfo.AgentAmount)
 	}
