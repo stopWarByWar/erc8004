@@ -11,6 +11,27 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+type AgentDESC struct {
+	UID              uint64 `gorm:"column:uid;type:bigint;primaryKey"`
+	ChainID          string `gorm:"column:chain_id;type:varchar(255)"`
+	IdentityRegistry string `gorm:"column:identity_registry;type:varchar(255)"`
+	AgentID          string `gorm:"column:agent_id"`
+	AgentURI         string `gorm:"column:agent_uri;type:text"`
+	AgentWallet      string `gorm:"column:agent_wallet"`
+}
+
+func ListAgentsBatch(lastUID uint64, limit int) ([]Agent, error) {
+	var agents []Agent
+	query := db.Order("uid ASC").Limit(limit)
+	if lastUID > 0 {
+		query = query.Where("uid > ?", lastUID)
+	}
+	if err := query.Find(&agents).Error; err != nil {
+		return nil, err
+	}
+	return agents, nil
+}
+
 func GetLatestAgent(chainID string, identityRegistry string) (uint64, uint64, error) {
 	var agent *Agent
 	err := db.

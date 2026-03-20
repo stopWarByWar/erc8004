@@ -3,31 +3,20 @@ package model
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
 
 	openai "github.com/sashabaranov/go-openai"
-	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 var openAIClient *openai.Client
 var ctx = context.Background()
 
 func InsertAgentVector(agentUID uint64, identityRegistry, chainID string, createTimestamp uint64, content string, metadata map[string]interface{}) error {
-	var existing AgentVector
-	checkErr := db.Where("agent_uid = ?", agentUID).First(&existing).Error
-	recordExists := checkErr == nil
-
 	// 如果 content 为空，删除已存在的记录（如果有）
 	if len(content) == 0 {
-		if recordExists {
-			return db.Where("agent_uid = ?", agentUID).Delete(&AgentVector{}).Error
-		}
-		if errors.Is(checkErr, gorm.ErrRecordNotFound) {
-			return nil
-		}
-		return checkErr
+		return db.Where("agent_uid = ?", agentUID).Delete(&AgentVector{}).Error
 	}
 
 	// content 不为空，生成 embedding
@@ -56,25 +45,18 @@ func InsertAgentVector(agentUID uint64, identityRegistry, chainID string, create
 		agentVector.Metadata = "null"
 	}
 
-	// 使用 upsert：基于之前的查询结果，存在则更新，不存在则插入
-	if recordExists {
-		// 记录已存在，更新所有字段
-		updateMap := map[string]interface{}{
+	// 使用数据库原生 upsert 能力，基于 agent_uid 唯一约束进行插入或更新
+	return db.Clauses(clause.OnConflict{
+		Columns: []clause.Column{{Name: "agent_uid"}},
+		DoUpdates: clause.Assignments(map[string]interface{}{
 			"identity_registry": agentVector.IdentityRegistry,
 			"chain_id":          agentVector.ChainID,
 			"create_timestamp":  agentVector.CreateTimestamp,
 			"embedding":         agentVector.Embedding,
 			"content":           agentVector.Content,
 			"metadata":          agentVector.Metadata,
-		}
-		return db.Model(&AgentVector{}).Where("agent_uid = ?", agentUID).Updates(updateMap).Error
-	} else if errors.Is(checkErr, gorm.ErrRecordNotFound) {
-		// 记录不存在，插入新记录
-		return db.Create(&agentVector).Error
-	} else {
-		// 查询出错（如网络超时、连接断开等）
-		return checkErr
-	}
+		}),
+	}).Create(&agentVector).Error
 }
 
 func SearchSimilarVectors(desc string, limit int, threshold float64, filters *VectorSearchFilters) ([]uint64, error) {
