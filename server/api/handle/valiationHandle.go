@@ -113,3 +113,21 @@ func GetValidatorByAddressHandler(c *gin.Context) {
 		"validator": validator,
 	}, c)
 }
+
+func GetAgentValidationEvalLatestHandler(c *gin.Context) {
+	agentUIDStr := c.Query("agent_uid")
+	agentUID, err := strconv.ParseUint(agentUIDStr, 10, 64)
+	if err != nil {
+		serverUtils.ErrResp(nil, "fail to get agent uid", "Invalid Request", c)
+		return
+	}
+	resp, err := serverLogic.GetLatestAgentValidationEval(agentUID)
+	if err != nil {
+		serverUtils.ErrResp(logrus.Fields{"error": err.Error()}, "fail to get agent validation eval latest", "Internal Error", c)
+		return
+	}
+	serverUtils.SuccessResp(gin.H{
+		"report":     resp.Report,
+		"dimensions": resp.Dimensions,
+	}, c)
+}

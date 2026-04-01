@@ -44,6 +44,7 @@ func Run(_cors []string, port string) {
 	r.POST("agent/identity/set/profile", handle.UploadAgentProfileHandler)
 
 	r.GET("agent/identity/detail/validation/list", handle.GetAgentValidationListHandler)
+	r.GET("agent/identity/detail/validation/eval/latest", handle.GetAgentValidationEvalLatestHandler)
 	r.GET("agent/validator/list", handle.GetValidatorListHandler)
 	r.GET("agent/validator/detail/validation/list", handle.GetValidatorValidationListHandler)
 	r.GET("agent/validator/detail/address", handle.GetValidatorByAddressHandler)

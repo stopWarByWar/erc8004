@@ -1,5 +1,7 @@
 package types
 
+import "time"
+
 type AgentResponse struct {
 	UID                  uint64 // uid
 	AgentID              string `json:"agentId"` // agent id in contract json file
@@ -242,4 +244,29 @@ type SimpleAgentInfo struct {
 	ChainID          string
 	ChainName        string
 	ChainLogo        string
+}
+
+type AgentValidationEvalReportResponse struct {
+	ID           uint      `json:"id"`
+	AgentUID     uint64    `json:"agent_uid"`
+	AgentTokenID int       `json:"agent_token_id"`
+	ChainID      int       `json:"chainid"`
+	Reporter     string    `json:"reporter"`
+	Version      string    `json:"version"`
+	Score        float64   `json:"score"`
+	ReportURL    string    `json:"report_url"`
+	Desc         string    `json:"desc"`
+	ValidatedAt  time.Time `json:"validated_at"`
+	CreatedAt    time.Time `json:"created_at"`
+}
+
+type AgentValidationEvalDimensionResponse struct {
+	Dimension string    `json:"dimension"`
+	Score     float64   `json:"score"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type AgentValidationEvalLatestResponse struct {
+	Report     *AgentValidationEvalReportResponse     `json:"report"`
+	Dimensions []AgentValidationEvalDimensionResponse `json:"dimensions"`
 }
