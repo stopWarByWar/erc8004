@@ -104,6 +104,11 @@ func main() {
 		go identityIdx.Process()
 	}
 
+	if config.Commerce.Run {
+		commerceIdx := processor.NewCommerceProcessor(config.Commerce.Addr, ethClient, config.Commerce.FetchBlockInterval, config.Commerce.StartBlock, _logger)
+		go commerceIdx.Process()
+	}
+
 	select {}
 }
 
@@ -122,6 +127,7 @@ func initConf(confPath string) (*config.IndexerConfig, error) {
 	config.Reputation.Addr = common.HexToAddress(config.Reputation.Addr).String()
 	config.Identity.Addr = common.HexToAddress(config.Identity.Addr).String()
 	config.Validation.Addr = common.HexToAddress(config.Validation.Addr).String()
+	config.Commerce.Addr = common.HexToAddress(config.Commerce.Addr).String()
 	config.Comment.CommentSchemaID = common.HexToHash(config.Comment.CommentSchemaID).String()
 	return config, nil
 }

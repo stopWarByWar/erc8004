@@ -14,6 +14,9 @@ import (
 )
 
 func TestProcessor(t *testing.T) {
+	if os.Getenv("RUN_INDEXER_E2E_TESTS") != "1" {
+		t.Skip("skipping indexer e2e test; set RUN_INDEXER_E2E_TESTS=1 to run")
+	}
 	logConf := &logger.Config{
 		Level:        logrus.InfoLevel,
 		ReportCaller: true,

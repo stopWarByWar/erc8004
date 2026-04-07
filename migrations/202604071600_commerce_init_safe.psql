@@ -1,0 +1,374 @@
+-- ERC-8183 Commerce Reputation safe init (NO DROP)
+-- Use this when DB has no commerce tables yet.
+-- Architecture: docs/designs/erc8183-commerce-reputation.md
+
+-- ═══════════════════════ commerce_actions ═══════════════════════
+
+CREATE TABLE IF NOT EXISTS commerce_actions (
+  uid serial PRIMARY KEY,
+
+  -- identity
+  chain_id varchar(255) NOT NULL,
+  commerce_contract varchar(255) NOT NULL,
+  job_id bigint NOT NULL,
+
+  -- role
+  agent_uid bigint NOT NULL,
+  agent_address varchar(255) NOT NULL,
+  role varchar(32) NOT NULL,  -- client / provider / evaluator
+
+  -- action
+  action varchar(64) NOT NULL,  -- job_* / provider_set / budget_set
+
+  -- signal
+  signal_polarity varchar(16) NOT NULL,  -- positive / negative / neutral
+  signal_weight numeric(4, 2) NOT NULL DEFAULT 0,
+  signal_certainty varchar(16) NOT NULL,  -- definitive / indicative
+
+  -- context
+  job_budget numeric(36, 8) DEFAULT 0,
+  counterparty varchar(255) DEFAULT '',
+  reason varchar(255) DEFAULT '',
+  deliverable varchar(255) DEFAULT '',
+  previous_status varchar(32) DEFAULT '',
+  hook_address varchar(255) DEFAULT '',
+
+  -- on-chain provenance
+  block_number bigint NOT NULL,
+  tx_hash varchar(255) NOT NULL,
+  log_index integer NOT NULL,
+  block_timestamp bigint NOT NULL,
+
+  -- system
+  created_at timestamp DEFAULT NOW(),
+
+  -- dedup
+  CONSTRAINT uniq_commerce_action UNIQUE (chain_id, commerce_contract, job_id, role, action, block_number, log_index)
+);
+
+-- Query indexes (architecture §6.4)
+CREATE INDEX IF NOT EXISTS idx_ca_agent_action ON commerce_actions(agent_uid, action);
+CREATE INDEX IF NOT EXISTS idx_ca_agent_role_action ON commerce_actions(agent_uid, role, action);
+CREATE INDEX IF NOT EXISTS idx_ca_job ON commerce_actions(chain_id, commerce_contract, job_id);
+CREATE INDEX IF NOT EXISTS idx_ca_agent_timestamp ON commerce_actions(agent_uid, block_timestamp);
+CREATE INDEX IF NOT EXISTS idx_ca_agent_counterparty ON commerce_actions(agent_uid, counterparty);
+CREATE INDEX IF NOT EXISTS idx_ca_agent_certainty ON commerce_actions(agent_uid, signal_certainty);
+CREATE INDEX IF NOT EXISTS idx_ca_hook ON commerce_actions(hook_address);
+
+-- ═══════════════════════ commerce_scores (segmented) ═══════════════════════
+
+CREATE TABLE IF NOT EXISTS commerce_scores (
+  agent_uid bigint NOT NULL,
+  role varchar(32) NOT NULL,
+  chain_id varchar(255) NOT NULL,
+  commerce_contract varchar(255) NOT NULL,
+
+  -- provider fields
+  completed_count integer NOT NULL DEFAULT 0,
+  rejected_count integer NOT NULL DEFAULT 0,
+  expired_responsible_count integer NOT NULL DEFAULT 0,
+  success_rate numeric(6, 4) NOT NULL DEFAULT 0,
+  weighted_score numeric(6, 4) NOT NULL DEFAULT 0,
+  weighted_volume_sum numeric(36, 8) NOT NULL DEFAULT 0,
+
+  -- client fields
+  created_count integer NOT NULL DEFAULT 0,
+  funded_count integer NOT NULL DEFAULT 0,
+  funded_rate numeric(6, 4) NOT NULL DEFAULT 0,
+  completion_rate numeric(6, 4) NOT NULL DEFAULT 0,
+
+  -- evaluator fields
+  evaluated_count integer NOT NULL DEFAULT 0,
+  expired_from_submitted_count integer NOT NULL DEFAULT 0,
+  responsiveness numeric(6, 4) NOT NULL DEFAULT 0,
+
+  -- shared
+  total_jobs integer NOT NULL DEFAULT 0,
+  total_volume numeric(36, 8) NOT NULL DEFAULT 0,
+  unique_counterparties integer NOT NULL DEFAULT 0,
+  confidence numeric(4, 2) NOT NULL DEFAULT 0,
+  updated_at timestamp DEFAULT NOW(),
+
+  PRIMARY KEY (agent_uid, role, chain_id, commerce_contract)
+);
+
+-- ═══════════════════════ commerce_scores_global (rollup) ═══════════════════════
+
+CREATE TABLE IF NOT EXISTS commerce_scores_global (
+  agent_uid bigint NOT NULL,
+  role varchar(32) NOT NULL,
+
+  completed_count integer NOT NULL DEFAULT 0,
+  rejected_count integer NOT NULL DEFAULT 0,
+  expired_responsible_count integer NOT NULL DEFAULT 0,
+  success_rate numeric(6, 4) NOT NULL DEFAULT 0,
+  weighted_score numeric(6, 4) NOT NULL DEFAULT 0,
+  weighted_volume_sum numeric(36, 8) NOT NULL DEFAULT 0,
+
+  created_count integer NOT NULL DEFAULT 0,
+  funded_count integer NOT NULL DEFAULT 0,
+  funded_rate numeric(6, 4) NOT NULL DEFAULT 0,
+  completion_rate numeric(6, 4) NOT NULL DEFAULT 0,
+
+  evaluated_count integer NOT NULL DEFAULT 0,
+  expired_from_submitted_count integer NOT NULL DEFAULT 0,
+  responsiveness numeric(6, 4) NOT NULL DEFAULT 0,
+
+  total_jobs integer NOT NULL DEFAULT 0,
+  total_volume numeric(36, 8) NOT NULL DEFAULT 0,
+  unique_counterparties integer NOT NULL DEFAULT 0,
+  confidence numeric(4, 2) NOT NULL DEFAULT 0,
+  updated_at timestamp DEFAULT NOW(),
+
+  PRIMARY KEY (agent_uid, role)
+);
+
+-- ═══════════════════════ Aggregation Triggers ═══════════════════════
+
+CREATE OR REPLACE FUNCTION update_commerce_scores_on_insert() RETURNS TRIGGER AS $$
+DECLARE
+  v_terminal_count integer;
+  v_unique_cp integer;
+BEGIN
+  IF NEW.signal_certainty <> 'definitive' THEN
+    RETURN NEW;
+  END IF;
+
+  -- Upsert into commerce_scores
+  INSERT INTO commerce_scores (agent_uid, role, chain_id, commerce_contract, updated_at)
+  VALUES (NEW.agent_uid, NEW.role, NEW.chain_id, NEW.commerce_contract, NOW())
+  ON CONFLICT (agent_uid, role, chain_id, commerce_contract) DO NOTHING;
+
+  -- Provider role aggregation
+  IF NEW.role = 'provider' THEN
+    IF NEW.action = 'job_completed' THEN
+      UPDATE commerce_scores SET
+        completed_count = completed_count + 1,
+        total_jobs = total_jobs + 1,
+        total_volume = total_volume + COALESCE(NEW.job_budget, 0),
+        weighted_volume_sum = weighted_volume_sum + COALESCE(NEW.job_budget, 0) * 1.0,
+        updated_at = NOW()
+      WHERE agent_uid = NEW.agent_uid AND role = NEW.role AND chain_id = NEW.chain_id AND commerce_contract = NEW.commerce_contract;
+    ELSIF NEW.action = 'job_rejected' THEN
+      UPDATE commerce_scores SET
+        rejected_count = rejected_count + 1,
+        total_jobs = total_jobs + 1,
+        total_volume = total_volume + COALESCE(NEW.job_budget, 0),
+        weighted_volume_sum = CASE
+          WHEN NEW.previous_status = 'funded' THEN weighted_volume_sum + COALESCE(NEW.job_budget, 0) * 0.2
+          ELSE weighted_volume_sum
+        END,
+        updated_at = NOW()
+      WHERE agent_uid = NEW.agent_uid AND role = NEW.role AND chain_id = NEW.chain_id AND commerce_contract = NEW.commerce_contract;
+    ELSIF NEW.action = 'job_expired' AND NEW.previous_status = 'funded' THEN
+      UPDATE commerce_scores SET
+        expired_responsible_count = expired_responsible_count + 1,
+        total_jobs = total_jobs + 1,
+        total_volume = total_volume + COALESCE(NEW.job_budget, 0),
+        updated_at = NOW()
+      WHERE agent_uid = NEW.agent_uid AND role = NEW.role AND chain_id = NEW.chain_id AND commerce_contract = NEW.commerce_contract;
+    ELSIF NEW.action = 'job_expired' AND NEW.previous_status = 'submitted' THEN
+      UPDATE commerce_scores SET
+        total_jobs = total_jobs + 1,
+        total_volume = total_volume + COALESCE(NEW.job_budget, 0),
+        weighted_volume_sum = weighted_volume_sum + COALESCE(NEW.job_budget, 0) * 0.3,
+        updated_at = NOW()
+      WHERE agent_uid = NEW.agent_uid AND role = NEW.role AND chain_id = NEW.chain_id AND commerce_contract = NEW.commerce_contract;
+    END IF;
+
+    -- Recalculate provider rates
+    SELECT completed_count + rejected_count + expired_responsible_count INTO v_terminal_count
+    FROM commerce_scores
+    WHERE agent_uid = NEW.agent_uid AND role = NEW.role AND chain_id = NEW.chain_id AND commerce_contract = NEW.commerce_contract;
+
+    UPDATE commerce_scores SET
+      success_rate = CASE WHEN v_terminal_count > 0 THEN completed_count::numeric / v_terminal_count ELSE 0 END,
+      weighted_score = CASE WHEN total_volume > 0 THEN weighted_volume_sum / total_volume ELSE 0 END,
+      confidence = LEAST(v_terminal_count::numeric / 5.0, 1.0)
+    WHERE agent_uid = NEW.agent_uid AND role = NEW.role AND chain_id = NEW.chain_id AND commerce_contract = NEW.commerce_contract;
+
+  -- Client role aggregation
+  ELSIF NEW.role = 'client' THEN
+    IF NEW.action = 'job_completed' THEN
+      UPDATE commerce_scores SET
+        completed_count = completed_count + 1,
+        total_jobs = total_jobs + 1,
+        total_volume = total_volume + COALESCE(NEW.job_budget, 0),
+        updated_at = NOW()
+      WHERE agent_uid = NEW.agent_uid AND role = NEW.role AND chain_id = NEW.chain_id AND commerce_contract = NEW.commerce_contract;
+    ELSIF NEW.action = 'job_rejected' OR NEW.action = 'job_expired' THEN
+      UPDATE commerce_scores SET
+        total_jobs = total_jobs + 1,
+        updated_at = NOW()
+      WHERE agent_uid = NEW.agent_uid AND role = NEW.role AND chain_id = NEW.chain_id AND commerce_contract = NEW.commerce_contract;
+    END IF;
+
+    UPDATE commerce_scores SET
+      funded_rate = CASE WHEN created_count > 0 THEN funded_count::numeric / created_count ELSE 0 END,
+      completion_rate = CASE WHEN funded_count > 0 THEN completed_count::numeric / funded_count ELSE 0 END,
+      confidence = LEAST(total_jobs::numeric / 5.0, 1.0)
+    WHERE agent_uid = NEW.agent_uid AND role = NEW.role AND chain_id = NEW.chain_id AND commerce_contract = NEW.commerce_contract;
+
+  -- Evaluator role aggregation
+  ELSIF NEW.role = 'evaluator' THEN
+    IF NEW.action = 'job_completed' OR NEW.action = 'job_rejected' THEN
+      UPDATE commerce_scores SET
+        evaluated_count = evaluated_count + 1,
+        total_jobs = total_jobs + 1,
+        updated_at = NOW()
+      WHERE agent_uid = NEW.agent_uid AND role = NEW.role AND chain_id = NEW.chain_id AND commerce_contract = NEW.commerce_contract;
+    ELSIF NEW.action = 'job_expired' AND NEW.previous_status = 'submitted' THEN
+      UPDATE commerce_scores SET
+        expired_from_submitted_count = expired_from_submitted_count + 1,
+        total_jobs = total_jobs + 1,
+        updated_at = NOW()
+      WHERE agent_uid = NEW.agent_uid AND role = NEW.role AND chain_id = NEW.chain_id AND commerce_contract = NEW.commerce_contract;
+    END IF;
+
+    UPDATE commerce_scores SET
+      responsiveness = CASE WHEN (evaluated_count + expired_from_submitted_count) > 0
+        THEN evaluated_count::numeric / (evaluated_count + expired_from_submitted_count) ELSE 0 END,
+      confidence = LEAST(total_jobs::numeric / 5.0, 1.0)
+    WHERE agent_uid = NEW.agent_uid AND role = NEW.role AND chain_id = NEW.chain_id AND commerce_contract = NEW.commerce_contract;
+  END IF;
+
+  -- Update unique_counterparties
+  SELECT COUNT(DISTINCT counterparty) INTO v_unique_cp
+  FROM commerce_actions
+  WHERE agent_uid = NEW.agent_uid AND role = NEW.role AND chain_id = NEW.chain_id
+    AND commerce_contract = NEW.commerce_contract AND signal_certainty = 'definitive'
+    AND counterparty <> '';
+
+  UPDATE commerce_scores SET unique_counterparties = COALESCE(v_unique_cp, 0)
+  WHERE agent_uid = NEW.agent_uid AND role = NEW.role AND chain_id = NEW.chain_id AND commerce_contract = NEW.commerce_contract;
+
+  -- ────── Global Rollup ──────
+  INSERT INTO commerce_scores_global (agent_uid, role, updated_at)
+  VALUES (NEW.agent_uid, NEW.role, NOW())
+  ON CONFLICT (agent_uid, role) DO NOTHING;
+
+  UPDATE commerce_scores_global g SET
+    completed_count = sub.completed_count,
+    rejected_count = sub.rejected_count,
+    expired_responsible_count = sub.expired_responsible_count,
+    weighted_volume_sum = sub.weighted_volume_sum,
+    created_count = sub.created_count,
+    funded_count = sub.funded_count,
+    evaluated_count = sub.evaluated_count,
+    expired_from_submitted_count = sub.expired_from_submitted_count,
+    total_jobs = sub.total_jobs,
+    total_volume = sub.total_volume,
+    unique_counterparties = sub.unique_counterparties,
+    updated_at = NOW()
+  FROM (
+    SELECT
+      SUM(completed_count) AS completed_count,
+      SUM(rejected_count) AS rejected_count,
+      SUM(expired_responsible_count) AS expired_responsible_count,
+      SUM(weighted_volume_sum) AS weighted_volume_sum,
+      SUM(created_count) AS created_count,
+      SUM(funded_count) AS funded_count,
+      SUM(evaluated_count) AS evaluated_count,
+      SUM(expired_from_submitted_count) AS expired_from_submitted_count,
+      SUM(total_jobs) AS total_jobs,
+      SUM(total_volume) AS total_volume,
+      SUM(unique_counterparties) AS unique_counterparties
+    FROM commerce_scores
+    WHERE agent_uid = NEW.agent_uid AND role = NEW.role
+  ) sub
+  WHERE g.agent_uid = NEW.agent_uid AND g.role = NEW.role;
+
+  -- Recalculate global rates
+  IF NEW.role = 'provider' THEN
+    UPDATE commerce_scores_global SET
+      success_rate = CASE WHEN (completed_count + rejected_count + expired_responsible_count) > 0
+        THEN completed_count::numeric / (completed_count + rejected_count + expired_responsible_count) ELSE 0 END,
+      weighted_score = CASE WHEN total_volume > 0 THEN weighted_volume_sum / total_volume ELSE 0 END,
+      confidence = LEAST((completed_count + rejected_count + expired_responsible_count)::numeric / 5.0, 1.0)
+    WHERE agent_uid = NEW.agent_uid AND role = NEW.role;
+  ELSIF NEW.role = 'client' THEN
+    UPDATE commerce_scores_global SET
+      funded_rate = CASE WHEN created_count > 0 THEN funded_count::numeric / created_count ELSE 0 END,
+      completion_rate = CASE WHEN funded_count > 0 THEN completed_count::numeric / funded_count ELSE 0 END,
+      confidence = LEAST(total_jobs::numeric / 5.0, 1.0)
+    WHERE agent_uid = NEW.agent_uid AND role = NEW.role;
+  ELSIF NEW.role = 'evaluator' THEN
+    UPDATE commerce_scores_global SET
+      responsiveness = CASE WHEN (evaluated_count + expired_from_submitted_count) > 0
+        THEN evaluated_count::numeric / (evaluated_count + expired_from_submitted_count) ELSE 0 END,
+      confidence = LEAST(total_jobs::numeric / 5.0, 1.0)
+    WHERE agent_uid = NEW.agent_uid AND role = NEW.role;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trigger_update_commerce_scores_on_insert') THEN
+    CREATE TRIGGER trigger_update_commerce_scores_on_insert
+    AFTER INSERT ON commerce_actions
+    FOR EACH ROW
+    EXECUTE FUNCTION update_commerce_scores_on_insert();
+  END IF;
+END $$;
+
+-- Handle client indicative events (created/funded) for client counts
+CREATE OR REPLACE FUNCTION update_commerce_client_counts_on_insert() RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.signal_certainty <> 'indicative' OR NEW.role <> 'client' THEN
+    RETURN NEW;
+  END IF;
+
+  INSERT INTO commerce_scores (agent_uid, role, chain_id, commerce_contract, updated_at)
+  VALUES (NEW.agent_uid, NEW.role, NEW.chain_id, NEW.commerce_contract, NOW())
+  ON CONFLICT (agent_uid, role, chain_id, commerce_contract) DO NOTHING;
+
+  IF NEW.action = 'job_created' THEN
+    UPDATE commerce_scores SET created_count = created_count + 1, updated_at = NOW()
+    WHERE agent_uid = NEW.agent_uid AND role = NEW.role AND chain_id = NEW.chain_id AND commerce_contract = NEW.commerce_contract;
+  ELSIF NEW.action = 'job_funded' THEN
+    UPDATE commerce_scores SET funded_count = funded_count + 1, updated_at = NOW()
+    WHERE agent_uid = NEW.agent_uid AND role = NEW.role AND chain_id = NEW.chain_id AND commerce_contract = NEW.commerce_contract;
+  END IF;
+
+  -- Also update global rollup for created/funded counts
+  INSERT INTO commerce_scores_global (agent_uid, role, updated_at)
+  VALUES (NEW.agent_uid, NEW.role, NOW())
+  ON CONFLICT (agent_uid, role) DO NOTHING;
+
+  UPDATE commerce_scores_global g SET
+    created_count = sub.created_count,
+    funded_count = sub.funded_count,
+    updated_at = NOW()
+  FROM (
+    SELECT SUM(created_count) AS created_count, SUM(funded_count) AS funded_count
+    FROM commerce_scores
+    WHERE agent_uid = NEW.agent_uid AND role = NEW.role
+  ) sub
+  WHERE g.agent_uid = NEW.agent_uid AND g.role = NEW.role;
+
+  -- Recalculate rates
+  UPDATE commerce_scores SET
+    funded_rate = CASE WHEN created_count > 0 THEN funded_count::numeric / created_count ELSE 0 END
+  WHERE agent_uid = NEW.agent_uid AND role = NEW.role AND chain_id = NEW.chain_id AND commerce_contract = NEW.commerce_contract;
+
+  UPDATE commerce_scores_global SET
+    funded_rate = CASE WHEN created_count > 0 THEN funded_count::numeric / created_count ELSE 0 END
+  WHERE agent_uid = NEW.agent_uid AND role = NEW.role;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trigger_update_commerce_client_counts') THEN
+    CREATE TRIGGER trigger_update_commerce_client_counts
+    AFTER INSERT ON commerce_actions
+    FOR EACH ROW
+    EXECUTE FUNCTION update_commerce_client_counts_on_insert();
+  END IF;
+END $$;
+

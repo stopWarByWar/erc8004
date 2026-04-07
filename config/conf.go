@@ -237,6 +237,12 @@ type IndexerConfig struct {
 		StartBlock         uint64 `yaml:"start_block"`
 		Run                bool   `yaml:"run"`
 	} `yaml:"validation"`
+	Commerce struct {
+		Addr               string `yaml:"addr"`
+		FetchBlockInterval int64  `yaml:"fetch_block_interval"`
+		StartBlock         uint64 `yaml:"start_block"`
+		Run                bool   `yaml:"run"`
+	} `yaml:"commerce"`
 }
 
 func GetFilterInfo() FilterInfo {

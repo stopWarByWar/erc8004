@@ -59,6 +59,14 @@ func TestGetCardResponse(t *testing.T) {
 	if err != nil {
 		t.Errorf("GetCardResponse error: %v", err)
 	}
+	// commerce_score is optional; ensure it doesn't crash and is either nil or keyed by role.
+	if agentCard != nil && agentCard.CommerceScore != nil {
+		for role := range agentCard.CommerceScore {
+			if role == "" {
+				t.Fatal("unexpected empty role key in commerce_score")
+			}
+		}
+	}
 	fmt.Printf("agentCard: %+v\n", agentCard)
 }
 

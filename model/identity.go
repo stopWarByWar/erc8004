@@ -261,6 +261,37 @@ func GetAgentUID(chainID string, identityRegistry string, agentID string) (uint6
 	return agentUID.UID, nil
 }
 
+// FindOrCreateAgentByWallet looks up an agent by wallet address and chain.
+// If no agent exists, it creates a minimal stub record (active=false, inserted=false)
+// and returns the new UID. This supports the ERC-8183 Commerce Reputation system
+// where on-chain addresses may not yet be registered in the identity registry.
+func FindOrCreateAgentByWallet(chainID, wallet string) (uint64, error) {
+	var agent Agent
+	err := db.Where("agent_wallet = ? AND chain_id = ?", wallet, chainID).First(&agent).Error
+	if err == nil {
+		return agent.UID, nil
+	}
+	if err != gorm.ErrRecordNotFound {
+		return 0, err
+	}
+
+	stub := Agent{
+		ChainID:     chainID,
+		AgentWallet: wallet,
+		Active:      false,
+		Inserted:    false,
+	}
+	if err := db.Omit("uid").Create(&stub).Error; err != nil {
+		// handle race condition: another goroutine may have inserted concurrently
+		var existing Agent
+		if err2 := db.Where("agent_wallet = ? AND chain_id = ?", wallet, chainID).First(&existing).Error; err2 == nil {
+			return existing.UID, nil
+		}
+		return 0, err
+	}
+	return stub.UID, nil
+}
+
 func CreateMetadata(metadata *Metadata) error {
 	err := db.Clauses(clause.OnConflict{
 		Columns: []clause.Column{

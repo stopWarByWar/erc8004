@@ -35,6 +35,12 @@ func initTest() {
 	helper.InitHelper(_config.S3Region, _config.S3BucketName, _config.AWSAccessKeyId, _config.AWSSecretAccessKey)
 
 	model.InitDB(_config.Dns, _config.OpenaiAPIKey)
+	if err := model.EnsureCommerceActionsSchema(); err != nil {
+		panic(err)
+	}
+	if err := model.EnsureCommerceScoresSchema(); err != nil {
+		panic(err)
+	}
 }
 
 type Config struct {

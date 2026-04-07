@@ -176,6 +176,45 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 		X402Support:        agent.X402Support,
 		Endpoints:          endpoints,
 	}
+
+	// Optional commerce score summary for UI (global rollup). If commerce tables are not
+	// initialized in the DB, we keep it empty instead of failing agent detail.
+	if scores, err := GetCommerceScoreSummary(agentUID); err == nil {
+		byRole := make(map[string]serverTypes.CommerceScore, len(scores))
+		for _, s := range scores {
+			if s.Role == "" {
+				continue
+			}
+			byRole[s.Role] = serverTypes.CommerceScore{
+				Role:                      s.Role,
+				CompletedCount:            s.CompletedCount,
+				RejectedCount:             s.RejectedCount,
+				ExpiredResponsibleCount:   s.ExpiredResponsibleCount,
+				SuccessRate:               s.SuccessRate,
+				WeightedScore:             s.WeightedScore,
+				CreatedCount:              s.CreatedCount,
+				FundedCount:               s.FundedCount,
+				FundedRate:                s.FundedRate,
+				CompletionRate:            s.CompletionRate,
+				EvaluatedCount:            s.EvaluatedCount,
+				ExpiredFromSubmittedCount: s.ExpiredFromSubmittedCount,
+				Responsiveness:            s.Responsiveness,
+				TotalJobs:                 s.TotalJobs,
+				TotalVolume:               s.TotalVolume,
+				UniqueCounterparties:      s.UniqueCounterparties,
+				Confidence:                s.Confidence,
+			}
+		}
+		if len(byRole) > 0 {
+			resp.CommerceScore = byRole
+		}
+	} else {
+		// Only tolerate missing-table style errors; real errors should still surface.
+		msg := err.Error()
+		if !(strings.Contains(msg, "commerce_scores_global") && strings.Contains(msg, "does not exist")) {
+			return nil, fmt.Errorf("fail to get commerce score summary: %v", err)
+		}
+	}
 	return &resp, nil
 }
 

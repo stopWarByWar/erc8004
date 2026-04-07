@@ -7,6 +7,9 @@ import (
 )
 
 func TestGetAgentProfile(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping network test in -short")
+	}
 	agent, err := GetAgentProfile("ipfs://QmcLpNkoqchCXjJS5diuP61hAwnUDaJnrAGTDn4PzkHKzn")
 	if err != nil {
 		panic(err)
@@ -78,6 +81,9 @@ func Test_getAgentProfileFromEncodedData(t *testing.T) {
 }
 
 func Test_GetAgentProfile(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping network test in -short")
+	}
 	agent, err := GetAgentProfile("https://futureswamp.studio/raven-agent.json")
 	if err != nil {
 		t.Fatal(err)

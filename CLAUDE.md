@@ -1,0 +1,75 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+This is a Go backend service implementing the ERC-8004 standard for AI agent identity registration and validation. It indexes blockchain events from smart contracts, stores agent identity/reputation data in PostgreSQL, and serves a REST API. Two separate processes: **server** (REST API) and **indexer** (blockchain event listener).
+
+## Commands
+
+```bash
+# Build
+go build ./server/main.go
+go build ./indexer/main.go
+
+# Run
+go run ./server/main.go -f ./server/api/logic/config.yaml
+go run ./indexer/main.go -f ./config/conf.yaml
+./start_indexer.sh   # interactive multi-chain indexer launcher
+
+# CLI tool - batch update vector embeddings
+go run ./cmd/update_desc_vector.go -f ./config/conf.yaml
+
+# Test
+go test ./...
+go test -v -run TestName ./path/to/package/
+go test -cover ./...
+go test -race ./...
+```
+
+## Architecture
+
+### Layered Request Flow
+```
+HTTP Request → handle/ → logic/ → model/ → PostgreSQL
+```
+- `server/api/handle/` — HTTP parsing, validation, calling logic functions
+- `server/api/logic/` — business logic, data transformation, response shaping
+- `model/` — GORM-based data access; queries split by domain (`identity.go`, `reputation.go`, `validation.go`, `embedding.go`)
+- `docs/` 
+    - `designs/`: 针对新的功能和模块，设计文档是只增的，对于相同的功能在旧的设计文档，新的功能放新的设计文档
+    - `specs`
+    - `exec-plans`: 计划执行跟踪，每个文件是一个独立的工作模块，跟踪task完成情况
+    - `resources` documents 
+
+### Two Services
+
+**Server** (`server/main.go`): Gin-based REST API. Routes defined in `server/api/router.go`. All handler logic lives in `handle/` + `logic/`.
+
+**Indexer** (`indexer/main.go`): Polls blockchain events from smart contracts. Processors in `indexer/processor/` handle different contract types (Identity, Reputation, Validation, Comments). Uses a fan-out channel pattern to distribute events.
+
+### Key Packages
+| Package | Purpose |
+|---------|---------|
+| `model/` | GORM models (`types.go`) + domain-specific query files |
+| `config/` | Loads YAML config; `config.ChainMap` and `config.RegisterMap` drive multi-chain support |
+| `abi/` | Generated Ethereum smart contract ABIs |
+| `agentCard/` | Agent profile card data structures |
+| `helper/` | AWS S3 file upload helper |
+| `logger/` | Structured logging wrapper |
+
+### Multi-Chain Support
+All agents are scoped by `chain_id` + `identity_registry` address. Chain configs live in `config/testnet/` and `config/mainnet/` as individual YAML files, aggregated by `config/config.yaml`.
+
+### Semantic Search
+Agent descriptions are embedded via OpenAI API and stored in `agent_vectors` table (`vector(1536)` type via pgvector). The `cmd/update_desc_vector.go` tool batch-processes embeddings. Similarity queries run in `model/embedding.go`.
+
+### Database
+PostgreSQL with GORM. Schema versioned in `migrations/`. Initialize with `model.InitDB()`. All models defined in `model/types.go`; key tables: `agents`, `feedbacks`, `validations`, `agent_vectors`, `attestation`.
+
+## Configuration
+
+- Server runtime config: `server/api/logic/config.yaml` (DB, OpenAI key, AWS, etc.)
+- Indexer/chain config: `config/conf.yaml` + per-chain files in `config/testnet/` or `config/mainnet/`
+- Secrets (DB password, OpenAI key, AWS keys) are read from the YAML config — never hardcode them

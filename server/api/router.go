@@ -55,6 +55,9 @@ func Run(_cors []string, port string) {
 	r.GET("agent/identity/detail/feedbacks", handle.GetAgentFeedbacksHandler)
 	r.POST("agent/identity/set/feedback", handle.UploadFeedbackHandler)
 
+	r.GET("agent/commerce/scores", handle.GetCommerceScoresHandler)
+	r.GET("agent/commerce/actions", handle.GetCommerceActionsHandler)
+
 	r.GET("agent/identity/filter/info", handle.GetFilterInfoHandler)
 	r.GET("agent/identity/filter/search/skill", handle.GetSkillsForFilterHandler)
 	r.GET("agent/leaderboard", handle.GetLeaderboardInfoHandler)

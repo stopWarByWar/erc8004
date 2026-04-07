@@ -263,3 +263,81 @@ type FeedbackTagScore struct {
 }
 
 func (FeedbackTagScore) TableName() string { return "feedback_tag_scores" }
+
+// ─────────────── ERC-8183 Commerce Reputation ───────────────
+
+type CommerceAction struct {
+	UID              uint64  `gorm:"column:uid;type:bigint;primaryKey"`
+	ChainID          string  `gorm:"column:chain_id;type:varchar(255);not null"`
+	CommerceContract string  `gorm:"column:commerce_contract;type:varchar(255);not null"`
+	JobID            uint64  `gorm:"column:job_id;type:bigint;not null"`
+	AgentUID         uint64  `gorm:"column:agent_uid;type:bigint;not null"`
+	AgentAddress     string  `gorm:"column:agent_address;type:varchar(255);not null"`
+	Role             string  `gorm:"column:role;type:varchar(32);not null"`
+	Action           string  `gorm:"column:action;type:varchar(64);not null"`
+	SignalPolarity   string  `gorm:"column:signal_polarity;type:varchar(16);not null"`
+	SignalWeight     float64 `gorm:"column:signal_weight;type:numeric(4,2);not null;default:0"`
+	SignalCertainty  string  `gorm:"column:signal_certainty;type:varchar(16);not null"`
+	JobBudget        float64 `gorm:"column:job_budget;type:numeric(36,8);default:0"`
+	Counterparty     string  `gorm:"column:counterparty;type:varchar(255);default:''"`
+	Reason           string  `gorm:"column:reason;type:varchar(255);default:''"`
+	Deliverable      string  `gorm:"column:deliverable;type:varchar(255);default:''"`
+	PreviousStatus   string  `gorm:"column:previous_status;type:varchar(32);default:''"`
+	HookAddress      string  `gorm:"column:hook_address;type:varchar(255);default:''"`
+	BlockNumber      uint64  `gorm:"column:block_number;type:bigint;not null"`
+	TxHash           string  `gorm:"column:tx_hash;type:varchar(255);not null"`
+	LogIndex         uint    `gorm:"column:log_index;type:integer;not null"`
+	BlockTimestamp   uint64  `gorm:"column:block_timestamp;type:bigint;not null"`
+}
+
+func (CommerceAction) TableName() string { return "commerce_actions" }
+
+type CommerceScore struct {
+	AgentUID                 uint64  `gorm:"column:agent_uid;type:bigint;primaryKey"`
+	Role                     string  `gorm:"column:role;type:varchar(32);primaryKey"`
+	ChainID                  string  `gorm:"column:chain_id;type:varchar(255);primaryKey"`
+	CommerceContract         string  `gorm:"column:commerce_contract;type:varchar(255);primaryKey"`
+	CompletedCount           int     `gorm:"column:completed_count;default:0"`
+	RejectedCount            int     `gorm:"column:rejected_count;default:0"`
+	ExpiredResponsibleCount  int     `gorm:"column:expired_responsible_count;default:0"`
+	SuccessRate              float64 `gorm:"column:success_rate;type:numeric(6,4);default:0"`
+	WeightedScore            float64 `gorm:"column:weighted_score;type:numeric(6,4);default:0"`
+	WeightedVolumeSum        float64 `gorm:"column:weighted_volume_sum;type:numeric(36,8);default:0"`
+	CreatedCount             int     `gorm:"column:created_count;default:0"`
+	FundedCount              int     `gorm:"column:funded_count;default:0"`
+	FundedRate               float64 `gorm:"column:funded_rate;type:numeric(6,4);default:0"`
+	CompletionRate           float64 `gorm:"column:completion_rate;type:numeric(6,4);default:0"`
+	EvaluatedCount           int     `gorm:"column:evaluated_count;default:0"`
+	ExpiredFromSubmittedCount int    `gorm:"column:expired_from_submitted_count;default:0"`
+	Responsiveness           float64 `gorm:"column:responsiveness;type:numeric(6,4);default:0"`
+	TotalJobs                int     `gorm:"column:total_jobs;default:0"`
+	TotalVolume              float64 `gorm:"column:total_volume;type:numeric(36,8);default:0"`
+	UniqueCounterparties     int     `gorm:"column:unique_counterparties;default:0"`
+	Confidence               float64 `gorm:"column:confidence;type:numeric(4,2);default:0"`
+}
+
+func (CommerceScore) TableName() string { return "commerce_scores" }
+
+type CommerceScoreGlobal struct {
+	AgentUID                 uint64  `gorm:"column:agent_uid;type:bigint;primaryKey"`
+	Role                     string  `gorm:"column:role;type:varchar(32);primaryKey"`
+	CompletedCount           int     `gorm:"column:completed_count;default:0"`
+	RejectedCount            int     `gorm:"column:rejected_count;default:0"`
+	ExpiredResponsibleCount  int     `gorm:"column:expired_responsible_count;default:0"`
+	SuccessRate              float64 `gorm:"column:success_rate;type:numeric(6,4);default:0"`
+	WeightedScore            float64 `gorm:"column:weighted_score;type:numeric(6,4);default:0"`
+	WeightedVolumeSum        float64 `gorm:"column:weighted_volume_sum;type:numeric(36,8);default:0"`
+	CreatedCount             int     `gorm:"column:created_count;default:0"`
+	FundedCount              int     `gorm:"column:funded_count;default:0"`
+	FundedRate               float64 `gorm:"column:funded_rate;type:numeric(6,4);default:0"`
+	CompletionRate           float64 `gorm:"column:completion_rate;type:numeric(6,4);default:0"`
+	EvaluatedCount           int     `gorm:"column:evaluated_count;default:0"`
+	ExpiredFromSubmittedCount int    `gorm:"column:expired_from_submitted_count;default:0"`
+	Responsiveness           float64 `gorm:"column:responsiveness;type:numeric(6,4);default:0"`
+	TotalJobs                int     `gorm:"column:total_jobs;default:0"`
+	TotalVolume              float64 `gorm:"column:total_volume;type:numeric(36,8);default:0"`
+	UniqueCounterparties     int     `gorm:"column:unique_counterparties;default:0"`
+	Confidence               float64 `gorm:"column:confidence;type:numeric(4,2);default:0"`
+}
+
+func (CommerceScoreGlobal) TableName() string { return "commerce_scores_global" }

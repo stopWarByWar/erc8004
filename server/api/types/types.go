@@ -35,6 +35,32 @@ type AgentResponse struct {
 	Status             string             `json:"status"`
 	X402Support        bool               `json:"x402Support"`
 	Endpoints          []EndpointResponse `json:"endpoints"`
+
+	// CommerceScore provides global commerce score summary organized by role.
+	// It is optional and may be empty when the DB has no commerce tables or no data.
+	CommerceScore map[string]CommerceScore `json:"commerce_score,omitempty"`
+}
+
+// CommerceScore is the UI-facing commerce score payload for a specific role.
+// It mirrors fields returned by GET agent/commerce/scores.
+type CommerceScore struct {
+	Role                      string  `json:"role"`
+	CompletedCount            int     `json:"completed_count"`
+	RejectedCount             int     `json:"rejected_count"`
+	ExpiredResponsibleCount   int     `json:"expired_responsible_count"`
+	SuccessRate               float64 `json:"success_rate"`
+	WeightedScore             float64 `json:"weighted_score"`
+	CreatedCount              int     `json:"created_count"`
+	FundedCount               int     `json:"funded_count"`
+	FundedRate                float64 `json:"funded_rate"`
+	CompletionRate            float64 `json:"completion_rate"`
+	EvaluatedCount            int     `json:"evaluated_count"`
+	ExpiredFromSubmittedCount int     `json:"expired_from_submitted_count"`
+	Responsiveness            float64 `json:"responsiveness"`
+	TotalJobs                 int     `json:"total_jobs"`
+	TotalVolume               float64 `json:"total_volume"`
+	UniqueCounterparties      int     `json:"unique_counterparties"`
+	Confidence                float64 `json:"confidence"`
 }
 
 type EndpointResponse struct {
