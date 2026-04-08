@@ -1,0 +1,33 @@
+rpc_url: "https://bsc-testnet-rpc.example"
+chain_id: 97
+commerce: "0xYourAgenticCommerce"
+
+# 三个角色钱包（测试用；私钥不要提交到仓库）
+client:
+  private_key: "0x..."
+  address: "0x..." # 可选：留空则运行时从私钥推导并打印
+provider:
+  private_key: "0x..."
+  address: "0x..."
+evaluator:
+  private_key: "0x..."
+  address: "0x..."
+
+# createJob 参数（provider/evaluator 地址建议与上面钱包地址一致）
+create_job:
+  provider: "0xProviderAddress"
+  evaluator: "0xEvaluatorAddress"
+  expired_at: 0 # 0 = now + 7d
+  description: "commerce_seed test job"
+  hook: "0x0000000000000000000000000000000000000000"
+
+# happy-path / 分步命令共用参数
+budget: "1000000" # token 最小单位
+opt_params: "0x"
+deliverable: "" # submit-only: 32 bytes hex；空=keccak256(description)
+reason: "0x0000000000000000000000000000000000000000000000000000000000000000"
+gas_limit: 0
+
+# 默认命令（可用 CLI -command 覆盖）
+command: "happy-path"
+
