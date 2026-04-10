@@ -76,7 +76,8 @@ func SetFeedback(request serverTypes.UploadFeedbackRequest) (string, string, err
 		return "", "", fmt.Errorf("fail to upload feedback to s3: %w", err)
 	}
 
-	feedbackHash := common.BytesToHash(sha256.New().Sum(feedbackData)).String()
+	sum := sha256.Sum256(feedbackData)
+	feedbackHash := common.BytesToHash(sum[:]).String()
 
 	return feedbackURI, feedbackHash, nil
 }

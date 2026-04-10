@@ -29,22 +29,25 @@ var (
 	_ = abi.ConvertType
 )
 
-// AgenticCommerceUpgradeableJob is an auto generated low-level Go binding around an user-defined struct.
-type AgenticCommerceUpgradeableJob struct {
-	Id          *big.Int
-	Client      common.Address
-	Provider    common.Address
-	Evaluator   common.Address
-	Description string
-	Budget      *big.Int
-	ExpiredAt   *big.Int
-	Status      uint8
-	Hook        common.Address
+// AgenticCommerceJob is an auto generated low-level Go binding around an user-defined struct.
+type AgenticCommerceJob struct {
+	Id              *big.Int
+	Client          common.Address
+	Provider        common.Address
+	Evaluator       common.Address
+	Description     string
+	Budget          *big.Int
+	ExpiredAt       *big.Int
+	Status          uint8
+	Hook            common.Address
+	PaymentToken    common.Address
+	ProviderAgentId *big.Int
+	SubmittedAt     *big.Int
 }
 
 // AgenticCommerceMetaData contains all meta data concerning the AgenticCommerce contract.
 var AgenticCommerceMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"trustedForwarder_\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"AccessControlBadConfirmation\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"neededRole\",\"type\":\"bytes32\"}],\"name\":\"AccessControlUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"target\",\"type\":\"address\"}],\"name\":\"AddressEmptyCode\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"BudgetMismatch\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"ERC1967InvalidImplementation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ERC1967NonPayable\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EnforcedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ExpectedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ExpiryTooShort\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FailedCall\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"FeesTooHigh\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"HookCallFailed\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"HookNotWhitelisted\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidInitialization\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidJob\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotInitializing\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ProviderNotSet\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ReentrancyGuardReentrantCall\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"}],\"name\":\"SafeERC20FailedOperation\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UUPSUnauthorizedCallContext\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"slot\",\"type\":\"bytes32\"}],\"name\":\"UUPSUnsupportedProxiableUUID\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"Unauthorized\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"WrongStatus\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ZeroBudget\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"BudgetSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"evaluator\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"EvaluatorFeePaid\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"hook\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"status\",\"type\":\"bool\"}],\"name\":\"HookWhitelistUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"evaluator\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"reason\",\"type\":\"bytes32\"}],\"name\":\"JobCompleted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"client\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"evaluator\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"expiredAt\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"hook\",\"type\":\"address\"}],\"name\":\"JobCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"}],\"name\":\"JobExpired\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"client\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"JobFunded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"rejector\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"reason\",\"type\":\"bytes32\"}],\"name\":\"JobRejected\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"deliverable\",\"type\":\"bytes32\"}],\"name\":\"JobSubmitted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"PaymentReleased\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"}],\"name\":\"ProviderSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"client\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Refunded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"subject\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"role\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"int8\",\"name\":\"signal\",\"type\":\"int8\"}],\"name\":\"ReputationSignal\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"HOOK_GAS_LIMIT\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"UPGRADE_INTERFACE_VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"}],\"name\":\"claimRefund\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"reason\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"optParams\",\"type\":\"bytes\"}],\"name\":\"complete\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"evaluator\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"expiredAt\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"hook\",\"type\":\"address\"}],\"name\":\"createJob\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"evaluatorFeeBP\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expectedBudget\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"optParams\",\"type\":\"bytes\"}],\"name\":\"fund\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expectedBudget\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"optParams\",\"type\":\"bytes\"},{\"internalType\":\"uint256\",\"name\":\"deadline\",\"type\":\"uint256\"},{\"internalType\":\"uint8\",\"name\":\"v\",\"type\":\"uint8\"},{\"internalType\":\"bytes32\",\"name\":\"r\",\"type\":\"bytes32\"},{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"fundWithPermit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"}],\"name\":\"getJob\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"client\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"evaluator\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"budget\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expiredAt\",\"type\":\"uint256\"},{\"internalType\":\"enumAgenticCommerceUpgradeable.JobStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"hook\",\"type\":\"address\"}],\"internalType\":\"structAgenticCommerceUpgradeable.Job\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"paymentToken_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"treasury_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"admin_\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"forwarder\",\"type\":\"address\"}],\"name\":\"isTrustedForwarder\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"jobCounter\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"}],\"name\":\"jobHasBudget\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"hasBudget\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"jobs\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"client\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"evaluator\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"budget\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expiredAt\",\"type\":\"uint256\"},{\"internalType\":\"enumAgenticCommerceUpgradeable.JobStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"hook\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paymentToken\",\"outputs\":[{\"internalType\":\"contractIERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"platformFeeBP\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"platformTreasury\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"reason\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"optParams\",\"type\":\"bytes\"}],\"name\":\"reject\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"callerConfirmation\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"optParams\",\"type\":\"bytes\"}],\"name\":\"setBudget\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"feeBP_\",\"type\":\"uint256\"}],\"name\":\"setEvaluatorFee\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"hook\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"status\",\"type\":\"bool\"}],\"name\":\"setHookWhitelist\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"feeBP_\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"treasury_\",\"type\":\"address\"}],\"name\":\"setPlatformFee\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"provider_\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"optParams\",\"type\":\"bytes\"}],\"name\":\"setProvider\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"deliverable\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"optParams\",\"type\":\"bytes\"}],\"name\":\"submit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"trustedForwarder\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"whitelistedHooks\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+	ABI: "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"BudgetSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"evaluator\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"EvaluatorFeePaid\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"feeBP\",\"type\":\"uint256\"}],\"name\":\"EvaluatorFeeSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"hook\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"status\",\"type\":\"bool\"}],\"name\":\"HookWhitelistUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint64\",\"name\":\"version\",\"type\":\"uint64\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"evaluator\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"reason\",\"type\":\"bytes32\"}],\"name\":\"JobCompleted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"client\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"evaluator\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"expiredAt\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"hook\",\"type\":\"address\"}],\"name\":\"JobCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"}],\"name\":\"JobExpired\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"client\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"JobFunded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"rejector\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"reason\",\"type\":\"bytes32\"}],\"name\":\"JobRejected\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes32\",\"name\":\"deliverable\",\"type\":\"bytes32\"}],\"name\":\"JobSubmitted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"PaymentReleased\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"platformTreasury\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"PlatformFeePaid\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"feeBP\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"treasury\",\"type\":\"address\"}],\"name\":\"PlatformFeeSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"}],\"name\":\"ProviderSet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"client\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"Refunded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"implementation\",\"type\":\"address\"}],\"name\":\"Upgraded\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"EVALUATION_GRACE_PERIOD\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"UPGRADE_INTERFACE_VERSION\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"}],\"name\":\"claimRefund\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"reason\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"optParams\",\"type\":\"bytes\"}],\"name\":\"complete\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"evaluator\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"expiredAt\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"address\",\"name\":\"hook\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"providerAgentId\",\"type\":\"uint256\"}],\"name\":\"createJob\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"evaluatorFeeBP\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expectedBudget\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"optParams\",\"type\":\"bytes\"}],\"name\":\"fund\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"}],\"name\":\"getJob\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"client\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"evaluator\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"budget\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expiredAt\",\"type\":\"uint256\"},{\"internalType\":\"enumAgenticCommerce.JobStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"hook\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"paymentToken\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"providerAgentId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"submittedAt\",\"type\":\"uint256\"}],\"internalType\":\"structAgenticCommerce.Job\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"treasury_\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"jobCounter\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"jobs\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"client\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"provider\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"evaluator\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"uint256\",\"name\":\"budget\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expiredAt\",\"type\":\"uint256\"},{\"internalType\":\"enumAgenticCommerce.JobStatus\",\"name\":\"status\",\"type\":\"uint8\"},{\"internalType\":\"address\",\"name\":\"hook\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"paymentToken\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"providerAgentId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"submittedAt\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"platformFeeBP\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"platformTreasury\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"proxiableUUID\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"reason\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"optParams\",\"type\":\"bytes\"}],\"name\":\"reject\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"callerConfirmation\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"optParams\",\"type\":\"bytes\"}],\"name\":\"setBudget\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"feeBP_\",\"type\":\"uint256\"}],\"name\":\"setEvaluatorFee\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"hook\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"status\",\"type\":\"bool\"}],\"name\":\"setHookWhitelist\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"feeBP_\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"treasury_\",\"type\":\"address\"}],\"name\":\"setPlatformFee\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"provider_\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"agentId\",\"type\":\"uint256\"}],\"name\":\"setProvider\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"jobId\",\"type\":\"uint256\"},{\"internalType\":\"bytes32\",\"name\":\"deliverable\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"optParams\",\"type\":\"bytes\"}],\"name\":\"submit\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newImplementation\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"upgradeToAndCall\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"whitelistedHooks\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
 }
 
 // AgenticCommerceABI is the input ABI used to generate the binding from.
@@ -255,12 +258,12 @@ func (_AgenticCommerce *AgenticCommerceCallerSession) DEFAULTADMINROLE() ([32]by
 	return _AgenticCommerce.Contract.DEFAULTADMINROLE(&_AgenticCommerce.CallOpts)
 }
 
-// HOOKGASLIMIT is a free data retrieval call binding the contract method 0xff54740f.
+// EVALUATIONGRACEPERIOD is a free data retrieval call binding the contract method 0x5088d8be.
 //
-// Solidity: function HOOK_GAS_LIMIT() view returns(uint256)
-func (_AgenticCommerce *AgenticCommerceCaller) HOOKGASLIMIT(opts *bind.CallOpts) (*big.Int, error) {
+// Solidity: function EVALUATION_GRACE_PERIOD() view returns(uint256)
+func (_AgenticCommerce *AgenticCommerceCaller) EVALUATIONGRACEPERIOD(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
-	err := _AgenticCommerce.contract.Call(opts, &out, "HOOK_GAS_LIMIT")
+	err := _AgenticCommerce.contract.Call(opts, &out, "EVALUATION_GRACE_PERIOD")
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -272,18 +275,18 @@ func (_AgenticCommerce *AgenticCommerceCaller) HOOKGASLIMIT(opts *bind.CallOpts)
 
 }
 
-// HOOKGASLIMIT is a free data retrieval call binding the contract method 0xff54740f.
+// EVALUATIONGRACEPERIOD is a free data retrieval call binding the contract method 0x5088d8be.
 //
-// Solidity: function HOOK_GAS_LIMIT() view returns(uint256)
-func (_AgenticCommerce *AgenticCommerceSession) HOOKGASLIMIT() (*big.Int, error) {
-	return _AgenticCommerce.Contract.HOOKGASLIMIT(&_AgenticCommerce.CallOpts)
+// Solidity: function EVALUATION_GRACE_PERIOD() view returns(uint256)
+func (_AgenticCommerce *AgenticCommerceSession) EVALUATIONGRACEPERIOD() (*big.Int, error) {
+	return _AgenticCommerce.Contract.EVALUATIONGRACEPERIOD(&_AgenticCommerce.CallOpts)
 }
 
-// HOOKGASLIMIT is a free data retrieval call binding the contract method 0xff54740f.
+// EVALUATIONGRACEPERIOD is a free data retrieval call binding the contract method 0x5088d8be.
 //
-// Solidity: function HOOK_GAS_LIMIT() view returns(uint256)
-func (_AgenticCommerce *AgenticCommerceCallerSession) HOOKGASLIMIT() (*big.Int, error) {
-	return _AgenticCommerce.Contract.HOOKGASLIMIT(&_AgenticCommerce.CallOpts)
+// Solidity: function EVALUATION_GRACE_PERIOD() view returns(uint256)
+func (_AgenticCommerce *AgenticCommerceCallerSession) EVALUATIONGRACEPERIOD() (*big.Int, error) {
+	return _AgenticCommerce.Contract.EVALUATIONGRACEPERIOD(&_AgenticCommerce.CallOpts)
 }
 
 // UPGRADEINTERFACEVERSION is a free data retrieval call binding the contract method 0xad3cb1cc.
@@ -350,16 +353,16 @@ func (_AgenticCommerce *AgenticCommerceCallerSession) EvaluatorFeeBP() (*big.Int
 
 // GetJob is a free data retrieval call binding the contract method 0xbf22c457.
 //
-// Solidity: function getJob(uint256 jobId) view returns((uint256,address,address,address,string,uint256,uint256,uint8,address))
-func (_AgenticCommerce *AgenticCommerceCaller) GetJob(opts *bind.CallOpts, jobId *big.Int) (AgenticCommerceUpgradeableJob, error) {
+// Solidity: function getJob(uint256 jobId) view returns((uint256,address,address,address,string,uint256,uint256,uint8,address,address,uint256,uint256))
+func (_AgenticCommerce *AgenticCommerceCaller) GetJob(opts *bind.CallOpts, jobId *big.Int) (AgenticCommerceJob, error) {
 	var out []interface{}
 	err := _AgenticCommerce.contract.Call(opts, &out, "getJob", jobId)
 
 	if err != nil {
-		return *new(AgenticCommerceUpgradeableJob), err
+		return *new(AgenticCommerceJob), err
 	}
 
-	out0 := *abi.ConvertType(out[0], new(AgenticCommerceUpgradeableJob)).(*AgenticCommerceUpgradeableJob)
+	out0 := *abi.ConvertType(out[0], new(AgenticCommerceJob)).(*AgenticCommerceJob)
 
 	return out0, err
 
@@ -367,15 +370,15 @@ func (_AgenticCommerce *AgenticCommerceCaller) GetJob(opts *bind.CallOpts, jobId
 
 // GetJob is a free data retrieval call binding the contract method 0xbf22c457.
 //
-// Solidity: function getJob(uint256 jobId) view returns((uint256,address,address,address,string,uint256,uint256,uint8,address))
-func (_AgenticCommerce *AgenticCommerceSession) GetJob(jobId *big.Int) (AgenticCommerceUpgradeableJob, error) {
+// Solidity: function getJob(uint256 jobId) view returns((uint256,address,address,address,string,uint256,uint256,uint8,address,address,uint256,uint256))
+func (_AgenticCommerce *AgenticCommerceSession) GetJob(jobId *big.Int) (AgenticCommerceJob, error) {
 	return _AgenticCommerce.Contract.GetJob(&_AgenticCommerce.CallOpts, jobId)
 }
 
 // GetJob is a free data retrieval call binding the contract method 0xbf22c457.
 //
-// Solidity: function getJob(uint256 jobId) view returns((uint256,address,address,address,string,uint256,uint256,uint8,address))
-func (_AgenticCommerce *AgenticCommerceCallerSession) GetJob(jobId *big.Int) (AgenticCommerceUpgradeableJob, error) {
+// Solidity: function getJob(uint256 jobId) view returns((uint256,address,address,address,string,uint256,uint256,uint8,address,address,uint256,uint256))
+func (_AgenticCommerce *AgenticCommerceCallerSession) GetJob(jobId *big.Int) (AgenticCommerceJob, error) {
 	return _AgenticCommerce.Contract.GetJob(&_AgenticCommerce.CallOpts, jobId)
 }
 
@@ -441,37 +444,6 @@ func (_AgenticCommerce *AgenticCommerceCallerSession) HasRole(role [32]byte, acc
 	return _AgenticCommerce.Contract.HasRole(&_AgenticCommerce.CallOpts, role, account)
 }
 
-// IsTrustedForwarder is a free data retrieval call binding the contract method 0x572b6c05.
-//
-// Solidity: function isTrustedForwarder(address forwarder) view returns(bool)
-func (_AgenticCommerce *AgenticCommerceCaller) IsTrustedForwarder(opts *bind.CallOpts, forwarder common.Address) (bool, error) {
-	var out []interface{}
-	err := _AgenticCommerce.contract.Call(opts, &out, "isTrustedForwarder", forwarder)
-
-	if err != nil {
-		return *new(bool), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
-
-	return out0, err
-
-}
-
-// IsTrustedForwarder is a free data retrieval call binding the contract method 0x572b6c05.
-//
-// Solidity: function isTrustedForwarder(address forwarder) view returns(bool)
-func (_AgenticCommerce *AgenticCommerceSession) IsTrustedForwarder(forwarder common.Address) (bool, error) {
-	return _AgenticCommerce.Contract.IsTrustedForwarder(&_AgenticCommerce.CallOpts, forwarder)
-}
-
-// IsTrustedForwarder is a free data retrieval call binding the contract method 0x572b6c05.
-//
-// Solidity: function isTrustedForwarder(address forwarder) view returns(bool)
-func (_AgenticCommerce *AgenticCommerceCallerSession) IsTrustedForwarder(forwarder common.Address) (bool, error) {
-	return _AgenticCommerce.Contract.IsTrustedForwarder(&_AgenticCommerce.CallOpts, forwarder)
-}
-
 // JobCounter is a free data retrieval call binding the contract method 0x50355d76.
 //
 // Solidity: function jobCounter() view returns(uint256)
@@ -503,64 +475,39 @@ func (_AgenticCommerce *AgenticCommerceCallerSession) JobCounter() (*big.Int, er
 	return _AgenticCommerce.Contract.JobCounter(&_AgenticCommerce.CallOpts)
 }
 
-// JobHasBudget is a free data retrieval call binding the contract method 0xfabc3329.
-//
-// Solidity: function jobHasBudget(uint256 jobId) view returns(bool hasBudget)
-func (_AgenticCommerce *AgenticCommerceCaller) JobHasBudget(opts *bind.CallOpts, jobId *big.Int) (bool, error) {
-	var out []interface{}
-	err := _AgenticCommerce.contract.Call(opts, &out, "jobHasBudget", jobId)
-
-	if err != nil {
-		return *new(bool), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
-
-	return out0, err
-
-}
-
-// JobHasBudget is a free data retrieval call binding the contract method 0xfabc3329.
-//
-// Solidity: function jobHasBudget(uint256 jobId) view returns(bool hasBudget)
-func (_AgenticCommerce *AgenticCommerceSession) JobHasBudget(jobId *big.Int) (bool, error) {
-	return _AgenticCommerce.Contract.JobHasBudget(&_AgenticCommerce.CallOpts, jobId)
-}
-
-// JobHasBudget is a free data retrieval call binding the contract method 0xfabc3329.
-//
-// Solidity: function jobHasBudget(uint256 jobId) view returns(bool hasBudget)
-func (_AgenticCommerce *AgenticCommerceCallerSession) JobHasBudget(jobId *big.Int) (bool, error) {
-	return _AgenticCommerce.Contract.JobHasBudget(&_AgenticCommerce.CallOpts, jobId)
-}
-
 // Jobs is a free data retrieval call binding the contract method 0x180aedf3.
 //
-// Solidity: function jobs(uint256 ) view returns(uint256 id, address client, address provider, address evaluator, string description, uint256 budget, uint256 expiredAt, uint8 status, address hook)
+// Solidity: function jobs(uint256 ) view returns(uint256 id, address client, address provider, address evaluator, string description, uint256 budget, uint256 expiredAt, uint8 status, address hook, address paymentToken, uint256 providerAgentId, uint256 submittedAt)
 func (_AgenticCommerce *AgenticCommerceCaller) Jobs(opts *bind.CallOpts, arg0 *big.Int) (struct {
-	Id          *big.Int
-	Client      common.Address
-	Provider    common.Address
-	Evaluator   common.Address
-	Description string
-	Budget      *big.Int
-	ExpiredAt   *big.Int
-	Status      uint8
-	Hook        common.Address
+	Id              *big.Int
+	Client          common.Address
+	Provider        common.Address
+	Evaluator       common.Address
+	Description     string
+	Budget          *big.Int
+	ExpiredAt       *big.Int
+	Status          uint8
+	Hook            common.Address
+	PaymentToken    common.Address
+	ProviderAgentId *big.Int
+	SubmittedAt     *big.Int
 }, error) {
 	var out []interface{}
 	err := _AgenticCommerce.contract.Call(opts, &out, "jobs", arg0)
 
 	outstruct := new(struct {
-		Id          *big.Int
-		Client      common.Address
-		Provider    common.Address
-		Evaluator   common.Address
-		Description string
-		Budget      *big.Int
-		ExpiredAt   *big.Int
-		Status      uint8
-		Hook        common.Address
+		Id              *big.Int
+		Client          common.Address
+		Provider        common.Address
+		Evaluator       common.Address
+		Description     string
+		Budget          *big.Int
+		ExpiredAt       *big.Int
+		Status          uint8
+		Hook            common.Address
+		PaymentToken    common.Address
+		ProviderAgentId *big.Int
+		SubmittedAt     *big.Int
 	})
 	if err != nil {
 		return *outstruct, err
@@ -575,6 +522,9 @@ func (_AgenticCommerce *AgenticCommerceCaller) Jobs(opts *bind.CallOpts, arg0 *b
 	outstruct.ExpiredAt = *abi.ConvertType(out[6], new(*big.Int)).(**big.Int)
 	outstruct.Status = *abi.ConvertType(out[7], new(uint8)).(*uint8)
 	outstruct.Hook = *abi.ConvertType(out[8], new(common.Address)).(*common.Address)
+	outstruct.PaymentToken = *abi.ConvertType(out[9], new(common.Address)).(*common.Address)
+	outstruct.ProviderAgentId = *abi.ConvertType(out[10], new(*big.Int)).(**big.Int)
+	outstruct.SubmittedAt = *abi.ConvertType(out[11], new(*big.Int)).(**big.Int)
 
 	return *outstruct, err
 
@@ -582,98 +532,42 @@ func (_AgenticCommerce *AgenticCommerceCaller) Jobs(opts *bind.CallOpts, arg0 *b
 
 // Jobs is a free data retrieval call binding the contract method 0x180aedf3.
 //
-// Solidity: function jobs(uint256 ) view returns(uint256 id, address client, address provider, address evaluator, string description, uint256 budget, uint256 expiredAt, uint8 status, address hook)
+// Solidity: function jobs(uint256 ) view returns(uint256 id, address client, address provider, address evaluator, string description, uint256 budget, uint256 expiredAt, uint8 status, address hook, address paymentToken, uint256 providerAgentId, uint256 submittedAt)
 func (_AgenticCommerce *AgenticCommerceSession) Jobs(arg0 *big.Int) (struct {
-	Id          *big.Int
-	Client      common.Address
-	Provider    common.Address
-	Evaluator   common.Address
-	Description string
-	Budget      *big.Int
-	ExpiredAt   *big.Int
-	Status      uint8
-	Hook        common.Address
+	Id              *big.Int
+	Client          common.Address
+	Provider        common.Address
+	Evaluator       common.Address
+	Description     string
+	Budget          *big.Int
+	ExpiredAt       *big.Int
+	Status          uint8
+	Hook            common.Address
+	PaymentToken    common.Address
+	ProviderAgentId *big.Int
+	SubmittedAt     *big.Int
 }, error) {
 	return _AgenticCommerce.Contract.Jobs(&_AgenticCommerce.CallOpts, arg0)
 }
 
 // Jobs is a free data retrieval call binding the contract method 0x180aedf3.
 //
-// Solidity: function jobs(uint256 ) view returns(uint256 id, address client, address provider, address evaluator, string description, uint256 budget, uint256 expiredAt, uint8 status, address hook)
+// Solidity: function jobs(uint256 ) view returns(uint256 id, address client, address provider, address evaluator, string description, uint256 budget, uint256 expiredAt, uint8 status, address hook, address paymentToken, uint256 providerAgentId, uint256 submittedAt)
 func (_AgenticCommerce *AgenticCommerceCallerSession) Jobs(arg0 *big.Int) (struct {
-	Id          *big.Int
-	Client      common.Address
-	Provider    common.Address
-	Evaluator   common.Address
-	Description string
-	Budget      *big.Int
-	ExpiredAt   *big.Int
-	Status      uint8
-	Hook        common.Address
+	Id              *big.Int
+	Client          common.Address
+	Provider        common.Address
+	Evaluator       common.Address
+	Description     string
+	Budget          *big.Int
+	ExpiredAt       *big.Int
+	Status          uint8
+	Hook            common.Address
+	PaymentToken    common.Address
+	ProviderAgentId *big.Int
+	SubmittedAt     *big.Int
 }, error) {
 	return _AgenticCommerce.Contract.Jobs(&_AgenticCommerce.CallOpts, arg0)
-}
-
-// Paused is a free data retrieval call binding the contract method 0x5c975abb.
-//
-// Solidity: function paused() view returns(bool)
-func (_AgenticCommerce *AgenticCommerceCaller) Paused(opts *bind.CallOpts) (bool, error) {
-	var out []interface{}
-	err := _AgenticCommerce.contract.Call(opts, &out, "paused")
-
-	if err != nil {
-		return *new(bool), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(bool)).(*bool)
-
-	return out0, err
-
-}
-
-// Paused is a free data retrieval call binding the contract method 0x5c975abb.
-//
-// Solidity: function paused() view returns(bool)
-func (_AgenticCommerce *AgenticCommerceSession) Paused() (bool, error) {
-	return _AgenticCommerce.Contract.Paused(&_AgenticCommerce.CallOpts)
-}
-
-// Paused is a free data retrieval call binding the contract method 0x5c975abb.
-//
-// Solidity: function paused() view returns(bool)
-func (_AgenticCommerce *AgenticCommerceCallerSession) Paused() (bool, error) {
-	return _AgenticCommerce.Contract.Paused(&_AgenticCommerce.CallOpts)
-}
-
-// PaymentToken is a free data retrieval call binding the contract method 0x3013ce29.
-//
-// Solidity: function paymentToken() view returns(address)
-func (_AgenticCommerce *AgenticCommerceCaller) PaymentToken(opts *bind.CallOpts) (common.Address, error) {
-	var out []interface{}
-	err := _AgenticCommerce.contract.Call(opts, &out, "paymentToken")
-
-	if err != nil {
-		return *new(common.Address), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
-
-	return out0, err
-
-}
-
-// PaymentToken is a free data retrieval call binding the contract method 0x3013ce29.
-//
-// Solidity: function paymentToken() view returns(address)
-func (_AgenticCommerce *AgenticCommerceSession) PaymentToken() (common.Address, error) {
-	return _AgenticCommerce.Contract.PaymentToken(&_AgenticCommerce.CallOpts)
-}
-
-// PaymentToken is a free data retrieval call binding the contract method 0x3013ce29.
-//
-// Solidity: function paymentToken() view returns(address)
-func (_AgenticCommerce *AgenticCommerceCallerSession) PaymentToken() (common.Address, error) {
-	return _AgenticCommerce.Contract.PaymentToken(&_AgenticCommerce.CallOpts)
 }
 
 // PlatformFeeBP is a free data retrieval call binding the contract method 0xff96092a.
@@ -800,37 +694,6 @@ func (_AgenticCommerce *AgenticCommerceCallerSession) SupportsInterface(interfac
 	return _AgenticCommerce.Contract.SupportsInterface(&_AgenticCommerce.CallOpts, interfaceId)
 }
 
-// TrustedForwarder is a free data retrieval call binding the contract method 0x7da0a877.
-//
-// Solidity: function trustedForwarder() view returns(address)
-func (_AgenticCommerce *AgenticCommerceCaller) TrustedForwarder(opts *bind.CallOpts) (common.Address, error) {
-	var out []interface{}
-	err := _AgenticCommerce.contract.Call(opts, &out, "trustedForwarder")
-
-	if err != nil {
-		return *new(common.Address), err
-	}
-
-	out0 := *abi.ConvertType(out[0], new(common.Address)).(*common.Address)
-
-	return out0, err
-
-}
-
-// TrustedForwarder is a free data retrieval call binding the contract method 0x7da0a877.
-//
-// Solidity: function trustedForwarder() view returns(address)
-func (_AgenticCommerce *AgenticCommerceSession) TrustedForwarder() (common.Address, error) {
-	return _AgenticCommerce.Contract.TrustedForwarder(&_AgenticCommerce.CallOpts)
-}
-
-// TrustedForwarder is a free data retrieval call binding the contract method 0x7da0a877.
-//
-// Solidity: function trustedForwarder() view returns(address)
-func (_AgenticCommerce *AgenticCommerceCallerSession) TrustedForwarder() (common.Address, error) {
-	return _AgenticCommerce.Contract.TrustedForwarder(&_AgenticCommerce.CallOpts)
-}
-
 // WhitelistedHooks is a free data retrieval call binding the contract method 0x6d3b96c3.
 //
 // Solidity: function whitelistedHooks(address ) view returns(bool)
@@ -904,25 +767,25 @@ func (_AgenticCommerce *AgenticCommerceTransactorSession) Complete(jobId *big.In
 	return _AgenticCommerce.Contract.Complete(&_AgenticCommerce.TransactOpts, jobId, reason, optParams)
 }
 
-// CreateJob is a paid mutator transaction binding the contract method 0x41528812.
+// CreateJob is a paid mutator transaction binding the contract method 0x1c226749.
 //
-// Solidity: function createJob(address provider, address evaluator, uint256 expiredAt, string description, address hook) returns(uint256)
-func (_AgenticCommerce *AgenticCommerceTransactor) CreateJob(opts *bind.TransactOpts, provider common.Address, evaluator common.Address, expiredAt *big.Int, description string, hook common.Address) (*types.Transaction, error) {
-	return _AgenticCommerce.contract.Transact(opts, "createJob", provider, evaluator, expiredAt, description, hook)
+// Solidity: function createJob(address provider, address evaluator, uint256 expiredAt, string description, address hook, uint256 providerAgentId) returns(uint256)
+func (_AgenticCommerce *AgenticCommerceTransactor) CreateJob(opts *bind.TransactOpts, provider common.Address, evaluator common.Address, expiredAt *big.Int, description string, hook common.Address, providerAgentId *big.Int) (*types.Transaction, error) {
+	return _AgenticCommerce.contract.Transact(opts, "createJob", provider, evaluator, expiredAt, description, hook, providerAgentId)
 }
 
-// CreateJob is a paid mutator transaction binding the contract method 0x41528812.
+// CreateJob is a paid mutator transaction binding the contract method 0x1c226749.
 //
-// Solidity: function createJob(address provider, address evaluator, uint256 expiredAt, string description, address hook) returns(uint256)
-func (_AgenticCommerce *AgenticCommerceSession) CreateJob(provider common.Address, evaluator common.Address, expiredAt *big.Int, description string, hook common.Address) (*types.Transaction, error) {
-	return _AgenticCommerce.Contract.CreateJob(&_AgenticCommerce.TransactOpts, provider, evaluator, expiredAt, description, hook)
+// Solidity: function createJob(address provider, address evaluator, uint256 expiredAt, string description, address hook, uint256 providerAgentId) returns(uint256)
+func (_AgenticCommerce *AgenticCommerceSession) CreateJob(provider common.Address, evaluator common.Address, expiredAt *big.Int, description string, hook common.Address, providerAgentId *big.Int) (*types.Transaction, error) {
+	return _AgenticCommerce.Contract.CreateJob(&_AgenticCommerce.TransactOpts, provider, evaluator, expiredAt, description, hook, providerAgentId)
 }
 
-// CreateJob is a paid mutator transaction binding the contract method 0x41528812.
+// CreateJob is a paid mutator transaction binding the contract method 0x1c226749.
 //
-// Solidity: function createJob(address provider, address evaluator, uint256 expiredAt, string description, address hook) returns(uint256)
-func (_AgenticCommerce *AgenticCommerceTransactorSession) CreateJob(provider common.Address, evaluator common.Address, expiredAt *big.Int, description string, hook common.Address) (*types.Transaction, error) {
-	return _AgenticCommerce.Contract.CreateJob(&_AgenticCommerce.TransactOpts, provider, evaluator, expiredAt, description, hook)
+// Solidity: function createJob(address provider, address evaluator, uint256 expiredAt, string description, address hook, uint256 providerAgentId) returns(uint256)
+func (_AgenticCommerce *AgenticCommerceTransactorSession) CreateJob(provider common.Address, evaluator common.Address, expiredAt *big.Int, description string, hook common.Address, providerAgentId *big.Int) (*types.Transaction, error) {
+	return _AgenticCommerce.Contract.CreateJob(&_AgenticCommerce.TransactOpts, provider, evaluator, expiredAt, description, hook, providerAgentId)
 }
 
 // Fund is a paid mutator transaction binding the contract method 0xd2e13f50.
@@ -946,27 +809,6 @@ func (_AgenticCommerce *AgenticCommerceTransactorSession) Fund(jobId *big.Int, e
 	return _AgenticCommerce.Contract.Fund(&_AgenticCommerce.TransactOpts, jobId, expectedBudget, optParams)
 }
 
-// FundWithPermit is a paid mutator transaction binding the contract method 0x71c720aa.
-//
-// Solidity: function fundWithPermit(uint256 jobId, uint256 expectedBudget, bytes optParams, uint256 deadline, uint8 v, bytes32 r, bytes32 s) returns()
-func (_AgenticCommerce *AgenticCommerceTransactor) FundWithPermit(opts *bind.TransactOpts, jobId *big.Int, expectedBudget *big.Int, optParams []byte, deadline *big.Int, v uint8, r [32]byte, s [32]byte) (*types.Transaction, error) {
-	return _AgenticCommerce.contract.Transact(opts, "fundWithPermit", jobId, expectedBudget, optParams, deadline, v, r, s)
-}
-
-// FundWithPermit is a paid mutator transaction binding the contract method 0x71c720aa.
-//
-// Solidity: function fundWithPermit(uint256 jobId, uint256 expectedBudget, bytes optParams, uint256 deadline, uint8 v, bytes32 r, bytes32 s) returns()
-func (_AgenticCommerce *AgenticCommerceSession) FundWithPermit(jobId *big.Int, expectedBudget *big.Int, optParams []byte, deadline *big.Int, v uint8, r [32]byte, s [32]byte) (*types.Transaction, error) {
-	return _AgenticCommerce.Contract.FundWithPermit(&_AgenticCommerce.TransactOpts, jobId, expectedBudget, optParams, deadline, v, r, s)
-}
-
-// FundWithPermit is a paid mutator transaction binding the contract method 0x71c720aa.
-//
-// Solidity: function fundWithPermit(uint256 jobId, uint256 expectedBudget, bytes optParams, uint256 deadline, uint8 v, bytes32 r, bytes32 s) returns()
-func (_AgenticCommerce *AgenticCommerceTransactorSession) FundWithPermit(jobId *big.Int, expectedBudget *big.Int, optParams []byte, deadline *big.Int, v uint8, r [32]byte, s [32]byte) (*types.Transaction, error) {
-	return _AgenticCommerce.Contract.FundWithPermit(&_AgenticCommerce.TransactOpts, jobId, expectedBudget, optParams, deadline, v, r, s)
-}
-
 // GrantRole is a paid mutator transaction binding the contract method 0x2f2ff15d.
 //
 // Solidity: function grantRole(bytes32 role, address account) returns()
@@ -988,46 +830,25 @@ func (_AgenticCommerce *AgenticCommerceTransactorSession) GrantRole(role [32]byt
 	return _AgenticCommerce.Contract.GrantRole(&_AgenticCommerce.TransactOpts, role, account)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xc0c53b8b.
+// Initialize is a paid mutator transaction binding the contract method 0xc4d66de8.
 //
-// Solidity: function initialize(address paymentToken_, address treasury_, address admin_) returns()
-func (_AgenticCommerce *AgenticCommerceTransactor) Initialize(opts *bind.TransactOpts, paymentToken_ common.Address, treasury_ common.Address, admin_ common.Address) (*types.Transaction, error) {
-	return _AgenticCommerce.contract.Transact(opts, "initialize", paymentToken_, treasury_, admin_)
+// Solidity: function initialize(address treasury_) returns()
+func (_AgenticCommerce *AgenticCommerceTransactor) Initialize(opts *bind.TransactOpts, treasury_ common.Address) (*types.Transaction, error) {
+	return _AgenticCommerce.contract.Transact(opts, "initialize", treasury_)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xc0c53b8b.
+// Initialize is a paid mutator transaction binding the contract method 0xc4d66de8.
 //
-// Solidity: function initialize(address paymentToken_, address treasury_, address admin_) returns()
-func (_AgenticCommerce *AgenticCommerceSession) Initialize(paymentToken_ common.Address, treasury_ common.Address, admin_ common.Address) (*types.Transaction, error) {
-	return _AgenticCommerce.Contract.Initialize(&_AgenticCommerce.TransactOpts, paymentToken_, treasury_, admin_)
+// Solidity: function initialize(address treasury_) returns()
+func (_AgenticCommerce *AgenticCommerceSession) Initialize(treasury_ common.Address) (*types.Transaction, error) {
+	return _AgenticCommerce.Contract.Initialize(&_AgenticCommerce.TransactOpts, treasury_)
 }
 
-// Initialize is a paid mutator transaction binding the contract method 0xc0c53b8b.
+// Initialize is a paid mutator transaction binding the contract method 0xc4d66de8.
 //
-// Solidity: function initialize(address paymentToken_, address treasury_, address admin_) returns()
-func (_AgenticCommerce *AgenticCommerceTransactorSession) Initialize(paymentToken_ common.Address, treasury_ common.Address, admin_ common.Address) (*types.Transaction, error) {
-	return _AgenticCommerce.Contract.Initialize(&_AgenticCommerce.TransactOpts, paymentToken_, treasury_, admin_)
-}
-
-// Pause is a paid mutator transaction binding the contract method 0x8456cb59.
-//
-// Solidity: function pause() returns()
-func (_AgenticCommerce *AgenticCommerceTransactor) Pause(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _AgenticCommerce.contract.Transact(opts, "pause")
-}
-
-// Pause is a paid mutator transaction binding the contract method 0x8456cb59.
-//
-// Solidity: function pause() returns()
-func (_AgenticCommerce *AgenticCommerceSession) Pause() (*types.Transaction, error) {
-	return _AgenticCommerce.Contract.Pause(&_AgenticCommerce.TransactOpts)
-}
-
-// Pause is a paid mutator transaction binding the contract method 0x8456cb59.
-//
-// Solidity: function pause() returns()
-func (_AgenticCommerce *AgenticCommerceTransactorSession) Pause() (*types.Transaction, error) {
-	return _AgenticCommerce.Contract.Pause(&_AgenticCommerce.TransactOpts)
+// Solidity: function initialize(address treasury_) returns()
+func (_AgenticCommerce *AgenticCommerceTransactorSession) Initialize(treasury_ common.Address) (*types.Transaction, error) {
+	return _AgenticCommerce.Contract.Initialize(&_AgenticCommerce.TransactOpts, treasury_)
 }
 
 // Reject is a paid mutator transaction binding the contract method 0x41dd26f5.
@@ -1093,25 +914,25 @@ func (_AgenticCommerce *AgenticCommerceTransactorSession) RevokeRole(role [32]by
 	return _AgenticCommerce.Contract.RevokeRole(&_AgenticCommerce.TransactOpts, role, account)
 }
 
-// SetBudget is a paid mutator transaction binding the contract method 0xdd4ae9d4.
+// SetBudget is a paid mutator transaction binding the contract method 0xf3302b89.
 //
-// Solidity: function setBudget(uint256 jobId, uint256 amount, bytes optParams) returns()
-func (_AgenticCommerce *AgenticCommerceTransactor) SetBudget(opts *bind.TransactOpts, jobId *big.Int, amount *big.Int, optParams []byte) (*types.Transaction, error) {
-	return _AgenticCommerce.contract.Transact(opts, "setBudget", jobId, amount, optParams)
+// Solidity: function setBudget(uint256 jobId, address token, uint256 amount, bytes optParams) returns()
+func (_AgenticCommerce *AgenticCommerceTransactor) SetBudget(opts *bind.TransactOpts, jobId *big.Int, token common.Address, amount *big.Int, optParams []byte) (*types.Transaction, error) {
+	return _AgenticCommerce.contract.Transact(opts, "setBudget", jobId, token, amount, optParams)
 }
 
-// SetBudget is a paid mutator transaction binding the contract method 0xdd4ae9d4.
+// SetBudget is a paid mutator transaction binding the contract method 0xf3302b89.
 //
-// Solidity: function setBudget(uint256 jobId, uint256 amount, bytes optParams) returns()
-func (_AgenticCommerce *AgenticCommerceSession) SetBudget(jobId *big.Int, amount *big.Int, optParams []byte) (*types.Transaction, error) {
-	return _AgenticCommerce.Contract.SetBudget(&_AgenticCommerce.TransactOpts, jobId, amount, optParams)
+// Solidity: function setBudget(uint256 jobId, address token, uint256 amount, bytes optParams) returns()
+func (_AgenticCommerce *AgenticCommerceSession) SetBudget(jobId *big.Int, token common.Address, amount *big.Int, optParams []byte) (*types.Transaction, error) {
+	return _AgenticCommerce.Contract.SetBudget(&_AgenticCommerce.TransactOpts, jobId, token, amount, optParams)
 }
 
-// SetBudget is a paid mutator transaction binding the contract method 0xdd4ae9d4.
+// SetBudget is a paid mutator transaction binding the contract method 0xf3302b89.
 //
-// Solidity: function setBudget(uint256 jobId, uint256 amount, bytes optParams) returns()
-func (_AgenticCommerce *AgenticCommerceTransactorSession) SetBudget(jobId *big.Int, amount *big.Int, optParams []byte) (*types.Transaction, error) {
-	return _AgenticCommerce.Contract.SetBudget(&_AgenticCommerce.TransactOpts, jobId, amount, optParams)
+// Solidity: function setBudget(uint256 jobId, address token, uint256 amount, bytes optParams) returns()
+func (_AgenticCommerce *AgenticCommerceTransactorSession) SetBudget(jobId *big.Int, token common.Address, amount *big.Int, optParams []byte) (*types.Transaction, error) {
+	return _AgenticCommerce.Contract.SetBudget(&_AgenticCommerce.TransactOpts, jobId, token, amount, optParams)
 }
 
 // SetEvaluatorFee is a paid mutator transaction binding the contract method 0x84f15090.
@@ -1177,25 +998,25 @@ func (_AgenticCommerce *AgenticCommerceTransactorSession) SetPlatformFee(feeBP_ 
 	return _AgenticCommerce.Contract.SetPlatformFee(&_AgenticCommerce.TransactOpts, feeBP_, treasury_)
 }
 
-// SetProvider is a paid mutator transaction binding the contract method 0xc9a84bb9.
+// SetProvider is a paid mutator transaction binding the contract method 0xfac3246c.
 //
-// Solidity: function setProvider(uint256 jobId, address provider_, bytes optParams) returns()
-func (_AgenticCommerce *AgenticCommerceTransactor) SetProvider(opts *bind.TransactOpts, jobId *big.Int, provider_ common.Address, optParams []byte) (*types.Transaction, error) {
-	return _AgenticCommerce.contract.Transact(opts, "setProvider", jobId, provider_, optParams)
+// Solidity: function setProvider(uint256 jobId, address provider_, uint256 agentId) returns()
+func (_AgenticCommerce *AgenticCommerceTransactor) SetProvider(opts *bind.TransactOpts, jobId *big.Int, provider_ common.Address, agentId *big.Int) (*types.Transaction, error) {
+	return _AgenticCommerce.contract.Transact(opts, "setProvider", jobId, provider_, agentId)
 }
 
-// SetProvider is a paid mutator transaction binding the contract method 0xc9a84bb9.
+// SetProvider is a paid mutator transaction binding the contract method 0xfac3246c.
 //
-// Solidity: function setProvider(uint256 jobId, address provider_, bytes optParams) returns()
-func (_AgenticCommerce *AgenticCommerceSession) SetProvider(jobId *big.Int, provider_ common.Address, optParams []byte) (*types.Transaction, error) {
-	return _AgenticCommerce.Contract.SetProvider(&_AgenticCommerce.TransactOpts, jobId, provider_, optParams)
+// Solidity: function setProvider(uint256 jobId, address provider_, uint256 agentId) returns()
+func (_AgenticCommerce *AgenticCommerceSession) SetProvider(jobId *big.Int, provider_ common.Address, agentId *big.Int) (*types.Transaction, error) {
+	return _AgenticCommerce.Contract.SetProvider(&_AgenticCommerce.TransactOpts, jobId, provider_, agentId)
 }
 
-// SetProvider is a paid mutator transaction binding the contract method 0xc9a84bb9.
+// SetProvider is a paid mutator transaction binding the contract method 0xfac3246c.
 //
-// Solidity: function setProvider(uint256 jobId, address provider_, bytes optParams) returns()
-func (_AgenticCommerce *AgenticCommerceTransactorSession) SetProvider(jobId *big.Int, provider_ common.Address, optParams []byte) (*types.Transaction, error) {
-	return _AgenticCommerce.Contract.SetProvider(&_AgenticCommerce.TransactOpts, jobId, provider_, optParams)
+// Solidity: function setProvider(uint256 jobId, address provider_, uint256 agentId) returns()
+func (_AgenticCommerce *AgenticCommerceTransactorSession) SetProvider(jobId *big.Int, provider_ common.Address, agentId *big.Int) (*types.Transaction, error) {
+	return _AgenticCommerce.Contract.SetProvider(&_AgenticCommerce.TransactOpts, jobId, provider_, agentId)
 }
 
 // Submit is a paid mutator transaction binding the contract method 0x9e63798d.
@@ -1217,27 +1038,6 @@ func (_AgenticCommerce *AgenticCommerceSession) Submit(jobId *big.Int, deliverab
 // Solidity: function submit(uint256 jobId, bytes32 deliverable, bytes optParams) returns()
 func (_AgenticCommerce *AgenticCommerceTransactorSession) Submit(jobId *big.Int, deliverable [32]byte, optParams []byte) (*types.Transaction, error) {
 	return _AgenticCommerce.Contract.Submit(&_AgenticCommerce.TransactOpts, jobId, deliverable, optParams)
-}
-
-// Unpause is a paid mutator transaction binding the contract method 0x3f4ba83a.
-//
-// Solidity: function unpause() returns()
-func (_AgenticCommerce *AgenticCommerceTransactor) Unpause(opts *bind.TransactOpts) (*types.Transaction, error) {
-	return _AgenticCommerce.contract.Transact(opts, "unpause")
-}
-
-// Unpause is a paid mutator transaction binding the contract method 0x3f4ba83a.
-//
-// Solidity: function unpause() returns()
-func (_AgenticCommerce *AgenticCommerceSession) Unpause() (*types.Transaction, error) {
-	return _AgenticCommerce.Contract.Unpause(&_AgenticCommerce.TransactOpts)
-}
-
-// Unpause is a paid mutator transaction binding the contract method 0x3f4ba83a.
-//
-// Solidity: function unpause() returns()
-func (_AgenticCommerce *AgenticCommerceTransactorSession) Unpause() (*types.Transaction, error) {
-	return _AgenticCommerce.Contract.Unpause(&_AgenticCommerce.TransactOpts)
 }
 
 // UpgradeToAndCall is a paid mutator transaction binding the contract method 0x4f1ef286.
@@ -1331,38 +1131,47 @@ func (it *AgenticCommerceBudgetSetIterator) Close() error {
 // AgenticCommerceBudgetSet represents a BudgetSet event raised by the AgenticCommerce contract.
 type AgenticCommerceBudgetSet struct {
 	JobId  *big.Int
+	Token  common.Address
 	Amount *big.Int
 	Raw    types.Log // Blockchain specific contextual infos
 }
 
-// FilterBudgetSet is a free log retrieval operation binding the contract event 0x869e2577b006bf47ee981cf6fec2e25583548081c14b98deab587f77b5068038.
+// FilterBudgetSet is a free log retrieval operation binding the contract event 0x74f37e24047ef5ad02b6aac54caaf20e06c51585a911183b2c6f2db0d8d896cc.
 //
-// Solidity: event BudgetSet(uint256 indexed jobId, uint256 amount)
-func (_AgenticCommerce *AgenticCommerceFilterer) FilterBudgetSet(opts *bind.FilterOpts, jobId []*big.Int) (*AgenticCommerceBudgetSetIterator, error) {
+// Solidity: event BudgetSet(uint256 indexed jobId, address indexed token, uint256 amount)
+func (_AgenticCommerce *AgenticCommerceFilterer) FilterBudgetSet(opts *bind.FilterOpts, jobId []*big.Int, token []common.Address) (*AgenticCommerceBudgetSetIterator, error) {
 
 	var jobIdRule []interface{}
 	for _, jobIdItem := range jobId {
 		jobIdRule = append(jobIdRule, jobIdItem)
 	}
+	var tokenRule []interface{}
+	for _, tokenItem := range token {
+		tokenRule = append(tokenRule, tokenItem)
+	}
 
-	logs, sub, err := _AgenticCommerce.contract.FilterLogs(opts, "BudgetSet", jobIdRule)
+	logs, sub, err := _AgenticCommerce.contract.FilterLogs(opts, "BudgetSet", jobIdRule, tokenRule)
 	if err != nil {
 		return nil, err
 	}
 	return &AgenticCommerceBudgetSetIterator{contract: _AgenticCommerce.contract, event: "BudgetSet", logs: logs, sub: sub}, nil
 }
 
-// WatchBudgetSet is a free log subscription operation binding the contract event 0x869e2577b006bf47ee981cf6fec2e25583548081c14b98deab587f77b5068038.
+// WatchBudgetSet is a free log subscription operation binding the contract event 0x74f37e24047ef5ad02b6aac54caaf20e06c51585a911183b2c6f2db0d8d896cc.
 //
-// Solidity: event BudgetSet(uint256 indexed jobId, uint256 amount)
-func (_AgenticCommerce *AgenticCommerceFilterer) WatchBudgetSet(opts *bind.WatchOpts, sink chan<- *AgenticCommerceBudgetSet, jobId []*big.Int) (event.Subscription, error) {
+// Solidity: event BudgetSet(uint256 indexed jobId, address indexed token, uint256 amount)
+func (_AgenticCommerce *AgenticCommerceFilterer) WatchBudgetSet(opts *bind.WatchOpts, sink chan<- *AgenticCommerceBudgetSet, jobId []*big.Int, token []common.Address) (event.Subscription, error) {
 
 	var jobIdRule []interface{}
 	for _, jobIdItem := range jobId {
 		jobIdRule = append(jobIdRule, jobIdItem)
 	}
+	var tokenRule []interface{}
+	for _, tokenItem := range token {
+		tokenRule = append(tokenRule, tokenItem)
+	}
 
-	logs, sub, err := _AgenticCommerce.contract.WatchLogs(opts, "BudgetSet", jobIdRule)
+	logs, sub, err := _AgenticCommerce.contract.WatchLogs(opts, "BudgetSet", jobIdRule, tokenRule)
 	if err != nil {
 		return nil, err
 	}
@@ -1394,9 +1203,9 @@ func (_AgenticCommerce *AgenticCommerceFilterer) WatchBudgetSet(opts *bind.Watch
 	}), nil
 }
 
-// ParseBudgetSet is a log parse operation binding the contract event 0x869e2577b006bf47ee981cf6fec2e25583548081c14b98deab587f77b5068038.
+// ParseBudgetSet is a log parse operation binding the contract event 0x74f37e24047ef5ad02b6aac54caaf20e06c51585a911183b2c6f2db0d8d896cc.
 //
-// Solidity: event BudgetSet(uint256 indexed jobId, uint256 amount)
+// Solidity: event BudgetSet(uint256 indexed jobId, address indexed token, uint256 amount)
 func (_AgenticCommerce *AgenticCommerceFilterer) ParseBudgetSet(log types.Log) (*AgenticCommerceBudgetSet, error) {
 	event := new(AgenticCommerceBudgetSet)
 	if err := _AgenticCommerce.contract.UnpackLog(event, "BudgetSet", log); err != nil {
@@ -1554,6 +1363,140 @@ func (_AgenticCommerce *AgenticCommerceFilterer) WatchEvaluatorFeePaid(opts *bin
 func (_AgenticCommerce *AgenticCommerceFilterer) ParseEvaluatorFeePaid(log types.Log) (*AgenticCommerceEvaluatorFeePaid, error) {
 	event := new(AgenticCommerceEvaluatorFeePaid)
 	if err := _AgenticCommerce.contract.UnpackLog(event, "EvaluatorFeePaid", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// AgenticCommerceEvaluatorFeeSetIterator is returned from FilterEvaluatorFeeSet and is used to iterate over the raw logs and unpacked data for EvaluatorFeeSet events raised by the AgenticCommerce contract.
+type AgenticCommerceEvaluatorFeeSetIterator struct {
+	Event *AgenticCommerceEvaluatorFeeSet // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *AgenticCommerceEvaluatorFeeSetIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(AgenticCommerceEvaluatorFeeSet)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(AgenticCommerceEvaluatorFeeSet)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *AgenticCommerceEvaluatorFeeSetIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *AgenticCommerceEvaluatorFeeSetIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// AgenticCommerceEvaluatorFeeSet represents a EvaluatorFeeSet event raised by the AgenticCommerce contract.
+type AgenticCommerceEvaluatorFeeSet struct {
+	FeeBP *big.Int
+	Raw   types.Log // Blockchain specific contextual infos
+}
+
+// FilterEvaluatorFeeSet is a free log retrieval operation binding the contract event 0x8d3c1e4f1243a044dac6f85b2c1043fe0965504a5d1331bca64534c4b45d560b.
+//
+// Solidity: event EvaluatorFeeSet(uint256 feeBP)
+func (_AgenticCommerce *AgenticCommerceFilterer) FilterEvaluatorFeeSet(opts *bind.FilterOpts) (*AgenticCommerceEvaluatorFeeSetIterator, error) {
+
+	logs, sub, err := _AgenticCommerce.contract.FilterLogs(opts, "EvaluatorFeeSet")
+	if err != nil {
+		return nil, err
+	}
+	return &AgenticCommerceEvaluatorFeeSetIterator{contract: _AgenticCommerce.contract, event: "EvaluatorFeeSet", logs: logs, sub: sub}, nil
+}
+
+// WatchEvaluatorFeeSet is a free log subscription operation binding the contract event 0x8d3c1e4f1243a044dac6f85b2c1043fe0965504a5d1331bca64534c4b45d560b.
+//
+// Solidity: event EvaluatorFeeSet(uint256 feeBP)
+func (_AgenticCommerce *AgenticCommerceFilterer) WatchEvaluatorFeeSet(opts *bind.WatchOpts, sink chan<- *AgenticCommerceEvaluatorFeeSet) (event.Subscription, error) {
+
+	logs, sub, err := _AgenticCommerce.contract.WatchLogs(opts, "EvaluatorFeeSet")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(AgenticCommerceEvaluatorFeeSet)
+				if err := _AgenticCommerce.contract.UnpackLog(event, "EvaluatorFeeSet", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseEvaluatorFeeSet is a log parse operation binding the contract event 0x8d3c1e4f1243a044dac6f85b2c1043fe0965504a5d1331bca64534c4b45d560b.
+//
+// Solidity: event EvaluatorFeeSet(uint256 feeBP)
+func (_AgenticCommerce *AgenticCommerceFilterer) ParseEvaluatorFeeSet(log types.Log) (*AgenticCommerceEvaluatorFeeSet, error) {
+	event := new(AgenticCommerceEvaluatorFeeSet)
+	if err := _AgenticCommerce.contract.UnpackLog(event, "EvaluatorFeeSet", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
@@ -2764,140 +2707,6 @@ func (_AgenticCommerce *AgenticCommerceFilterer) ParseJobSubmitted(log types.Log
 	return event, nil
 }
 
-// AgenticCommercePausedIterator is returned from FilterPaused and is used to iterate over the raw logs and unpacked data for Paused events raised by the AgenticCommerce contract.
-type AgenticCommercePausedIterator struct {
-	Event *AgenticCommercePaused // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *AgenticCommercePausedIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(AgenticCommercePaused)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(AgenticCommercePaused)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *AgenticCommercePausedIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *AgenticCommercePausedIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// AgenticCommercePaused represents a Paused event raised by the AgenticCommerce contract.
-type AgenticCommercePaused struct {
-	Account common.Address
-	Raw     types.Log // Blockchain specific contextual infos
-}
-
-// FilterPaused is a free log retrieval operation binding the contract event 0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258.
-//
-// Solidity: event Paused(address account)
-func (_AgenticCommerce *AgenticCommerceFilterer) FilterPaused(opts *bind.FilterOpts) (*AgenticCommercePausedIterator, error) {
-
-	logs, sub, err := _AgenticCommerce.contract.FilterLogs(opts, "Paused")
-	if err != nil {
-		return nil, err
-	}
-	return &AgenticCommercePausedIterator{contract: _AgenticCommerce.contract, event: "Paused", logs: logs, sub: sub}, nil
-}
-
-// WatchPaused is a free log subscription operation binding the contract event 0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258.
-//
-// Solidity: event Paused(address account)
-func (_AgenticCommerce *AgenticCommerceFilterer) WatchPaused(opts *bind.WatchOpts, sink chan<- *AgenticCommercePaused) (event.Subscription, error) {
-
-	logs, sub, err := _AgenticCommerce.contract.WatchLogs(opts, "Paused")
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(AgenticCommercePaused)
-				if err := _AgenticCommerce.contract.UnpackLog(event, "Paused", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParsePaused is a log parse operation binding the contract event 0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258.
-//
-// Solidity: event Paused(address account)
-func (_AgenticCommerce *AgenticCommerceFilterer) ParsePaused(log types.Log) (*AgenticCommercePaused, error) {
-	event := new(AgenticCommercePaused)
-	if err := _AgenticCommerce.contract.UnpackLog(event, "Paused", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
 // AgenticCommercePaymentReleasedIterator is returned from FilterPaymentReleased and is used to iterate over the raw logs and unpacked data for PaymentReleased events raised by the AgenticCommerce contract.
 type AgenticCommercePaymentReleasedIterator struct {
 	Event *AgenticCommercePaymentReleased // Event containing the contract specifics and raw log
@@ -3052,6 +2861,305 @@ func (_AgenticCommerce *AgenticCommerceFilterer) ParsePaymentReleased(log types.
 	return event, nil
 }
 
+// AgenticCommercePlatformFeePaidIterator is returned from FilterPlatformFeePaid and is used to iterate over the raw logs and unpacked data for PlatformFeePaid events raised by the AgenticCommerce contract.
+type AgenticCommercePlatformFeePaidIterator struct {
+	Event *AgenticCommercePlatformFeePaid // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *AgenticCommercePlatformFeePaidIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(AgenticCommercePlatformFeePaid)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(AgenticCommercePlatformFeePaid)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *AgenticCommercePlatformFeePaidIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *AgenticCommercePlatformFeePaidIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// AgenticCommercePlatformFeePaid represents a PlatformFeePaid event raised by the AgenticCommerce contract.
+type AgenticCommercePlatformFeePaid struct {
+	JobId            *big.Int
+	PlatformTreasury common.Address
+	Amount           *big.Int
+	Raw              types.Log // Blockchain specific contextual infos
+}
+
+// FilterPlatformFeePaid is a free log retrieval operation binding the contract event 0x0e61cfd0ee655641b3ed0a1dd373ec3cacf4c090de1f33708e3a4091f4947662.
+//
+// Solidity: event PlatformFeePaid(uint256 indexed jobId, address indexed platformTreasury, uint256 amount)
+func (_AgenticCommerce *AgenticCommerceFilterer) FilterPlatformFeePaid(opts *bind.FilterOpts, jobId []*big.Int, platformTreasury []common.Address) (*AgenticCommercePlatformFeePaidIterator, error) {
+
+	var jobIdRule []interface{}
+	for _, jobIdItem := range jobId {
+		jobIdRule = append(jobIdRule, jobIdItem)
+	}
+	var platformTreasuryRule []interface{}
+	for _, platformTreasuryItem := range platformTreasury {
+		platformTreasuryRule = append(platformTreasuryRule, platformTreasuryItem)
+	}
+
+	logs, sub, err := _AgenticCommerce.contract.FilterLogs(opts, "PlatformFeePaid", jobIdRule, platformTreasuryRule)
+	if err != nil {
+		return nil, err
+	}
+	return &AgenticCommercePlatformFeePaidIterator{contract: _AgenticCommerce.contract, event: "PlatformFeePaid", logs: logs, sub: sub}, nil
+}
+
+// WatchPlatformFeePaid is a free log subscription operation binding the contract event 0x0e61cfd0ee655641b3ed0a1dd373ec3cacf4c090de1f33708e3a4091f4947662.
+//
+// Solidity: event PlatformFeePaid(uint256 indexed jobId, address indexed platformTreasury, uint256 amount)
+func (_AgenticCommerce *AgenticCommerceFilterer) WatchPlatformFeePaid(opts *bind.WatchOpts, sink chan<- *AgenticCommercePlatformFeePaid, jobId []*big.Int, platformTreasury []common.Address) (event.Subscription, error) {
+
+	var jobIdRule []interface{}
+	for _, jobIdItem := range jobId {
+		jobIdRule = append(jobIdRule, jobIdItem)
+	}
+	var platformTreasuryRule []interface{}
+	for _, platformTreasuryItem := range platformTreasury {
+		platformTreasuryRule = append(platformTreasuryRule, platformTreasuryItem)
+	}
+
+	logs, sub, err := _AgenticCommerce.contract.WatchLogs(opts, "PlatformFeePaid", jobIdRule, platformTreasuryRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(AgenticCommercePlatformFeePaid)
+				if err := _AgenticCommerce.contract.UnpackLog(event, "PlatformFeePaid", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParsePlatformFeePaid is a log parse operation binding the contract event 0x0e61cfd0ee655641b3ed0a1dd373ec3cacf4c090de1f33708e3a4091f4947662.
+//
+// Solidity: event PlatformFeePaid(uint256 indexed jobId, address indexed platformTreasury, uint256 amount)
+func (_AgenticCommerce *AgenticCommerceFilterer) ParsePlatformFeePaid(log types.Log) (*AgenticCommercePlatformFeePaid, error) {
+	event := new(AgenticCommercePlatformFeePaid)
+	if err := _AgenticCommerce.contract.UnpackLog(event, "PlatformFeePaid", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// AgenticCommercePlatformFeeSetIterator is returned from FilterPlatformFeeSet and is used to iterate over the raw logs and unpacked data for PlatformFeeSet events raised by the AgenticCommerce contract.
+type AgenticCommercePlatformFeeSetIterator struct {
+	Event *AgenticCommercePlatformFeeSet // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *AgenticCommercePlatformFeeSetIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(AgenticCommercePlatformFeeSet)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(AgenticCommercePlatformFeeSet)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *AgenticCommercePlatformFeeSetIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *AgenticCommercePlatformFeeSetIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// AgenticCommercePlatformFeeSet represents a PlatformFeeSet event raised by the AgenticCommerce contract.
+type AgenticCommercePlatformFeeSet struct {
+	FeeBP    *big.Int
+	Treasury common.Address
+	Raw      types.Log // Blockchain specific contextual infos
+}
+
+// FilterPlatformFeeSet is a free log retrieval operation binding the contract event 0x2c913b218a7fcc4905fb9f9dc3a7ecd1b0f9f8b086cdcd514f2fc4c885389930.
+//
+// Solidity: event PlatformFeeSet(uint256 feeBP, address indexed treasury)
+func (_AgenticCommerce *AgenticCommerceFilterer) FilterPlatformFeeSet(opts *bind.FilterOpts, treasury []common.Address) (*AgenticCommercePlatformFeeSetIterator, error) {
+
+	var treasuryRule []interface{}
+	for _, treasuryItem := range treasury {
+		treasuryRule = append(treasuryRule, treasuryItem)
+	}
+
+	logs, sub, err := _AgenticCommerce.contract.FilterLogs(opts, "PlatformFeeSet", treasuryRule)
+	if err != nil {
+		return nil, err
+	}
+	return &AgenticCommercePlatformFeeSetIterator{contract: _AgenticCommerce.contract, event: "PlatformFeeSet", logs: logs, sub: sub}, nil
+}
+
+// WatchPlatformFeeSet is a free log subscription operation binding the contract event 0x2c913b218a7fcc4905fb9f9dc3a7ecd1b0f9f8b086cdcd514f2fc4c885389930.
+//
+// Solidity: event PlatformFeeSet(uint256 feeBP, address indexed treasury)
+func (_AgenticCommerce *AgenticCommerceFilterer) WatchPlatformFeeSet(opts *bind.WatchOpts, sink chan<- *AgenticCommercePlatformFeeSet, treasury []common.Address) (event.Subscription, error) {
+
+	var treasuryRule []interface{}
+	for _, treasuryItem := range treasury {
+		treasuryRule = append(treasuryRule, treasuryItem)
+	}
+
+	logs, sub, err := _AgenticCommerce.contract.WatchLogs(opts, "PlatformFeeSet", treasuryRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(AgenticCommercePlatformFeeSet)
+				if err := _AgenticCommerce.contract.UnpackLog(event, "PlatformFeeSet", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParsePlatformFeeSet is a log parse operation binding the contract event 0x2c913b218a7fcc4905fb9f9dc3a7ecd1b0f9f8b086cdcd514f2fc4c885389930.
+//
+// Solidity: event PlatformFeeSet(uint256 feeBP, address indexed treasury)
+func (_AgenticCommerce *AgenticCommerceFilterer) ParsePlatformFeeSet(log types.Log) (*AgenticCommercePlatformFeeSet, error) {
+	event := new(AgenticCommercePlatformFeeSet)
+	if err := _AgenticCommerce.contract.UnpackLog(event, "PlatformFeeSet", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
 // AgenticCommerceProviderSetIterator is returned from FilterProviderSet and is used to iterate over the raw logs and unpacked data for ProviderSet events raised by the AgenticCommerce contract.
 type AgenticCommerceProviderSetIterator struct {
 	Event *AgenticCommerceProviderSet // Event containing the contract specifics and raw log
@@ -3123,12 +3231,13 @@ func (it *AgenticCommerceProviderSetIterator) Close() error {
 type AgenticCommerceProviderSet struct {
 	JobId    *big.Int
 	Provider common.Address
+	AgentId  *big.Int
 	Raw      types.Log // Blockchain specific contextual infos
 }
 
-// FilterProviderSet is a free log retrieval operation binding the contract event 0x9a87df076ea1725aba8ba29d32517ce37c9597d88cbf16ec6707892cc330ab69.
+// FilterProviderSet is a free log retrieval operation binding the contract event 0x49d0adc1d0f8a0d589f5eba9d9764b09b597ab6227e8ba63b0884599f1acd0e7.
 //
-// Solidity: event ProviderSet(uint256 indexed jobId, address indexed provider)
+// Solidity: event ProviderSet(uint256 indexed jobId, address indexed provider, uint256 agentId)
 func (_AgenticCommerce *AgenticCommerceFilterer) FilterProviderSet(opts *bind.FilterOpts, jobId []*big.Int, provider []common.Address) (*AgenticCommerceProviderSetIterator, error) {
 
 	var jobIdRule []interface{}
@@ -3147,9 +3256,9 @@ func (_AgenticCommerce *AgenticCommerceFilterer) FilterProviderSet(opts *bind.Fi
 	return &AgenticCommerceProviderSetIterator{contract: _AgenticCommerce.contract, event: "ProviderSet", logs: logs, sub: sub}, nil
 }
 
-// WatchProviderSet is a free log subscription operation binding the contract event 0x9a87df076ea1725aba8ba29d32517ce37c9597d88cbf16ec6707892cc330ab69.
+// WatchProviderSet is a free log subscription operation binding the contract event 0x49d0adc1d0f8a0d589f5eba9d9764b09b597ab6227e8ba63b0884599f1acd0e7.
 //
-// Solidity: event ProviderSet(uint256 indexed jobId, address indexed provider)
+// Solidity: event ProviderSet(uint256 indexed jobId, address indexed provider, uint256 agentId)
 func (_AgenticCommerce *AgenticCommerceFilterer) WatchProviderSet(opts *bind.WatchOpts, sink chan<- *AgenticCommerceProviderSet, jobId []*big.Int, provider []common.Address) (event.Subscription, error) {
 
 	var jobIdRule []interface{}
@@ -3193,9 +3302,9 @@ func (_AgenticCommerce *AgenticCommerceFilterer) WatchProviderSet(opts *bind.Wat
 	}), nil
 }
 
-// ParseProviderSet is a log parse operation binding the contract event 0x9a87df076ea1725aba8ba29d32517ce37c9597d88cbf16ec6707892cc330ab69.
+// ParseProviderSet is a log parse operation binding the contract event 0x49d0adc1d0f8a0d589f5eba9d9764b09b597ab6227e8ba63b0884599f1acd0e7.
 //
-// Solidity: event ProviderSet(uint256 indexed jobId, address indexed provider)
+// Solidity: event ProviderSet(uint256 indexed jobId, address indexed provider, uint256 agentId)
 func (_AgenticCommerce *AgenticCommerceFilterer) ParseProviderSet(log types.Log) (*AgenticCommerceProviderSet, error) {
 	event := new(AgenticCommerceProviderSet)
 	if err := _AgenticCommerce.contract.UnpackLog(event, "ProviderSet", log); err != nil {
@@ -3353,161 +3462,6 @@ func (_AgenticCommerce *AgenticCommerceFilterer) WatchRefunded(opts *bind.WatchO
 func (_AgenticCommerce *AgenticCommerceFilterer) ParseRefunded(log types.Log) (*AgenticCommerceRefunded, error) {
 	event := new(AgenticCommerceRefunded)
 	if err := _AgenticCommerce.contract.UnpackLog(event, "Refunded", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// AgenticCommerceReputationSignalIterator is returned from FilterReputationSignal and is used to iterate over the raw logs and unpacked data for ReputationSignal events raised by the AgenticCommerce contract.
-type AgenticCommerceReputationSignalIterator struct {
-	Event *AgenticCommerceReputationSignal // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *AgenticCommerceReputationSignalIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(AgenticCommerceReputationSignal)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(AgenticCommerceReputationSignal)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *AgenticCommerceReputationSignalIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *AgenticCommerceReputationSignalIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// AgenticCommerceReputationSignal represents a ReputationSignal event raised by the AgenticCommerce contract.
-type AgenticCommerceReputationSignal struct {
-	JobId   *big.Int
-	Subject common.Address
-	Role    string
-	Signal  int8
-	Raw     types.Log // Blockchain specific contextual infos
-}
-
-// FilterReputationSignal is a free log retrieval operation binding the contract event 0xc407f1b818177970f0dcd9a17c8a2068a2a07f449bf34cfcee4f2667db8ea4ab.
-//
-// Solidity: event ReputationSignal(uint256 indexed jobId, address indexed subject, string role, int8 signal)
-func (_AgenticCommerce *AgenticCommerceFilterer) FilterReputationSignal(opts *bind.FilterOpts, jobId []*big.Int, subject []common.Address) (*AgenticCommerceReputationSignalIterator, error) {
-
-	var jobIdRule []interface{}
-	for _, jobIdItem := range jobId {
-		jobIdRule = append(jobIdRule, jobIdItem)
-	}
-	var subjectRule []interface{}
-	for _, subjectItem := range subject {
-		subjectRule = append(subjectRule, subjectItem)
-	}
-
-	logs, sub, err := _AgenticCommerce.contract.FilterLogs(opts, "ReputationSignal", jobIdRule, subjectRule)
-	if err != nil {
-		return nil, err
-	}
-	return &AgenticCommerceReputationSignalIterator{contract: _AgenticCommerce.contract, event: "ReputationSignal", logs: logs, sub: sub}, nil
-}
-
-// WatchReputationSignal is a free log subscription operation binding the contract event 0xc407f1b818177970f0dcd9a17c8a2068a2a07f449bf34cfcee4f2667db8ea4ab.
-//
-// Solidity: event ReputationSignal(uint256 indexed jobId, address indexed subject, string role, int8 signal)
-func (_AgenticCommerce *AgenticCommerceFilterer) WatchReputationSignal(opts *bind.WatchOpts, sink chan<- *AgenticCommerceReputationSignal, jobId []*big.Int, subject []common.Address) (event.Subscription, error) {
-
-	var jobIdRule []interface{}
-	for _, jobIdItem := range jobId {
-		jobIdRule = append(jobIdRule, jobIdItem)
-	}
-	var subjectRule []interface{}
-	for _, subjectItem := range subject {
-		subjectRule = append(subjectRule, subjectItem)
-	}
-
-	logs, sub, err := _AgenticCommerce.contract.WatchLogs(opts, "ReputationSignal", jobIdRule, subjectRule)
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(AgenticCommerceReputationSignal)
-				if err := _AgenticCommerce.contract.UnpackLog(event, "ReputationSignal", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseReputationSignal is a log parse operation binding the contract event 0xc407f1b818177970f0dcd9a17c8a2068a2a07f449bf34cfcee4f2667db8ea4ab.
-//
-// Solidity: event ReputationSignal(uint256 indexed jobId, address indexed subject, string role, int8 signal)
-func (_AgenticCommerce *AgenticCommerceFilterer) ParseReputationSignal(log types.Log) (*AgenticCommerceReputationSignal, error) {
-	event := new(AgenticCommerceReputationSignal)
-	if err := _AgenticCommerce.contract.UnpackLog(event, "ReputationSignal", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log
@@ -3994,140 +3948,6 @@ func (_AgenticCommerce *AgenticCommerceFilterer) WatchRoleRevoked(opts *bind.Wat
 func (_AgenticCommerce *AgenticCommerceFilterer) ParseRoleRevoked(log types.Log) (*AgenticCommerceRoleRevoked, error) {
 	event := new(AgenticCommerceRoleRevoked)
 	if err := _AgenticCommerce.contract.UnpackLog(event, "RoleRevoked", log); err != nil {
-		return nil, err
-	}
-	event.Raw = log
-	return event, nil
-}
-
-// AgenticCommerceUnpausedIterator is returned from FilterUnpaused and is used to iterate over the raw logs and unpacked data for Unpaused events raised by the AgenticCommerce contract.
-type AgenticCommerceUnpausedIterator struct {
-	Event *AgenticCommerceUnpaused // Event containing the contract specifics and raw log
-
-	contract *bind.BoundContract // Generic contract to use for unpacking event data
-	event    string              // Event name to use for unpacking event data
-
-	logs chan types.Log        // Log channel receiving the found contract events
-	sub  ethereum.Subscription // Subscription for errors, completion and termination
-	done bool                  // Whether the subscription completed delivering logs
-	fail error                 // Occurred error to stop iteration
-}
-
-// Next advances the iterator to the subsequent event, returning whether there
-// are any more events found. In case of a retrieval or parsing error, false is
-// returned and Error() can be queried for the exact failure.
-func (it *AgenticCommerceUnpausedIterator) Next() bool {
-	// If the iterator failed, stop iterating
-	if it.fail != nil {
-		return false
-	}
-	// If the iterator completed, deliver directly whatever's available
-	if it.done {
-		select {
-		case log := <-it.logs:
-			it.Event = new(AgenticCommerceUnpaused)
-			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-				it.fail = err
-				return false
-			}
-			it.Event.Raw = log
-			return true
-
-		default:
-			return false
-		}
-	}
-	// Iterator still in progress, wait for either a data or an error event
-	select {
-	case log := <-it.logs:
-		it.Event = new(AgenticCommerceUnpaused)
-		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
-			it.fail = err
-			return false
-		}
-		it.Event.Raw = log
-		return true
-
-	case err := <-it.sub.Err():
-		it.done = true
-		it.fail = err
-		return it.Next()
-	}
-}
-
-// Error returns any retrieval or parsing error occurred during filtering.
-func (it *AgenticCommerceUnpausedIterator) Error() error {
-	return it.fail
-}
-
-// Close terminates the iteration process, releasing any pending underlying
-// resources.
-func (it *AgenticCommerceUnpausedIterator) Close() error {
-	it.sub.Unsubscribe()
-	return nil
-}
-
-// AgenticCommerceUnpaused represents a Unpaused event raised by the AgenticCommerce contract.
-type AgenticCommerceUnpaused struct {
-	Account common.Address
-	Raw     types.Log // Blockchain specific contextual infos
-}
-
-// FilterUnpaused is a free log retrieval operation binding the contract event 0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa.
-//
-// Solidity: event Unpaused(address account)
-func (_AgenticCommerce *AgenticCommerceFilterer) FilterUnpaused(opts *bind.FilterOpts) (*AgenticCommerceUnpausedIterator, error) {
-
-	logs, sub, err := _AgenticCommerce.contract.FilterLogs(opts, "Unpaused")
-	if err != nil {
-		return nil, err
-	}
-	return &AgenticCommerceUnpausedIterator{contract: _AgenticCommerce.contract, event: "Unpaused", logs: logs, sub: sub}, nil
-}
-
-// WatchUnpaused is a free log subscription operation binding the contract event 0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa.
-//
-// Solidity: event Unpaused(address account)
-func (_AgenticCommerce *AgenticCommerceFilterer) WatchUnpaused(opts *bind.WatchOpts, sink chan<- *AgenticCommerceUnpaused) (event.Subscription, error) {
-
-	logs, sub, err := _AgenticCommerce.contract.WatchLogs(opts, "Unpaused")
-	if err != nil {
-		return nil, err
-	}
-	return event.NewSubscription(func(quit <-chan struct{}) error {
-		defer sub.Unsubscribe()
-		for {
-			select {
-			case log := <-logs:
-				// New log arrived, parse the event and forward to the user
-				event := new(AgenticCommerceUnpaused)
-				if err := _AgenticCommerce.contract.UnpackLog(event, "Unpaused", log); err != nil {
-					return err
-				}
-				event.Raw = log
-
-				select {
-				case sink <- event:
-				case err := <-sub.Err():
-					return err
-				case <-quit:
-					return nil
-				}
-			case err := <-sub.Err():
-				return err
-			case <-quit:
-				return nil
-			}
-		}
-	}), nil
-}
-
-// ParseUnpaused is a log parse operation binding the contract event 0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa.
-//
-// Solidity: event Unpaused(address account)
-func (_AgenticCommerce *AgenticCommerceFilterer) ParseUnpaused(log types.Log) (*AgenticCommerceUnpaused, error) {
-	event := new(AgenticCommerceUnpaused)
-	if err := _AgenticCommerce.contract.UnpackLog(event, "Unpaused", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

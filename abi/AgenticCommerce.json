@@ -1,176 +1,5 @@
 [
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "trustedForwarder_",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "inputs": [],
-    "name": "AccessControlBadConfirmation",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "neededRole",
-        "type": "bytes32"
-      }
-    ],
-    "name": "AccessControlUnauthorizedAccount",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "target",
-        "type": "address"
-      }
-    ],
-    "name": "AddressEmptyCode",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "BudgetMismatch",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "implementation",
-        "type": "address"
-      }
-    ],
-    "name": "ERC1967InvalidImplementation",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "ERC1967NonPayable",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "EnforcedPause",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "ExpectedPause",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "ExpiryTooShort",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "FailedCall",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "FeesTooHigh",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "HookCallFailed",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "HookNotWhitelisted",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "InvalidInitialization",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "InvalidJob",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "NotInitializing",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "ProviderNotSet",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "ReentrancyGuardReentrantCall",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "token",
-        "type": "address"
-      }
-    ],
-    "name": "SafeERC20FailedOperation",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "UUPSUnauthorizedCallContext",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bytes32",
-        "name": "slot",
-        "type": "bytes32"
-      }
-    ],
-    "name": "UUPSUnsupportedProxiableUUID",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "Unauthorized",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "WrongStatus",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "ZeroAddress",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "ZeroBudget",
-    "type": "error"
-  },
-  {
     "anonymous": false,
     "inputs": [
       {
@@ -178,6 +7,12 @@
         "internalType": "uint256",
         "name": "jobId",
         "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
       },
       {
         "indexed": false,
@@ -212,6 +47,19 @@
       }
     ],
     "name": "EvaluatorFeePaid",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "feeBP",
+        "type": "uint256"
+      }
+    ],
+    "name": "EvaluatorFeeSet",
     "type": "event"
   },
   {
@@ -406,19 +254,6 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "Paused",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
         "indexed": true,
         "internalType": "uint256",
         "name": "jobId",
@@ -452,8 +287,58 @@
       {
         "indexed": true,
         "internalType": "address",
+        "name": "platformTreasury",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "PlatformFeePaid",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "feeBP",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "treasury",
+        "type": "address"
+      }
+    ],
+    "name": "PlatformFeeSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "jobId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
         "name": "provider",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "agentId",
+        "type": "uint256"
       }
     ],
     "name": "ProviderSet",
@@ -482,37 +367,6 @@
       }
     ],
     "name": "Refunded",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "jobId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "subject",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "role",
-        "type": "string"
-      },
-      {
-        "indexed": false,
-        "internalType": "int8",
-        "name": "signal",
-        "type": "int8"
-      }
-    ],
-    "name": "ReputationSignal",
     "type": "event"
   },
   {
@@ -594,19 +448,6 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "address",
-        "name": "account",
-        "type": "address"
-      }
-    ],
-    "name": "Unpaused",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
         "indexed": true,
         "internalType": "address",
         "name": "implementation",
@@ -644,7 +485,7 @@
   },
   {
     "inputs": [],
-    "name": "HOOK_GAS_LIMIT",
+    "name": "EVALUATION_GRACE_PERIOD",
     "outputs": [
       {
         "internalType": "uint256",
@@ -730,6 +571,11 @@
         "internalType": "address",
         "name": "hook",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "providerAgentId",
+        "type": "uint256"
       }
     ],
     "name": "createJob",
@@ -785,49 +631,6 @@
         "internalType": "uint256",
         "name": "jobId",
         "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "expectedBudget",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes",
-        "name": "optParams",
-        "type": "bytes"
-      },
-      {
-        "internalType": "uint256",
-        "name": "deadline",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint8",
-        "name": "v",
-        "type": "uint8"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "r",
-        "type": "bytes32"
-      },
-      {
-        "internalType": "bytes32",
-        "name": "s",
-        "type": "bytes32"
-      }
-    ],
-    "name": "fundWithPermit",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "jobId",
-        "type": "uint256"
       }
     ],
     "name": "getJob",
@@ -870,7 +673,7 @@
             "type": "uint256"
           },
           {
-            "internalType": "enum AgenticCommerceUpgradeable.JobStatus",
+            "internalType": "enum AgenticCommerce.JobStatus",
             "name": "status",
             "type": "uint8"
           },
@@ -878,9 +681,24 @@
             "internalType": "address",
             "name": "hook",
             "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "paymentToken",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "providerAgentId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "submittedAt",
+            "type": "uint256"
           }
         ],
-        "internalType": "struct AgenticCommerceUpgradeable.Job",
+        "internalType": "struct AgenticCommerce.Job",
         "name": "",
         "type": "tuple"
       }
@@ -953,42 +771,13 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "paymentToken_",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
         "name": "treasury_",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "admin_",
         "type": "address"
       }
     ],
     "name": "initialize",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "forwarder",
-        "type": "address"
-      }
-    ],
-    "name": "isTrustedForwarder",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -999,25 +788,6 @@
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "jobId",
-        "type": "uint256"
-      }
-    ],
-    "name": "jobHasBudget",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "hasBudget",
-        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -1069,7 +839,7 @@
         "type": "uint256"
       },
       {
-        "internalType": "enum AgenticCommerceUpgradeable.JobStatus",
+        "internalType": "enum AgenticCommerce.JobStatus",
         "name": "status",
         "type": "uint8"
       },
@@ -1077,39 +847,21 @@
         "internalType": "address",
         "name": "hook",
         "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "pause",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "paused",
-    "outputs": [
+      },
       {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "paymentToken",
-    "outputs": [
-      {
-        "internalType": "contract IERC20",
-        "name": "",
+        "internalType": "address",
+        "name": "paymentToken",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "providerAgentId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "submittedAt",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1221,6 +973,11 @@
         "type": "uint256"
       },
       {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
@@ -1298,9 +1055,9 @@
         "type": "address"
       },
       {
-        "internalType": "bytes",
-        "name": "optParams",
-        "type": "bytes"
+        "internalType": "uint256",
+        "name": "agentId",
+        "type": "uint256"
       }
     ],
     "name": "setProvider",
@@ -1348,26 +1105,6 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "trustedForwarder",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "unpause",
-    "outputs": [],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

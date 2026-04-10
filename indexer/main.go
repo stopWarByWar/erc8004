@@ -129,5 +129,8 @@ func initConf(confPath string) (*config.IndexerConfig, error) {
 	config.Validation.Addr = common.HexToAddress(config.Validation.Addr).String()
 	config.Commerce.Addr = common.HexToAddress(config.Commerce.Addr).String()
 	config.Comment.CommentSchemaID = common.HexToHash(config.Comment.CommentSchemaID).String()
+
+	processor.SetCoingeckoAPIKey(config.CoingeckoAPIKey)
+
 	return config, nil
 }

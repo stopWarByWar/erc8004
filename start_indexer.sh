@@ -109,7 +109,7 @@ check_commerce_db_schema_if_needed() {
     return 1
   fi
 
-  # Schema check (commerce tables)
+  # Schema check (commerce_actions table)
   local reg
   reg="$(psql "$dns" -v ON_ERROR_STOP=1 -qtAc "select to_regclass('public.commerce_actions')" 2>/dev/null | tr -d '[:space:]' || true)"
   if [[ "$reg" != "commerce_actions" ]]; then
@@ -118,6 +118,55 @@ check_commerce_db_schema_if_needed() {
     echo -e "${YELLOW}    psql \"${dns}\" -f migrations/202604071600_commerce_init_safe.psql${NC}"
     return 1
   fi
+
+  # Token-aware columns check (§2.1 spec: payment_token, token_symbol, budget_usd)
+  local missing_cols=()
+  for col in payment_token token_symbol budget_usd; do
+    local exists
+    exists="$(psql "$dns" -v ON_ERROR_STOP=1 -qtAc "
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name='commerce_actions' AND column_name='${col}'
+    " 2>/dev/null | tr -d '[:space:]' || true)"
+    if [[ "$exists" != "1" ]]; then
+      missing_cols+=("$col")
+    fi
+  done
+
+  if [[ ${#missing_cols[@]} -gt 0 ]]; then
+    echo -e "${YELLOW}  ! commerce_actions 缺少列: ${missing_cols[*]}（token-aware 迁移未执行）。${NC}"
+    local migration_file="migrations/202604101430_commerce_token_aware.sql"
+    if [[ -f "$SCRIPT_DIR/$migration_file" ]]; then
+      echo -e "${YELLOW}    自动执行迁移: ${migration_file}${NC}"
+      if psql "$dns" -v ON_ERROR_STOP=1 -f "$SCRIPT_DIR/$migration_file" >/dev/null 2>&1; then
+        echo -e "${GREEN}    ✓ 迁移成功: ${migration_file}${NC}"
+      else
+        echo -e "${RED}    ✗ 迁移失败，请检查: psql \"${dns}\" -f ${migration_file}${NC}"
+        return 1
+      fi
+    else
+      echo -e "${RED}    ✗ 迁移文件不存在: ${migration_file}${NC}"
+      return 1
+    fi
+  fi
+
+  # Feedbacks dedup constraint check
+  local dedup_exists
+  dedup_exists="$(psql "$dns" -v ON_ERROR_STOP=1 -qtAc "
+    SELECT 1 FROM pg_constraint WHERE conname='uniq_feedbacks_dedup'
+  " 2>/dev/null | tr -d '[:space:]' || true)"
+  if [[ "$dedup_exists" != "1" ]]; then
+    local fb_migration="migrations/202604091000_feedbacks_dedup_unique.psql"
+    if [[ -f "$SCRIPT_DIR/$fb_migration" ]]; then
+      echo -e "${YELLOW}  ! 添加 feedbacks 唯一约束: ${fb_migration}${NC}"
+      if psql "$dns" -v ON_ERROR_STOP=1 -f "$SCRIPT_DIR/$fb_migration" >/dev/null 2>&1; then
+        echo -e "${GREEN}    ✓ 约束添加成功${NC}"
+      else
+        echo -e "${RED}    ✗ 约束添加失败${NC}"
+        return 1
+      fi
+    fi
+  fi
+
   return 0
 }
 

@@ -59,11 +59,11 @@ type seedConfig struct {
 		Hook        string `yaml:"hook"`
 	} `yaml:"create_job"`
 
-	Budget     string `yaml:"budget"`
-	OptParams  string `yaml:"opt_params"`
+	Budget      string `yaml:"budget"`
+	OptParams   string `yaml:"opt_params"`
 	Deliverable string `yaml:"deliverable"`
-	Reason     string `yaml:"reason"`
-	GasLimit   uint64 `yaml:"gas_limit"`
+	Reason      string `yaml:"reason"`
+	GasLimit    uint64 `yaml:"gas_limit"`
 
 	Command string `yaml:"command"`
 }
@@ -89,6 +89,8 @@ func run() error {
 
 	// 对于需要 job-id 的分步命令，允许 CLI 传入（不强制写入配置）
 	jobIDStr := fs.String("job-id", "", "decimal job id for set-budget / approve-fund / fund-only / submit-only / complete-only")
+	paymentToken := fs.String("payment-token", "0x0000000000000000000000000000000000000000", "ERC-20 token address for payment (default: ETH)")
+	providerAgentID := fs.String("provider-agent-id", "0", "provider agent ID for createJob (default: 0)")
 
 	if err := fs.Parse(os.Args[1:]); err != nil {
 		return err
@@ -136,22 +138,23 @@ func run() error {
 
 	switch strings.TrimSpace(cfg.Command) {
 	case "check":
-		return runCheck(ctx, ec, contract, commerceAddr, chainIDBig, cfg, *jobIDStr)
+		return runCheck(ctx, ec, contract, commerceAddr, chainIDBig, cfg, *jobIDStr, *paymentToken)
 	case "happy-path":
 		return runHappyPath(ctx, ec, contract, commerceAddr, chainIDBig,
 			cfg.Client.PrivateKey, cfg.Provider.PrivateKey, cfg.Evaluator.PrivateKey,
 			cfg.CreateJob.Provider, cfg.CreateJob.Evaluator, cfg.Budget, cfg.CreateJob.ExpiredAt,
-			cfg.CreateJob.Description, cfg.CreateJob.Hook, cfg.OptParams, cfg.Deliverable, cfg.Reason, cfg.GasLimit)
+			cfg.CreateJob.Description, cfg.CreateJob.Hook, cfg.OptParams, cfg.Deliverable, cfg.Reason, cfg.GasLimit,
+			*paymentToken, *providerAgentID)
 	case "create-job":
 		return runCreateJob(ctx, ec, contract, commerceAddr, chainIDBig,
 			cfg.Client.PrivateKey, cfg.CreateJob.Provider, cfg.CreateJob.Evaluator, cfg.CreateJob.ExpiredAt,
-			cfg.CreateJob.Description, cfg.CreateJob.Hook, cfg.GasLimit)
+			cfg.CreateJob.Description, cfg.CreateJob.Hook, cfg.GasLimit, *paymentToken, *providerAgentID)
 	case "set-budget":
-		return runSetBudget(ctx, ec, contract, commerceAddr, chainIDBig, cfg.Client.PrivateKey, *jobIDStr, cfg.Budget, cfg.OptParams, cfg.GasLimit)
+		return runSetBudget(ctx, ec, contract, commerceAddr, chainIDBig, cfg.Client.PrivateKey, *jobIDStr, cfg.Budget, cfg.OptParams, cfg.GasLimit, *paymentToken)
 	case "approve-fund":
-		return runApproveFund(ctx, ec, contract, commerceAddr, chainIDBig, cfg.Client.PrivateKey, *jobIDStr, cfg.Budget, cfg.OptParams, cfg.GasLimit)
+		return runApproveFund(ctx, ec, contract, commerceAddr, chainIDBig, cfg.Client.PrivateKey, *jobIDStr, cfg.Budget, cfg.OptParams, cfg.GasLimit, *paymentToken)
 	case "fund-only":
-		return runFundOnly(ctx, ec, contract, chainIDBig, cfg.Client.PrivateKey, *jobIDStr, cfg.Budget, cfg.OptParams, cfg.GasLimit)
+		return runFundOnly(ctx, ec, contract, chainIDBig, cfg.Client.PrivateKey, *jobIDStr, cfg.Budget, cfg.OptParams, cfg.GasLimit, *paymentToken)
 	case "submit-only":
 		return runSubmitOnly(ctx, ec, contract, chainIDBig, cfg.Provider.PrivateKey, *jobIDStr, cfg.CreateJob.Description, cfg.Deliverable, cfg.OptParams, cfg.GasLimit)
 	case "complete-only":
@@ -223,14 +226,14 @@ func writeInitConfig(outPath string, force bool) error {
 	}
 
 	cfg := seedConfig{
-		RPCURL:   "https://bsc-testnet-rpc.example",
-		ChainID:  97,
-		Commerce: "0xYourAgenticCommerce",
-		Budget:   "1000000",
+		RPCURL:    "https://bsc-testnet-rpc.example",
+		ChainID:   97,
+		Commerce:  "0xYourAgenticCommerce",
+		Budget:    "1000000",
 		OptParams: "0x",
-		Reason:   "0x0000000000000000000000000000000000000000000000000000000000000000",
-		GasLimit: 0,
-		Command:  "happy-path",
+		Reason:    "0x0000000000000000000000000000000000000000000000000000000000000000",
+		GasLimit:  0,
+		Command:   "happy-path",
 	}
 	cfg.Client.PrivateKey = cPriv
 	cfg.Client.Address = cAddr
@@ -635,7 +638,7 @@ func erc20CallBigInt(ctx context.Context, ec *ethclient.Client, token common.Add
 	return v, nil
 }
 
-func runCheck(ctx context.Context, ec *ethclient.Client, contract *cabi.AgenticCommerce, commerceAddr common.Address, chainID *big.Int, cfg *seedConfig, jobIDStr string) error {
+func runCheck(ctx context.Context, ec *ethclient.Client, contract *cabi.AgenticCommerce, commerceAddr common.Address, chainID *big.Int, cfg *seedConfig, jobIDStr string, paymentToken string) error {
 	// 解析地址（优先用配置中的 address；为空则由私钥推导）
 	clientAddr, err := addrFromPrivOrConfig(cfg.Client.PrivateKey, cfg.Client.Address)
 	if err != nil {
@@ -674,10 +677,7 @@ func runCheck(ctx context.Context, ec *ethclient.Client, contract *cabi.AgenticC
 	}
 
 	// 2) paymentToken 余额与 allowance
-	tokenAddr, err := contract.PaymentToken(nil)
-	if err != nil {
-		return fmt.Errorf("paymentToken: %w", err)
-	}
+	tokenAddr := common.HexToAddress(paymentToken)
 	cTokenBal, err := erc20CallBigInt(ctx, ec, tokenAddr, "balanceOf", clientAddr)
 	if err != nil {
 		return fmt.Errorf("erc20 balanceOf(client): %w", err)
@@ -735,6 +735,7 @@ func runCheck(ctx context.Context, ec *ethclient.Client, contract *cabi.AgenticC
 
 func runHappyPath(ctx context.Context, ec *ethclient.Client, contract *cabi.AgenticCommerce, commerceAddr common.Address, chainID *big.Int,
 	clientKeyHex, providerKeyHex, evaluatorKeyHex, providerStr, evaluatorStr, budgetStr string, expiredAt int64, desc, hookStr, optParamsHex, deliverableHex, reasonHex string, gasLimit uint64,
+	paymentToken string, providerAgentID string,
 ) error {
 	clientKey, err := parsePrivateKey(clientKeyHex)
 	if err != nil {
@@ -777,10 +778,7 @@ func runHappyPath(ctx context.Context, ec *ethclient.Client, contract *cabi.Agen
 		return err
 	}
 
-	tokenAddr, err := contract.PaymentToken(nil)
-	if err != nil {
-		return fmt.Errorf("paymentToken: %w", err)
-	}
+	tokenAddr := common.HexToAddress(paymentToken)
 	fmt.Printf("paymentToken: %s\n", tokenAddr.Hex())
 
 	// 1) createJob
@@ -789,7 +787,8 @@ func runHappyPath(ctx context.Context, ec *ethclient.Client, contract *cabi.Agen
 		return err
 	}
 	applyGasLimit(cAuth, gasLimit)
-	tx1, err := contract.CreateJob(cAuth, provider, evaluator, expiryUnix(expiredAt), desc, hook)
+	providerAgentIDBig, _ := new(big.Int).SetString(providerAgentID, 10)
+	tx1, err := contract.CreateJob(cAuth, provider, evaluator, expiryUnix(expiredAt), desc, hook, providerAgentIDBig)
 	if err != nil {
 		return fmt.Errorf("createJob: %w", err)
 	}
@@ -815,7 +814,7 @@ func runHappyPath(ctx context.Context, ec *ethclient.Client, contract *cabi.Agen
 	fmt.Printf("jobId: %s\n", jobID.String())
 
 	// 2) setBudget (链上 budget 须与 fund 的 expectedBudget 一致)
-	tx2, err := contract.SetBudget(cAuth, jobID, budget, optParams)
+	tx2, err := contract.SetBudget(cAuth, jobID, tokenAddr, budget, optParams)
 	if err != nil {
 		return fmt.Errorf("setBudget: %w", err)
 	}
@@ -879,6 +878,7 @@ func runHappyPath(ctx context.Context, ec *ethclient.Client, contract *cabi.Agen
 
 func runCreateJob(ctx context.Context, ec *ethclient.Client, contract *cabi.AgenticCommerce, commerceAddr common.Address, chainID *big.Int,
 	clientKeyHex, providerStr, evaluatorStr string, expiredAt int64, desc, hookStr string, gasLimit uint64,
+	paymentToken string, providerAgentID string,
 ) error {
 	clientKey, err := parsePrivateKey(clientKeyHex)
 	if err != nil {
@@ -891,10 +891,7 @@ func runCreateJob(ctx context.Context, ec *ethclient.Client, contract *cabi.Agen
 	evaluator := common.HexToAddress(evaluatorStr)
 	hook := common.HexToAddress(hookStr)
 
-	tokenAddr, err := contract.PaymentToken(nil)
-	if err != nil {
-		return fmt.Errorf("paymentToken: %w", err)
-	}
+	tokenAddr := common.HexToAddress(paymentToken)
 	fmt.Printf("paymentToken: %s\n", tokenAddr.Hex())
 
 	beforeCounter, err := contract.JobCounter(nil)
@@ -907,7 +904,8 @@ func runCreateJob(ctx context.Context, ec *ethclient.Client, contract *cabi.Agen
 		return err
 	}
 	applyGasLimit(cAuth, gasLimit)
-	tx, err := contract.CreateJob(cAuth, provider, evaluator, expiryUnix(expiredAt), desc, hook)
+	providerAgentIDBig, _ := new(big.Int).SetString(providerAgentID, 10)
+	tx, err := contract.CreateJob(cAuth, provider, evaluator, expiryUnix(expiredAt), desc, hook, providerAgentIDBig)
 	if err != nil {
 		return fmt.Errorf("createJob: %w", err)
 	}
@@ -930,7 +928,7 @@ func runCreateJob(ctx context.Context, ec *ethclient.Client, contract *cabi.Agen
 }
 
 func runSetBudget(ctx context.Context, ec *ethclient.Client, contract *cabi.AgenticCommerce, commerceAddr common.Address, chainID *big.Int,
-	clientKeyHex, jobIDStr, budgetStr, optParamsHex string, gasLimit uint64,
+	clientKeyHex, jobIDStr, budgetStr, optParamsHex string, gasLimit uint64, paymentToken string,
 ) error {
 	clientKey, err := parsePrivateKey(clientKeyHex)
 	if err != nil {
@@ -952,8 +950,9 @@ func runSetBudget(ctx context.Context, ec *ethclient.Client, contract *cabi.Agen
 	if err != nil {
 		return err
 	}
+	tokenAddr := common.HexToAddress(paymentToken)
 	applyGasLimit(cAuth, gasLimit)
-	tx, err := contract.SetBudget(cAuth, jobID, budget, optParams)
+	tx, err := contract.SetBudget(cAuth, jobID, tokenAddr, budget, optParams)
 	if err != nil {
 		return fmt.Errorf("setBudget: %w", err)
 	}
@@ -965,7 +964,7 @@ func runSetBudget(ctx context.Context, ec *ethclient.Client, contract *cabi.Agen
 }
 
 func runApproveFund(ctx context.Context, ec *ethclient.Client, contract *cabi.AgenticCommerce, commerceAddr common.Address, chainID *big.Int,
-	clientKeyHex, jobIDStr, budgetStr, optParamsHex string, gasLimit uint64,
+	clientKeyHex, jobIDStr, budgetStr, optParamsHex string, gasLimit uint64, paymentToken string,
 ) error {
 	clientKey, err := parsePrivateKey(clientKeyHex)
 	if err != nil {
@@ -984,6 +983,7 @@ func runApproveFund(ctx context.Context, ec *ethclient.Client, contract *cabi.Ag
 		return err
 	}
 
+	tokenAddr := common.HexToAddress(paymentToken)
 	j, err := contract.GetJob(nil, jobID)
 	if err != nil {
 		return fmt.Errorf("getJob: %w", err)
@@ -992,10 +992,6 @@ func runApproveFund(ctx context.Context, ec *ethclient.Client, contract *cabi.Ag
 		fmt.Fprintf(os.Stderr, "warning: -budget %s != on-chain job.budget %s; fund may revert with BudgetMismatch\n", budget.String(), j.Budget.String())
 	}
 
-	tokenAddr, err := contract.PaymentToken(nil)
-	if err != nil {
-		return fmt.Errorf("paymentToken: %w", err)
-	}
 	cAuth, err := transactor(clientKey, chainID)
 	if err != nil {
 		return err
@@ -1023,7 +1019,7 @@ func runApproveFund(ctx context.Context, ec *ethclient.Client, contract *cabi.Ag
 }
 
 func runFundOnly(ctx context.Context, ec *ethclient.Client, contract *cabi.AgenticCommerce, chainID *big.Int,
-	clientKeyHex, jobIDStr, budgetStr, optParamsHex string, gasLimit uint64,
+	clientKeyHex, jobIDStr, budgetStr, optParamsHex string, gasLimit uint64, paymentToken string,
 ) error {
 	clientKey, err := parsePrivateKey(clientKeyHex)
 	if err != nil {

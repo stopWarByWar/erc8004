@@ -1,0 +1,14 @@
+-- Add unique constraint on feedbacks for deduplication
+-- Replaces the count-then-insert pattern in CreateFeedback() with DB-level guarantee.
+-- Idempotent: uses IF NOT EXISTS to avoid errors on re-run.
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'uniq_feedbacks_dedup'
+  ) THEN
+    ALTER TABLE feedbacks
+      ADD CONSTRAINT uniq_feedbacks_dedup
+      UNIQUE (chain_id, reputation_registry, agent_id, client_address, feedback_index);
+  END IF;
+END $$;

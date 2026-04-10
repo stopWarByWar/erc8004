@@ -17,6 +17,9 @@ const (
 	StatusOpen      = "open"
 	StatusFunded    = "funded"
 	StatusSubmitted = "submitted"
+	StatusCompleted = "completed"
+	StatusRejected  = "rejected"
+	StatusExpired   = "expired"
 )
 
 // Roles

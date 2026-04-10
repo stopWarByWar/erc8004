@@ -37,9 +37,9 @@ HTTP Request → handle/ → logic/ → model/ → PostgreSQL
 - `server/api/handle/` — HTTP parsing, validation, calling logic functions
 - `server/api/logic/` — business logic, data transformation, response shaping
 - `model/` — GORM-based data access; queries split by domain (`identity.go`, `reputation.go`, `validation.go`, `embedding.go`)
-- `docs/` 
+- `docs/` ：其中除了resources中的文档，命名格式统一为 `YYYYMMDDHHMM_descriptive_name.md`
     - `designs/`: 针对新的功能和模块，设计文档是只增的，对于相同的功能在旧的设计文档，新的功能放新的设计文档
-    - `specs`
+    - `specs`：开发的具体spec
     - `exec-plans`: 计划执行跟踪，每个文件是一个独立的工作模块，跟踪task完成情况
     - `resources` documents 
 
@@ -73,3 +73,7 @@ PostgreSQL with GORM. Schema versioned in `migrations/`. Initialize with `model.
 - Server runtime config: `server/api/logic/config.yaml` (DB, OpenAI key, AWS, etc.)
 - Indexer/chain config: `config/conf.yaml` + per-chain files in `config/testnet/` or `config/mainnet/`
 - Secrets (DB password, OpenAI key, AWS keys) are read from the YAML config — never hardcode them
+
+## Work Flow
+- 对于任何新的功能，先写设计文档，再写spec，最后写exec-plan
+- 按照exec-plan执行，每执行完成一项任务，在对应的文档中将对应的任务勾选掉

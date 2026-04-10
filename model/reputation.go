@@ -5,6 +5,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func GetLatestFeedbackAndResponse(chainID string, reputationRegistry string) (uint64, uint64, error) {
@@ -33,25 +34,23 @@ func GetLatestFeedbackAndResponse(chainID string, reputationRegistry string) (ui
 }
 
 func CreateFeedback(feedback *Feedback) error {
-	var amount int64
-	err := db.Model(&Feedback{}).
-		Where("chain_id = ? and agent_id = ? and reputation_registry = ? and client_address = ? and feedback_index = ?", feedback.ChainID, feedback.AgentID, feedback.ReputationRegistry, feedback.ClientAddress, feedback.FeedbackIndex).
-		Count(&amount).Error
-	if err != nil {
-		return err
+	if feedback == nil {
+		return errors.New("nil feedback")
 	}
-	if amount > 0 {
-		return nil
-	}
-	return db.Omit("uid").Create(feedback).Error
+	// Rely on DB unique constraint (see migrations) to guarantee idempotency.
+	return db.Omit("uid").
+		Clauses(clause.OnConflict{DoNothing: true}).
+		Create(feedback).Error
 }
 
 func UpdateFeedbackRevoked(chainID, agentID, reputationRegistry, clientAddress string, feedbackIndex uint64) error {
 	return db.
 		Model(&Feedback{}).
 		Where("chain_id = ? and agent_id = ? and reputation_registry =? and client_address = ? and feedback_index = ?", chainID, agentID, reputationRegistry, clientAddress, feedbackIndex).
-		Update("revoked", true).
-		Update("endpoint", "").Error
+		Updates(map[string]any{
+			"revoked":  true,
+			"endpoint": "",
+		}).Error
 }
 
 func GetFeedbackUIDAndAgentUID(chainID, agentID, reputationRegistry, clientAddress string, feedbackIndex uint64) (uint64, uint64, error) {

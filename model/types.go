@@ -284,6 +284,9 @@ type CommerceAction struct {
 	Deliverable      string  `gorm:"column:deliverable;type:varchar(255);default:''"`
 	PreviousStatus   string  `gorm:"column:previous_status;type:varchar(32);default:''"`
 	HookAddress      string  `gorm:"column:hook_address;type:varchar(255);default:''"`
+	PaymentToken     string  `gorm:"column:payment_token;type:varchar(255);default:''"`
+	TokenSymbol      string  `gorm:"column:token_symbol;type:varchar(32);default:''"`
+	BudgetUSD        float64 `gorm:"column:budget_usd;type:numeric(36,8);default:0"`
 	BlockNumber      uint64  `gorm:"column:block_number;type:bigint;not null"`
 	TxHash           string  `gorm:"column:tx_hash;type:varchar(255);not null"`
 	LogIndex         uint    `gorm:"column:log_index;type:integer;not null"`
@@ -312,6 +315,8 @@ type CommerceScore struct {
 	Responsiveness           float64 `gorm:"column:responsiveness;type:numeric(6,4);default:0"`
 	TotalJobs                int     `gorm:"column:total_jobs;default:0"`
 	TotalVolume              float64 `gorm:"column:total_volume;type:numeric(36,8);default:0"`
+	TotalVolumeUSD           float64 `gorm:"column:total_volume_usd;type:numeric(36,8);default:0"`
+	WeightedVolumeUSD        float64 `gorm:"column:weighted_volume_usd_sum;type:numeric(36,8);default:0"`
 	UniqueCounterparties     int     `gorm:"column:unique_counterparties;default:0"`
 	Confidence               float64 `gorm:"column:confidence;type:numeric(4,2);default:0"`
 }
@@ -336,8 +341,52 @@ type CommerceScoreGlobal struct {
 	Responsiveness           float64 `gorm:"column:responsiveness;type:numeric(6,4);default:0"`
 	TotalJobs                int     `gorm:"column:total_jobs;default:0"`
 	TotalVolume              float64 `gorm:"column:total_volume;type:numeric(36,8);default:0"`
+	TotalVolumeUSD           float64 `gorm:"column:total_volume_usd;type:numeric(36,8);default:0"`
+	WeightedVolumeUSD        float64 `gorm:"column:weighted_volume_usd_sum;type:numeric(36,8);default:0"`
 	UniqueCounterparties     int     `gorm:"column:unique_counterparties;default:0"`
 	Confidence               float64 `gorm:"column:confidence;type:numeric(4,2);default:0"`
 }
 
 func (CommerceScoreGlobal) TableName() string { return "commerce_scores_global" }
+
+// CommerceJob 存储每个 Job 的实时状态快照
+type CommerceJob struct {
+	UID              uint64  `gorm:"column:uid;type:bigint;primaryKey;autoIncrement"`
+	ChainID          string  `gorm:"column:chain_id;type:varchar(255);not null"`
+	CommerceContract string  `gorm:"column:commerce_contract;type:varchar(255);not null"`
+	JobID            uint64  `gorm:"column:job_id;type:bigint;not null"`
+
+	// 角色地址
+	Client    string `gorm:"column:client;type:varchar(255);not null"`
+	Provider  string `gorm:"column:provider;type:varchar(255);default:''"`
+	Evaluator string `gorm:"column:evaluator;type:varchar(255);default:''"`
+
+	// Job 描述
+	Description string `gorm:"column:description;type:text"`
+
+	// 金额相关
+	Budget        float64 `gorm:"column:budget;type:numeric(36,8);default:0"`
+	PaidAmount    float64 `gorm:"column:paid_amount;type:numeric(36,8);default:0"`
+	PaidAmountUSD float64 `gorm:"column:paid_amount_usd;type:numeric(36,8);default:0"`
+
+	// Token 信息
+	PaymentToken string `gorm:"column:payment_token;type:varchar(255);default:''"`
+	TokenSymbol  string `gorm:"column:token_symbol;type:varchar(32);default:''"`
+
+	// 状态机
+	Status      string `gorm:"column:status;type:varchar(32);not null"`
+	HookAddress string `gorm:"column:hook_address;type:varchar(255);default:''"`
+
+	// 时间戳
+	ExpiredAt   uint64 `gorm:"column:expired_at;type:bigint;default:0"`
+	SubmittedAt uint64 `gorm:"column:submitted_at;type:bigint;default:0"`
+	CompletedAt uint64 `gorm:"column:completed_at;type:bigint;default:0"`
+
+	// 审计字段
+	LatestActionUID   uint64 `gorm:"column:latest_action_uid;type:bigint"`
+	LatestBlockNumber uint64 `gorm:"column:latest_block_number;type:bigint"`
+	LatestTxHash     string `gorm:"column:latest_tx_hash;type:varchar(255)"`
+	UpdatedAt        uint64 `gorm:"column:updated_at;type:bigint;not null"`
+}
+
+func (CommerceJob) TableName() string { return "commerce_jobs" }

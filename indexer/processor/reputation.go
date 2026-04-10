@@ -306,19 +306,20 @@ func (p *ReputationProcessor) dealWithResponseAppendedEvent(e types.Log) error {
 	blockTimestamp := uint64(e.BlockTimestamp)
 
 	response := &model.Response{
-		ChainID:       p.chainID,
-		AgentUID:      agentUID,
-		FeedbackUID:   feedbackUID,
-		AgentID:       responseAppendedEvent.AgentId.String(),
-		ClientAddress: responseAppendedEvent.ClientAddress.String(),
-		FeedbackIndex: responseAppendedEvent.FeedbackIndex,
-		Responder:     responseAppendedEvent.Responder.String(),
-		ResponseURI:   responseAppendedEvent.ResponseURI,
-		ResponseHash:  common.BytesToHash(responseAppendedEvent.ResponseHash[:]).String(),
-		BlockNumber:   uint64(e.BlockNumber),
-		Index:         uint64(e.Index),
-		TxHash:        e.TxHash.String(),
-		Timestamps:    blockTimestamp,
+		ChainID:            p.chainID,
+		AgentUID:           agentUID,
+		FeedbackUID:        feedbackUID,
+		AgentID:            responseAppendedEvent.AgentId.String(),
+		ReputationRegistry: p.reputationAddr.String(),
+		ClientAddress:      responseAppendedEvent.ClientAddress.String(),
+		FeedbackIndex:     responseAppendedEvent.FeedbackIndex,
+		Responder:         responseAppendedEvent.Responder.String(),
+		ResponseURI:       responseAppendedEvent.ResponseURI,
+		ResponseHash:      common.BytesToHash(responseAppendedEvent.ResponseHash[:]).String(),
+		BlockNumber:       uint64(e.BlockNumber),
+		Index:              uint64(e.Index),
+		TxHash:             e.TxHash.String(),
+		Timestamps:         blockTimestamp,
 	}
 
 	if err := model.CreateResponse(p.chainID, response); err != nil {
