@@ -2,10 +2,12 @@ package handle
 
 import (
 	serverLogic "agent_identity/server/api/logic"
+	"agent_identity/model"
 	serverUtils "agent_identity/server/api/utils"
 	"math"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -118,6 +120,28 @@ func GetCommerceActionsHandler(c *gin.Context) {
 		maxBudget = &v
 	}
 
+	paymentToken := c.Query("payment_token")
+	tokenSymbol := c.Query("token_symbol")
+
+	var minBudgetUSD *float64
+	if raw := c.Query("min_budget_usd"); raw != "" {
+		v, perr := strconv.ParseFloat(raw, 64)
+		if perr != nil || math.IsNaN(v) || math.IsInf(v, 0) {
+			serverUtils.ErrResp(nil, "invalid min_budget_usd", "Invalid Request", c)
+			return
+		}
+		minBudgetUSD = &v
+	}
+	var maxBudgetUSD *float64
+	if raw := c.Query("max_budget_usd"); raw != "" {
+		v, perr := strconv.ParseFloat(raw, 64)
+		if perr != nil || math.IsNaN(v) || math.IsInf(v, 0) {
+			serverUtils.ErrResp(nil, "invalid max_budget_usd", "Invalid Request", c)
+			return
+		}
+		maxBudgetUSD = &v
+	}
+
 	var startTime *uint64
 	if raw := c.Query("start_time"); raw != "" {
 		v, perr := strconv.ParseUint(raw, 10, 64)
@@ -162,6 +186,10 @@ func GetCommerceActionsHandler(c *gin.Context) {
 		HasHook:      hasHook,
 		MinBudget:    minBudget,
 		MaxBudget:    maxBudget,
+		PaymentToken: paymentToken,
+		TokenSymbol:  tokenSymbol,
+		MinBudgetUSD: minBudgetUSD,
+		MaxBudgetUSD: maxBudgetUSD,
 		StartTime:    startTime,
 		EndTime:      endTime,
 		SortBy:       sortBy,
@@ -173,6 +201,34 @@ func GetCommerceActionsHandler(c *gin.Context) {
 		return
 	}
 	serverUtils.SuccessResp(gin.H{"actions": actionsRes, "total": total}, c)
+}
+
+func GetCommerceStatsHandler(c *gin.Context) {
+	uid, err := strconv.ParseUint(c.Query("uid"), 10, 64)
+	if err != nil {
+		serverUtils.ErrResp(nil, "fail to get uid", "Invalid Request", c)
+		return
+	}
+
+	// Get latest block_timestamp for this agent to serve as "now"
+	latestAction, err := model.GetLatestCommerceActionTimestampByUID(uid)
+	now := uint64(0)
+	if err == nil && latestAction > 0 {
+		now = latestAction
+	} else {
+		// Fallback to system time
+		now = uint64(time.Now().Unix())
+	}
+
+	stats, err := serverLogic.GetCommerceStats(serverLogic.CommerceStatsParams{
+		UID: uid,
+		Now: now,
+	})
+	if err != nil {
+		serverUtils.ErrResp(logrus.Fields{"error": err}, "fail to get commerce stats", "Internal Error", c)
+		return
+	}
+	serverUtils.SuccessResp(gin.H{"stats": stats}, c)
 }
 
 func splitCSV(v string) []string {

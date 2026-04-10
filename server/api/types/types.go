@@ -1,6 +1,9 @@
 package types
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type AgentResponse struct {
 	UID                  uint64 // uid
@@ -50,6 +53,8 @@ type CommerceScore struct {
 	ExpiredResponsibleCount   int     `json:"expired_responsible_count"`
 	SuccessRate               float64 `json:"success_rate"`
 	WeightedScore             float64 `json:"weighted_score"`
+	TotalVolumeUSD            float64 `json:"total_volume_usd"`
+	WeightedScoreUSD          float64 `json:"weighted_score_usd"`
 	CreatedCount              int     `json:"created_count"`
 	FundedCount               int     `json:"funded_count"`
 	FundedRate                float64 `json:"funded_rate"`
@@ -295,4 +300,75 @@ type AgentValidationEvalDimensionResponse struct {
 type AgentValidationEvalLatestResponse struct {
 	Report     *AgentValidationEvalReportResponse     `json:"report"`
 	Dimensions []AgentValidationEvalDimensionResponse `json:"dimensions"`
+}
+
+// ─────────────── Commerce Stats ───────────────
+
+// CommerceStats is the top-level stats holder for GET /agent/commerce/stats.
+type CommerceStats struct {
+	ActionBreakdown      ActionBreakdown      `json:"action_breakdown"`
+	TimeSeries           TimeSeriesStats      `json:"time_series"`
+	BudgetDistribution   BudgetDistribution   `json:"budget_distribution"`
+}
+
+// ActionBreakdown maps role → action counts. Empty roles are omitted.
+type ActionBreakdown map[string]ActionCounts
+
+// ActionCounts holds counts for the 6 core commerce actions.
+type ActionCounts struct {
+	JobCreated   int `json:"job_created"`
+	JobFunded    int `json:"job_funded"`
+	JobSubmitted int `json:"job_submitted"`
+	JobCompleted int `json:"job_completed"`
+	JobRejected  int `json:"job_rejected"`
+	JobExpired   int `json:"job_expired"`
+}
+
+// TimeSeriesStats holds three time windows.
+type TimeSeriesStats struct {
+	Hours24 []TimeBucket `json:"24h"`
+	Days7   []TimeBucket `json:"7d"`
+	Days30  []TimeBucket `json:"30d"`
+}
+
+// TimeBucket represents one time-series bucket.
+type TimeBucket struct {
+	Bucket        int64   `json:"bucket"`
+	CompletedCount int     `json:"completed_count"`
+	RejectedCount  int     `json:"rejected_count"`
+	SuccessRate    float64 `json:"success_rate"`
+}
+
+// BudgetDistribution maps role → contract address → stats.
+type BudgetDistribution map[string]map[string]ContractBudgetStats
+
+// ContractBudgetStats holds total count and bucketed stats for one contract.
+type ContractBudgetStats struct {
+	TotalCount int               `json:"total_count"`
+	Buckets    BudgetBuckets     `json:"buckets"`
+}
+
+// BudgetBuckets holds small/medium/large buckets.
+// When TotalCount < 3, Buckets is a flat map[string]interface{}{"count": int, "max_amount": string}.
+type BudgetBuckets struct {
+	Small   *BudgetBucketStat `json:"small,omitempty"`
+	Medium  *BudgetBucketStat `json:"medium,omitempty"`
+	Large   *BudgetBucketStat `json:"large,omitempty"`
+	// Flat is used when sample size < 3.
+	Flat    any `json:"-"` // map[string]any{"count": int, "max_amount": string}
+}
+
+// MarshalJSON implements custom marshaling to handle flat bucket case.
+func (b BudgetBuckets) MarshalJSON() ([]byte, error) {
+	if b.Flat != nil {
+		return json.Marshal(b.Flat)
+	}
+	type BB BudgetBuckets
+	return json.Marshal(BB(b))
+}
+
+// BudgetBucketStat holds count and max_amount for one bucket.
+type BudgetBucketStat struct {
+	Count     int    `json:"count"`
+	MaxAmount string `json:"max_amount"`
 }

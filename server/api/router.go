@@ -57,6 +57,7 @@ func Run(_cors []string, port string) {
 
 	r.GET("agent/commerce/scores", handle.GetCommerceScoresHandler)
 	r.GET("agent/commerce/actions", handle.GetCommerceActionsHandler)
+	r.GET("agent/commerce/stats", handle.GetCommerceStatsHandler)
 
 	r.GET("agent/identity/filter/info", handle.GetFilterInfoHandler)
 	r.GET("agent/identity/filter/search/skill", handle.GetSkillsForFilterHandler)
