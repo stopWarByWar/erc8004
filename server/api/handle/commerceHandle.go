@@ -765,6 +765,25 @@ func GetCommerceJobsChartsHandler(c *gin.Context) {
 	serverUtils.SuccessResp(gin.H{"charts": charts}, c)
 }
 
+func GetCommerceJobsFiltersHandler(c *gin.Context) {
+	if serverUtils.IsMockEnabled() {
+		serverUtils.SetMockHeader(c)
+		serverUtils.SuccessResp(gin.H{"filters": apiMock.CommerceJobsFilters()}, c)
+		return
+	}
+
+	snap, err := serverUtils.GetJobsFiltersSnapshot(c.Request.Context())
+	if err != nil && snap == nil {
+		serverUtils.ErrResp(logrus.Fields{"error": err}, "fail to get commerce jobs filters", "Internal Error", c)
+		return
+	}
+	if err != nil {
+		// Soft error: return stale cache but log it.
+		logrus.WithFields(logrus.Fields{"error": err}).Warn("refresh jobs filters cache failed; returning stale snapshot")
+	}
+	serverUtils.SuccessResp(gin.H{"filters": snap.Filters}, c)
+}
+
 func GetCommerceJobActionsHandler(c *gin.Context) {
 	chainID := c.Query("chain_id")
 	contract := c.Query("commerce_contract")

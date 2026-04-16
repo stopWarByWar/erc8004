@@ -4,6 +4,7 @@ import (
 	"agent_identity/logger"
 	"agent_identity/server/api/handle"
 	apiUtils "agent_identity/server/api/utils"
+	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -65,10 +66,12 @@ func Run(_cors []string, port string) {
 	r.GET("agent/commerce/jobs/general", handle.GetCommerceJobsGeneralHandler)
 	r.GET("agent/commerce/jobs/charts", handle.GetCommerceJobsChartsHandler)
 	r.GET("agent/commerce/jobs/actions", handle.GetCommerceJobActionsHandler)
+	r.GET("agent/commerce/jobs/filters", handle.GetCommerceJobsFiltersHandler)
 
 	r.GET("agent/identity/filter/info", handle.GetFilterInfoHandler)
 	r.GET("agent/identity/filter/search/skill", handle.GetSkillsForFilterHandler)
 	r.GET("agent/leaderboard", handle.GetLeaderboardInfoHandler)
 	go apiUtils.UpdateGeneralInfo()
+	apiUtils.StartJobsFiltersCache(context.Background(), 5*time.Minute)
 	r.Run(fmt.Sprintf(":%s", port))
 }

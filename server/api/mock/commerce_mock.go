@@ -604,9 +604,20 @@ func CommerceJobsGeneral() (types.CommerceJobsGeneralSummaryResp, types.Commerce
 				"DAI":  map[string]any{"jobs_count": 300, "paid_volume_usd": 120000.0},
 				"ETH":  map[string]any{"jobs_count": 134, "paid_volume_usd": 47890.12},
 			},
-			ChainContract: map[string]any{
-				"1": map[string]any{
-					"0x1111111111111111111111111111111111111111": map[string]any{"jobs_count": 600, "paid_volume_usd": 300000.0},
+			ChainContracts: []types.CommerceJobsChainContractsItem{
+				{
+					ChainID:   "8453",
+					ChainName: "Base",
+					ChainLogo: "https://example.com/base.png",
+					ERC8183Contracts: []types.CommerceJobsChainContractItem{
+						{
+							CommerceContract: "0x1111111111111111111111111111111111111111",
+							JobsCount:        600,
+							BudgetVolumeUSD:  500000.0,
+							PaidVolumeUSD:    300000.0,
+							Drilldown:        map[string]any{"chain_id": "8453", "commerce_contract": "0x1111111111111111111111111111111111111111"},
+						},
+					},
 				},
 			},
 			Fees: map[string]any{
@@ -660,16 +671,20 @@ func CommerceJobsCharts() any {
 		{"token_symbol": "USDC", "jobs_count": 80, "budget_volume_usd": 60000, "paid_volume_usd": 40000, "drilldown": map[string]any{"token_symbol": "USDC"}},
 		{"token_symbol": "ETH", "jobs_count": 40, "budget_volume_usd": 20123.45, "paid_volume_usd": 12340.12, "drilldown": map[string]any{"token_symbol": "ETH"}},
 	}
-	ccDist := []map[string]any{
+	chainContracts := []map[string]any{
 		{
-			"chain_id":          "8453",
-			"chain_name":        "Base",
-			"chain_logo":        "https://example.com/base.png",
-			"commerce_contract": "0x1111111111111111111111111111111111111111",
-			"jobs_count":        120,
-			"budget_volume_usd": 80123.45,
-			"paid_volume_usd":   52340.12,
-			"drilldown":         map[string]any{"chain_id": "8453", "commerce_contract": "0x1111111111111111111111111111111111111111"},
+			"chain_id":   "8453",
+			"chain_name": "Base",
+			"chain_logo": "https://example.com/base.png",
+			"erc8183_contracts": []map[string]any{
+				{
+					"commerce_contract": "0x1111111111111111111111111111111111111111",
+					"jobs_count":        120,
+					"budget_volume_usd": 80123.45,
+					"paid_volume_usd":   52340.12,
+					"drilldown":         map[string]any{"chain_id": "8453", "commerce_contract": "0x1111111111111111111111111111111111111111"},
+				},
+			},
 		},
 	}
 
@@ -709,7 +724,7 @@ func CommerceJobsCharts() any {
 		},
 		"distribution": map[string]any{
 			"token_distribution":          tokenDist,
-			"chain_contract_distribution": ccDist,
+			"chain_contracts":             chainContracts,
 			"budget_histogram_usd": []map[string]any{
 				{"range": map[string]any{"min": 0, "max": 100}, "count": 20, "drilldown": map[string]any{"min_budget_usd": 0, "max_budget_usd": 100}},
 			},
@@ -726,6 +741,25 @@ func CommerceJobsCharts() any {
 				},
 			},
 		},
+	}
+}
+
+func CommerceJobsFilters() types.CommerceJobsFilters {
+	now := uint64(time.Now().Unix())
+	return types.CommerceJobsFilters{
+		Chains: []types.CommerceJobsFilterChain{
+			{ChainID: "8453", ChainName: "Base", ChainLogo: "https://example.com/base.png"},
+			{ChainID: "1", ChainName: "Ethereum", ChainLogo: "https://example.com/eth.png"},
+		},
+		CommerceContracts: []string{
+			"0x1111111111111111111111111111111111111111",
+			"0x2222222222222222222222222222222222222222",
+		},
+		PaymentTokens: []string{
+			"0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", // USDC (example)
+			"0x0000000000000000000000000000000000000000", // native placeholder
+		},
+		LastUpdated: now,
 	}
 }
 

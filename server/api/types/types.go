@@ -480,9 +480,9 @@ type CommerceJobsGeneralSummaryResp struct {
 }
 
 type CommerceJobsGeneralDistributionsResp struct {
-	Token         any `json:"token"`
-	ChainContract any `json:"chain_contract"`
-	Fees          any `json:"fees"`
+	Token          any                             `json:"token"`
+	ChainContracts []CommerceJobsChainContractsItem `json:"chain_contracts"`
+	Fees           any                             `json:"fees"`
 }
 
 type CommerceJobsGeneralResp struct {
@@ -490,8 +490,42 @@ type CommerceJobsGeneralResp struct {
 	Distributions CommerceJobsGeneralDistributionsResp `json:"distributions"`
 }
 
+// CommerceJobsChainContractItem is one commerce_contract aggregate row under a specific chain.
+type CommerceJobsChainContractItem struct {
+	CommerceContract string         `json:"commerce_contract"`
+	JobsCount        int64          `json:"jobs_count"`
+	BudgetVolumeUSD  float64        `json:"budget_volume_usd"`
+	PaidVolumeUSD    float64        `json:"paid_volume_usd"`
+	Drilldown        map[string]any `json:"drilldown,omitempty"`
+}
+
+// CommerceJobsChainContractsItem groups contract aggregates by chain_id for UI display.
+type CommerceJobsChainContractsItem struct {
+	ChainID          string                       `json:"chain_id"`
+	ChainName        string                       `json:"chain_name,omitempty"`
+	ChainLogo        string                       `json:"chain_logo,omitempty"`
+	ERC8183Contracts []CommerceJobsChainContractItem `json:"erc8183_contracts"`
+}
+
 type CommerceJobsChartsResp struct {
 	Charts any `json:"charts"`
+}
+
+// ─────────────── Commerce Jobs Filters (Job Browser) ───────────────
+
+type CommerceJobsFilterChain struct {
+	ChainID   string `json:"chain_id"`
+	ChainName string `json:"chain_name,omitempty"`
+	ChainLogo string `json:"chain_logo,omitempty"`
+}
+
+// CommerceJobsFilters holds default filter options for Job Browser.
+// It is returned by GET /agent/commerce/jobs/filters.
+type CommerceJobsFilters struct {
+	Chains            []CommerceJobsFilterChain `json:"chains"`
+	CommerceContracts []string                 `json:"commerce_contracts"`
+	PaymentTokens     []string                 `json:"payment_tokens"`
+	LastUpdated       uint64                   `json:"last_updated"`
 }
 
 // ─────────────── Commerce Job Actions (Job Detail) ───────────────

@@ -1,13 +1,16 @@
 package logic
 
 import (
+	"context"
 	"agent_identity/config"
 	"agent_identity/model"
 	"agent_identity/server/api/types"
 	"errors"
 	"fmt"
 	"math"
+	"sort"
 	"strings"
+	"time"
 )
 
 type CommerceScoreResp struct {
@@ -652,6 +655,8 @@ func GetCommerceJobsGeneral(p CommerceJobsParams, includeDistributions bool) (*C
 			ccDist[i].ChainLogo = chain.ChainLogo
 		}
 	}
+
+	grouped := groupChainContracts(ccDist)
 	return &CommerceJobsGeneral{
 		Summary: types.CommerceJobsGeneralSummaryResp{
 			JobsCount:       summary.JobsCount,
@@ -671,10 +676,80 @@ func GetCommerceJobsGeneral(p CommerceJobsParams, includeDistributions bool) (*C
 		},
 		Distributions: types.CommerceJobsGeneralDistributionsResp{
 			Token:         tokenDist,
-			ChainContract: ccDist,
+			ChainContracts: grouped,
 			Fees:          fees,
 		},
 	}, nil
+}
+
+func groupChainContracts(flat []model.CommerceJobsChainContractDistributionItem) []types.CommerceJobsChainContractsItem {
+	if len(flat) == 0 {
+		return []types.CommerceJobsChainContractsItem{}
+	}
+
+	byChain := make(map[string]*types.CommerceJobsChainContractsItem)
+	chainOrder := make([]string, 0, 8)
+
+	for _, it := range flat {
+		cid := strings.TrimSpace(it.ChainID)
+		if cid == "" {
+			continue
+		}
+		g, ok := byChain[cid]
+		if !ok {
+			g = &types.CommerceJobsChainContractsItem{
+				ChainID:          cid,
+				ChainName:        it.ChainName,
+				ChainLogo:        it.ChainLogo,
+				ERC8183Contracts: []types.CommerceJobsChainContractItem{},
+			}
+			byChain[cid] = g
+			chainOrder = append(chainOrder, cid)
+		} else {
+			// Ensure chain meta is filled when later rows contain it.
+			if g.ChainName == "" && it.ChainName != "" {
+				g.ChainName = it.ChainName
+			}
+			if g.ChainLogo == "" && it.ChainLogo != "" {
+				g.ChainLogo = it.ChainLogo
+			}
+		}
+
+		contract := strings.TrimSpace(it.CommerceContract)
+		if contract == "" {
+			continue
+		}
+		g.ERC8183Contracts = append(g.ERC8183Contracts, types.CommerceJobsChainContractItem{
+			CommerceContract: contract,
+			JobsCount:        it.JobsCount,
+			BudgetVolumeUSD:  it.BudgetVolumeUSD,
+			PaidVolumeUSD:    it.PaidVolumeUSD,
+			Drilldown: map[string]any{
+				"chain_id":          cid,
+				"commerce_contract": contract,
+			},
+		})
+	}
+
+	out := make([]types.CommerceJobsChainContractsItem, 0, len(chainOrder))
+	for _, cid := range chainOrder {
+		g := byChain[cid]
+		if g == nil || len(g.ERC8183Contracts) == 0 {
+			continue
+		}
+		// Deterministic order: paid desc then jobs desc.
+		sort.Slice(g.ERC8183Contracts, func(i, j int) bool {
+			if g.ERC8183Contracts[i].PaidVolumeUSD != g.ERC8183Contracts[j].PaidVolumeUSD {
+				return g.ERC8183Contracts[i].PaidVolumeUSD > g.ERC8183Contracts[j].PaidVolumeUSD
+			}
+			if g.ERC8183Contracts[i].JobsCount != g.ERC8183Contracts[j].JobsCount {
+				return g.ERC8183Contracts[i].JobsCount > g.ERC8183Contracts[j].JobsCount
+			}
+			return g.ERC8183Contracts[i].CommerceContract < g.ERC8183Contracts[j].CommerceContract
+		})
+		out = append(out, *g)
+	}
+	return out
 }
 
 func GetCommerceJobsCharts(p CommerceJobsChartsParams) (any, error) {
@@ -722,16 +797,56 @@ func GetCommerceJobsCharts(p CommerceJobsChartsParams) (any, error) {
 		return nil, err
 	}
 	// Enrich chain meta for UI display (chain name/logo).
-	for i := range charts.Distribution.ChainContractDistribution {
-		if charts.Distribution.ChainContractDistribution[i].ChainID == "" {
+	// NOTE: chart chain/contract distribution is grouped in model (see model.CommerceJobsCharts).
+	for i := range charts.Distribution.ChainContracts {
+		if charts.Distribution.ChainContracts[i].ChainID == "" {
 			continue
 		}
-		if chain, ok := config.GetChainInfo(charts.Distribution.ChainContractDistribution[i].ChainID); ok {
-			charts.Distribution.ChainContractDistribution[i].ChainName = chain.ChainName
-			charts.Distribution.ChainContractDistribution[i].ChainLogo = chain.ChainLogo
+		if chain, ok := config.GetChainInfo(charts.Distribution.ChainContracts[i].ChainID); ok {
+			charts.Distribution.ChainContracts[i].ChainName = chain.ChainName
+			charts.Distribution.ChainContracts[i].ChainLogo = chain.ChainLogo
 		}
 	}
 	return charts, nil
+}
+
+// BuildCommerceJobsFilters builds default filter options for Job Browser.
+// It is used by the in-memory cache refresher.
+func BuildCommerceJobsFilters(ctx context.Context) (*types.CommerceJobsFilters, error) {
+	_ = ctx // reserved for future DB timeouts/cancellation
+
+	chainIDs, err := model.GetCommerceJobsDistinctChainIDs()
+	if err != nil {
+		return nil, fmt.Errorf("distinct chain_ids: %w", err)
+	}
+	contracts, err := model.GetCommerceJobsDistinctCommerceContracts()
+	if err != nil {
+		return nil, fmt.Errorf("distinct commerce_contracts: %w", err)
+	}
+	tokens, err := model.GetCommerceJobsDistinctPaymentTokens()
+	if err != nil {
+		return nil, fmt.Errorf("distinct payment_tokens: %w", err)
+	}
+
+	chains := make([]types.CommerceJobsFilterChain, 0, len(chainIDs))
+	for _, id := range chainIDs {
+		item := types.CommerceJobsFilterChain{ChainID: id}
+		if chain, ok := config.GetChainInfo(id); ok {
+			item.ChainName = chain.ChainName
+			item.ChainLogo = chain.ChainLogo
+		}
+		chains = append(chains, item)
+	}
+
+	// Stable order for UI.
+	sort.Slice(chains, func(i, j int) bool { return chains[i].ChainID < chains[j].ChainID })
+
+	return &types.CommerceJobsFilters{
+		Chains:            chains,
+		CommerceContracts: contracts,
+		PaymentTokens:     tokens,
+		LastUpdated:       uint64(time.Now().Unix()),
+	}, nil
 }
 
 // ─────────────── Commerce Job Actions (Job Detail) ───────────────

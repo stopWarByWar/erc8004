@@ -3,6 +3,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 
 	"gorm.io/gorm"
@@ -43,6 +44,67 @@ func GetCommerceLeaderboardStats() (*CommerceLeaderboardStats, error) {
 		ClientAmount:       r.Clients,
 		PaymentVolumeUSD:   r.PaidVolumeUSD,
 	}, nil
+}
+
+// ─────────────── Commerce Jobs Filters (distinct options) ───────────────
+
+func GetCommerceJobsDistinctChainIDs() ([]string, error) {
+	var ids []string
+	if err := db.Model(&CommerceJob{}).
+		Distinct("chain_id").
+		Where("chain_id <> ''").
+		Pluck("chain_id", &ids).Error; err != nil {
+		return nil, err
+	}
+	ids = uniqueNonEmptyStrings(ids)
+	sort.Strings(ids)
+	return ids, nil
+}
+
+func GetCommerceJobsDistinctCommerceContracts() ([]string, error) {
+	var contracts []string
+	if err := db.Model(&CommerceJob{}).
+		Distinct("commerce_contract").
+		Where("commerce_contract <> ''").
+		Pluck("commerce_contract", &contracts).Error; err != nil {
+		return nil, err
+	}
+	contracts = uniqueNonEmptyStrings(contracts)
+	sort.Strings(contracts)
+	return contracts, nil
+}
+
+func GetCommerceJobsDistinctPaymentTokens() ([]string, error) {
+	var tokens []string
+	if err := db.Model(&CommerceJob{}).
+		Distinct("payment_token").
+		Where("payment_token <> ''").
+		Pluck("payment_token", &tokens).Error; err != nil {
+		return nil, err
+	}
+	tokens = uniqueNonEmptyStrings(tokens)
+	sort.Strings(tokens)
+	return tokens, nil
+}
+
+func uniqueNonEmptyStrings(in []string) []string {
+	if len(in) == 0 {
+		return []string{}
+	}
+	seen := make(map[string]struct{}, len(in))
+	out := make([]string, 0, len(in))
+	for _, s := range in {
+		s = strings.TrimSpace(s)
+		if s == "" {
+			continue
+		}
+		if _, ok := seen[s]; ok {
+			continue
+		}
+		seen[s] = struct{}{}
+		out = append(out, s)
+	}
+	return out
 }
 
 func CreateCommerceAction(action *CommerceAction) error {
@@ -851,6 +913,21 @@ type CommerceJobsChainContractDistributionItem struct {
 	Drilldown        map[string]any `json:"drilldown,omitempty"`
 }
 
+type CommerceJobsChainContractItem struct {
+	CommerceContract string         `json:"commerce_contract"`
+	JobsCount        int64          `json:"jobs_count"`
+	BudgetVolumeUSD  float64        `json:"budget_volume_usd"`
+	PaidVolumeUSD    float64        `json:"paid_volume_usd"`
+	Drilldown        map[string]any `json:"drilldown,omitempty"`
+}
+
+type CommerceJobsChainContractsItem struct {
+	ChainID          string                       `json:"chain_id"`
+	ChainName        string                       `json:"chain_name,omitempty"`
+	ChainLogo        string                       `json:"chain_logo,omitempty"`
+	ERC8183Contracts []CommerceJobsChainContractItem `json:"erc8183_contracts"`
+}
+
 type CommerceJobsFeesDistribution struct {
 	PlatformFeeUSD  float64 `json:"platform_fee_usd"`
 	EvaluatorFeeUSD float64 `json:"evaluator_fee_usd"`
@@ -919,7 +996,7 @@ type CommerceJobsCharts struct {
 	} `json:"volume"`
 	Distribution struct {
 		TokenDistribution         []CommerceJobsTokenDistributionItem         `json:"token_distribution"`
-		ChainContractDistribution []CommerceJobsChainContractDistributionItem `json:"chain_contract_distribution"`
+		ChainContracts            []CommerceJobsChainContractsItem            `json:"chain_contracts"`
 		BudgetHistogramUSD        []CommerceJobsChartHistogramItem            `json:"budget_histogram_usd"`
 	} `json:"distribution"`
 	Evidence struct {
@@ -942,20 +1019,11 @@ func GetCommerceJobsCharts(q CommerceJobsQuery, windowStart, windowEnd uint64, b
 
 	out := &CommerceJobsCharts{}
 	out.Distribution.TokenDistribution = tokenDist
-	out.Distribution.ChainContractDistribution = ccDist
+	out.Distribution.ChainContracts = groupChainContracts(ccDist)
 	for i := range out.Distribution.TokenDistribution {
 		sym := out.Distribution.TokenDistribution[i].TokenSymbol
 		if sym != "" {
 			out.Distribution.TokenDistribution[i].Drilldown = map[string]any{"token_symbol": sym}
-		}
-	}
-	for i := range out.Distribution.ChainContractDistribution {
-		cc := out.Distribution.ChainContractDistribution[i]
-		if cc.ChainID != "" || cc.CommerceContract != "" {
-			out.Distribution.ChainContractDistribution[i].Drilldown = map[string]any{
-				"chain_id":          cc.ChainID,
-				"commerce_contract": cc.CommerceContract,
-			}
 		}
 	}
 	out.Volume.FeesBreakdown = []CommerceJobsChartFeesItem{
@@ -1313,6 +1381,66 @@ func GetCommerceJobsCharts(q CommerceJobsQuery, windowStart, windowEnd uint64, b
 	}
 
 	return out, nil
+}
+
+func groupChainContracts(flat []CommerceJobsChainContractDistributionItem) []CommerceJobsChainContractsItem {
+	if len(flat) == 0 {
+		return []CommerceJobsChainContractsItem{}
+	}
+
+	byChain := make(map[string]*CommerceJobsChainContractsItem)
+	order := make([]string, 0, 8)
+
+	for _, it := range flat {
+		cid := strings.TrimSpace(it.ChainID)
+		if cid == "" {
+			continue
+		}
+		g, ok := byChain[cid]
+		if !ok {
+			g = &CommerceJobsChainContractsItem{
+				ChainID:          cid,
+				ChainName:        it.ChainName,
+				ChainLogo:        it.ChainLogo,
+				ERC8183Contracts: []CommerceJobsChainContractItem{},
+			}
+			byChain[cid] = g
+			order = append(order, cid)
+		} else {
+			// best-effort fill
+			if g.ChainName == "" && it.ChainName != "" {
+				g.ChainName = it.ChainName
+			}
+			if g.ChainLogo == "" && it.ChainLogo != "" {
+				g.ChainLogo = it.ChainLogo
+			}
+		}
+
+		contract := strings.TrimSpace(it.CommerceContract)
+		if contract == "" {
+			continue
+		}
+		g.ERC8183Contracts = append(g.ERC8183Contracts, CommerceJobsChainContractItem{
+			CommerceContract: contract,
+			JobsCount:        it.JobsCount,
+			BudgetVolumeUSD:  it.BudgetVolumeUSD,
+			PaidVolumeUSD:    it.PaidVolumeUSD,
+			Drilldown: map[string]any{
+				"chain_id":          cid,
+				"commerce_contract": contract,
+			},
+		})
+	}
+
+	out := make([]CommerceJobsChainContractsItem, 0, len(order))
+	for _, cid := range order {
+		g := byChain[cid]
+		if g == nil || len(g.ERC8183Contracts) == 0 {
+			continue
+		}
+		out = append(out, *g)
+	}
+	return out
 }
 
 // GetCommerceJobsGeneral aggregates summary + distributions for a given jobs query filter.
