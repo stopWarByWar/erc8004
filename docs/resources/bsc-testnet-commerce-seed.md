@@ -81,7 +81,7 @@ SELECT count(*) FROM commerce_actions
 WHERE chain_id = '97' AND commerce_contract = '0xYourAgenticCommerce';
 ```
 
-**API**（示例，按实际路由与参数调整）：`GET agent/commerce/actions?...` — `uid` 可由 Indexer 为各钱包创建 stub agent 后从 `agents` 表反查。
+**API**（示例，按实际路由与参数调整）：`GET agent/identity/commerce/actions?...` — `uid` 可由 Indexer 为各钱包创建 stub agent 后从 `agents` 表反查。
 
 ## 常见失败
 

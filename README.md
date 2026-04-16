@@ -106,13 +106,13 @@ go test -race ./...
 
 ### API 扩展
 
-**GET `/agent/commerce/actions`** 新增过滤参数：
+**GET `/agent/identity/commerce/actions`** 新增过滤参数：
 - `payment_token` — 按 ERC-20 地址精确过滤
 - `token_symbol` — 按代币符号过滤（USDC/ETH/WETH）
 - `min_budget_usd` — 最小 USD 价值
 - `max_budget_usd` — 最大 USD 价值
 
-**GET `/agent/commerce/scores`** 新增返回字段：
+**GET `/agent/identity/commerce/scores`** 新增返回字段：
 - `total_volume_usd` — USD 计价总交易量
 - `weighted_score_usd` — Σ(budget_usd × outcome_score) / Σ(budget_usd)
 

@@ -837,14 +837,18 @@ type CommerceJobsTokenDistributionItem struct {
 	JobsCount       int64   `json:"jobs_count"`
 	BudgetVolumeUSD float64 `json:"budget_volume_usd"`
 	PaidVolumeUSD   float64 `json:"paid_volume_usd"`
+	Drilldown       map[string]any `json:"drilldown,omitempty"`
 }
 
 type CommerceJobsChainContractDistributionItem struct {
 	ChainID          string  `json:"chain_id"`
+	ChainName        string  `json:"chain_name,omitempty"`
+	ChainLogo        string  `json:"chain_logo,omitempty"`
 	CommerceContract string  `json:"commerce_contract"`
 	JobsCount        int64   `json:"jobs_count"`
 	BudgetVolumeUSD  float64 `json:"budget_volume_usd"`
 	PaidVolumeUSD    float64 `json:"paid_volume_usd"`
+	Drilldown        map[string]any `json:"drilldown,omitempty"`
 }
 
 type CommerceJobsFeesDistribution struct {
@@ -939,6 +943,21 @@ func GetCommerceJobsCharts(q CommerceJobsQuery, windowStart, windowEnd uint64, b
 	out := &CommerceJobsCharts{}
 	out.Distribution.TokenDistribution = tokenDist
 	out.Distribution.ChainContractDistribution = ccDist
+	for i := range out.Distribution.TokenDistribution {
+		sym := out.Distribution.TokenDistribution[i].TokenSymbol
+		if sym != "" {
+			out.Distribution.TokenDistribution[i].Drilldown = map[string]any{"token_symbol": sym}
+		}
+	}
+	for i := range out.Distribution.ChainContractDistribution {
+		cc := out.Distribution.ChainContractDistribution[i]
+		if cc.ChainID != "" || cc.CommerceContract != "" {
+			out.Distribution.ChainContractDistribution[i].Drilldown = map[string]any{
+				"chain_id":          cc.ChainID,
+				"commerce_contract": cc.CommerceContract,
+			}
+		}
+	}
 	out.Volume.FeesBreakdown = []CommerceJobsChartFeesItem{
 		{Type: "platform_fee_usd", Value: fees.PlatformFeeUSD, Drilldown: map[string]any{"status": StatusCompleted}},
 		{Type: "evaluator_fee_usd", Value: fees.EvaluatorFeeUSD, Drilldown: map[string]any{"status": StatusCompleted}},
@@ -967,11 +986,53 @@ func GetCommerceJobsCharts(q CommerceJobsQuery, windowStart, windowEnd uint64, b
 		if q.Status != "" {
 			tx = tx.Where("status = ?", q.Status)
 		}
+		if q.Role != "" {
+			switch strings.ToLower(q.Role) {
+			case "client":
+				if q.AgentAddress != "" {
+					tx = tx.Where("client = ?", q.AgentAddress)
+				} else {
+					tx = tx.Where("client <> ''")
+				}
+				if q.Counterparty != "" {
+					tx = tx.Where("provider = ?", q.Counterparty)
+				}
+			case "provider":
+				if q.AgentAddress != "" {
+					tx = tx.Where("provider = ?", q.AgentAddress)
+				} else {
+					tx = tx.Where("provider <> ''")
+				}
+				if q.Counterparty != "" {
+					tx = tx.Where("client = ?", q.Counterparty)
+				}
+			case "evaluator":
+				if q.AgentAddress != "" {
+					tx = tx.Where("evaluator = ?", q.AgentAddress)
+				} else {
+					tx = tx.Where("evaluator <> ''")
+				}
+				// Counterparty for evaluator is ambiguous (client/provider). Keep for future extension.
+			}
+		} else if q.AgentAddress != "" {
+			// When role is empty, match any party if agent_address is provided.
+			tx = tx.Where("(client = ? OR provider = ? OR evaluator = ?)", q.AgentAddress, q.AgentAddress, q.AgentAddress)
+		}
+		if q.Role == "" && q.Counterparty != "" {
+			// Minimal behavior: match any party.
+			tx = tx.Where("(client = ? OR provider = ? OR evaluator = ?)", q.Counterparty, q.Counterparty, q.Counterparty)
+		}
 		if q.PaymentToken != "" {
 			tx = tx.Where("payment_token = ?", q.PaymentToken)
 		}
 		if q.TokenSymbol != "" {
 			tx = tx.Where("token_symbol = ?", q.TokenSymbol)
+		}
+		if q.MinBudget != nil {
+			tx = tx.Where("budget >= ?", *q.MinBudget)
+		}
+		if q.MaxBudget != nil {
+			tx = tx.Where("budget <= ?", *q.MaxBudget)
 		}
 		if q.MinBudgetUSD != nil {
 			tx = tx.Where("budget_usd >= ?", *q.MinBudgetUSD)
@@ -1014,6 +1075,7 @@ func GetCommerceJobsCharts(q CommerceJobsQuery, windowStart, windowEnd uint64, b
 		})
 		out.Volume.PaidVolumeUSDOverTime = append(out.Volume.PaidVolumeUSDOverTime, CommerceJobsChartsBucket{
 			Bucket:        start,
+			ValueUSD:      r.SumUSD,
 			PaidVolumeUSD: r.SumUSD,
 			Drilldown: map[string]any{
 				"status":     StatusCompleted,
@@ -1041,11 +1103,51 @@ func GetCommerceJobsCharts(q CommerceJobsQuery, windowStart, windowEnd uint64, b
 		if q.Status != "" {
 			tx = tx.Where("cj.status = ?", q.Status)
 		}
+		if q.Role != "" {
+			switch strings.ToLower(q.Role) {
+			case "client":
+				if q.AgentAddress != "" {
+					tx = tx.Where("cj.client = ?", q.AgentAddress)
+				} else {
+					tx = tx.Where("cj.client <> ''")
+				}
+				if q.Counterparty != "" {
+					tx = tx.Where("cj.provider = ?", q.Counterparty)
+				}
+			case "provider":
+				if q.AgentAddress != "" {
+					tx = tx.Where("cj.provider = ?", q.AgentAddress)
+				} else {
+					tx = tx.Where("cj.provider <> ''")
+				}
+				if q.Counterparty != "" {
+					tx = tx.Where("cj.client = ?", q.Counterparty)
+				}
+			case "evaluator":
+				if q.AgentAddress != "" {
+					tx = tx.Where("cj.evaluator = ?", q.AgentAddress)
+				} else {
+					tx = tx.Where("cj.evaluator <> ''")
+				}
+				// Counterparty for evaluator is ambiguous (client/provider). Keep for future extension.
+			}
+		} else if q.AgentAddress != "" {
+			tx = tx.Where("(cj.client = ? OR cj.provider = ? OR cj.evaluator = ?)", q.AgentAddress, q.AgentAddress, q.AgentAddress)
+		}
+		if q.Role == "" && q.Counterparty != "" {
+			tx = tx.Where("(cj.client = ? OR cj.provider = ? OR cj.evaluator = ?)", q.Counterparty, q.Counterparty, q.Counterparty)
+		}
 		if q.PaymentToken != "" {
 			tx = tx.Where("cj.payment_token = ?", q.PaymentToken)
 		}
 		if q.TokenSymbol != "" {
 			tx = tx.Where("cj.token_symbol = ?", q.TokenSymbol)
+		}
+		if q.MinBudget != nil {
+			tx = tx.Where("cj.budget >= ?", *q.MinBudget)
+		}
+		if q.MaxBudget != nil {
+			tx = tx.Where("cj.budget <= ?", *q.MaxBudget)
 		}
 		if q.MinBudgetUSD != nil {
 			tx = tx.Where("cj.budget_usd >= ?", *q.MinBudgetUSD)

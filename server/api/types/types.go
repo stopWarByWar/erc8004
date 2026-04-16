@@ -45,7 +45,7 @@ type AgentResponse struct {
 }
 
 // CommerceScore is the UI-facing commerce score payload for a specific role.
-// It mirrors fields returned by GET agent/commerce/scores.
+// It mirrors fields returned by GET agent/identity/commerce/scores.
 type CommerceScore struct {
 	Role                      string  `json:"role"`
 	CompletedCount            int     `json:"completed_count"`
@@ -308,7 +308,7 @@ type AgentValidationEvalLatestResponse struct {
 
 // ─────────────── Commerce Stats ───────────────
 
-// CommerceStats is the top-level stats holder for GET /agent/commerce/stats.
+// CommerceStats is the top-level stats holder for GET /agent/identity/commerce/stats.
 type CommerceStats struct {
 	ActionBreakdown    ActionBreakdown    `json:"action_breakdown"`
 	TimeSeries         TimeSeriesStats    `json:"time_series"`
@@ -383,6 +383,8 @@ type BudgetBucketStat struct {
 // NOTE: we currently reuse model.CommerceJob in handlers; this DTO is reserved for future decoupling.
 type CommerceJobDTO struct {
 	ChainID          string `json:"chain_id"`
+	ChainName        string `json:"chain_name,omitempty"`
+	ChainLogo        string `json:"chain_logo,omitempty"`
 	CommerceContract string `json:"commerce_contract"`
 	JobID            uint64 `json:"job_id"`
 

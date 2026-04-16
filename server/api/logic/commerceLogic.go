@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"agent_identity/config"
 	"agent_identity/model"
 	"agent_identity/server/api/types"
 	"errors"
@@ -475,7 +476,7 @@ func defaultBucketSeconds(window string) uint64 {
 }
 
 func jobToDTO(j model.CommerceJob) types.CommerceJobDTO {
-	return types.CommerceJobDTO{
+	dto := types.CommerceJobDTO{
 		ChainID:          j.ChainID,
 		CommerceContract: j.CommerceContract,
 		JobID:            j.JobID,
@@ -504,6 +505,11 @@ func jobToDTO(j model.CommerceJob) types.CommerceJobDTO {
 		LatestTxHash:       j.LatestTxHash,
 		LatestActionUID:    j.LatestActionUID,
 	}
+	if chain, ok := config.GetChainInfo(j.ChainID); ok {
+		dto.ChainName = chain.ChainName
+		dto.ChainLogo = chain.ChainLogo
+	}
+	return dto
 }
 
 func normalizePaymentDecimals(v uint) uint {
@@ -635,6 +641,17 @@ func GetCommerceJobsGeneral(p CommerceJobsParams, includeDistributions bool) (*C
 	if err != nil {
 		return nil, fmt.Errorf("get commerce jobs general: %w", err)
 	}
+
+	// Enrich chain meta for UI display (chain name/logo).
+	for i := range ccDist {
+		if ccDist[i].ChainID == "" {
+			continue
+		}
+		if chain, ok := config.GetChainInfo(ccDist[i].ChainID); ok {
+			ccDist[i].ChainName = chain.ChainName
+			ccDist[i].ChainLogo = chain.ChainLogo
+		}
+	}
 	return &CommerceJobsGeneral{
 		Summary: types.CommerceJobsGeneralSummaryResp{
 			JobsCount:       summary.JobsCount,
@@ -683,15 +700,38 @@ func GetCommerceJobsCharts(p CommerceJobsChartsParams) (any, error) {
 		we = *p.EndTime
 	}
 	q := model.CommerceJobsQuery{
-		ChainID:      p.ChainID,
-		Contract:     p.CommerceContract,
-		Status:       p.Status,
-		PaymentToken: p.PaymentToken,
-		TokenSymbol:  p.TokenSymbol,
-		Page:         1,
-		PageSize:     1,
+		ChainID:       p.ChainID,
+		Contract:      p.CommerceContract,
+		Status:        p.Status,
+		Role:          p.Role,
+		AgentAddress:  p.AgentAddress,
+		Counterparty:  p.Counterparty,
+		PaymentToken:  p.PaymentToken,
+		TokenSymbol:   p.TokenSymbol,
+		MinBudget:     p.MinBudget,
+		MaxBudget:     p.MaxBudget,
+		MinBudgetUSD:  p.MinBudgetUSD,
+		MaxBudgetUSD:  p.MaxBudgetUSD,
+		StartTime:     p.StartTime,
+		EndTime:       p.EndTime,
+		Page:          1,
+		PageSize:      1,
 	}
-	return model.GetCommerceJobsCharts(q, ws, we, bucket)
+	charts, err := model.GetCommerceJobsCharts(q, ws, we, bucket)
+	if err != nil {
+		return nil, err
+	}
+	// Enrich chain meta for UI display (chain name/logo).
+	for i := range charts.Distribution.ChainContractDistribution {
+		if charts.Distribution.ChainContractDistribution[i].ChainID == "" {
+			continue
+		}
+		if chain, ok := config.GetChainInfo(charts.Distribution.ChainContractDistribution[i].ChainID); ok {
+			charts.Distribution.ChainContractDistribution[i].ChainName = chain.ChainName
+			charts.Distribution.ChainContractDistribution[i].ChainLogo = chain.ChainLogo
+		}
+	}
+	return charts, nil
 }
 
 // ─────────────── Commerce Job Actions (Job Detail) ───────────────

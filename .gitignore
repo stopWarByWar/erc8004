@@ -21,3 +21,6 @@
 /indexer/allLogger/
 /cmd/commerce_seed/log
 /config/commerce_seed.local.yaml
+./main
+logger/logrus*
+logger/*.log

@@ -23,16 +23,16 @@ func TestGetCommerceActionsHandler_InvalidEnums_Return400(t *testing.T) {
 	apiUtils.Init(nil, apiUtils.RuntimeConfig{})
 
 	r := gin.New()
-	r.GET("/agent/commerce/actions", GetCommerceActionsHandler)
+	r.GET("/agent/identity/commerce/actions", GetCommerceActionsHandler)
 
 	cases := []string{
-		"/agent/commerce/actions?uid=1&role=bad",
-		"/agent/commerce/actions?uid=1&certainty=bad",
-		"/agent/commerce/actions?uid=1&sort_by=bad",
-		"/agent/commerce/actions?uid=1&action=bad_action",
-		"/agent/commerce/actions?uid=1&polarity=bad_polarity",
-		"/agent/commerce/actions?uid=1&action=job_completed,bad_action",
-		"/agent/commerce/actions?uid=1&polarity=positive,bad_polarity",
+		"/agent/identity/commerce/actions?uid=1&role=bad",
+		"/agent/identity/commerce/actions?uid=1&certainty=bad",
+		"/agent/identity/commerce/actions?uid=1&sort_by=bad",
+		"/agent/identity/commerce/actions?uid=1&action=bad_action",
+		"/agent/identity/commerce/actions?uid=1&polarity=bad_polarity",
+		"/agent/identity/commerce/actions?uid=1&action=job_completed,bad_action",
+		"/agent/identity/commerce/actions?uid=1&polarity=positive,bad_polarity",
 	}
 
 	for _, path := range cases {
@@ -129,27 +129,27 @@ func TestCommerceHandlers_MockMode_HeaderAndShape(t *testing.T) {
 	initMockHandleTest(t)
 
 	r := gin.New()
-	r.GET("/agent/commerce/scores", GetCommerceScoresHandler)
-	r.GET("/agent/commerce/actions", GetCommerceActionsHandler)
-	r.GET("/agent/commerce/stats", GetCommerceStatsHandler)
-	r.GET("/commerce/jobs", GetCommerceJobsHandler)
-	r.GET("/commerce/jobs/detail", GetCommerceJobDetailHandler)
-	r.GET("/commerce/jobs/general", GetCommerceJobsGeneralHandler)
-	r.GET("/commerce/jobs/charts", GetCommerceJobsChartsHandler)
-	r.GET("/commerce/jobs/actions", GetCommerceJobActionsHandler)
+	r.GET("/agent/identity/commerce/scores", GetCommerceScoresHandler)
+	r.GET("/agent/identity/commerce/actions", GetCommerceActionsHandler)
+	r.GET("/agent/identity/commerce/stats", GetCommerceStatsHandler)
+	r.GET("/agent/commerce/jobs", GetCommerceJobsHandler)
+	r.GET("/agent/commerce/jobs/detail", GetCommerceJobDetailHandler)
+	r.GET("/agent/commerce/jobs/general", GetCommerceJobsGeneralHandler)
+	r.GET("/agent/commerce/jobs/charts", GetCommerceJobsChartsHandler)
+	r.GET("/agent/commerce/jobs/actions", GetCommerceJobActionsHandler)
 
 	cases := []struct {
 		path         string
 		expectSubstr []string
 	}{
-		{"/agent/commerce/scores?uid=1", []string{`"scores"`}},
-		{"/agent/commerce/actions?uid=1&page=1&page_size=3", []string{`"actions"`, `"total"`}},
-		{"/agent/commerce/stats?uid=1", []string{`"stats"`}},
-		{"/commerce/jobs?page=1&page_size=5", []string{`"jobs"`, `"total"`}},
-		{"/commerce/jobs/detail?chain_id=1&commerce_contract=0x1111111111111111111111111111111111111111&job_id=10001", []string{`"job"`, `"evidence"`}},
-		{"/commerce/jobs/general", []string{`"summary"`, `"distributions"`}},
-		{"/commerce/jobs/charts", []string{`"charts"`}},
-		{"/commerce/jobs/actions?chain_id=1&commerce_contract=0x1111111111111111111111111111111111111111&job_id=10001&page=1&page_size=5", []string{`"actions"`, `"total"`}},
+		{"/agent/identity/commerce/scores?uid=1", []string{`"scores"`}},
+		{"/agent/identity/commerce/actions?uid=1&page=1&page_size=3", []string{`"actions"`, `"total"`}},
+		{"/agent/identity/commerce/stats?uid=1", []string{`"stats"`}},
+		{"/agent/commerce/jobs?page=1&page_size=5", []string{`"jobs"`, `"total"`}},
+		{"/agent/commerce/jobs/detail?chain_id=1&commerce_contract=0x1111111111111111111111111111111111111111&job_id=10001", []string{`"job"`, `"evidence"`}},
+		{"/agent/commerce/jobs/general", []string{`"summary"`, `"distributions"`}},
+		{"/agent/commerce/jobs/charts", []string{`"charts"`, `"activity"`, `"volume"`, `"paid_volume_usd_over_time"`, `"value_usd"`, `"drilldown"`}},
+		{"/agent/commerce/jobs/actions?chain_id=1&commerce_contract=0x1111111111111111111111111111111111111111&job_id=10001&page=1&page_size=5", []string{`"actions"`, `"total"`}},
 	}
 
 	for _, tc := range cases {
@@ -176,9 +176,9 @@ func TestCommerceJobs_List_Success(t *testing.T) {
 	initHandleTest(t)
 
 	r := gin.New()
-	r.GET("/commerce/jobs", GetCommerceJobsHandler)
+	r.GET("/agent/commerce/jobs", GetCommerceJobsHandler)
 
-	req := httptest.NewRequest(http.MethodGet, "/commerce/jobs?page=1&page_size=5", nil)
+	req := httptest.NewRequest(http.MethodGet, "/agent/commerce/jobs?page=1&page_size=5", nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 	if w.Code != http.StatusOK {
@@ -198,11 +198,11 @@ func TestCommerceJobs_Detail_InvalidRequest(t *testing.T) {
 	initHandleTest(t)
 
 	r := gin.New()
-	r.GET("/commerce/jobs/detail", GetCommerceJobDetailHandler)
+	r.GET("/agent/commerce/jobs/detail", GetCommerceJobDetailHandler)
 
 	cases := []string{
-		"/commerce/jobs/detail?job_id=1",                              // missing chain/contract
-		"/commerce/jobs/detail?chain_id=1&commerce_contract=0x&job_id=bad", // invalid job_id
+		"/agent/commerce/jobs/detail?job_id=1",                                   // missing chain/contract
+		"/agent/commerce/jobs/detail?chain_id=1&commerce_contract=0x&job_id=bad", // invalid job_id
 	}
 	for _, path := range cases {
 		req := httptest.NewRequest(http.MethodGet, path, nil)
@@ -232,11 +232,11 @@ func TestCommerceJobs_Detail_FromList_IfAny(t *testing.T) {
 	j := jobs[0]
 
 	r := gin.New()
-	r.GET("/commerce/jobs/detail", GetCommerceJobDetailHandler)
+	r.GET("/agent/commerce/jobs/detail", GetCommerceJobDetailHandler)
 
-	path := "/commerce/jobs/detail?chain_id=" + j.ChainID + "&commerce_contract=" + j.CommerceContract + "&job_id=1"
+	path := "/agent/commerce/jobs/detail?chain_id=" + j.ChainID + "&commerce_contract=" + j.CommerceContract + "&job_id=1"
 	// use the actual job_id
-	path = "/commerce/jobs/detail?chain_id=" + j.ChainID + "&commerce_contract=" + j.CommerceContract + "&job_id=" + func() string {
+	path = "/agent/commerce/jobs/detail?chain_id=" + j.ChainID + "&commerce_contract=" + j.CommerceContract + "&job_id=" + func() string {
 		b, _ := json.Marshal(j.JobID)
 		// json marshals uint64 as number; convert without quotes by trimming spaces
 		return strings.TrimSpace(string(b))
@@ -261,9 +261,9 @@ func TestCommerceJobs_General_Success(t *testing.T) {
 	initHandleTest(t)
 
 	r := gin.New()
-	r.GET("/commerce/jobs/general", GetCommerceJobsGeneralHandler)
+	r.GET("/agent/commerce/jobs/general", GetCommerceJobsGeneralHandler)
 
-	req := httptest.NewRequest(http.MethodGet, "/commerce/jobs/general", nil)
+	req := httptest.NewRequest(http.MethodGet, "/agent/commerce/jobs/general", nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 	if w.Code != http.StatusOK {
@@ -282,9 +282,9 @@ func TestCommerceJobs_Charts_Success(t *testing.T) {
 	initHandleTest(t)
 
 	r := gin.New()
-	r.GET("/commerce/jobs/charts", GetCommerceJobsChartsHandler)
+	r.GET("/agent/commerce/jobs/charts", GetCommerceJobsChartsHandler)
 
-	req := httptest.NewRequest(http.MethodGet, "/commerce/jobs/charts", nil)
+	req := httptest.NewRequest(http.MethodGet, "/agent/commerce/jobs/charts", nil)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 	if w.Code != http.StatusOK {

@@ -606,10 +606,19 @@ func GetCommerceJobsChartsHandler(c *gin.Context) {
 	status := c.Query("status")
 	paymentToken := c.Query("payment_token")
 	tokenSymbol := c.Query("token_symbol")
+	role := c.Query("role")
+	agentAddress := c.Query("agent_address")
+	counterparty := c.Query("counterparty")
 
 	if _, ok := allowedJobStatus[status]; !ok {
 		serverUtils.ErrResp(nil, "invalid status", "Invalid Request", c)
 		return
+	}
+	if role != "" {
+		if _, ok := allowedRoles[role]; !ok {
+			serverUtils.ErrResp(nil, "invalid role", "Invalid Request", c)
+			return
+		}
 	}
 
 	window := c.DefaultQuery("window", "7d")
@@ -674,6 +683,44 @@ func GetCommerceJobsChartsHandler(c *gin.Context) {
 		endTime = &v
 	}
 
+	var minBudget *float64
+	if raw := c.Query("min_budget"); raw != "" {
+		v, perr := strconv.ParseFloat(raw, 64)
+		if perr != nil || math.IsNaN(v) || math.IsInf(v, 0) {
+			serverUtils.ErrResp(nil, "invalid min_budget", "Invalid Request", c)
+			return
+		}
+		minBudget = &v
+	}
+	var maxBudget *float64
+	if raw := c.Query("max_budget"); raw != "" {
+		v, perr := strconv.ParseFloat(raw, 64)
+		if perr != nil || math.IsNaN(v) || math.IsInf(v, 0) {
+			serverUtils.ErrResp(nil, "invalid max_budget", "Invalid Request", c)
+			return
+		}
+		maxBudget = &v
+	}
+
+	var minBudgetUSD *float64
+	if raw := c.Query("min_budget_usd"); raw != "" {
+		v, perr := strconv.ParseFloat(raw, 64)
+		if perr != nil || math.IsNaN(v) || math.IsInf(v, 0) {
+			serverUtils.ErrResp(nil, "invalid min_budget_usd", "Invalid Request", c)
+			return
+		}
+		minBudgetUSD = &v
+	}
+	var maxBudgetUSD *float64
+	if raw := c.Query("max_budget_usd"); raw != "" {
+		v, perr := strconv.ParseFloat(raw, 64)
+		if perr != nil || math.IsNaN(v) || math.IsInf(v, 0) {
+			serverUtils.ErrResp(nil, "invalid max_budget_usd", "Invalid Request", c)
+			return
+		}
+		maxBudgetUSD = &v
+	}
+
 	ws, we := uint64(0), uint64(0)
 	if startTime != nil {
 		ws = *startTime
@@ -693,8 +740,15 @@ func GetCommerceJobsChartsHandler(c *gin.Context) {
 			ChainID:          chainID,
 			CommerceContract: contract,
 			Status:           status,
+			Role:             role,
+			AgentAddress:     agentAddress,
+			Counterparty:     counterparty,
 			PaymentToken:     paymentToken,
 			TokenSymbol:      tokenSymbol,
+			MinBudget:        minBudget,
+			MaxBudget:        maxBudget,
+			MinBudgetUSD:     minBudgetUSD,
+			MaxBudgetUSD:     maxBudgetUSD,
 			StartTime:        func() *uint64 { if ws == 0 { return nil }; return &ws }(),
 			EndTime:          func() *uint64 { if we == 0 { return nil }; return &we }(),
 			Page:             1,

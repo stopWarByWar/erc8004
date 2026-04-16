@@ -51,7 +51,7 @@ func paginate[T any](items []T, page, pageSize int) ([]T, int64) {
 	return out, total
 }
 
-// -------------------- agent/commerce/scores --------------------
+// -------------------- agent/identity/commerce/scores --------------------
 
 func CommerceScores(uid uint64, chainID, contract string) []serverLogic.CommerceScoreResp {
 	r := seededRand(fmt.Sprintf("%d", uid), chainID, contract, "scores")
@@ -93,7 +93,7 @@ func CommerceScores(uid uint64, chainID, contract string) []serverLogic.Commerce
 	return out
 }
 
-// -------------------- agent/commerce/actions --------------------
+// -------------------- agent/identity/commerce/actions --------------------
 
 type CommerceActionsQuery struct {
 	UID          uint64
@@ -272,7 +272,7 @@ func filterCommerceActions(items []types.CommerceActionDTO, q CommerceActionsQue
 	return out
 }
 
-// -------------------- agent/commerce/stats --------------------
+// -------------------- agent/identity/commerce/stats --------------------
 
 func CommerceStats(uid uint64, now uint64) *types.CommerceStats {
 	r := seededRand(fmt.Sprintf("%d", uid), fmt.Sprintf("%d", now), "stats")
@@ -555,6 +555,8 @@ func CommerceJobDetail(chainID, contract string, jobID uint64) (*types.CommerceJ
 	now := uint64(time.Now().Unix())
 	job := &types.CommerceJobDTO{
 		ChainID:          firstNonEmpty(chainID, "1"),
+		ChainName:        "Base",
+		ChainLogo:        "https://example.com/base.png",
 		CommerceContract: firstNonEmpty(contract, fmt.Sprintf("0x%040x", r.Uint64())),
 		JobID:            jobID,
 		Status:           []string{"open", "funded", "submitted", "completed"}[r.Intn(4)],
@@ -616,17 +618,115 @@ func CommerceJobsGeneral() (types.CommerceJobsGeneralSummaryResp, types.Commerce
 
 func CommerceJobsCharts() any {
 	now := uint64(time.Now().Unix())
-	points := make([]map[string]any, 0, 14)
-	for i := 0; i < 14; i++ {
-		t := int64(now - uint64((13-i))*86400)
-		points = append(points, map[string]any{
-			"bucket":           t,
-			"jobs_count":       20 + i,
-			"paid_volume_usd":  1000.0 + float64(i)*123.45,
-			"budget_volume_usd": 1500.0 + float64(i)*200.0,
+	r := seededRand("charts", fmt.Sprintf("%d", now))
+
+	// Build buckets (7d, 6h) as default-like.
+	buckets := make([]map[string]any, 0, 10)
+	step := uint64(6 * 3600)
+	start := now - step*uint64(9)
+	for i := 0; i < 10; i++ {
+		b := start + uint64(i)*step
+		count := int64(5 + r.Intn(30))
+		paid := round2(500 + r.Float64()*5000)
+		buckets = append(buckets, map[string]any{
+			"bucket":    b,
+			"count":     count,
+			"drilldown": map[string]any{"start_time": b, "end_time": b + step},
+		})
+		_ = paid
+	}
+
+	paidBuckets := make([]map[string]any, 0, len(buckets))
+	feeBuckets := make([]map[string]any, 0, len(buckets))
+	for _, it := range buckets {
+		b := it["bucket"].(uint64)
+		paid := round2(500 + r.Float64()*8000)
+		fee := round2(paid * 0.02)
+		paidBuckets = append(paidBuckets, map[string]any{
+			"bucket":         b,
+			"value_usd":      paid,
+			"paid_volume_usd": paid, // keep compatibility
+			"drilldown":      map[string]any{"status": "completed", "start_time": b, "end_time": b + step},
+		})
+		feeBuckets = append(feeBuckets, map[string]any{
+			"bucket":           b,
+			"platform_fee_usd": fee,
+			"value_usd":        fee,
+			"drilldown":        map[string]any{"status": "completed", "start_time": b, "end_time": b + step},
 		})
 	}
-	return map[string]any{"series": points}
+
+	tokenDist := []map[string]any{
+		{"token_symbol": "USDC", "jobs_count": 80, "budget_volume_usd": 60000, "paid_volume_usd": 40000, "drilldown": map[string]any{"token_symbol": "USDC"}},
+		{"token_symbol": "ETH", "jobs_count": 40, "budget_volume_usd": 20123.45, "paid_volume_usd": 12340.12, "drilldown": map[string]any{"token_symbol": "ETH"}},
+	}
+	ccDist := []map[string]any{
+		{
+			"chain_id":          "8453",
+			"chain_name":        "Base",
+			"chain_logo":        "https://example.com/base.png",
+			"commerce_contract": "0x1111111111111111111111111111111111111111",
+			"jobs_count":        120,
+			"budget_volume_usd": 80123.45,
+			"paid_volume_usd":   52340.12,
+			"drilldown":         map[string]any{"chain_id": "8453", "commerce_contract": "0x1111111111111111111111111111111111111111"},
+		},
+	}
+
+	return map[string]any{
+		"activity": map[string]any{
+			"active_jobs_over_time": buckets,
+			"created_jobs_over_time": []map[string]any{
+				{"bucket": start, "count": 3, "drilldown": map[string]any{"start_time": start, "end_time": start + step}},
+			},
+			"unique_clients_over_time": []map[string]any{
+				{"bucket": start, "count": 4, "drilldown": map[string]any{"start_time": start, "end_time": start + step}},
+			},
+			"unique_providers_over_time": []map[string]any{
+				{"bucket": start, "count": 5, "drilldown": map[string]any{"start_time": start, "end_time": start + step}},
+			},
+		},
+		"health": map[string]any{
+			"outcome_mix": []map[string]any{
+				{"status": "completed", "count": 50, "drilldown": map[string]any{"status": "completed"}},
+				{"status": "rejected", "count": 10, "drilldown": map[string]any{"status": "rejected"}},
+				{"status": "expired", "count": 5, "drilldown": map[string]any{"status": "expired"}},
+			},
+			"funnel": []map[string]any{
+				{"stage": "open", "count": 30, "drilldown": map[string]any{"status": "open"}},
+				{"stage": "funded", "count": 15, "drilldown": map[string]any{"status": "funded"}},
+				{"stage": "submitted", "count": 10, "drilldown": map[string]any{"status": "submitted"}},
+				{"stage": "completed", "count": 50, "drilldown": map[string]any{"status": "completed"}},
+			},
+		},
+		"volume": map[string]any{
+			"paid_volume_usd_over_time":     paidBuckets,
+			"platform_fee_usd_over_time":    feeBuckets,
+			"fees_breakdown": []map[string]any{
+				{"type": "platform_fee_usd", "value": 1200.5, "drilldown": map[string]any{"status": "completed"}},
+				{"type": "evaluator_fee_usd", "value": 800.25, "drilldown": map[string]any{"status": "completed"}},
+			},
+		},
+		"distribution": map[string]any{
+			"token_distribution":          tokenDist,
+			"chain_contract_distribution": ccDist,
+			"budget_histogram_usd": []map[string]any{
+				{"range": map[string]any{"min": 0, "max": 100}, "count": 20, "drilldown": map[string]any{"min_budget_usd": 0, "max_budget_usd": 100}},
+			},
+		},
+		"evidence": map[string]any{
+			"top_events": []map[string]any{
+				{
+					"kind":             "PaymentReleased",
+					"chain_id":          "8453",
+					"commerce_contract": "0x1111111111111111111111111111111111111111",
+					"job_id":            12,
+					"value_usd":         1350,
+					"drilldown":         map[string]any{"chain_id": "8453", "commerce_contract": "0x1111111111111111111111111111111111111111", "job_id": 12},
+				},
+			},
+		},
+	}
 }
 
 type CommerceJobActionsQuery struct {
