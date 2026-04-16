@@ -382,6 +382,7 @@ type BudgetBucketStat struct {
 // CommerceJobDTO is a UI-facing job snapshot payload (commerce_jobs).
 // NOTE: we currently reuse model.CommerceJob in handlers; this DTO is reserved for future decoupling.
 type CommerceJobDTO struct {
+	JobUID           uint64 `json:"job_uid"`
 	ChainID          string `json:"chain_id"`
 	ChainName        string `json:"chain_name,omitempty"`
 	ChainLogo        string `json:"chain_logo,omitempty"`

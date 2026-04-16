@@ -406,6 +406,7 @@ func CommerceJobs(q CommerceJobsQuery) ([]types.CommerceJobDTO, int64) {
 	for i := 0; i < 200; i++ {
 		st := statuses[r.Intn(len(statuses))]
 		chainID := firstNonEmpty(q.ChainID, "1")
+		chainName, chainLogo := mockChainMeta(chainID)
 		contract := firstNonEmpty(q.CommerceContract, fmt.Sprintf("0x%040x", r.Uint64()))
 		jobID := uint64(10000 + i)
 		updatedAt := now - uint64(r.Intn(3600*24*90))
@@ -419,7 +420,10 @@ func CommerceJobs(q CommerceJobsQuery) ([]types.CommerceJobDTO, int64) {
 		evaluatorFee := paid * 0.01
 
 		all = append(all, types.CommerceJobDTO{
+			JobUID:           900000 + uint64(i),
 			ChainID:          chainID,
+			ChainName:        chainName,
+			ChainLogo:        chainLogo,
 			CommerceContract: contract,
 			JobID:            jobID,
 			Status:           st,
@@ -575,6 +579,7 @@ func CommerceJobDetail(chainID, contract string, jobID uint64) (*types.CommerceJ
 	now := uint64(time.Now().Unix())
 	chainName, chainLogo := mockChainMeta(firstNonEmpty(chainID, "1"))
 	job := &types.CommerceJobDTO{
+		JobUID:           900000 + jobID,
 		ChainID:          firstNonEmpty(chainID, "1"),
 		ChainName:        chainName,
 		ChainLogo:        chainLogo,

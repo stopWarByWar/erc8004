@@ -480,6 +480,7 @@ func defaultBucketSeconds(window string) uint64 {
 
 func jobToDTO(j model.CommerceJob) types.CommerceJobDTO {
 	dto := types.CommerceJobDTO{
+		JobUID:           j.UID,
 		ChainID:          j.ChainID,
 		CommerceContract: j.CommerceContract,
 		JobID:            j.JobID,

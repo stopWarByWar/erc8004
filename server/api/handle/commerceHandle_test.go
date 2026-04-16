@@ -146,7 +146,7 @@ func TestCommerceHandlers_MockMode_HeaderAndShape(t *testing.T) {
 		{"/agent/identity/commerce/scores?uid=1", []string{`"scores"`}},
 		{"/agent/identity/commerce/actions?uid=1&page=1&page_size=3", []string{`"actions"`, `"total"`}},
 		{"/agent/identity/commerce/stats?uid=1", []string{`"stats"`}},
-		{"/agent/commerce/jobs?page=1&page_size=5", []string{`"jobs"`, `"total"`}},
+		{"/agent/commerce/jobs?page=1&page_size=5", []string{`"jobs"`, `"total"`, `"job_uid"`, `"chain_name"`, `"chain_logo"`}},
 		{"/agent/commerce/jobs/detail?chain_id=1&commerce_contract=0x1111111111111111111111111111111111111111&job_id=10001", []string{`"job"`, `"evidence"`}},
 		{"/agent/commerce/jobs/general", []string{`"summary"`, `"distributions"`, `"chain_contracts"`, `"erc8183_contracts"`}},
 		{"/agent/commerce/jobs/charts", []string{`"charts"`, `"activity"`, `"volume"`, `"paid_volume_usd_over_time"`, `"value_usd"`, `"drilldown"`, `"chain_contracts"`, `"erc8183_contracts"`}},

@@ -7,6 +7,7 @@ import (
 
 func TestJobToDTO_AmountStringsAndDecimals(t *testing.T) {
 	j := model.CommerceJob{
+		UID:              4242,
 		ChainID:          "1",
 		CommerceContract: "0xC",
 		JobID:            1,
@@ -21,6 +22,9 @@ func TestJobToDTO_AmountStringsAndDecimals(t *testing.T) {
 		EvaluatorFeeAmount: 0,
 	}
 	dto := jobToDTO(j)
+	if dto.JobUID != 4242 {
+		t.Fatalf("expected job_uid=4242, got %d", dto.JobUID)
+	}
 	if dto.PaymentDecimals != 6 {
 		t.Fatalf("expected payment_decimals=6, got %d", dto.PaymentDecimals)
 	}
