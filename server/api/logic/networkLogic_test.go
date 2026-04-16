@@ -6,7 +6,7 @@ import (
 )
 
 func TestGetNetworkList(t *testing.T) {
-	initTest()
+	initTest(t)
 	networkList, err := GetNetworkList()
 	if err != nil {
 		t.Errorf("GetNetworkList error: %v", err)

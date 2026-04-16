@@ -59,6 +59,12 @@ go run ./indexer/main.go -f ./config/conf.yaml
 go run ./cmd/update_desc_vector.go -f ./config/conf.yaml
 ```
 
+### Mock 数据（Commerce API）
+
+在 `server/api/logic/config.yaml`（API 服务运行配置）中设置：
+- `mock: true`：所有 commerce 相关接口返回 mock 数据，并在响应 header 中携带 `X-Mock: 1`
+- `mock: false`：走真实 DB/索引数据路径（默认）
+
 ### 测试
 
 ```bash

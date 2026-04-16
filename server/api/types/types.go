@@ -257,6 +257,10 @@ type LeaderboardInfo struct {
 	FeedbackAmount         int64
 	AgentAmountWithIn7Days int64
 	NetworkAmount          int64
+	JobCreatedAmount       int64
+	JobCompletedAmount     int64
+	ClientAmount           int64
+	PaymentVolumeUSD       float64
 	Leaderboard            []LeaderboardAgentInfo
 }
 
@@ -306,9 +310,9 @@ type AgentValidationEvalLatestResponse struct {
 
 // CommerceStats is the top-level stats holder for GET /agent/commerce/stats.
 type CommerceStats struct {
-	ActionBreakdown      ActionBreakdown      `json:"action_breakdown"`
-	TimeSeries           TimeSeriesStats      `json:"time_series"`
-	BudgetDistribution   BudgetDistribution   `json:"budget_distribution"`
+	ActionBreakdown    ActionBreakdown    `json:"action_breakdown"`
+	TimeSeries         TimeSeriesStats    `json:"time_series"`
+	BudgetDistribution BudgetDistribution `json:"budget_distribution"`
 }
 
 // ActionBreakdown maps role → action counts. Empty roles are omitted.
@@ -333,7 +337,7 @@ type TimeSeriesStats struct {
 
 // TimeBucket represents one time-series bucket.
 type TimeBucket struct {
-	Bucket        int64   `json:"bucket"`
+	Bucket         int64   `json:"bucket"`
 	CompletedCount int     `json:"completed_count"`
 	RejectedCount  int     `json:"rejected_count"`
 	SuccessRate    float64 `json:"success_rate"`
@@ -344,18 +348,18 @@ type BudgetDistribution map[string]map[string]ContractBudgetStats
 
 // ContractBudgetStats holds total count and bucketed stats for one contract.
 type ContractBudgetStats struct {
-	TotalCount int               `json:"total_count"`
-	Buckets    BudgetBuckets     `json:"buckets"`
+	TotalCount int           `json:"total_count"`
+	Buckets    BudgetBuckets `json:"buckets"`
 }
 
 // BudgetBuckets holds small/medium/large buckets.
 // When TotalCount < 3, Buckets is a flat map[string]interface{}{"count": int, "max_amount": string}.
 type BudgetBuckets struct {
-	Small   *BudgetBucketStat `json:"small,omitempty"`
-	Medium  *BudgetBucketStat `json:"medium,omitempty"`
-	Large   *BudgetBucketStat `json:"large,omitempty"`
+	Small  *BudgetBucketStat `json:"small,omitempty"`
+	Medium *BudgetBucketStat `json:"medium,omitempty"`
+	Large  *BudgetBucketStat `json:"large,omitempty"`
 	// Flat is used when sample size < 3.
-	Flat    any `json:"-"` // map[string]any{"count": int, "max_amount": string}
+	Flat any `json:"-"` // map[string]any{"count": int, "max_amount": string}
 }
 
 // MarshalJSON implements custom marshaling to handle flat bucket case.
@@ -371,4 +375,153 @@ func (b BudgetBuckets) MarshalJSON() ([]byte, error) {
 type BudgetBucketStat struct {
 	Count     int    `json:"count"`
 	MaxAmount string `json:"max_amount"`
+}
+
+// ─────────────── Commerce Jobs (Job Browser) ───────────────
+
+// CommerceJobDTO is a UI-facing job snapshot payload (commerce_jobs).
+// NOTE: we currently reuse model.CommerceJob in handlers; this DTO is reserved for future decoupling.
+type CommerceJobDTO struct {
+	ChainID          string `json:"chain_id"`
+	CommerceContract string `json:"commerce_contract"`
+	JobID            uint64 `json:"job_id"`
+
+	Status    string `json:"status"`
+	UpdatedAt uint64 `json:"updated_at"`
+
+	Client    string `json:"client"`
+	Provider  string `json:"provider"`
+	Evaluator string `json:"evaluator"`
+
+	Description string `json:"description,omitempty"`
+	HookAddress string `json:"hook_address,omitempty"`
+
+	ExpiredAt   uint64 `json:"expired_at,omitempty"`
+	SubmittedAt uint64 `json:"submitted_at,omitempty"`
+	CompletedAt uint64 `json:"completed_at,omitempty"`
+
+	PaymentToken    string `json:"payment_token"`
+	PaymentDecimals uint   `json:"payment_decimals"`
+	TokenSymbol     string `json:"token_symbol"`
+
+	Budget        string  `json:"budget"`
+	BudgetUSD     float64 `json:"budget_usd"`
+	PaidAmount    string  `json:"paid_amount"`
+	PaidAmountUSD float64 `json:"paid_amount_usd"`
+
+	PlatformFeeAmount  string  `json:"platform_fee_amount"`
+	PlatformFeeUSD     float64 `json:"platform_fee_usd"`
+	EvaluatorFeeAmount string  `json:"evaluator_fee_amount"`
+	EvaluatorFeeUSD    float64 `json:"evaluator_fee_usd"`
+
+	LatestBlockNumber uint64 `json:"latest_block_number,omitempty"`
+	LatestTxHash      string `json:"latest_tx_hash,omitempty"`
+	LatestActionUID   uint64 `json:"latest_action_uid,omitempty"`
+}
+
+type CommerceJobsListResp struct {
+	Jobs  []CommerceJobDTO `json:"jobs"`
+	Total int64            `json:"total"`
+}
+
+type CommerceActionDTO struct {
+	ChainID          string `json:"chain_id"`
+	CommerceContract string `json:"commerce_contract"`
+	JobID            uint64 `json:"job_id"`
+
+	AgentUID     uint64 `json:"agent_uid"`
+	AgentAddress string `json:"agent_address"`
+	Role         string `json:"role"`
+	Action       string `json:"action"`
+
+	SignalPolarity  string  `json:"signal_polarity"`
+	SignalWeight    float64 `json:"signal_weight"`
+	SignalCertainty string  `json:"signal_certainty"`
+
+	JobBudget string  `json:"job_budget"`
+	BudgetUSD float64 `json:"budget_usd"`
+
+	PaymentToken    string `json:"payment_token"`
+	PaymentDecimals uint   `json:"payment_decimals"`
+	TokenSymbol     string `json:"token_symbol"`
+
+	Counterparty   string `json:"counterparty"`
+	Reason         string `json:"reason"`
+	Deliverable    string `json:"deliverable"`
+	PreviousStatus string `json:"previous_status"`
+	HookAddress    string `json:"hook_address"`
+
+	BlockNumber    uint64 `json:"block_number"`
+	TxHash         string `json:"tx_hash"`
+	LogIndex       uint   `json:"log_index"`
+	BlockTimestamp uint64 `json:"block_timestamp"`
+}
+
+type CommerceJobDetailEvidence struct {
+	TimelineSource    string   `json:"timeline_source"`
+	EventsTableSource string   `json:"events_table_source"`
+	SettlementEvents  []string `json:"settlement_events"`
+}
+
+type CommerceJobDetailResp struct {
+	Job      CommerceJobDTO            `json:"job"`
+	Evidence CommerceJobDetailEvidence `json:"evidence"`
+}
+
+type CommerceJobsGeneralSummaryResp struct {
+	JobsCount       int64            `json:"jobs_count"`
+	PaidVolumeUSD   float64          `json:"paid_volume_usd"`
+	BudgetVolumeUSD float64          `json:"budget_volume_usd"`
+	OutcomeMix      map[string]int64 `json:"outcome_mix"`
+	ActiveMix       map[string]int64 `json:"active_mix"`
+	LastUpdated     uint64           `json:"last_updated"`
+}
+
+type CommerceJobsGeneralDistributionsResp struct {
+	Token         any `json:"token"`
+	ChainContract any `json:"chain_contract"`
+	Fees          any `json:"fees"`
+}
+
+type CommerceJobsGeneralResp struct {
+	Summary       CommerceJobsGeneralSummaryResp       `json:"summary"`
+	Distributions CommerceJobsGeneralDistributionsResp `json:"distributions"`
+}
+
+type CommerceJobsChartsResp struct {
+	Charts any `json:"charts"`
+}
+
+// ─────────────── Commerce Job Actions (Job Detail) ───────────────
+
+// CommerceJobActionDTO is a UI-facing action row for Job Detail.
+// It is derived from commerce_actions (event log) with minimal fields for rendering a table.
+type CommerceJobActionDTO struct {
+	ChainID          string `json:"chain_id"`
+	CommerceContract string `json:"commerce_contract"`
+	JobID            uint64 `json:"job_id"`
+
+	// ActionType is a UI-friendly event name (e.g., JobCreated, BudgetSet).
+	ActionType string `json:"action_type"`
+
+	BlockTimestamp uint64 `json:"block_timestamp"`
+	BlockNumber    uint64 `json:"block_number"`
+	TxHash         string `json:"tx_hash"`
+	LogIndex       uint   `json:"log_index"`
+
+	Actor string `json:"actor,omitempty"`
+	Role  string `json:"role,omitempty"` // client|provider|evaluator|platform|unknown
+
+	PaymentToken    string `json:"payment_token,omitempty"`
+	PaymentDecimals uint   `json:"payment_decimals,omitempty"`
+	TokenSymbol     string `json:"token_symbol,omitempty"`
+
+	// Amount/AmountUSD are optional. For now, we expose budget-like amounts from commerce_actions.
+	Amount    *float64 `json:"amount,omitempty"`
+	AmountUSD *float64 `json:"amount_usd,omitempty"`
+}
+
+type CommerceJobActionsListResp struct {
+	Actions []CommerceJobActionDTO `json:"actions"`
+	Total   int64                  `json:"total"`
 }

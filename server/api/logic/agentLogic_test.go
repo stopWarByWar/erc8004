@@ -11,7 +11,7 @@ import (
 )
 
 func TestUpdateFilterInfo(t *testing.T) {
-	initTest()
+	initTest(t)
 	config.UpdateFilterInfo()
 	fmt.Printf("filterInfo: %+v\n", config.GetFilterInfo())
 	apiUtils.UpdateLeaderboardInfo()
@@ -27,7 +27,7 @@ var active = true
 var haveFeedback = true
 
 func TestFilterSearchAgentListByFilter(t *testing.T) {
-	initTest()
+	initTest(t)
 	page := 1
 	pageSize := 10
 	agents, total, err := GetAgentListByFilter(page, pageSize, nil, nil, &chainIDs, nil, &x402Support, &active, &haveFeedback)
@@ -38,7 +38,7 @@ func TestFilterSearchAgentListByFilter(t *testing.T) {
 }
 
 func TestGetAgentListByFilter(t *testing.T) {
-	initTest()
+	initTest(t)
 	page := 1
 	pageSize := 10
 
@@ -53,7 +53,7 @@ func TestGetAgentListByFilter(t *testing.T) {
 	}
 }
 func TestGetCardResponse(t *testing.T) {
-	initTest()
+	initTest(t)
 	agentUID := uint64(1)
 	agentCard, err := GetCardResponse(agentUID)
 	if err != nil {
@@ -71,7 +71,7 @@ func TestGetCardResponse(t *testing.T) {
 }
 
 func TestFilterSearchAgentListBySemantic(t *testing.T) {
-	initTest()
+	initTest(t)
 	desc := "AI agent"
 	limit := 10
 	threshold := 0.5
@@ -83,7 +83,7 @@ func TestFilterSearchAgentListBySemantic(t *testing.T) {
 }
 
 func TestUploadAgentProfile(t *testing.T) {
-	initTest()
+	initTest(t)
 	versionString := "1.0.0"
 	capabilities := map[string]interface{}{
 		"tools":     []string{"test"},

@@ -6,6 +6,7 @@ import (
 	"agent_identity/logger"
 	"agent_identity/model"
 	"agent_identity/server/api"
+	apiUtils "agent_identity/server/api/utils"
 	"flag"
 	"os"
 
@@ -38,7 +39,7 @@ func main() {
 	helper.InitHelper(_config.S3Region, _config.S3BucketName, _config.S3AccessKey, _config.S3SecretKey)
 
 	model.InitDB(_config.Dns, _config.OpenaiAPIKey)
-	api.InitRouter(_logger)
+	api.InitRouter(_logger, apiUtils.RuntimeConfig{Mock: _config.Mock, FeedbackMock: _config.FeedbackMock})
 
 	api.Run([]string{"*"}, _config.Port)
 }

@@ -7,7 +7,7 @@ import (
 )
 
 func TestGetAgentFeedbacksList(t *testing.T) {
-	initTest()
+	initTest(t)
 	agentUID := uint64(19838)
 	page := 1
 	pageSize := 10
@@ -19,7 +19,7 @@ func TestGetAgentFeedbacksList(t *testing.T) {
 }
 
 func TestSetFeedback(t *testing.T) {
-	initTest()
+	initTest(t)
 	tag1 := "tag1"
 	tag2 := "tag2"
 	skill := "test"
@@ -45,7 +45,7 @@ func TestSetFeedback(t *testing.T) {
 }
 
 func TestGetAgentScoreForEachTag1(t *testing.T) {
-	initTest()
+	initTest(t)
 	agentUID := uint64(19838)
 	offset := 0
 	limit := 10

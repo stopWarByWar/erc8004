@@ -16,8 +16,24 @@ import (
 var _logger *logger.Logger
 var leaderboardInfo types.LeaderboardInfo
 
-func Init(nlogger *logger.Logger) {
+type RuntimeConfig struct {
+	Mock         bool
+	FeedbackMock bool
+}
+
+var runtimeConfig RuntimeConfig
+
+func Init(nlogger *logger.Logger, rc RuntimeConfig) {
 	_logger = nlogger
+	runtimeConfig = rc
+}
+
+func IsMockEnabled() bool {
+	return runtimeConfig.Mock
+}
+
+func SetMockHeader(c *gin.Context) {
+	c.Header("X-Mock", "1")
 }
 
 func ErrResp(errorInfos logrus.Fields, msg, reply string, c *gin.Context) {
@@ -70,6 +86,18 @@ func UpdateLeaderboardInfo() {
 	}
 
 	leaderboardInfo.NetworkAmount = int64(len(filterInfo.Networks))
+
+	commerceStats, err := model.GetCommerceLeaderboardStats()
+	if err != nil {
+		_logger.WithFields(logrus.Fields{
+			"error": err.Error(),
+		}).Error("failed to get commerce leaderboard stats")
+		return
+	}
+	leaderboardInfo.JobCreatedAmount = commerceStats.JobCreatedAmount
+	leaderboardInfo.JobCompletedAmount = commerceStats.JobCompletedAmount
+	leaderboardInfo.ClientAmount = commerceStats.ClientAmount
+	leaderboardInfo.PaymentVolumeUSD = commerceStats.PaymentVolumeUSD
 
 	feedbackAmount, err := model.GetAgentAmountWithFeedback()
 	if err != nil {

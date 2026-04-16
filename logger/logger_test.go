@@ -14,13 +14,10 @@ func TestLogger(t *testing.T) {
 		time.Hour,
 		time.Second * time.Duration(5)}
 	logger, _ := New(config)
-	i := 0
-	for {
-		i++
+	for i := 1; i <= 3; i++ {
 		logger.WithFields(logrus.Fields{
 			"index": i,
 			"age":   18,
 		}).Info("info msg")
-		time.Sleep(time.Second)
 	}
 }

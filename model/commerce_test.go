@@ -14,6 +14,9 @@ type commerceTestConfig struct {
 
 func initCommerceTest(t *testing.T) {
 	t.Helper()
+	if os.Getenv("RUN_DB_TESTS") != "1" {
+		t.Skip("set RUN_DB_TESTS=1 to run DB-backed tests")
+	}
 	conf := &commerceTestConfig{}
 	data, err := os.ReadFile("./config.yaml")
 	if err != nil {

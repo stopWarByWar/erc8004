@@ -6,12 +6,17 @@ import (
 	"agent_identity/logger"
 	"agent_identity/model"
 	"os"
+	"testing"
 
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
-func initTest() {
+func initTest(t *testing.T) {
+	t.Helper()
+	if os.Getenv("RUN_DB_TESTS") != "1" {
+		t.Skip("set RUN_DB_TESTS=1 to run DB-backed tests")
+	}
 	logConf := &logger.Config{
 		Level:        logrus.InfoLevel,
 		ReportCaller: true,

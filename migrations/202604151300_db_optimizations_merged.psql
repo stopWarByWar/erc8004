@@ -1,0 +1,175 @@
+-- Merged migration: DB batch/index optimizations (commerce/feedback/validation/vector).
+-- This file consolidates previously split migrations created on 2026-04-15.
+-- Idempotent where practical (guards via pg_indexes / pg_constraint). Safe to re-run.
+
+-- ──────────────────────────────
+-- A) Commerce query indexes
+-- ──────────────────────────────
+
+DO $$
+BEGIN
+  -- commerce_jobs: stable pagination + common filters
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_cj_chain_contract_updated_job') THEN
+    CREATE INDEX idx_cj_chain_contract_updated_job
+      ON commerce_jobs(chain_id, commerce_contract, updated_at DESC, job_id DESC);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_cj_chain_contract_status_updated_job') THEN
+    CREATE INDEX idx_cj_chain_contract_status_updated_job
+      ON commerce_jobs(chain_id, commerce_contract, status, updated_at DESC, job_id DESC);
+  END IF;
+
+  -- Role-specific filters in Job Browser (client/provider views).
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_cj_chain_contract_client_updated_job') THEN
+    CREATE INDEX idx_cj_chain_contract_client_updated_job
+      ON commerce_jobs(chain_id, commerce_contract, client, updated_at DESC, job_id DESC);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_cj_chain_contract_provider_updated_job') THEN
+    CREATE INDEX idx_cj_chain_contract_provider_updated_job
+      ON commerce_jobs(chain_id, commerce_contract, provider, updated_at DESC, job_id DESC);
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  -- commerce_actions: agent timeline + sortable lists + job detail timeline
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_ca_job_timestamp_log') THEN
+    CREATE INDEX idx_ca_job_timestamp_log
+      ON commerce_actions(chain_id, commerce_contract, job_id, block_timestamp DESC, log_index DESC);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_ca_agent_chain_contract_timestamp') THEN
+    CREATE INDEX idx_ca_agent_chain_contract_timestamp
+      ON commerce_actions(agent_uid, chain_id, commerce_contract, block_timestamp DESC);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_ca_agent_budget_timestamp') THEN
+    CREATE INDEX idx_ca_agent_budget_timestamp
+      ON commerce_actions(agent_uid, job_budget DESC, block_timestamp DESC);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_ca_agent_signal_weight_timestamp') THEN
+    CREATE INDEX idx_ca_agent_signal_weight_timestamp
+      ON commerce_actions(agent_uid, signal_weight DESC, block_timestamp DESC);
+  END IF;
+END $$;
+
+-- ──────────────────────────────
+-- B) Feedback query indexes
+-- ──────────────────────────────
+
+DO $$
+BEGIN
+  -- API: GetFeedbacksByAgentUID(uid, tag1s) WHERE agent_uid=? AND revoked=false ORDER BY timestamps DESC
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_feedbacks_agent_uid_revoked_timestamps') THEN
+    CREATE INDEX idx_feedbacks_agent_uid_revoked_timestamps
+      ON feedbacks(agent_uid, revoked, timestamps DESC);
+  END IF;
+
+  -- API: optional tag1 filter + same pagination
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_feedbacks_agent_uid_tag1_revoked_timestamps') THEN
+    CREATE INDEX idx_feedbacks_agent_uid_tag1_revoked_timestamps
+      ON feedbacks(agent_uid, tag1, revoked, timestamps DESC);
+  END IF;
+
+  -- Triggers: lookup by agent_uid+tag1+client_address (both insert EXISTS and revoke COUNT).
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_feedbacks_agent_uid_tag1_client_address') THEN
+    CREATE INDEX idx_feedbacks_agent_uid_tag1_client_address
+      ON feedbacks(agent_uid, tag1, client_address);
+  END IF;
+
+  -- Triggers: frequently count active (revoked=false) feedbacks for a client under a tag.
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_feedbacks_active_agent_uid_tag1_client_address') THEN
+    CREATE INDEX idx_feedbacks_active_agent_uid_tag1_client_address
+      ON feedbacks(agent_uid, tag1, client_address)
+      WHERE revoked = FALSE;
+  END IF;
+END $$;
+
+-- ──────────────────────────────
+-- C) Validation query indexes
+-- ──────────────────────────────
+
+DO $$
+BEGIN
+  -- Latest cursor for indexer: WHERE chain_id=? AND validation_registry=? ORDER BY block_number DESC, index DESC LIMIT 1
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_validations_chain_registry_block_index_desc') THEN
+    CREATE INDEX idx_validations_chain_registry_block_index_desc
+      ON validations(chain_id, validation_registry, block_number DESC, index DESC);
+  END IF;
+
+  -- API: list validations by agent ordered by time
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_validations_agent_uid_block_index_desc') THEN
+    CREATE INDEX idx_validations_agent_uid_block_index_desc
+      ON validations(agent_uid, block_number DESC, index DESC);
+  END IF;
+
+  -- API: list validations by validator ordered by time
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_validations_validator_block_index_desc') THEN
+    CREATE INDEX idx_validations_validator_block_index_desc
+      ON validations(validator_address, block_number DESC, index DESC);
+  END IF;
+
+  -- UpdateValidation lookup: WHERE chain_id=? AND validation_registry=? AND request_hash=?
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_validations_chain_registry_request_hash') THEN
+    CREATE INDEX idx_validations_chain_registry_request_hash
+      ON validations(chain_id, validation_registry, request_hash);
+  END IF;
+
+  -- Optional: speed up pending/finished filters used by list endpoints.
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_validations_pending_by_agent') THEN
+    CREATE INDEX idx_validations_pending_by_agent
+      ON validations(agent_uid, block_number DESC, index DESC)
+      WHERE (response_tx_hash = '' OR response_tx_hash IS NULL);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_validations_finished_by_agent') THEN
+    CREATE INDEX idx_validations_finished_by_agent
+      ON validations(agent_uid, block_number DESC, index DESC)
+      WHERE (response_tx_hash != '' AND response_tx_hash IS NOT NULL);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_validations_pending_by_validator') THEN
+    CREATE INDEX idx_validations_pending_by_validator
+      ON validations(validator_address, block_number DESC, index DESC)
+      WHERE (response_tx_hash = '' OR response_tx_hash IS NULL);
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_validations_finished_by_validator') THEN
+    CREATE INDEX idx_validations_finished_by_validator
+      ON validations(validator_address, block_number DESC, index DESC)
+      WHERE (response_tx_hash != '' AND response_tx_hash IS NOT NULL);
+  END IF;
+END $$;
+
+-- ──────────────────────────────
+-- D) Unique constraints for idempotent writes
+-- ──────────────────────────────
+
+-- ──────────────────────────────
+-- E) pgvector ANN index (HNSW cosine)
+-- ──────────────────────────────
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'idx_agent_vectors_embedding_hnsw_cosine') THEN
+    CREATE INDEX idx_agent_vectors_embedding_hnsw_cosine
+      ON agent_vectors USING hnsw (embedding vector_cosine_ops);
+  END IF;
+END $$;
+
+-- ──────────────────────────────
+-- F) Cleanup redundant agent_vectors constraint/indexes
+-- ──────────────────────────────
+
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'agent_vectors_agent_uid_unique') THEN
+    ALTER TABLE agent_vectors DROP CONSTRAINT agent_vectors_agent_uid_unique;
+  END IF;
+END $$;
+
+DROP INDEX IF EXISTS idx_agent_vectors_agent_uid;
+DROP INDEX IF EXISTS idx_agent_vectors_agent_chain;
+

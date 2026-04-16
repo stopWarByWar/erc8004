@@ -39,24 +39,13 @@ func GetLatestAgent(chainID string, identityRegistry string) (uint64, uint64, er
 }
 
 func CreateAgent(agent *Agent) error {
-	return db.Transaction(func(tx *gorm.DB) error {
-		var amount int64
-		err := tx.Model(&Agent{}).Where("agent_id = ? AND chain_id = ? AND identity_registry = ?",
-			agent.AgentID, agent.ChainID, agent.IdentityRegistry).
-			Count(&amount).Error
-		if err != nil {
-			return err
-		}
-		if amount > 0 {
-			return nil
-		}
-
-		// 创建新记录，忽略 uid 字段（让数据库自动生成主键）
-		if err := tx.Omit("uid").Create(&agent).Error; err != nil {
-			return err
-		}
+	if agent == nil {
 		return nil
-	})
+	}
+	// Rely on DB unique constraint to guarantee idempotency.
+	return db.Omit("uid").
+		Clauses(clause.OnConflict{DoNothing: true}).
+		Create(agent).Error
 }
 
 func UpdateAgentTokenURL(chainID, identityRegistry, agentID, agentURI string, blockNumber uint64, index uint64) error {
@@ -293,52 +282,19 @@ func FindOrCreateAgentByWallet(chainID, wallet string) (uint64, error) {
 }
 
 func CreateMetadata(metadata *Metadata) error {
-	err := db.Clauses(clause.OnConflict{
+	if metadata == nil {
+		return nil
+	}
+	// Use DB upsert to avoid insert+select+update round-trips.
+	return db.Clauses(clause.OnConflict{
 		Columns: []clause.Column{
 			{Name: "chain_id"},
 			{Name: "identity_registry"},
 			{Name: "agent_id"},
 			{Name: "key"},
 		},
-		DoNothing: true,
+		DoUpdates: clause.AssignmentColumns([]string{"value", "block", "index", "tx_hash"}),
 	}).Create(metadata).Error
-
-	if err != nil {
-		return err
-	}
-
-	// 查询记录（无论是新插入的还是已存在的）
-	var existing Metadata
-	err = db.Where("chain_id = ? AND identity_registry = ? AND agent_id = ? AND key = ?",
-		metadata.ChainID, metadata.IdentityRegistry, metadata.AgentID, metadata.Key).
-		First(&existing).Error
-
-	if err != nil {
-		return err
-	}
-
-	// 检查是否有变化
-	hasChange := existing.Value != metadata.Value ||
-		existing.Block != metadata.Block ||
-		existing.Index != metadata.Index ||
-		existing.TxHash != metadata.TxHash
-
-	if !hasChange {
-		// 没有变化，什么都不做
-		return nil
-	}
-
-	// 有变化，更新记录
-	updateMap := map[string]interface{}{
-		"value":   metadata.Value,
-		"block":   metadata.Block,
-		"index":   metadata.Index,
-		"tx_hash": metadata.TxHash,
-	}
-	return db.Model(&Metadata{}).
-		Where("chain_id = ? AND identity_registry = ? AND agent_id = ? AND key = ?",
-			metadata.ChainID, metadata.IdentityRegistry, metadata.AgentID, metadata.Key).
-		Updates(updateMap).Error
 }
 
 //

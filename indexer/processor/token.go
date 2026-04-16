@@ -182,6 +182,7 @@ var jobBudgetCache sync.Map // map[uint64]*jobBudgetEntry
 
 type jobBudgetEntry struct {
 	PaymentToken string
+	PaymentDecimals uint8
 	TokenSymbol  string
 	Budget       *big.Int
 	BudgetUSD    float64

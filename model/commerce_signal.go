@@ -27,6 +27,7 @@ const (
 	RoleClient    = "client"
 	RoleProvider  = "provider"
 	RoleEvaluator = "evaluator"
+	RolePlatform  = "platform"
 )
 
 // Signal polarity

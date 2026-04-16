@@ -285,6 +285,7 @@ type CommerceAction struct {
 	PreviousStatus   string  `gorm:"column:previous_status;type:varchar(32);default:''"`
 	HookAddress      string  `gorm:"column:hook_address;type:varchar(255);default:''"`
 	PaymentToken     string  `gorm:"column:payment_token;type:varchar(255);default:''"`
+	PaymentDecimals  uint    `gorm:"column:payment_decimals;type:smallint;default:18"`
 	TokenSymbol      string  `gorm:"column:token_symbol;type:varchar(32);default:''"`
 	BudgetUSD        float64 `gorm:"column:budget_usd;type:numeric(36,8);default:0"`
 	BlockNumber      uint64  `gorm:"column:block_number;type:bigint;not null"`
@@ -365,12 +366,26 @@ type CommerceJob struct {
 	Description string `gorm:"column:description;type:text"`
 
 	// 金额相关
-	Budget        float64 `gorm:"column:budget;type:numeric(36,8);default:0"`
-	PaidAmount    float64 `gorm:"column:paid_amount;type:numeric(36,8);default:0"`
+	// Budget is the on-chain `budget` amount (token units) set by BudgetSet.
+	Budget float64 `gorm:"column:budget;type:numeric(36,8);default:0"`
+	// BudgetUSD is the USD value of Budget at the time of BudgetSet.
+	BudgetUSD float64 `gorm:"column:budget_usd;type:numeric(36,8);default:0"`
+	// PaidAmount is the amount actually paid to provider (net of fees) on completion.
+	PaidAmount float64 `gorm:"column:paid_amount;type:numeric(36,8);default:0"`
+	// PaidAmountUSD is the USD value of PaidAmount at completion time.
 	PaidAmountUSD float64 `gorm:"column:paid_amount_usd;type:numeric(36,8);default:0"`
+	// PlatformFeeAmount is the platform fee amount (token units) paid on completion.
+	PlatformFeeAmount float64 `gorm:"column:platform_fee_amount;type:numeric(36,8);default:0"`
+	// PlatformFeeUSD is the USD value of PlatformFeeAmount at completion time.
+	PlatformFeeUSD float64 `gorm:"column:platform_fee_usd;type:numeric(36,8);default:0"`
+	// EvaluatorFeeAmount is the evaluator fee amount (token units) paid on completion.
+	EvaluatorFeeAmount float64 `gorm:"column:evaluator_fee_amount;type:numeric(36,8);default:0"`
+	// EvaluatorFeeUSD is the USD value of EvaluatorFeeAmount at completion time.
+	EvaluatorFeeUSD float64 `gorm:"column:evaluator_fee_usd;type:numeric(36,8);default:0"`
 
 	// Token 信息
 	PaymentToken string `gorm:"column:payment_token;type:varchar(255);default:''"`
+	PaymentDecimals uint `gorm:"column:payment_decimals;type:smallint;default:18"`
 	TokenSymbol  string `gorm:"column:token_symbol;type:varchar(32);default:''"`
 
 	// 状态机

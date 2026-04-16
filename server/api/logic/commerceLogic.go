@@ -3,7 +3,10 @@ package logic
 import (
 	"agent_identity/model"
 	"agent_identity/server/api/types"
+	"errors"
 	"fmt"
+	"math"
+	"strings"
 )
 
 type CommerceScoreResp struct {
@@ -366,4 +369,455 @@ func percentile(sorted []float64, p float64) float64 {
 	}
 	frac := idx - float64(lower)
 	return sorted[lower]*(1-frac) + sorted[upper]*frac
+}
+
+// ─────────────── Commerce Jobs (Job Browser) ───────────────
+
+type CommerceJobsParams struct {
+	ChainID          string
+	CommerceContract string
+	Status           string
+	Role             string
+	AgentAddress     string
+	Counterparty     string
+	PaymentToken     string
+	TokenSymbol      string
+
+	MinBudget    *float64
+	MaxBudget    *float64
+	MinBudgetUSD *float64
+	MaxBudgetUSD *float64
+
+	StartTime *uint64
+	EndTime   *uint64
+
+	SortBy    string
+	SortOrder string
+
+	Page     int
+	PageSize int
+}
+
+type CommerceJobsChartsParams struct {
+	CommerceJobsParams
+	Window        string
+	BucketSeconds uint64
+}
+
+func normalizePage(page int) int {
+	if page <= 0 {
+		return 1
+	}
+	return page
+}
+
+func normalizePageSize(pageSize int) int {
+	if pageSize <= 0 {
+		return 20
+	}
+	if pageSize > 100 {
+		return 100
+	}
+	return pageSize
+}
+
+func normalizeSortOrder(v string) string {
+	v = strings.ToLower(strings.TrimSpace(v))
+	if v == "" {
+		return "desc"
+	}
+	if v != "asc" && v != "desc" {
+		return "desc"
+	}
+	return v
+}
+
+func normalizeJobsSortBy(v string) string {
+	v = strings.ToLower(strings.TrimSpace(v))
+	switch v {
+	case "", "updated_at", "budget", "budget_usd", "paid_amount_usd":
+		return v
+	default:
+		return ""
+	}
+}
+
+func normalizeChartsWindow(v string) (string, error) {
+	v = strings.TrimSpace(v)
+	if v == "" {
+		return "7d", nil
+	}
+	switch v {
+	case "24h", "3d", "7d", "1month", "all", "30d", "custom":
+		return v, nil
+	default:
+		return "", errors.New("invalid window")
+	}
+}
+
+func defaultBucketSeconds(window string) uint64 {
+	switch window {
+	case "24h":
+		return 3600
+	case "3d":
+		return 3 * 3600
+	case "7d":
+		return 6 * 3600
+	case "1month":
+		return 24 * 3600
+	case "all":
+		return 24 * 3600
+	case "30d":
+		return 24 * 3600
+	default:
+		return 0
+	}
+}
+
+func jobToDTO(j model.CommerceJob) types.CommerceJobDTO {
+	return types.CommerceJobDTO{
+		ChainID:          j.ChainID,
+		CommerceContract: j.CommerceContract,
+		JobID:            j.JobID,
+		Status:           j.Status,
+		UpdatedAt:        j.UpdatedAt,
+		Client:           j.Client,
+		Provider:         j.Provider,
+		Evaluator:        j.Evaluator,
+		Description:      j.Description,
+		HookAddress:      j.HookAddress,
+		ExpiredAt:        j.ExpiredAt,
+		SubmittedAt:      j.SubmittedAt,
+		CompletedAt:      j.CompletedAt,
+		PaymentToken:     j.PaymentToken,
+		PaymentDecimals:  normalizePaymentDecimals(j.PaymentDecimals),
+		TokenSymbol:      j.TokenSymbol,
+		Budget:           formatAmount(j.Budget),
+		BudgetUSD:        j.BudgetUSD,
+		PaidAmount:       formatAmount(j.PaidAmount),
+		PaidAmountUSD:    j.PaidAmountUSD,
+		PlatformFeeAmount:  formatAmount(j.PlatformFeeAmount),
+		PlatformFeeUSD:     j.PlatformFeeUSD,
+		EvaluatorFeeAmount: formatAmount(j.EvaluatorFeeAmount),
+		EvaluatorFeeUSD:    j.EvaluatorFeeUSD,
+		LatestBlockNumber:  j.LatestBlockNumber,
+		LatestTxHash:       j.LatestTxHash,
+		LatestActionUID:    j.LatestActionUID,
+	}
+}
+
+func normalizePaymentDecimals(v uint) uint {
+	if v == 0 {
+		return 18
+	}
+	return v
+}
+
+// formatAmount formats a numeric(36,8) value stored in float64 into a stable string.
+// It avoids scientific notation and trims trailing zeros.
+func formatAmount(v float64) string {
+	if v == 0 || math.IsNaN(v) || math.IsInf(v, 0) {
+		return "0"
+	}
+	// Keep exactly 8 decimals (matches schema), then trim.
+	s := fmt.Sprintf("%.8f", v)
+	// Trim trailing zeros and dot.
+	for len(s) > 1 && s[len(s)-1] == '0' {
+		s = s[:len(s)-1]
+	}
+	if len(s) > 1 && s[len(s)-1] == '.' {
+		s = s[:len(s)-1]
+	}
+	if s == "" || s == "-0" {
+		return "0"
+	}
+	return s
+}
+
+func ActionToDTO(a model.CommerceAction) types.CommerceActionDTO {
+	return types.CommerceActionDTO{
+		ChainID:          a.ChainID,
+		CommerceContract: a.CommerceContract,
+		JobID:            a.JobID,
+		AgentUID:         a.AgentUID,
+		AgentAddress:     a.AgentAddress,
+		Role:             a.Role,
+		Action:           a.Action,
+		SignalPolarity:   a.SignalPolarity,
+		SignalWeight:     a.SignalWeight,
+		SignalCertainty:  a.SignalCertainty,
+		JobBudget:        formatAmount(a.JobBudget),
+		BudgetUSD:        a.BudgetUSD,
+		PaymentToken:     a.PaymentToken,
+		PaymentDecimals:  normalizePaymentDecimals(a.PaymentDecimals),
+		TokenSymbol:      a.TokenSymbol,
+		Counterparty:     a.Counterparty,
+		Reason:           a.Reason,
+		Deliverable:      a.Deliverable,
+		PreviousStatus:   a.PreviousStatus,
+		HookAddress:      a.HookAddress,
+		BlockNumber:      a.BlockNumber,
+		TxHash:           a.TxHash,
+		LogIndex:         a.LogIndex,
+		BlockTimestamp:   a.BlockTimestamp,
+	}
+}
+
+func GetCommerceJobs(p CommerceJobsParams) ([]types.CommerceJobDTO, int64, error) {
+	q := model.CommerceJobsQuery{
+		ChainID:       p.ChainID,
+		Contract:      p.CommerceContract,
+		Status:        p.Status,
+		Role:          p.Role,
+		AgentAddress:  p.AgentAddress,
+		Counterparty:  p.Counterparty,
+		PaymentToken:  p.PaymentToken,
+		TokenSymbol:   p.TokenSymbol,
+		MinBudget:     p.MinBudget,
+		MaxBudget:     p.MaxBudget,
+		MinBudgetUSD:  p.MinBudgetUSD,
+		MaxBudgetUSD:  p.MaxBudgetUSD,
+		StartTime:     p.StartTime,
+		EndTime:       p.EndTime,
+		SortBy:        normalizeJobsSortBy(p.SortBy),
+		SortOrder:     normalizeSortOrder(p.SortOrder),
+		Page:          normalizePage(p.Page),
+		PageSize:      normalizePageSize(p.PageSize),
+	}
+	jobs, total, err := model.GetCommerceJobs(q)
+	if err != nil {
+		return nil, 0, fmt.Errorf("get commerce jobs: %w", err)
+	}
+	out := make([]types.CommerceJobDTO, 0, len(jobs))
+	for _, j := range jobs {
+		out = append(out, jobToDTO(j))
+	}
+	return out, total, nil
+}
+
+func GetCommerceJobDetail(chainID, contract string, jobID uint64) (*types.CommerceJobDTO, error) {
+	j, err := model.GetCommerceJobByID(chainID, contract, jobID)
+	if err != nil {
+		return nil, fmt.Errorf("get commerce job detail: %w", err)
+	}
+	if j == nil {
+		return nil, nil
+	}
+	dto := jobToDTO(*j)
+	return &dto, nil
+}
+
+type CommerceJobsGeneral struct {
+	Summary types.CommerceJobsGeneralSummaryResp       `json:"summary"`
+	Distributions types.CommerceJobsGeneralDistributionsResp `json:"distributions"`
+}
+
+func GetCommerceJobsGeneral(p CommerceJobsParams, includeDistributions bool) (*CommerceJobsGeneral, error) {
+	q := model.CommerceJobsQuery{
+		ChainID:       p.ChainID,
+		Contract:      p.CommerceContract,
+		Status:        p.Status,
+		Role:          p.Role,
+		AgentAddress:  p.AgentAddress,
+		Counterparty:  p.Counterparty,
+		PaymentToken:  p.PaymentToken,
+		TokenSymbol:   p.TokenSymbol,
+		MinBudget:     p.MinBudget,
+		MaxBudget:     p.MaxBudget,
+		MinBudgetUSD:  p.MinBudgetUSD,
+		MaxBudgetUSD:  p.MaxBudgetUSD,
+		StartTime:     p.StartTime,
+		EndTime:       p.EndTime,
+		Page:          1,
+		PageSize:      1,
+	}
+	summary, tokenDist, ccDist, fees, err := model.GetCommerceJobsGeneral(q, includeDistributions)
+	if err != nil {
+		return nil, fmt.Errorf("get commerce jobs general: %w", err)
+	}
+	return &CommerceJobsGeneral{
+		Summary: types.CommerceJobsGeneralSummaryResp{
+			JobsCount:       summary.JobsCount,
+			PaidVolumeUSD:   summary.PaidVolumeUSD,
+			BudgetVolumeUSD: summary.BudgetVolumeUSD,
+			OutcomeMix: map[string]int64{
+				"completed": summary.OutcomeCompleted,
+				"rejected":  summary.OutcomeRejected,
+				"expired":   summary.OutcomeExpired,
+			},
+			ActiveMix: map[string]int64{
+				"open":      summary.ActiveOpen,
+				"funded":    summary.ActiveFunded,
+				"submitted": summary.ActiveSubmitted,
+			},
+			LastUpdated: summary.LastUpdated,
+		},
+		Distributions: types.CommerceJobsGeneralDistributionsResp{
+			Token:         tokenDist,
+			ChainContract: ccDist,
+			Fees:          fees,
+		},
+	}, nil
+}
+
+func GetCommerceJobsCharts(p CommerceJobsChartsParams) (any, error) {
+	window, err := normalizeChartsWindow(p.Window)
+	if err != nil {
+		return nil, err
+	}
+	bucket := p.BucketSeconds
+	if bucket == 0 {
+		bucket = defaultBucketSeconds(window)
+	}
+	if window == "custom" && bucket == 0 {
+		return nil, errors.New("missing bucket_seconds for custom window")
+	}
+	if bucket == 0 {
+		return nil, errors.New("invalid bucket_seconds")
+	}
+	ws, we := uint64(0), uint64(0)
+	if p.StartTime != nil {
+		ws = *p.StartTime
+	}
+	if p.EndTime != nil {
+		we = *p.EndTime
+	}
+	q := model.CommerceJobsQuery{
+		ChainID:      p.ChainID,
+		Contract:     p.CommerceContract,
+		Status:       p.Status,
+		PaymentToken: p.PaymentToken,
+		TokenSymbol:  p.TokenSymbol,
+		Page:         1,
+		PageSize:     1,
+	}
+	return model.GetCommerceJobsCharts(q, ws, we, bucket)
+}
+
+// ─────────────── Commerce Job Actions (Job Detail) ───────────────
+
+type CommerceJobActionsParams struct {
+	ChainID          string
+	CommerceContract string
+	JobID            uint64
+
+	ActionTypes []string
+	StartTime   *uint64
+	EndTime     *uint64
+
+	Page     int
+	PageSize int
+}
+
+func normalizeActionTypes(v []string) []string {
+	if len(v) == 0 {
+		return nil
+	}
+	out := make([]string, 0, len(v))
+	for _, s := range v {
+		s = strings.ToLower(strings.TrimSpace(s))
+		if s == "" {
+			continue
+		}
+		out = append(out, s)
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
+}
+
+func actionToUIType(raw string) string {
+	switch strings.ToLower(strings.TrimSpace(raw)) {
+	case "job_created":
+		return "JobCreated"
+	case "job_funded":
+		return "JobFunded"
+	case "job_submitted":
+		return "JobSubmitted"
+	case "job_completed":
+		return "JobCompleted"
+	case "job_rejected":
+		return "JobRejected"
+	case "job_expired":
+		return "JobExpired"
+	case "provider_set":
+		return "ProviderSet"
+	case "budget_set":
+		return "BudgetSet"
+	case "payment_released":
+		return "PaymentReleased"
+	case "platform_fee_paid":
+		return "PlatformFeePaid"
+	case "evaluator_fee_paid":
+		return "EvaluatorFeePaid"
+	default:
+		return raw
+	}
+}
+
+func roleNormalize(v string) string {
+	v = strings.ToLower(strings.TrimSpace(v))
+	switch v {
+	case "client", "provider", "evaluator", "platform", "unknown":
+		return v
+	default:
+		return "unknown"
+	}
+}
+
+func GetCommerceJobActions(p CommerceJobActionsParams) ([]types.CommerceJobActionDTO, int64, error) {
+	if p.ChainID == "" || p.CommerceContract == "" || p.JobID == 0 {
+		return nil, 0, errors.New("missing chain_id/commerce_contract/job_id")
+	}
+
+	page := normalizePage(p.Page)
+	pageSize := normalizePageSize(p.PageSize)
+	actionTypes := normalizeActionTypes(p.ActionTypes)
+
+	actions, total, err := model.GetCommerceJobActions(model.CommerceJobActionsQuery{
+		ChainID:     p.ChainID,
+		Contract:    p.CommerceContract,
+		JobID:       p.JobID,
+		ActionTypes: actionTypes,
+		StartTime:   p.StartTime,
+		EndTime:     p.EndTime,
+		Page:        page,
+		PageSize:    pageSize,
+	})
+	if err != nil {
+		return nil, 0, fmt.Errorf("get commerce job actions: %w", err)
+	}
+
+	out := make([]types.CommerceJobActionDTO, 0, len(actions))
+	for _, a := range actions {
+		var amount *float64
+		var amountUSD *float64
+		if a.JobBudget > 0 {
+			v := a.JobBudget
+			amount = &v
+		}
+		if a.BudgetUSD > 0 {
+			v := a.BudgetUSD
+			amountUSD = &v
+		}
+		out = append(out, types.CommerceJobActionDTO{
+			ChainID:          a.ChainID,
+			CommerceContract: a.CommerceContract,
+			JobID:            a.JobID,
+			ActionType:       actionToUIType(a.Action),
+			BlockTimestamp:   a.BlockTimestamp,
+			BlockNumber:      a.BlockNumber,
+			TxHash:           a.TxHash,
+			LogIndex:         a.LogIndex,
+			Actor:            a.AgentAddress,
+			Role:             roleNormalize(a.Role),
+			PaymentToken:     a.PaymentToken,
+			PaymentDecimals:  a.PaymentDecimals,
+			TokenSymbol:      a.TokenSymbol,
+			Amount:           amount,
+			AmountUSD:        amountUSD,
+		})
+	}
+	return out, total, nil
 }

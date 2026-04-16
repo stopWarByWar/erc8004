@@ -12,8 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitRouter(nlogger *logger.Logger) {
-	apiUtils.Init(nlogger)
+func InitRouter(nlogger *logger.Logger, rc apiUtils.RuntimeConfig) {
+	apiUtils.Init(nlogger, rc)
 }
 
 func Run(_cors []string, port string) {
@@ -58,6 +58,13 @@ func Run(_cors []string, port string) {
 	r.GET("agent/commerce/scores", handle.GetCommerceScoresHandler)
 	r.GET("agent/commerce/actions", handle.GetCommerceActionsHandler)
 	r.GET("agent/commerce/stats", handle.GetCommerceStatsHandler)
+
+	// Job Browser / Job Detail (ERC-8183)
+	r.GET("commerce/jobs", handle.GetCommerceJobsHandler)
+	r.GET("commerce/jobs/detail", handle.GetCommerceJobDetailHandler)
+	r.GET("commerce/jobs/general", handle.GetCommerceJobsGeneralHandler)
+	r.GET("commerce/jobs/charts", handle.GetCommerceJobsChartsHandler)
+	r.GET("commerce/jobs/actions", handle.GetCommerceJobActionsHandler)
 
 	r.GET("agent/identity/filter/info", handle.GetFilterInfoHandler)
 	r.GET("agent/identity/filter/search/skill", handle.GetSkillsForFilterHandler)

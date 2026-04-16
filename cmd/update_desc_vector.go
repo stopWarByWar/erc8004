@@ -63,21 +63,21 @@ func updateAllAgentsDescVector() error {
 			break
 		}
 
+		upserts := make([]model.AgentVectorUpsert, 0, len(agents))
 		for _, a := range agents {
 			content := strings.TrimSpace(a.Name + "\n" + a.Description)
-			if content == "" {
-				// 没有可用描述，删除该 agent 的向量（如果有）
-				if err := model.InsertAgentVector(a.UID, a.IdentityRegistry, a.ChainID, a.Timestamps, "", nil); err != nil {
-					return fmt.Errorf("delete desc_vector for agent %d failed: %w", a.UID, err)
-				}
-				lastUID = a.UID
-				continue
-			}
-
-			if err := model.InsertAgentVector(a.UID, a.IdentityRegistry, a.ChainID, a.Timestamps, content, nil); err != nil {
-				return fmt.Errorf("update desc_vector for agent %d failed: %w", a.UID, err)
-			}
+			upserts = append(upserts, model.AgentVectorUpsert{
+				AgentUID:         a.UID,
+				IdentityRegistry: a.IdentityRegistry,
+				ChainID:          a.ChainID,
+				CreateTimestamp:  a.Timestamps,
+				Content:          content,
+				Metadata:         nil,
+			})
 			lastUID = a.UID
+		}
+		if err := model.InsertAgentVectors(upserts, batchSize); err != nil {
+			return fmt.Errorf("batch update desc_vector failed: %w", err)
 		}
 	}
 

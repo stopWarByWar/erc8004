@@ -3,12 +3,13 @@ package agentcard
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"testing"
 )
 
 func TestGetAgentProfile(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping network test in -short")
+	if testing.Short() || os.Getenv("RUN_NETWORK_TESTS") != "1" {
+		t.Skip("skipping network test (set RUN_NETWORK_TESTS=1 to enable)")
 	}
 	agent, err := GetAgentProfile("ipfs://QmcLpNkoqchCXjJS5diuP61hAwnUDaJnrAGTDn4PzkHKzn")
 	if err != nil {
@@ -81,8 +82,8 @@ func Test_getAgentProfileFromEncodedData(t *testing.T) {
 }
 
 func Test_GetAgentProfile(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping network test in -short")
+	if testing.Short() || os.Getenv("RUN_NETWORK_TESTS") != "1" {
+		t.Skip("skipping network test (set RUN_NETWORK_TESTS=1 to enable)")
 	}
 	agent, err := GetAgentProfile("https://futureswamp.studio/raven-agent.json")
 	if err != nil {

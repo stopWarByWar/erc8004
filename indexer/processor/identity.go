@@ -338,6 +338,7 @@ func (idx *IdentityProcessor) setAgentCardInserted() {
 			break
 		}
 
+		vectorUpserts := make([]model.AgentVectorUpsert, 0, len(agents))
 		for _, agent := range agents {
 			agentProfile, err := agentcard.GetAgentProfile(agent.AgentURI)
 			if err != nil {
@@ -362,15 +363,14 @@ func (idx *IdentityProcessor) setAgentCardInserted() {
 					}).Error("failed to update agent")
 					continue
 				}
-
-				err = model.InsertAgentVector(agent.UID, agent.IdentityRegistry, agent.ChainID, agent.Timestamps, agent.Description, nil)
-				if err != nil {
-					idx.logger.WithFields(logrus.Fields{
-						"error": err,
-						"uid":   agent.UID,
-					}).Error("failed to insert agent vector")
-					continue
-				}
+				vectorUpserts = append(vectorUpserts, model.AgentVectorUpsert{
+					AgentUID:         agent.UID,
+					IdentityRegistry: agent.IdentityRegistry,
+					ChainID:          agent.ChainID,
+					CreateTimestamp:  agent.Timestamps,
+					Content:          agent.Description,
+					Metadata:         nil,
+				})
 			}
 
 			if err := model.UpdateAgentInserted([]uint64{agent.UID}); err != nil {
@@ -382,6 +382,13 @@ func (idx *IdentityProcessor) setAgentCardInserted() {
 					"agentURI":         agent.AgentURI,
 				}).Error("failed to update agent registry inserted")
 				continue
+			}
+		}
+
+		// Batch upsert vectors for this page (best-effort, doesn't block inserted status updates above).
+		if len(vectorUpserts) > 0 {
+			if err := model.InsertAgentVectors(vectorUpserts, 100); err != nil {
+				idx.logger.WithFields(logrus.Fields{"error": err}).Error("failed to batch upsert agent vectors")
 			}
 		}
 	}

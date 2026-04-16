@@ -6,7 +6,7 @@ import (
 )
 
 func TestGetAgentValidationList(t *testing.T) {
-	initTest()
+	initTest(t)
 	uid := uint64(1)
 	page := 1
 	pageSize := 10
@@ -19,7 +19,7 @@ func TestGetAgentValidationList(t *testing.T) {
 }
 
 func TestGetValidatorList(t *testing.T) {
-	initTest()
+	initTest(t)
 	page := 1
 	pageSize := 10
 	validatorList, total, err := GetValidatorList(page, pageSize)
@@ -30,7 +30,7 @@ func TestGetValidatorList(t *testing.T) {
 }
 
 func TestGetValidatorValidationList(t *testing.T) {
-	initTest()
+	initTest(t)
 	validatorAddress := "0x0004AA63c570c570eBF15376c0dB199918BFe9Fb"
 	page := 1
 	pageSize := 10
@@ -43,7 +43,7 @@ func TestGetValidatorValidationList(t *testing.T) {
 }
 
 func TestGetValidatorByAddress(t *testing.T) {
-	initTest()
+	initTest(t)
 	validatorAddress := "0x0004AA63c570c570eBF15376c0dB199918BFe9Fb"
 	validator, err := GetValidatorByAddress(validatorAddress)
 	if err != nil {

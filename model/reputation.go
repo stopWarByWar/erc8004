@@ -65,13 +65,13 @@ func GetFeedbackUIDAndAgentUID(chainID, agentID, reputationRegistry, clientAddre
 }
 
 func CreateResponse(chainID string, response *Response) error {
-	var amount int64
-	err := db.Model(&Response{}).Where("chain_id = ? and block_number = ? and index = ?", chainID, response.BlockNumber, response.Index).Count(&amount).Error
-	if err != nil || amount > 0 {
-		return err
+	if response == nil {
+		return errors.New("nil response")
 	}
-
-	return db.Omit("uid").Create(&response).Error
+	// Rely on DB unique constraint to guarantee idempotency.
+	return db.Omit("uid").
+		Clauses(clause.OnConflict{DoNothing: true}).
+		Create(response).Error
 }
 
 //

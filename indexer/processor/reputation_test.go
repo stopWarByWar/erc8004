@@ -3,6 +3,7 @@ package processor
 import (
 	"agent_identity/logger"
 	"agent_identity/model"
+	"os"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -10,6 +11,13 @@ import (
 )
 
 func TestReputationProcessor(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skip integration test in -short")
+	}
+	if v := os.Getenv("RUN_INTEGRATION"); v != "1" {
+		t.Skip("set RUN_INTEGRATION=1 to run integration test")
+	}
+
 	logConf := &logger.Config{
 		Level:        logrus.InfoLevel,
 		ReportCaller: true,

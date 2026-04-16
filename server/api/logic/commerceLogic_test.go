@@ -7,7 +7,7 @@ import (
 )
 
 func TestGetCommerceScores_Global(t *testing.T) {
-	initTest()
+	initTest(t)
 	uid := uint64(1)
 	scores, err := GetCommerceScores(uid, "", "")
 	if err != nil {
@@ -20,7 +20,7 @@ func TestGetCommerceScores_Global(t *testing.T) {
 }
 
 func TestGetCommerceScores_Segmented(t *testing.T) {
-	initTest()
+	initTest(t)
 	uid := uint64(1)
 	scores, err := GetCommerceScores(uid, "84532", "0xTEST")
 	if err != nil {
@@ -30,7 +30,7 @@ func TestGetCommerceScores_Segmented(t *testing.T) {
 }
 
 func TestGetCommerceActions(t *testing.T) {
-	initTest()
+	initTest(t)
 
 	// Seed one action via model to validate query->logic wiring.
 	uid := uint64(424242)
@@ -69,7 +69,7 @@ func TestGetCommerceActions(t *testing.T) {
 }
 
 func TestGetCommerceScoreSummary(t *testing.T) {
-	initTest()
+	initTest(t)
 	uid := uint64(1)
 	summary, err := GetCommerceScoreSummary(uid)
 	if err != nil {

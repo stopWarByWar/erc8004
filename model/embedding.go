@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	openai "github.com/sashabaranov/go-openai"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -57,6 +58,81 @@ func InsertAgentVector(agentUID uint64, identityRegistry, chainID string, create
 			"metadata":          agentVector.Metadata,
 		}),
 	}).Create(&agentVector).Error
+}
+
+type AgentVectorUpsert struct {
+	AgentUID         uint64
+	IdentityRegistry string
+	ChainID          string
+	CreateTimestamp  uint64
+	Content          string
+	Metadata         map[string]interface{}
+}
+
+// InsertAgentVectors batches embedding generation and DB upserts.
+// Empty Content entries are treated as deletions (agent_uid scoped).
+func InsertAgentVectors(items []AgentVectorUpsert, batchSize int) error {
+	if len(items) == 0 {
+		return nil
+	}
+	if batchSize <= 0 {
+		batchSize = 100
+	}
+
+	deletes := make([]uint64, 0)
+	toUpsert := make([]AgentVector, 0, len(items))
+	for _, it := range items {
+		if strings.TrimSpace(it.Content) == "" {
+			deletes = append(deletes, it.AgentUID)
+			continue
+		}
+		emb, err := textToEmbedding(it.Content)
+		if err != nil {
+			return fmt.Errorf("failed to convert content to embedding (agent_uid=%d): %w", it.AgentUID, err)
+		}
+		av := AgentVector{
+			AgentUID:         it.AgentUID,
+			IdentityRegistry: it.IdentityRegistry,
+			ChainID:          it.ChainID,
+			CreateTimestamp:  it.CreateTimestamp,
+			Embedding:        formatVector(emb),
+			Content:          it.Content,
+		}
+
+		if it.Metadata != nil {
+			metadataJSON, err := json.Marshal(it.Metadata)
+			if err != nil {
+				return fmt.Errorf("failed to marshal metadata (agent_uid=%d): %w", it.AgentUID, err)
+			}
+			av.Metadata = string(metadataJSON)
+		} else {
+			av.Metadata = "null"
+		}
+		toUpsert = append(toUpsert, av)
+	}
+
+	return db.Transaction(func(tx *gorm.DB) error {
+		if len(deletes) > 0 {
+			if err := tx.Where("agent_uid IN ?", deletes).Delete(&AgentVector{}).Error; err != nil {
+				return err
+			}
+		}
+		if len(toUpsert) == 0 {
+			return nil
+		}
+
+		return tx.Clauses(clause.OnConflict{
+			Columns: []clause.Column{{Name: "agent_uid"}},
+			DoUpdates: clause.Assignments(map[string]interface{}{
+				"identity_registry": gorm.Expr("EXCLUDED.identity_registry"),
+				"chain_id":          gorm.Expr("EXCLUDED.chain_id"),
+				"create_timestamp":  gorm.Expr("EXCLUDED.create_timestamp"),
+				"embedding":         gorm.Expr("EXCLUDED.embedding"),
+				"content":           gorm.Expr("EXCLUDED.content"),
+				"metadata":          gorm.Expr("EXCLUDED.metadata"),
+			}),
+		}).CreateInBatches(toUpsert, batchSize).Error
+	})
 }
 
 func SearchSimilarVectors(desc string, limit int, threshold float64, filters *VectorSearchFilters) ([]uint64, error) {
@@ -181,7 +257,7 @@ func SearchSimilarVectors(desc string, limit int, threshold float64, filters *Ve
 
 	sql += whereClause + `
 		1 - (av.embedding <=> ?::vector) >= ?
-		ORDER BY similarity DESC
+		ORDER BY (av.embedding <=> ?::vector) ASC
 		LIMIT ?
 	`
 
@@ -190,8 +266,9 @@ func SearchSimilarVectors(desc string, limit int, threshold float64, filters *Ve
 	// 后续占位符顺序依次为：
 	// 1) WHERE 中的 ?::vector（再次使用 queryVector）
 	// 2) WHERE 中的 阈值 ?
-	// 3) LIMIT 中的 ?
-	allArgs = append(allArgs, queryVector, threshold, limit)
+	// 3) ORDER BY 中的 ?::vector（第三次使用 queryVector，便于命中 ANN 索引）
+	// 4) LIMIT 中的 ?
+	allArgs = append(allArgs, queryVector, threshold, queryVector, limit)
 
 	var results []struct {
 		AgentUID   uint64  `gorm:"column:agent_uid"`

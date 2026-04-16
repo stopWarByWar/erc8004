@@ -8,6 +8,9 @@ import (
 )
 
 func TestTextToEmbedding(t *testing.T) {
+	if os.Getenv("RUN_OPENAI_INTEGRATION_TESTS") != "1" {
+		t.Skip("skipping OpenAI integration test; set RUN_OPENAI_INTEGRATION_TESTS=1 to enable")
+	}
 	config, err := initConf("./config.yaml")
 	if err != nil {
 		panic(err)
@@ -39,6 +42,9 @@ func initConf(confPath string) (*Config, error) {
 }
 
 func TestSearchSimilarVectors(t *testing.T) {
+	if os.Getenv("RUN_OPENAI_INTEGRATION_TESTS") != "1" {
+		t.Skip("skipping OpenAI integration test; set RUN_OPENAI_INTEGRATION_TESTS=1 to enable")
+	}
 	config, err := initConf("./config.yaml")
 	if err != nil {
 		panic(err)
