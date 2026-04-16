@@ -14,6 +14,26 @@ import (
 	"time"
 )
 
+// Mock chain meta should mirror config/config.yaml (data replacement, not runtime lookup).
+const (
+	mockChainLogoEth  = "https://bnbattest.s3.ap-southeast-1.amazonaws.com/agentCard/chain/eth.png"
+	mockChainLogoBsc  = "https://bnbattest.s3.ap-southeast-1.amazonaws.com/agentCard/chain/bsc.png"
+	mockChainLogoBase = "https://bnbattest.s3.ap-southeast-1.amazonaws.com/agentCard/chain/base.png"
+)
+
+func mockChainMeta(chainID string) (name string, logo string) {
+	switch strings.TrimSpace(chainID) {
+	case "1":
+		return "Ethereum", mockChainLogoEth
+	case "56":
+		return "BSC", mockChainLogoBsc
+	case "8453":
+		return "Base", mockChainLogoBase
+	default:
+		return "", ""
+	}
+}
+
 func seededRand(parts ...string) *rand.Rand {
 	h := fnv.New64a()
 	for _, p := range parts {
@@ -553,10 +573,11 @@ func filterJobs(items []types.CommerceJobDTO, q CommerceJobsQuery) []types.Comme
 func CommerceJobDetail(chainID, contract string, jobID uint64) (*types.CommerceJobDTO, *types.CommerceJobDetailEvidence) {
 	r := seededRand(chainID, contract, fmt.Sprintf("%d", jobID), "job_detail")
 	now := uint64(time.Now().Unix())
+	chainName, chainLogo := mockChainMeta(firstNonEmpty(chainID, "1"))
 	job := &types.CommerceJobDTO{
 		ChainID:          firstNonEmpty(chainID, "1"),
-		ChainName:        "Base",
-		ChainLogo:        "https://example.com/base.png",
+		ChainName:        chainName,
+		ChainLogo:        chainLogo,
 		CommerceContract: firstNonEmpty(contract, fmt.Sprintf("0x%040x", r.Uint64())),
 		JobID:            jobID,
 		Status:           []string{"open", "funded", "submitted", "completed"}[r.Intn(4)],
@@ -591,6 +612,7 @@ func CommerceJobDetail(chainID, contract string, jobID uint64) (*types.CommerceJ
 
 func CommerceJobsGeneral() (types.CommerceJobsGeneralSummaryResp, types.CommerceJobsGeneralDistributionsResp) {
 	// Keep schema-compatible but minimal.
+	chainName, chainLogo := mockChainMeta("8453")
 	return types.CommerceJobsGeneralSummaryResp{
 			JobsCount:       1234,
 			PaidVolumeUSD:   567890.12,
@@ -607,8 +629,8 @@ func CommerceJobsGeneral() (types.CommerceJobsGeneralSummaryResp, types.Commerce
 			ChainContracts: []types.CommerceJobsChainContractsItem{
 				{
 					ChainID:   "8453",
-					ChainName: "Base",
-					ChainLogo: "https://example.com/base.png",
+					ChainName: chainName,
+					ChainLogo: chainLogo,
 					ERC8183Contracts: []types.CommerceJobsChainContractItem{
 						{
 							CommerceContract: "0x1111111111111111111111111111111111111111",
@@ -671,11 +693,12 @@ func CommerceJobsCharts() any {
 		{"token_symbol": "USDC", "jobs_count": 80, "budget_volume_usd": 60000, "paid_volume_usd": 40000, "drilldown": map[string]any{"token_symbol": "USDC"}},
 		{"token_symbol": "ETH", "jobs_count": 40, "budget_volume_usd": 20123.45, "paid_volume_usd": 12340.12, "drilldown": map[string]any{"token_symbol": "ETH"}},
 	}
+	chainName, chainLogo := mockChainMeta("8453")
 	chainContracts := []map[string]any{
 		{
 			"chain_id":   "8453",
-			"chain_name": "Base",
-			"chain_logo": "https://example.com/base.png",
+			"chain_name": chainName,
+			"chain_logo": chainLogo,
 			"erc8183_contracts": []map[string]any{
 				{
 					"commerce_contract": "0x1111111111111111111111111111111111111111",
@@ -746,10 +769,12 @@ func CommerceJobsCharts() any {
 
 func CommerceJobsFilters() types.CommerceJobsFilters {
 	now := uint64(time.Now().Unix())
+	ethName, ethLogo := mockChainMeta("1")
+	baseName, baseLogo := mockChainMeta("8453")
 	return types.CommerceJobsFilters{
 		Chains: []types.CommerceJobsFilterChain{
-			{ChainID: "8453", ChainName: "Base", ChainLogo: "https://example.com/base.png"},
-			{ChainID: "1", ChainName: "Ethereum", ChainLogo: "https://example.com/eth.png"},
+			{ChainID: "8453", ChainName: baseName, ChainLogo: baseLogo},
+			{ChainID: "1", ChainName: ethName, ChainLogo: ethLogo},
 		},
 		CommerceContracts: []string{
 			"0x1111111111111111111111111111111111111111",
