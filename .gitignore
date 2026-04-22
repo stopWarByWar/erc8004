@@ -23,4 +23,4 @@
 /config/commerce_seed.local.yaml
 ./main
 logger/logrus*
-logger/*.log
+logger/*.log.worktrees/
