@@ -863,6 +863,89 @@ func CommerceJobActions(q CommerceJobActionsQuery) ([]types.CommerceJobActionDTO
 	return pageItems, total
 }
 
+// -------------------- passport --------------------
+
+func PassportDetail(uid uint64) *types.PassportResponse {
+	r := seededRand(fmt.Sprintf("%d", uid), "passport")
+	uidStr := fmt.Sprintf("0x%x", uid)
+
+	chainIDs := []string{"1", "56", "8453"}
+	chainID := chainIDs[int(uid)%len(chainIDs)]
+	chainName, chainLogo := mockChainMeta(chainID)
+
+	agentNames := []string{"AlphaAgent", "BetaBot", "GammaAI", "DeltaWorker", "EpsilonHelper"}
+	name := agentNames[int(uid)%len(agentNames)]
+
+	skills := []string{"web-development", "data-analysis", "smart-contract", "ui-design", "security-audit"}
+	var agentSkills []string
+	skillCount := 1 + int(uid)%len(skills)
+	for i := 0; i < skillCount; i++ {
+		agentSkills = append(agentSkills, skills[(int(uid)+i)%len(skills)])
+	}
+
+	verificationLevels := []string{"basic", "advanced"}
+	verification := verificationLevels[int(uid)%len(verificationLevels)]
+
+	completedCount := 30 + int(uid)%100
+	rejectedCount := 5 + int(uid)%20
+	expiredCount := 2 + int(uid)%5
+	totalJobs := completedCount + rejectedCount + expiredCount
+	successRate := 0.0
+	if completedCount+rejectedCount > 0 {
+		successRate = float64(completedCount) / float64(completedCount+rejectedCount)
+	}
+
+	return &types.PassportResponse{
+		UID:       uidStr,
+		Name:      name,
+		Avatar:    fmt.Sprintf("https://api.dicebear.com/7.x/avataaars/svg?seed=%s", uidStr),
+		ChainID:   chainID,
+		ChainName: chainName,
+		ChainLogo: chainLogo,
+		CreatedAt: 1700000000 + int64(uid)*100000,
+		BasicStats: types.PassportBasicStats{
+			TotalJobs:       totalJobs,
+			CompletedJobs:   completedCount,
+			ActiveJobs:      5 + int(uid)%10,
+			ReputationScore: 3.5 + float64(int(uid)%15)/10,
+			FeedbackCount:   20 + int(uid)%50,
+		},
+		CommerceScore: map[string]types.CommerceScore{
+			"provider": {
+				Role:                       "provider",
+				CompletedCount:             completedCount,
+				RejectedCount:              rejectedCount,
+				ExpiredResponsibleCount:     expiredCount,
+				SuccessRate:                round3(successRate),
+				WeightedScore:              round3(0.75 + r.Float64()*0.2),
+				TotalVolumeUSD:             round2(100000 + float64(uid)*50000),
+				WeightedScoreUSD:           round3(0.8 + r.Float64()*0.15),
+				TotalJobs:                  totalJobs,
+				TotalVolume:                round2(100000 + float64(uid)*50000),
+				UniqueCounterparties:       15 + int(uid)%30,
+				Confidence:                 round3(0.5 + r.Float64()*0.4),
+			},
+			"client": {
+				Role:                       "client",
+				CreatedCount:               20 + int(uid)%60,
+				FundedCount:               18 + int(uid)%55,
+				CompletedCount:             15 + int(uid)%50,
+				FundedRate:                round3(r.Float64()),
+				CompletionRate:             round3(r.Float64()),
+				TotalVolumeUSD:             round2(50000 + float64(uid)*30000),
+				WeightedScoreUSD:           round3(0.75 + r.Float64()*0.2),
+				TotalJobs:                  25 + int(uid)%60,
+				TotalVolume:                round2(50000 + float64(uid)*30000),
+				UniqueCounterparties:       10 + int(uid)%20,
+				Confidence:                 round3(0.4 + r.Float64()*0.3),
+			},
+		},
+		Skills:       agentSkills,
+		Verification: verification,
+		ShareURL:     fmt.Sprintf("/passport/%s/shared", uidStr),
+	}
+}
+
 // -------------------- helpers --------------------
 
 func firstNonEmpty(v, fallback string) string {

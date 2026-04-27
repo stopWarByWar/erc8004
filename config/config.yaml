@@ -36,5 +36,3 @@ register_list:
     name: "ETH Foundation"
     description: "ETH Foundation Official Registry"
     logo_url: "https://bnbattest.s3.ap-southeast-1.amazonaws.com/agentCard/org/eth.png"
-
-  

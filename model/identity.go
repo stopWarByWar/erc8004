@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -731,4 +732,13 @@ func GetAgentListBy(offset, limit int, filter []int8) ([]*Agent, error) {
 		return nil, err
 	}
 	return agents, nil
+}
+
+func GetAttestationCountByRecipient(agentUID uint64) (int, error) {
+	var count int64
+	recipient := fmt.Sprintf("0x%x", agentUID)
+	err := db.Model(&Attestation{}).
+		Where("recipient = ? AND revoked = false", recipient).
+		Count(&count).Error
+	return int(count), err
 }

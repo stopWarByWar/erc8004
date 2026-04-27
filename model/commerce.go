@@ -426,6 +426,30 @@ func GetCommerceScoreGlobal(uid uint64) ([]CommerceScoreGlobal, error) {
 	return scores, err
 }
 
+// GetAgentReputationStats returns the average feedback score and total feedback count for an agent.
+func GetAgentReputationStats(uid uint64) (avgScore float64, count int, err error) {
+	type row struct {
+		AvgScore float64
+		Count    int
+	}
+	var r row
+	err = db.Model(&FeedbackTagScore{}).
+		Select("COALESCE(AVG(score), 0) as avg_score, COUNT(*) as count").
+		Where("agent_uid = ?", uid).
+		Scan(&r).Error
+	if err != nil {
+		return 0, 0, err
+	}
+	return r.AvgScore, r.Count, nil
+}
+
+// GetCommerceJobsByProviderAddress returns commerce jobs where the agent is the provider.
+func GetCommerceJobsByProviderAddress(providerAddress string, chainID string) ([]CommerceJob, error) {
+	var jobs []CommerceJob
+	err := db.Where("provider = ? AND chain_id = ?", providerAddress, chainID).Find(&jobs).Error
+	return jobs, err
+}
+
 func GetCommerceScoresByAgentUIDAndContract(uid uint64, chainID, contract string) ([]CommerceScore, error) {
 	var scores []CommerceScore
 	err := db.Where("agent_uid = ? AND chain_id = ? AND commerce_contract = ?", uid, chainID, contract).
@@ -895,21 +919,21 @@ type CommerceJobsGeneralSummary struct {
 }
 
 type CommerceJobsTokenDistributionItem struct {
-	TokenSymbol     string  `json:"token_symbol"`
-	JobsCount       int64   `json:"jobs_count"`
-	BudgetVolumeUSD float64 `json:"budget_volume_usd"`
-	PaidVolumeUSD   float64 `json:"paid_volume_usd"`
+	TokenSymbol     string         `json:"token_symbol"`
+	JobsCount       int64          `json:"jobs_count"`
+	BudgetVolumeUSD float64        `json:"budget_volume_usd"`
+	PaidVolumeUSD   float64        `json:"paid_volume_usd"`
 	Drilldown       map[string]any `json:"drilldown,omitempty"`
 }
 
 type CommerceJobsChainContractDistributionItem struct {
-	ChainID          string  `json:"chain_id"`
-	ChainName        string  `json:"chain_name,omitempty"`
-	ChainLogo        string  `json:"chain_logo,omitempty"`
-	CommerceContract string  `json:"commerce_contract"`
-	JobsCount        int64   `json:"jobs_count"`
-	BudgetVolumeUSD  float64 `json:"budget_volume_usd"`
-	PaidVolumeUSD    float64 `json:"paid_volume_usd"`
+	ChainID          string         `json:"chain_id"`
+	ChainName        string         `json:"chain_name,omitempty"`
+	ChainLogo        string         `json:"chain_logo,omitempty"`
+	CommerceContract string         `json:"commerce_contract"`
+	JobsCount        int64          `json:"jobs_count"`
+	BudgetVolumeUSD  float64        `json:"budget_volume_usd"`
+	PaidVolumeUSD    float64        `json:"paid_volume_usd"`
 	Drilldown        map[string]any `json:"drilldown,omitempty"`
 }
 
@@ -922,9 +946,9 @@ type CommerceJobsChainContractItem struct {
 }
 
 type CommerceJobsChainContractsItem struct {
-	ChainID          string                       `json:"chain_id"`
-	ChainName        string                       `json:"chain_name,omitempty"`
-	ChainLogo        string                       `json:"chain_logo,omitempty"`
+	ChainID          string                          `json:"chain_id"`
+	ChainName        string                          `json:"chain_name,omitempty"`
+	ChainLogo        string                          `json:"chain_logo,omitempty"`
 	ERC8183Contracts []CommerceJobsChainContractItem `json:"erc8183_contracts"`
 }
 
@@ -995,9 +1019,9 @@ type CommerceJobsCharts struct {
 		FeesBreakdown          []CommerceJobsChartFeesItem `json:"fees_breakdown"`
 	} `json:"volume"`
 	Distribution struct {
-		TokenDistribution         []CommerceJobsTokenDistributionItem         `json:"token_distribution"`
-		ChainContracts            []CommerceJobsChainContractsItem            `json:"chain_contracts"`
-		BudgetHistogramUSD        []CommerceJobsChartHistogramItem            `json:"budget_histogram_usd"`
+		TokenDistribution  []CommerceJobsTokenDistributionItem `json:"token_distribution"`
+		ChainContracts     []CommerceJobsChainContractsItem    `json:"chain_contracts"`
+		BudgetHistogramUSD []CommerceJobsChartHistogramItem    `json:"budget_histogram_usd"`
 	} `json:"distribution"`
 	Evidence struct {
 		TopEvents []CommerceJobsChartTopEventItem `json:"top_events"`
@@ -1622,4 +1646,62 @@ func GetCommerceJobByID(chainID, contract string, jobID uint64) (*CommerceJob, e
 		return nil, fmt.Errorf("get commerce job: %w", err)
 	}
 	return &job, nil
+}
+
+func GetAgentUIDsByAddress(chainIDs []string, address string, limit int) ([]uint64, error) {
+	var results1 []uint64
+
+	query1 := db.Model(&CommerceJob{}).
+		Select("DISTINCT agent_uid").
+		Where("client = ?", address)
+
+	if len(chainIDs) > 0 {
+		query1 = query1.Where("chain_id IN ?", chainIDs)
+	}
+
+	if limit > 0 {
+		query1 = query1.Limit(limit)
+	}
+
+	if err := query1.Scan(&results1).Error; err != nil {
+		return nil, err
+	}
+
+	var results2 []uint64
+
+	query2 := db.Model(&Agent{}).
+		Select("DISTINCT agent_uid").
+		Where("agent_wallet = ?", address)
+
+	if len(chainIDs) > 0 {
+		query2 = query2.Where("chain_id IN ?", chainIDs)
+	}
+
+	if limit > 0 {
+		query2 = query2.Limit(limit)
+	}
+	if err := query2.Scan(&results2).Error; err != nil {
+		return nil, err
+	}
+
+	//去重合并 result1，result2，返回
+	results1 = append(results1, results2...)
+	results1 = uniqueUint64s(results1)
+	return results1, nil
+}
+
+func uniqueUint64s(in []uint64) []uint64 {
+	if len(in) == 0 {
+		return []uint64{}
+	}
+	seen := make(map[uint64]struct{}, len(in))
+	out := make([]uint64, 0, len(in))
+	for _, s := range in {
+		if _, ok := seen[s]; ok {
+			continue
+		}
+		seen[s] = struct{}{}
+		out = append(out, s)
+	}
+	return out
 }

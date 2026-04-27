@@ -8,7 +8,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuardTransient.sol";
-import "./IACPHook.sol";
+import "./IERC8183Hook.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
 
 /**
@@ -17,7 +17,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165Checker.sol";
  *      Implements a job escrow state machine with optional hook extension points.
  *      Core state machine: Open -> Funded -> Submitted -> Completed | Rejected | Expired.
  *
- *      Hooks (IACPHook):
+ *      Hooks (IERC8183Hook):
  *        before* — called BEFORE state change, CAN revert to gate the transition.
  *        after*  — called AFTER state change for bookkeeping/side effects.
  *
@@ -128,6 +128,7 @@ contract AgenticCommerce is Initializable, AccessControlUpgradeable, ReentrancyG
     error FeesTooHigh();
     error HookNotWhitelisted();
     error BudgetMismatch();
+    error ProviderCannotBeEvaluator();
     error GracePeriodActive();
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -190,7 +191,7 @@ contract AgenticCommerce is Initializable, AccessControlUpgradeable, ReentrancyG
         bytes memory data
     ) internal {
         if (hook != address(0)) {
-            IACPHook(hook).beforeAction(jobId, selector, data);
+            IERC8183Hook(hook).beforeAction(jobId, selector, data);
         }
     }
 
@@ -201,7 +202,7 @@ contract AgenticCommerce is Initializable, AccessControlUpgradeable, ReentrancyG
         bytes memory data
     ) internal {
         if (hook != address(0)) {
-            IACPHook(hook).afterAction(jobId, selector, data);
+            IERC8183Hook(hook).afterAction(jobId, selector, data);
         }
     }
 
@@ -216,13 +217,14 @@ contract AgenticCommerce is Initializable, AccessControlUpgradeable, ReentrancyG
         uint256 providerAgentId
     ) external nonReentrant returns (uint256) {
         if (evaluator == address(0)) revert ZeroAddress();
+        if (evaluator != address(0) && evaluator == provider) revert ProviderCannotBeEvaluator();
         if (expiredAt <= block.timestamp + 5 minutes) revert ExpiryTooShort();
         if (!whitelistedHooks[hook]) revert HookNotWhitelisted();
         if (hook != address(0)) {
             if (
                 !ERC165Checker.supportsInterface(
                     hook,
-                    type(IACPHook).interfaceId
+                    type(IERC8183Hook).interfaceId
                 )
             ) revert InvalidHook();
         }
@@ -269,6 +271,7 @@ contract AgenticCommerce is Initializable, AccessControlUpgradeable, ReentrancyG
         if (msg.sender != job.client) revert Unauthorized();
         if (job.provider != address(0)) revert WrongStatus();
         if (provider_ == address(0)) revert ZeroAddress();
+        if (provider_ == job.evaluator) revert ProviderCannotBeEvaluator();
         job.provider = provider_;
         job.providerAgentId = agentId;
         emit ProviderSet(jobId, provider_, agentId);

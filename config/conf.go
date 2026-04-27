@@ -81,6 +81,7 @@ func Init(configPath string) error {
 		register.ValidationAddress = common.HexToAddress(register.ValidationAddress).String()
 	}
 
+
 	for _, chain := range config.ChainList {
 		ChainMap[chain.ChainId] = chain
 	}
@@ -108,6 +109,7 @@ func GetChainInfo(chainId string) (ChainInfo, bool) {
 	}
 	return chain, true
 }
+
 func SetChainAgentAmount(chainId string, amount int64) {
 	chain, ok := ChainMap[chainId]
 	if !ok {

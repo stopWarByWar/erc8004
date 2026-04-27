@@ -219,17 +219,27 @@ func GetCardResponse(agentUID uint64) (*serverTypes.AgentResponse, error) {
 }
 
 func FilterSearchAgentListBySemantic(desc string, limit int, threshold float64, trustModelIDs *[]string, chainIDs *[]string, skills *[]string, x402Support *bool, active *bool, haveFeedback *bool) ([]*serverTypes.AgentResponse, error) {
-	filters := &model.VectorSearchFilters{
-		TrustModel:   trustModelIDs,
-		ChainID:      chainIDs,
-		Skills:       skills,
-		X402Support:  x402Support,
-		Active:       active,
-		HaveFeedback: haveFeedback,
-	}
-	agentUIDs, err := model.SearchSimilarVectors(desc, limit, threshold, filters)
-	if err != nil {
-		return nil, err
+	agentUIDs := make([]uint64, 0)
+	var err error
+	if common.IsHexAddress(desc) {
+		address := common.HexToAddress(desc).String()
+		agentUIDs, err = model.GetAgentUIDsByAddress(*chainIDs, address, limit)
+		if err != nil {
+			return nil, fmt.Errorf("fail to get agent by address: %w", err)
+		}
+	} else {
+		filters := &model.VectorSearchFilters{
+			TrustModel:   trustModelIDs,
+			ChainID:      chainIDs,
+			Skills:       skills,
+			X402Support:  x402Support,
+			Active:       active,
+			HaveFeedback: haveFeedback,
+		}
+		agentUIDs, err = model.SearchSimilarVectors(desc, limit, threshold, filters)
+		if err != nil {
+			return nil, err
+		}
 	}
 	agents, err := model.GetAgentsByUIDs(agentUIDs)
 	if err != nil {

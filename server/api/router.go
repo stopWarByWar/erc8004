@@ -71,6 +71,10 @@ func Run(_cors []string, port string) {
 	r.GET("agent/identity/filter/info", handle.GetFilterInfoHandler)
 	r.GET("agent/identity/filter/search/skill", handle.GetSkillsForFilterHandler)
 	r.GET("agent/leaderboard", handle.GetLeaderboardInfoHandler)
+
+	// Passport / Agent Summary (ERC-8183)
+	r.GET("agent/identity/commerce/passport", handle.GetPassportHandler)
+
 	go apiUtils.UpdateGeneralInfo()
 	apiUtils.StartJobsFiltersCache(context.Background(), 5*time.Minute)
 	r.Run(fmt.Sprintf(":%s", port))

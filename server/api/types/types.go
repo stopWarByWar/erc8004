@@ -68,6 +68,31 @@ type CommerceScore struct {
 	Confidence                float64 `json:"confidence"`
 }
 
+// PassportResponse is the API response structure for passport/agent summary view.
+type PassportResponse struct {
+	UID           string                    `json:"uid"`
+	Name          string                    `json:"name"`
+	Avatar        string                    `json:"avatar"`
+	ChainID       string                    `json:"chain_id"`
+	ChainName     string                    `json:"chain_name"`
+	ChainLogo     string                    `json:"chain_logo"`
+	CreatedAt     int64                     `json:"created_at"`
+	BasicStats    PassportBasicStats         `json:"basic_stats"`
+	CommerceScore map[string]CommerceScore  `json:"commerce_scores"`
+	Skills        []string                  `json:"skills"`
+	Verification  string                    `json:"verification_level"`
+	ShareURL      string                    `json:"share_url"`
+}
+
+// PassportBasicStats holds high-level agent statistics.
+type PassportBasicStats struct {
+	TotalJobs       int     `json:"total_jobs"`
+	CompletedJobs   int     `json:"completed_jobs"`
+	ActiveJobs      int     `json:"active_jobs"`
+	ReputationScore float64 `json:"reputation_score"`
+	FeedbackCount   int     `json:"feedback_count"`
+}
+
 type EndpointResponse struct {
 	No       int    `json:"no"`
 	Name     string `json:"name"`
