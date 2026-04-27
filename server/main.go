@@ -39,7 +39,7 @@ func main() {
 	// config.yaml is at project_root/config/config.yaml
 	// *configFile is project_root/server/api/logic/config.yaml
 	// Go up 3 levels: server/api/logic -> server/api -> server -> project_root
-	config.Init(filepath.Join(filepath.Dir(*configFile), "..", "..", "..", "config", "config.yaml"))
+	config.Init(filepath.Join(filepath.Dir(*configFile), "..", "config", "config.yaml"))
 
 	helper.InitHelper(_config.S3Region, _config.S3BucketName, _config.S3AccessKey, _config.S3SecretKey)
 

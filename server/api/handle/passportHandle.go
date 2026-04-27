@@ -24,7 +24,7 @@ func GetPassportHandler(c *gin.Context) {
 		return
 	}
 
-	if serverUtils.IsMockEnabled() {
+	if serverUtils.IsMockEnabled() || c.Query("mock") == "true" {
 		serverUtils.SetMockHeader(c)
 		passport := apiMock.PassportDetail(uid)
 		serverUtils.SuccessResp(gin.H{"passport": passport}, c)
@@ -63,7 +63,7 @@ func GetPassportSharedHandler(c *gin.Context) {
 		return
 	}
 
-	if serverUtils.IsMockEnabled() {
+	if serverUtils.IsMockEnabled() || c.Query("mock") == "true" {
 		serverUtils.SetMockHeader(c)
 		passport := apiMock.PassportDetail(uid)
 		c.JSON(http.StatusOK, gin.H{
