@@ -1,6 +1,6 @@
-Drop table if exists feedbacks;
-Drop table if exists responses;
-Drop table if exists feedback_tag_scores;
+Drop table if exists feedbacks CASCADE;
+Drop table if exists responses CASCADE;
+Drop table if exists feedback_tag_scores CASCADE;
 
 -- Feedback 表
 CREATE TABLE IF NOT EXISTS feedbacks (

@@ -1,5 +1,5 @@
-Drop table if exists validations;
-Drop table if exists validators;
+Drop table if exists validations CASCADE;
+Drop table if exists validators CASCADE;
 
 create table if not exists validations (
     agent_uid bigint not null,

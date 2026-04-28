@@ -1,9 +1,9 @@
 -- ERC-8183 Commerce Reputation tables
 -- Architecture: docs/designs/erc8183-commerce-reputation.md
 
-DROP TABLE IF EXISTS commerce_actions;
-DROP TABLE IF EXISTS commerce_scores;
-DROP TABLE IF EXISTS commerce_scores_global;
+DROP TABLE IF EXISTS commerce_actions CASCADE;
+DROP TABLE IF EXISTS commerce_scores CASCADE;
+DROP TABLE IF EXISTS commerce_scores_global CASCADE;
 
 -- ═══════════════════════ commerce_actions ═══════════════════════
 

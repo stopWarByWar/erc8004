@@ -1,12 +1,12 @@
-Drop table if exists agents;
-Drop table if exists agent_vectors;
-Drop table if exists agent_metadatas;
+Drop table if exists agents CASCADE;
+Drop table if exists agent_vectors CASCADE ;
+Drop table if exists agent_metadatas CASCADE ;
 
-Drop table if exists services;
-Drop table if exists oasf_skills;
-Drop table if exists oasf_domains;
-Drop table if exists trust_models;
-Drop table if exists feedbacks;
+Drop table if exists services CASCADE ;
+Drop table if exists oasf_skills CASCADE ;
+Drop table if exists oasf_domains CASCADE ;
+Drop table if exists trust_models CASCADE ;
+Drop table if exists feedbacks CASCADE ;
 
 -- Agent 表
 CREATE TABLE IF NOT EXISTS agents (
