@@ -20,16 +20,16 @@ import (
 )
 
 var (
-	JobCreatedTopic    = common.HexToHash("0xb0f0239bfdd96453e24733e18bfc24b70d8fadf123dd977473518dd577ee79b9")
-	JobFundedTopic     = common.HexToHash("0x") // filled below
-	JobSubmittedTopic  = common.HexToHash("0x")
-	JobCompletedTopic  = common.HexToHash("0x")
-	JobRejectedTopic   = common.HexToHash("0x")
-	JobExpiredTopic    = common.HexToHash("0x")
-	ProviderSetTopic   = common.HexToHash("0x")
-	BudgetSetTopic     = common.HexToHash("0x")
-	PaymentReleasedTopic = common.HexToHash("0x")
-	PlatformFeePaidTopic = common.HexToHash("0x")
+	JobCreatedTopic       = common.HexToHash("0xb0f0239bfdd96453e24733e18bfc24b70d8fadf123dd977473518dd577ee79b9")
+	JobFundedTopic        = common.HexToHash("0x") // filled below
+	JobSubmittedTopic     = common.HexToHash("0x")
+	JobCompletedTopic     = common.HexToHash("0x")
+	JobRejectedTopic      = common.HexToHash("0x")
+	JobExpiredTopic       = common.HexToHash("0x")
+	ProviderSetTopic      = common.HexToHash("0x")
+	BudgetSetTopic        = common.HexToHash("0x")
+	PaymentReleasedTopic  = common.HexToHash("0x")
+	PlatformFeePaidTopic  = common.HexToHash("0x")
 	EvaluatorFeePaidTopic = common.HexToHash("0x")
 )
 
@@ -237,7 +237,11 @@ func (p *CommerceProcessor) upsertJobFromEvent(e types.Log, jobID uint64, job ab
 		cj.Description = job.Description
 		cj.Status = model.StatusOpen
 		cj.HookAddress = job.Hook.String()
-		cj.ExpiredAt = job.ExpiredAt.Uint64()
+		if job.ExpiredAt == nil {
+			cj.ExpiredAt = 0
+		} else {
+			cj.ExpiredAt = job.ExpiredAt.Uint64()
+		}
 	case model.ActionProviderSet:
 		cj.Provider = job.Provider.String()
 		cj.Evaluator = job.Evaluator.String()
@@ -247,6 +251,9 @@ func (p *CommerceProcessor) upsertJobFromEvent(e types.Log, jobID uint64, job ab
 		cj.Status = model.StatusFunded
 	case model.ActionJobSubmitted:
 		cj.Status = model.StatusSubmitted
+		if job.SubmittedAt == nil {
+			return fmt.Errorf("job.SubmittedAt is nil for jobID=%d", jobID)
+		}
 		cj.SubmittedAt = job.SubmittedAt.Uint64()
 	case model.ActionJobCompleted:
 		cj.Status = model.StatusCompleted
@@ -262,8 +269,6 @@ func (p *CommerceProcessor) upsertJobFromEvent(e types.Log, jobID uint64, job ab
 	}
 	return nil
 }
-
-
 
 func (p *CommerceProcessor) handleJobCreated(e types.Log) error {
 	ev, err := p.commerceContract.ParseJobCreated(e)
@@ -332,7 +337,7 @@ func (p *CommerceProcessor) handleJobFunded(e types.Log) error {
 			JobID: ev.JobId.Uint64(), AgentUID: clientUID, AgentAddress: ev.Client.String(),
 			Role: model.RoleClient, Action: model.ActionJobFunded,
 			SignalPolarity: sig.Polarity, SignalWeight: sig.Weight, SignalCertainty: sig.Certainty,
-			JobBudget:   budget,
+			JobBudget:    budget,
 			PaymentToken: paymentToken, PaymentDecimals: uint(paymentDecimals), TokenSymbol: tokenSymbol, BudgetUSD: budgetUSD,
 			HookAddress: hookAddr,
 			BlockNumber: e.BlockNumber, TxHash: e.TxHash.String(), LogIndex: e.Index, BlockTimestamp: e.BlockTimestamp,
@@ -376,7 +381,7 @@ func (p *CommerceProcessor) handleJobSubmitted(e types.Log) error {
 			JobID: ev.JobId.Uint64(), AgentUID: providerUID, AgentAddress: ev.Provider.String(),
 			Role: model.RoleProvider, Action: model.ActionJobSubmitted,
 			SignalPolarity: sig.Polarity, SignalWeight: sig.Weight, SignalCertainty: sig.Certainty,
-			Deliverable: common.BytesToHash(ev.Deliverable[:]).String(),
+			Deliverable:  common.BytesToHash(ev.Deliverable[:]).String(),
 			PaymentToken: paymentToken, PaymentDecimals: uint(paymentDecimals), TokenSymbol: tokenSymbol, BudgetUSD: budgetUSD,
 			HookAddress: hookAddr,
 			BlockNumber: e.BlockNumber, TxHash: e.TxHash.String(), LogIndex: e.Index, BlockTimestamp: e.BlockTimestamp,
@@ -694,23 +699,23 @@ func (p *CommerceProcessor) handleBudgetSet(e types.Log) error {
 	budgetUSD, usdErr := GetHistoricalUSDBudget(context.Background(), p.chainID, paymentToken, ev.Amount, tokenInfo.Decimals, e.BlockTimestamp)
 	if usdErr != nil {
 		p.logger.WithFields(logrus.Fields{
-			"event":          "BudgetSet",
-			"jobId":          ev.JobId.Uint64(),
-			"payment_token":  paymentToken,
-			"token_symbol":   tokenInfo.Symbol,
+			"event":           "BudgetSet",
+			"jobId":           ev.JobId.Uint64(),
+			"payment_token":   paymentToken,
+			"token_symbol":    tokenInfo.Symbol,
 			"block_timestamp": e.BlockTimestamp,
-			"error":          usdErr,
+			"error":           usdErr,
 		}).Warn("failed to resolve historical USD budget; keep budget_usd=0")
 	}
 	budget := scaleTokenAmountToFloat64(ev.Amount, tokenInfo.Decimals)
 
 	// Write to snapshot cache for subsequent events
 	SetJobBudgetCache(ev.JobId.Uint64(), &jobBudgetEntry{
-		PaymentToken: paymentToken,
+		PaymentToken:    paymentToken,
 		PaymentDecimals: tokenInfo.Decimals,
-		TokenSymbol:  tokenInfo.Symbol,
-		Budget:       ev.Amount,
-		BudgetUSD:    budgetUSD,
+		TokenSymbol:     tokenInfo.Symbol,
+		Budget:          ev.Amount,
+		BudgetUSD:       budgetUSD,
 	})
 
 	// Upsert job with budget fields
@@ -794,12 +799,12 @@ func (p *CommerceProcessor) handlePaymentReleased(e types.Log) error {
 	paidUSD, usdErr := GetHistoricalUSDBudget(context.Background(), p.chainID, paymentToken, ev.Amount, tokenInfo.Decimals, e.BlockTimestamp)
 	if usdErr != nil {
 		p.logger.WithFields(logrus.Fields{
-			"event":          "PaymentReleased",
-			"jobId":          ev.JobId.Uint64(),
-			"payment_token":  paymentToken,
-			"token_symbol":   tokenInfo.Symbol,
+			"event":           "PaymentReleased",
+			"jobId":           ev.JobId.Uint64(),
+			"payment_token":   paymentToken,
+			"token_symbol":    tokenInfo.Symbol,
 			"block_timestamp": e.BlockTimestamp,
-			"error":          usdErr,
+			"error":           usdErr,
 		}).Warn("failed to resolve historical USD paid amount; keep paid_amount_usd=0")
 	}
 	cj, err := model.FetchOrCreateCommerceJob(p.chainID, p.commerceAddr.String(), ev.JobId.Uint64())
@@ -829,16 +834,16 @@ func (p *CommerceProcessor) handlePaymentReleased(e types.Log) error {
 		JobBudget: scaleTokenAmountToFloat64(ev.Amount, tokenInfo.Decimals), BudgetUSD: paidUSD,
 		PaymentToken: paymentToken, PaymentDecimals: uint(tokenInfo.Decimals), TokenSymbol: tokenInfo.Symbol,
 		Counterparty: cj.Client,
-		BlockNumber: e.BlockNumber, TxHash: e.TxHash.String(), LogIndex: e.Index, BlockTimestamp: e.BlockTimestamp,
+		BlockNumber:  e.BlockNumber, TxHash: e.TxHash.String(), LogIndex: e.Index, BlockTimestamp: e.BlockTimestamp,
 	}); err != nil {
 		p.logger.WithFields(logrus.Fields{
-			"event":          "PaymentReleased",
-			"jobId":          ev.JobId.Uint64(),
-			"provider":       ev.Provider.String(),
-			"block_number":   e.BlockNumber,
-			"log_index":      e.Index,
+			"event":           "PaymentReleased",
+			"jobId":           ev.JobId.Uint64(),
+			"provider":        ev.Provider.String(),
+			"block_number":    e.BlockNumber,
+			"log_index":       e.Index,
 			"block_timestamp": e.BlockTimestamp,
-			"error":          err,
+			"error":           err,
 		}).Warn("failed to write commerce_actions for PaymentReleased")
 	}
 	return nil
@@ -858,12 +863,12 @@ func (p *CommerceProcessor) handlePlatformFeePaid(e types.Log) error {
 	feeUSD, usdErr := GetHistoricalUSDBudget(context.Background(), p.chainID, paymentToken, ev.Amount, tokenInfo.Decimals, e.BlockTimestamp)
 	if usdErr != nil {
 		p.logger.WithFields(logrus.Fields{
-			"event":          "PlatformFeePaid",
-			"jobId":          ev.JobId.Uint64(),
-			"payment_token":  paymentToken,
-			"token_symbol":   tokenInfo.Symbol,
+			"event":           "PlatformFeePaid",
+			"jobId":           ev.JobId.Uint64(),
+			"payment_token":   paymentToken,
+			"token_symbol":    tokenInfo.Symbol,
 			"block_timestamp": e.BlockTimestamp,
-			"error":          usdErr,
+			"error":           usdErr,
 		}).Warn("failed to resolve historical USD platform fee; keep platform_fee_usd=0")
 	}
 	cj, err := model.FetchOrCreateCommerceJob(p.chainID, p.commerceAddr.String(), ev.JobId.Uint64())
@@ -893,16 +898,16 @@ func (p *CommerceProcessor) handlePlatformFeePaid(e types.Log) error {
 		JobBudget: scaleTokenAmountToFloat64(ev.Amount, tokenInfo.Decimals), BudgetUSD: feeUSD,
 		PaymentToken: paymentToken, PaymentDecimals: uint(tokenInfo.Decimals), TokenSymbol: tokenInfo.Symbol,
 		Counterparty: cj.Client,
-		BlockNumber: e.BlockNumber, TxHash: e.TxHash.String(), LogIndex: e.Index, BlockTimestamp: e.BlockTimestamp,
+		BlockNumber:  e.BlockNumber, TxHash: e.TxHash.String(), LogIndex: e.Index, BlockTimestamp: e.BlockTimestamp,
 	}); err != nil {
 		p.logger.WithFields(logrus.Fields{
-			"event":          "PlatformFeePaid",
-			"jobId":          ev.JobId.Uint64(),
-			"treasury":       ev.PlatformTreasury.String(),
-			"block_number":   e.BlockNumber,
-			"log_index":      e.Index,
+			"event":           "PlatformFeePaid",
+			"jobId":           ev.JobId.Uint64(),
+			"treasury":        ev.PlatformTreasury.String(),
+			"block_number":    e.BlockNumber,
+			"log_index":       e.Index,
 			"block_timestamp": e.BlockTimestamp,
-			"error":          err,
+			"error":           err,
 		}).Warn("failed to write commerce_actions for PlatformFeePaid")
 	}
 	return nil
@@ -922,12 +927,12 @@ func (p *CommerceProcessor) handleEvaluatorFeePaid(e types.Log) error {
 	feeUSD, usdErr := GetHistoricalUSDBudget(context.Background(), p.chainID, paymentToken, ev.Amount, tokenInfo.Decimals, e.BlockTimestamp)
 	if usdErr != nil {
 		p.logger.WithFields(logrus.Fields{
-			"event":          "EvaluatorFeePaid",
-			"jobId":          ev.JobId.Uint64(),
-			"payment_token":  paymentToken,
-			"token_symbol":   tokenInfo.Symbol,
+			"event":           "EvaluatorFeePaid",
+			"jobId":           ev.JobId.Uint64(),
+			"payment_token":   paymentToken,
+			"token_symbol":    tokenInfo.Symbol,
 			"block_timestamp": e.BlockTimestamp,
-			"error":          usdErr,
+			"error":           usdErr,
 		}).Warn("failed to resolve historical USD evaluator fee; keep evaluator_fee_usd=0")
 	}
 	cj, err := model.FetchOrCreateCommerceJob(p.chainID, p.commerceAddr.String(), ev.JobId.Uint64())
@@ -957,16 +962,16 @@ func (p *CommerceProcessor) handleEvaluatorFeePaid(e types.Log) error {
 		JobBudget: scaleTokenAmountToFloat64(ev.Amount, tokenInfo.Decimals), BudgetUSD: feeUSD,
 		PaymentToken: paymentToken, PaymentDecimals: uint(tokenInfo.Decimals), TokenSymbol: tokenInfo.Symbol,
 		Counterparty: cj.Client,
-		BlockNumber: e.BlockNumber, TxHash: e.TxHash.String(), LogIndex: e.Index, BlockTimestamp: e.BlockTimestamp,
+		BlockNumber:  e.BlockNumber, TxHash: e.TxHash.String(), LogIndex: e.Index, BlockTimestamp: e.BlockTimestamp,
 	}); err != nil {
 		p.logger.WithFields(logrus.Fields{
-			"event":          "EvaluatorFeePaid",
-			"jobId":          ev.JobId.Uint64(),
-			"evaluator":      ev.Evaluator.String(),
-			"block_number":   e.BlockNumber,
-			"log_index":      e.Index,
+			"event":           "EvaluatorFeePaid",
+			"jobId":           ev.JobId.Uint64(),
+			"evaluator":       ev.Evaluator.String(),
+			"block_number":    e.BlockNumber,
+			"log_index":       e.Index,
 			"block_timestamp": e.BlockTimestamp,
-			"error":          err,
+			"error":           err,
 		}).Warn("failed to write commerce_actions for EvaluatorFeePaid")
 	}
 	return nil
