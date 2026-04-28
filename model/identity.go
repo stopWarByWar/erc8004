@@ -238,8 +238,12 @@ func UpdateAgentInserted(agentUIDs []uint64) error {
 	return db.Model(&Agent{}).Where("uid IN (?)", agentUIDs).Update("inserted", true).Error
 }
 
-func UpdateAgentWallet(chainID string, identityRegistry string, agentID string, agentWallet string) error {
-	return db.Model(&Agent{}).Where("chain_id = ? AND identity_registry = ? AND agent_id = ?", chainID, identityRegistry, agentID).Update("agent_wallet", agentWallet).Error
+func UpdateAgentWallet(chainID string, identityRegistry string, agentID string, agentWallet string, blockNumber uint64, index uint64) error {
+	return db.Model(&Agent{}).Where("chain_id = ? AND identity_registry = ? AND agent_id = ?", chainID, identityRegistry, agentID).Updates(map[string]interface{}{
+		"agent_wallet": agentWallet,
+		"block_number": blockNumber,
+		"index":        index,
+	}).Error
 }
 
 func GetAgentUID(chainID string, identityRegistry string, agentID string) (uint64, error) {
