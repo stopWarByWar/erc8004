@@ -88,7 +88,7 @@ func (idx *IdentityProcessor) Process() {
 	}).Info("start run identity registry processor")
 
 	processInterval := 20 * time.Second
-	ticker := time.NewTicker(1)
+	ticker := time.NewTicker(processInterval)
 	defer ticker.Stop()
 
 	fetchAgentProfileInterval := 20 * time.Second
@@ -96,7 +96,7 @@ func (idx *IdentityProcessor) Process() {
 	defer fetchAgentCardTicker.Stop()
 
 	logExecBlockInterval := 60 * time.Second
-	logExecBlockTicker := time.NewTicker(2)
+	logExecBlockTicker := time.NewTicker(logExecBlockInterval)
 	defer logExecBlockTicker.Stop()
 	for {
 		select {

@@ -252,9 +252,10 @@ func (p *CommerceProcessor) upsertJobFromEvent(e types.Log, jobID uint64, job ab
 	case model.ActionJobSubmitted:
 		cj.Status = model.StatusSubmitted
 		if job.SubmittedAt == nil {
-			return fmt.Errorf("job.SubmittedAt is nil for jobID=%d", jobID)
+			cj.SubmittedAt = 0
+		} else {
+			cj.SubmittedAt = job.SubmittedAt.Uint64()
 		}
-		cj.SubmittedAt = job.SubmittedAt.Uint64()
 	case model.ActionJobCompleted:
 		cj.Status = model.StatusCompleted
 		cj.CompletedAt = e.BlockTimestamp
