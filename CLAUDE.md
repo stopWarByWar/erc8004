@@ -37,14 +37,6 @@ HTTP Request → handle/ → logic/ → model/ → PostgreSQL
 - `server/api/handle/` — HTTP parsing, validation, calling logic functions
 - `server/api/logic/` — business logic, data transformation, response shaping
 - `model/` — GORM-based data access; queries split by domain (`identity.go`, `reputation.go`, `validation.go`, `embedding.go`)
-- `docs/` ：其中除了resources中的文档，命名格式统一为 `YYYYMMDDHHMM_descriptive_name.md`
-    - `designs/`: 针对新的功能和模块，设计文档是只增的，对于相同的功能在旧的设计文档，新的功能放新的设计文档。design是产品功能设计文档，不要涉及具体的代码和spec
-    - `specs`：开发的具体spec
-    - `exec-plans`: 计划执行跟踪，每个文件是一个独立的工作模块，跟踪task完成情况
-    - `resources` documents 
-    - `proposals`：提案文档
-
-### Two Services
 
 **Server** (`server/main.go`): Gin-based REST API. Routes defined in `server/api/router.go`. All handler logic lives in `handle/` + `logic/`.
 
