@@ -102,6 +102,7 @@ func (p *ReputationProcessor) Process() {
 				p.logger.WithFields(logrus.Fields{
 					"error": err,
 				}).Error("fail to get current block num")
+				ticker.Reset(processInterval)
 				continue
 			}
 			if p.execBlock < uint64(currentBlock) {

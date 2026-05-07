@@ -107,6 +107,7 @@ func (idx *IdentityProcessor) Process() {
 				idx.logger.WithFields(logrus.Fields{
 					"error": err,
 				}).Error("fail to get current block num")
+				ticker.Reset(processInterval)
 				continue
 			}
 			idx.mu.RLock()
