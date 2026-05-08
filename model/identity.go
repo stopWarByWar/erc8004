@@ -43,10 +43,30 @@ func CreateAgent(agent *Agent) error {
 	if agent == nil {
 		return nil
 	}
-	// Rely on DB unique constraint to guarantee idempotency.
-	return db.Omit("uid").
-		Clauses(clause.OnConflict{DoNothing: true}).
-		Create(agent).Error
+
+	var existing Agent
+	err := db.Where("chain_id = ? AND identity_registry = ? AND agent_id = ?",
+		agent.ChainID, agent.IdentityRegistry, agent.AgentID).First(&existing).Error
+
+	if err == gorm.ErrRecordNotFound {
+		return db.Omit("uid").Create(agent).Error
+	}
+	if err != nil {
+		return err
+	}
+
+	updates := map[string]interface{}{
+		"owner":        agent.Owner,
+		"agent_uri":    agent.AgentURI,
+		"block_number": agent.BlockNumber,
+		"index":        agent.Index,
+		"tx_hash":      agent.TxHash,
+		"timestamps":   agent.Timestamps,
+	}
+	if existing.AgentURI != agent.AgentURI {
+		updates["inserted"] = false
+	}
+	return db.Model(&Agent{}).Where("uid = ?", existing.UID).Updates(updates).Error
 }
 
 func UpdateAgentTokenURL(chainID, identityRegistry, agentID, agentURI string, blockNumber uint64, index uint64) error {
@@ -239,11 +259,51 @@ func UpdateAgentInserted(agentUIDs []uint64) error {
 }
 
 func UpdateAgentWallet(chainID string, identityRegistry string, agentID string, agentWallet string, blockNumber uint64, index uint64) error {
-	return db.Model(&Agent{}).Where("chain_id = ? AND identity_registry = ? AND agent_id = ?", chainID, identityRegistry, agentID).Updates(map[string]interface{}{
-		"agent_wallet": agentWallet,
-		"block_number": blockNumber,
-		"index":        index,
-	}).Error
+	return db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&Agent{}).
+			Where("chain_id = ? AND identity_registry = ? AND agent_id = ?", chainID, identityRegistry, agentID).
+			Updates(map[string]interface{}{
+				"agent_wallet": agentWallet,
+				"block_number": blockNumber,
+				"index":        index,
+			}).Error; err != nil {
+			return err
+		}
+
+		var fullAgent Agent
+		if err := tx.Where("chain_id = ? AND identity_registry = ? AND agent_id = ?", chainID, identityRegistry, agentID).
+			First(&fullAgent).Error; err != nil {
+			return err
+		}
+
+		// 查找同一 chain_id + agent_wallet 的 stub（agent_id 为空说明是 commerce 创建的占位记录）
+		var stub Agent
+		err := tx.Where("chain_id = ? AND agent_wallet = ? AND agent_id = '' AND uid != ?", chainID, agentWallet, fullAgent.UID).
+			First(&stub).Error
+		if err == gorm.ErrRecordNotFound {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+
+		// 将 stub 的 commerce_actions 迁移到正式 agent
+		if err := tx.Model(&CommerceAction{}).
+			Where("agent_uid = ?", stub.UID).
+			Update("agent_uid", fullAgent.UID).Error; err != nil {
+			return err
+		}
+
+		// commerce_scores / commerce_scores_global 的 agent_uid 是联合主键，无法直接改，删掉让下次重算
+		if err := tx.Where("agent_uid = ?", stub.UID).Delete(&CommerceScore{}).Error; err != nil {
+			return err
+		}
+		if err := tx.Where("agent_uid = ?", stub.UID).Delete(&CommerceScoreGlobal{}).Error; err != nil {
+			return err
+		}
+
+		return tx.Delete(&Agent{}, stub.UID).Error
+	})
 }
 
 func GetAgentUID(chainID string, identityRegistry string, agentID string) (uint64, error) {
@@ -276,7 +336,7 @@ func FindOrCreateAgentByWallet(chainID, wallet string) (uint64, error) {
 		Inserted:    false,
 	}
 	if err := db.Omit("uid").Create(&stub).Error; err != nil {
-		// handle race condition: another goroutine may have inserted concurrently
+		// 并发竞争时另一个 goroutine 可能已插入，重新查一次
 		var existing Agent
 		if err2 := db.Where("agent_wallet = ? AND chain_id = ?", wallet, chainID).First(&existing).Error; err2 == nil {
 			return existing.UID, nil
