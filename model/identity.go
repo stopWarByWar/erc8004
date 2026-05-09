@@ -491,7 +491,7 @@ func GetServicesByAgentUID(uid uint64) ([]*Service, error) {
 func GetAgentsByFilter(name *string, page, pageSize int, trustModelIDs, chainIDs, skills *[]string, x402Support, active, haveFeedback *bool) ([]*Agent, int64, error) {
 	// 构建基础查询的辅助函数（不加 DISTINCT，由具体查询决定是否去重）
 	buildBaseQuery := func() *gorm.DB {
-		query := db.Model(&Agent{})
+		query := db.Model(&Agent{}).Where("length(name) <> 0")
 		if name != nil && *name != "" {
 			query = query.Where("LOWER(agents.name) LIKE LOWER(?)", "%"+*name+"%")
 		}
