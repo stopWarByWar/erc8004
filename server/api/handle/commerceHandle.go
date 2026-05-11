@@ -471,12 +471,22 @@ func GetCommerceJobDetailHandler(c *gin.Context) {
 		return
 	}
 
+	settlementActions, err := model.GetSettlementActionsByJobID(chainID, contract, jobID)
+	if err != nil {
+		serverUtils.ErrResp(logrus.Fields{"error": err}, "fail to get settlement events", "Internal Error", c)
+		return
+	}
+	settlementDTOs := make([]types.CommerceActionDTO, 0, len(settlementActions))
+	for _, a := range settlementActions {
+		settlementDTOs = append(settlementDTOs, serverLogic.ActionToDTO(a))
+	}
+
 	serverUtils.SuccessResp(gin.H{
 		"job": job,
-		"evidence": gin.H{
-			"timeline_source":      "commerce_actions",
-			"events_table_source":  "commerce_actions",
-			"settlement_events":    []string{"PaymentReleased", "PlatformFeePaid", "EvaluatorFeePaid"},
+		"evidence": types.CommerceJobDetailEvidence{
+			TimelineSource:    "commerce_actions",
+			EventsTableSource: "commerce_actions",
+			SettlementEvents:  settlementDTOs,
 		},
 	}, c)
 }

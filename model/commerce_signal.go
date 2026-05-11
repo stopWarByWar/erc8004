@@ -12,6 +12,13 @@ const (
 	ActionBudgetSet    = "budget_set"
 )
 
+// Settlement action types (payment distribution events)
+const (
+	ActionPaymentReleased  = "payment_released"
+	ActionPlatformFeePaid  = "platform_fee_paid"
+	ActionEvaluatorFeePaid = "evaluator_fee_paid"
+)
+
 // Job statuses (previous_status context for terminal events)
 const (
 	StatusOpen      = "open"

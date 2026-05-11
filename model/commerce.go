@@ -312,6 +312,16 @@ func GetCommerceActionsByJobID(chainID, contract string, jobID uint64) ([]Commer
 	return actions, err
 }
 
+func GetSettlementActionsByJobID(chainID, contract string, jobID uint64) ([]CommerceAction, error) {
+	var actions []CommerceAction
+	err := db.Where("chain_id = ? AND commerce_contract = ? AND job_id = ? AND action IN ?",
+		chainID, contract, jobID,
+		[]string{ActionPaymentReleased, ActionPlatformFeePaid, ActionEvaluatorFeePaid}).
+		Order("block_number ASC, log_index ASC").
+		Find(&actions).Error
+	return actions, err
+}
+
 // ─────────────── Commerce Job Actions (Job Detail) ───────────────
 
 type CommerceJobActionsQuery struct {

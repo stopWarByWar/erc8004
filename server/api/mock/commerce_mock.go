@@ -610,7 +610,7 @@ func CommerceJobDetail(chainID, contract string, jobID uint64) (*types.CommerceJ
 	ev := &types.CommerceJobDetailEvidence{
 		TimelineSource:    "commerce_actions",
 		EventsTableSource: "commerce_actions",
-		SettlementEvents:  []string{"PaymentReleased", "PlatformFeePaid", "EvaluatorFeePaid"},
+		SettlementEvents:  []types.CommerceActionDTO{},
 	}
 	return job, ev
 }

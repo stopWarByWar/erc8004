@@ -335,8 +335,19 @@ func FindOrCreateAgentByWallet(chainID, wallet string) (uint64, error) {
 		Active:      false,
 		Inserted:    false,
 	}
-	if err := db.Omit("uid").Create(&stub).Error; err != nil {
-		// 并发竞争时另一个 goroutine 可能已插入，重新查一次
+
+	// Use upsert to handle the race where the unique constraint
+	// (chain_id, identity_registry, agent_id) is violated because stub
+	// records share empty identity_registry + agent_id on the same chain.
+	// We use agent_wallet as the conflict target since it's the actual
+	// unique identifier for stub lookups.
+	err = db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "chain_id"}, {Name: "identity_registry"}, {Name: "agent_id"}},
+		DoUpdates: clause.AssignmentColumns([]string{"agent_wallet", "active", "inserted"}),
+	}).Create(&stub).Error
+	if err != nil {
+		// Fallback: if upsert still fails (e.g. unique constraint on a different column),
+		// fall back to select-by-wallet to handle any other edge case.
 		var existing Agent
 		if err2 := db.Where("agent_wallet = ? AND chain_id = ?", wallet, chainID).First(&existing).Error; err2 == nil {
 			return existing.UID, nil

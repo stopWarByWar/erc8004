@@ -486,9 +486,9 @@ type CommerceActionDTO struct {
 }
 
 type CommerceJobDetailEvidence struct {
-	TimelineSource    string   `json:"timeline_source"`
-	EventsTableSource string   `json:"events_table_source"`
-	SettlementEvents  []string `json:"settlement_events"`
+	TimelineSource    string             `json:"timeline_source"`
+	EventsTableSource string             `json:"events_table_source"`
+	SettlementEvents  []CommerceActionDTO `json:"settlement_events"`
 }
 
 type CommerceJobDetailResp struct {
