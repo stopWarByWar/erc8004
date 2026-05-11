@@ -13,7 +13,7 @@ if [[ -z "$CONN" ]]; then
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MIGRATIONS=$(ls -1 "$SCRIPT_DIR"/*.psql | sort)
+MIGRATIONS=$(ls -1 "$SCRIPT_DIR"/{*.psql,*.sql} 2>/dev/null | sort)
 
 echo "=== Re-running all PSQL migrations ==="
 echo "Connection: ${CONN%% @*}"  # redact password in output
