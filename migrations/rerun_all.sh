@@ -15,16 +15,44 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MIGRATIONS=$(ls -1 "$SCRIPT_DIR"/{*.psql,*.sql} 2>/dev/null | sort)
 
-echo "=== Re-running all PSQL migrations ==="
-echo "Connection: ${CONN%% @*}"  # redact password in output
+echo "=== PSQL Migration Runner ==="
+echo "Connection: ${CONN%% @*}"
 echo ""
+
+if [[ ! -t 0 ]]; then
+  echo "Error: not a terminal, cannot ask for input. Run with '-y' to skip all prompts."
+  echo "Usage: $0 [-y] [conn_string]"
+  exit 1
+fi
+
+read -p "Run ALL migrations now? [y/N] " -n1 -r reply
+echo ""
+if [[ ! "$reply" =~ ^[Yy]$ ]]; then
+  echo "Aborted."
+  exit 0
+fi
 
 for f in $MIGRATIONS; do
   name=$(basename "$f")
-  echo "--- Executing: $name ---"
-  psql "$CONN" -f "$f"
-  echo "--- Done: $name ---"
-  echo ""
+  while true; do
+    read -p "--- Execute: $name? [y/s(=skip file)/q(=quit)] " -n1 -r reply
+    echo ""
+    case "$reply" in
+      [Yy] )
+        psql "$CONN" -f "$f" && echo "--- Done: $name ---" && echo "" && break
+        ;;
+      [Ss] )
+        echo "--- Skipped: $name ---" && echo "" && break
+        ;;
+      [Qq] )
+        echo "Quit."
+        exit 0
+        ;;
+      * )
+        echo "Please answer y, s, or q."
+        ;;
+    esac
+  done
 done
 
-echo "=== All migrations complete ==="
+echo "=== All done ==="
