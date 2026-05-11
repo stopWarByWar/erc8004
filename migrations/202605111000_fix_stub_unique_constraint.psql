@@ -1,0 +1,22 @@
+-- Fix stub agent uniqueness: allow multiple stubs on same chain (same identity_registry='' AND agent_id=''),
+-- but enforce uniqueness for registered agents (non-empty identity_registry or agent_id).
+--
+-- Steps:
+-- 1. Deduplicate existing stubs: for each (chain_id, agent_wallet), keep only the lowest uid.
+--    Stubs are identified by wallet, not by (chain_id, identity_registry, agent_id).
+-- 2. Create partial unique index for non-stub agents only.
+
+-- Step 1: Delete duplicate stubs (keep lowest uid per chain_id + agent_wallet)
+DELETE FROM agents a
+WHERE (a.identity_registry = '' AND a.agent_id = '')
+  AND a.uid > (
+    SELECT MIN(a2.uid)
+    FROM agents a2
+    WHERE a2.chain_id = a.chain_id
+      AND a2.agent_wallet = a.agent_wallet
+  );
+
+-- Step 2: Partial unique index — only non-stub agents are unique on (chain_id, identity_registry, agent_id)
+CREATE UNIQUE INDEX IF NOT EXISTS uq_agents_identity_nonstub
+ON agents (chain_id, identity_registry, agent_id)
+WHERE identity_registry <> '' OR agent_id <> '';
