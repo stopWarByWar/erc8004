@@ -25,7 +25,8 @@ if [[ ! -t 0 ]]; then
   exit 1
 fi
 
-read -p "Run ALL migrations now? [y/N] " -n1 -r reply
+echo -n "Run ALL migrations now? [y/N] "
+read -r reply
 echo ""
 if [[ ! "$reply" =~ ^[Yy]$ ]]; then
   echo "Aborted."
@@ -35,7 +36,8 @@ fi
 for f in $MIGRATIONS; do
   name=$(basename "$f")
   while true; do
-    read -p "--- Execute: $name? [y/s(=skip file)/q(=quit)] " -n1 -r reply
+    echo -n "--- Execute: $name? [y/s(=skip file)/q(=quit)] "
+    read -r reply
     echo ""
     case "$reply" in
       [Yy] )
