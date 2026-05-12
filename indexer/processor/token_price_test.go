@@ -55,9 +55,12 @@ func TestGetHistoricalUSDBudget(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
+	for i, tt := range tests {
 		name := fmt.Sprintf("%s_%s_%d", tt.platform, tt.tokenAddr, tt.timestamp)
 		t.Run(name, func(t *testing.T) {
+			if i > 0 {
+				time.Sleep(5 * time.Second) // avoid CoinGecko rate limit
+			}
 			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()
 
