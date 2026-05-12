@@ -20,11 +20,11 @@ func TestGetHistoricalUSDBudget(t *testing.T) {
 		// ETH @ ~$2507, 2025-05-12 (within CoinGecko free 365-day window)
 		{
 			platform:  "ethereum",
-			tokenAddr: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeEF", // ETH native
-			amount:    1_000000000000000000,                            // 1 ETH
+			tokenAddr: "0xeeeee0eee0eeee0eeee0eeee0eeee0eeee0eeeee", // ETH (matches staticTokenToGeckoID)
+			amount:    1_000000000000000000,                         // 1 ETH
 			decimals:  18,
-			timestamp: 1747064855, // 2025-05-12 00:00:00 UTC
-			wantMin:   2000,       // ETH was ~$2500 in May 2025
+			timestamp: 1747064855,                                  // 2025-05-12 00:00:00 UTC
+			wantMin:   2000,                                         // ETH was ~$2500 in May 2025
 		},
 		// USDC @ $1.00, 2025-05-12
 		{
@@ -43,6 +43,15 @@ func TestGetHistoricalUSDBudget(t *testing.T) {
 			decimals:  18,
 			timestamp: 1747064855,
 			wantMin:   0.9,
+		},
+		// BSC token 0x40b8129B786D766267A7a118cF8C07E31CDB6Fde, 2026-05-12
+		{
+			platform:  "binance-smart-chain",
+			tokenAddr: "0x40b8129B786D766267A7a118cF8C07E31CDB6Fde",
+			amount:    1_000000000000000000,
+			decimals:  18,
+			timestamp: 1778515200, // 2026-05-12 00:00:00 UTC
+			wantMin:   0.05,      // Unibase ~$0.11-$0.15 in May 2026
 		},
 	}
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math"
 	"math/big"
 	"net/http"
@@ -17,6 +18,58 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// geckoHTTPClient is the HTTP client used for all CoinGecko API calls.
+// Uses no proxy to avoid inconsistent responses between CLI and Go.
+var geckoHTTPClient = &http.Client{Timeout: 15 * time.Second}
+
+// ─── Caches ───────────────────────────────────────────────────────────────────
+
+// geckoIDCache caches CoinGecko coin ID per (platform, tokenAddr).
+// Coin IDs rarely change, so this is a long-lived cache (no TTL).
+var geckoIDCache   = map[string]string{}
+var geckoIDCacheMu sync.RWMutex
+
+func geckoIDKey(platform, tokenAddr string) string {
+	return platform + ":" + strings.ToLower(tokenAddr)
+}
+
+func getCachedGeckoID(platform, tokenAddr string) (string, bool) {
+	geckoIDCacheMu.RLock()
+	id, ok := geckoIDCache[geckoIDKey(platform, tokenAddr)]
+	geckoIDCacheMu.RUnlock()
+	return id, ok
+}
+
+func setCachedGeckoID(platform, tokenAddr, id string) {
+	geckoIDCacheMu.Lock()
+	geckoIDCache[geckoIDKey(platform, tokenAddr)] = id
+	geckoIDCacheMu.Unlock()
+}
+
+// Price cache: key = "platform:addr:date" → price.
+// Different dates for the same token have different prices.
+type tokenPriceEntry struct {
+	price     float64
+	fetchedAt time.Time
+}
+
+var globalPriceCache struct {
+	mu sync.RWMutex
+	m  map[string]tokenPriceEntry
+}
+
+const priceCacheTTL = 1 * time.Hour
+
+func init() {
+	globalPriceCache.m = make(map[string]tokenPriceEntry)
+}
+
+func priceCacheKey(platform, tokenAddr, date string) string {
+	return platform + ":" + strings.ToLower(tokenAddr) + ":" + date
+}
+
+// ─── Token Info ────────────────────────────────────────────────────────────────
+
 // TokenInfo holds symbol and decimals for an ERC-20 token.
 type TokenInfo struct {
 	Symbol   string
@@ -26,7 +79,7 @@ type TokenInfo struct {
 // tokenInfoCache caches TokenInfo per token address.
 type tokenInfoCache struct {
 	mu     sync.RWMutex
-	tokens map[string]TokenInfo // token address → TokenInfo
+	tokens map[string]TokenInfo
 }
 
 var globalTokenInfoCache tokenInfoCache
@@ -36,7 +89,6 @@ func init() {
 }
 
 // ResolveTokenInfo returns cached TokenInfo, fetching from chain if not cached.
-// Returns symbol "???" with decimals 18 on error.
 func ResolveTokenInfo(ctx context.Context, client *ethclient.Client, addr string) (*TokenInfo, error) {
 	globalTokenInfoCache.mu.RLock()
 	if info, ok := globalTokenInfoCache.tokens[addr]; ok {
@@ -56,7 +108,6 @@ func ResolveTokenInfo(ctx context.Context, client *ethclient.Client, addr string
 	return info, nil
 }
 
-// fetchTokenInfo calls symbol() then decimals() on the token contract.
 func fetchTokenInfo(ctx context.Context, client *ethclient.Client, addr common.Address) (*TokenInfo, error) {
 	symbol, err := callSymbol(ctx, client, addr)
 	if err != nil {
@@ -69,26 +120,18 @@ func fetchTokenInfo(ctx context.Context, client *ethclient.Client, addr common.A
 	return &TokenInfo{Symbol: symbol, Decimals: decimals}, nil
 }
 
-// callSymbol invokes symbol() on an ERC-20 token.
 func callSymbol(ctx context.Context, client *ethclient.Client, addr common.Address) (string, error) {
-	data := common.FromHex("0x95d89b41") // symbol() selector
-	out, err := client.CallContract(ctx, ethereum.CallMsg{
-		To:   &addr,
-		Data: data,
-	}, nil)
+	data := common.FromHex("0x95d89b41")
+	out, err := client.CallContract(ctx, ethereum.CallMsg{To: &addr, Data: data}, nil)
 	if err != nil {
 		return "", err
 	}
 	return parseString32(out), nil
 }
 
-// callDecimals invokes decimals() on an ERC-20 token.
 func callDecimals(ctx context.Context, client *ethclient.Client, addr common.Address) (uint8, error) {
-	data := common.FromHex("0x313ce567") // decimals() selector
-	out, err := client.CallContract(ctx, ethereum.CallMsg{
-		To:   &addr,
-		Data: data,
-	}, nil)
+	data := common.FromHex("0x313ce567")
+	out, err := client.CallContract(ctx, ethereum.CallMsg{To: &addr, Data: data}, nil)
 	if err != nil {
 		return 18, err
 	}
@@ -113,31 +156,16 @@ func parseString32(b []byte) string {
 	return string(b[offset+32 : offset+32+length])
 }
 
-// ─── Price Cache ─────────────────────────────────────────────────────────────
+// ─── Price APIs ────────────────────────────────────────────────────────────────
 
-type tokenPriceEntry struct {
-	price     float64
-	fetchedAt time.Time
-}
-
-var globalPriceCache struct {
-	mu sync.RWMutex
-	m  map[string]tokenPriceEntry // token address → price
-}
-
-const priceCacheTTL = 1 * time.Hour
-
-func init() {
-	globalPriceCache.m = make(map[string]tokenPriceEntry)
-}
-
-// GetHistoricalUSDBudget returns budget * price at the given block timestamp.
-// Uses pure lazy loading; miss triggers synchronous API call.
+// GetHistoricalUSDBudget returns amount * price at blockTimestamp (USD).
+// Price is cached for 1 hour per (platform, tokenAddr, date).
 func GetHistoricalUSDBudget(ctx context.Context, platform, tokenAddr string, amount *big.Int, decimals uint8, blockTimestamp uint64) (float64, error) {
 	dateStr := time.Unix(int64(blockTimestamp), 0).UTC().Format("02-01-2006")
+	cacheKey := priceCacheKey(platform, tokenAddr, dateStr)
 
 	globalPriceCache.mu.RLock()
-	cached, ok := globalPriceCache.m[tokenAddr]
+	cached, ok := globalPriceCache.m[cacheKey]
 	globalPriceCache.mu.RUnlock()
 
 	var price float64
@@ -151,7 +179,7 @@ func GetHistoricalUSDBudget(ctx context.Context, platform, tokenAddr string, amo
 			price = 1.0
 		}
 		globalPriceCache.mu.Lock()
-		globalPriceCache.m[tokenAddr] = tokenPriceEntry{price: price, fetchedAt: time.Now()}
+		globalPriceCache.m[cacheKey] = tokenPriceEntry{price: price, fetchedAt: time.Now()}
 		globalPriceCache.mu.Unlock()
 	}
 
@@ -162,7 +190,7 @@ func GetHistoricalUSDBudget(ctx context.Context, platform, tokenAddr string, amo
 	return f * price / math.Pow10(int(decimals)), nil
 }
 
-// GetCurrentUSDBudget returns current USD value of amount (for cache miss fallback).
+// GetCurrentUSDBudget returns current USD value of amount.
 func GetCurrentUSDBudget(ctx context.Context, platform, tokenAddr string, amount *big.Int, decimals uint8) (float64, error) {
 	price, err := fetchPriceWithFallback(ctx, platform, tokenAddr)
 	if err != nil {
@@ -176,24 +204,22 @@ func GetCurrentUSDBudget(ctx context.Context, platform, tokenAddr string, amount
 	return f * price / math.Pow10(int(decimals)), nil
 }
 
-// ─── Job Budget Cache ────────────────────────────────────────────────────────
+// ─── Job Budget Cache ─────────────────────────────────────────────────────────
 
-var jobBudgetCache sync.Map // map[uint64]*jobBudgetEntry
+var jobBudgetCache sync.Map
 
 type jobBudgetEntry struct {
-	PaymentToken string
+	PaymentToken    string
 	PaymentDecimals uint8
-	TokenSymbol  string
-	Budget       *big.Int
-	BudgetUSD    float64
+	TokenSymbol      string
+	Budget           *big.Int
+	BudgetUSD        float64
 }
 
-// SetJobBudgetCache stores budget info for a job.
 func SetJobBudgetCache(jobID uint64, entry *jobBudgetEntry) {
 	jobBudgetCache.Store(jobID, entry)
 }
 
-// GetJobBudgetFromCache retrieves cached budget info for a job.
 func GetJobBudgetFromCache(jobID uint64) (*jobBudgetEntry, bool) {
 	val, ok := jobBudgetCache.Load(jobID)
 	if !ok {
@@ -206,17 +232,14 @@ func GetJobBudgetFromCache(jobID uint64) (*jobBudgetEntry, bool) {
 
 var coingeckoAPIKey string
 
-// SetCoingeckoAPIKey configures the CoinGecko Pro API key for price lookups.
-func SetCoingeckoAPIKey(key string) {
-	coingeckoAPIKey = key
-}
+func SetCoingeckoAPIKey(key string) { coingeckoAPIKey = key }
 
 var chainIDToPlatform = map[string]string{
-	"1":      "ethereum",
-	"8453":   "ethereum",
-	"84532":  "ethereum",
-	"56":     "binance-smart-chain",
-	"42161":  "arbitrum",
+	"1":     "ethereum",
+	"8453":  "ethereum",
+	"84532": "ethereum",
+	"56":    "binance-smart-chain",
+	"42161": "arbitrum",
 }
 
 var staticTokenToGeckoID = map[string]string{
@@ -226,22 +249,87 @@ var staticTokenToGeckoID = map[string]string{
 	"0xeeeee0eee0eeee0eeee0eeee0eeee0eeee0eeeee": "ethereum",
 }
 
-// resolveGeckoID returns CoinGecko ID: static map first, then dynamic lookup.
+// resolveGeckoID returns CoinGecko ID: static map → cache → dynamic lookup.
 func resolveGeckoID(ctx context.Context, platform, tokenAddr string) (string, error) {
 	addr := strings.ToLower(tokenAddr)
 	if id, ok := staticTokenToGeckoID[addr]; ok {
+		return id, nil
+	}
+	if id, ok := getCachedGeckoID(platform, tokenAddr); ok {
 		return id, nil
 	}
 	id, err := fetchGeckoIDByContract(ctx, platform, tokenAddr)
 	if err != nil {
 		return "", err
 	}
-	staticTokenToGeckoID[addr] = id
+	setCachedGeckoID(platform, tokenAddr, id)
 	return id, nil
 }
 
-// fetchGeckoIDByContract uses CoinGecko API to find coin ID by contract address.
+// fetchGeckoIDByContract tries free contract lookup → search fallback → Pro API.
 func fetchGeckoIDByContract(ctx context.Context, platform, tokenAddr string) (string, error) {
+	id, err := fetchGeckoIDByContractFreeAPI(ctx, platform, tokenAddr)
+	if err == nil && id != "" {
+		return id, nil
+	}
+	logrus.WithField("token", tokenAddr).Debugf("contract lookup failed, trying search: %v", err)
+
+	id, err = searchGeckoIDByContract(ctx, platform, tokenAddr)
+	if err == nil && id != "" {
+		logrus.WithField("token", tokenAddr).Debugf("search fallback found: %s", id)
+		return id, nil
+	}
+
+	if coingeckoAPIKey != "" {
+		id, err := fetchGeckoIDByContractProAPI(ctx, platform, tokenAddr)
+		if err == nil && id != "" {
+			return id, nil
+		}
+		logrus.WithField("token", tokenAddr).Warnf("Pro contract lookup failed: %v", err)
+	}
+	return "", fmt.Errorf("coin ID not found for %s on %s", tokenAddr, platform)
+}
+
+// searchGeckoIDByContract uses CoinGecko search API to find coin ID by contract address.
+func searchGeckoIDByContract(ctx context.Context, platform, tokenAddr string) (string, error) {
+	url := fmt.Sprintf("https://api.coingecko.com/api/v3/search?query=%s", strings.ToLower(tokenAddr))
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return "", err
+	}
+
+	resp, err := geckoHTTPClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("search API returned status %d", resp.StatusCode)
+	}
+
+	var result struct {
+		Coins []struct {
+			ID        string            `json:"id"`
+			Symbol    string            `json:"symbol"`
+			Name      string            `json:"name"`
+			Platforms map[string]string `json:"platforms"`
+		} `json:"coins"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return "", err
+	}
+
+	for _, coin := range result.Coins {
+		if contract, ok := coin.Platforms[platform]; ok {
+			if strings.ToLower(contract) == strings.ToLower(tokenAddr) {
+				return coin.ID, nil
+			}
+		}
+	}
+	return "", fmt.Errorf("search: no coin matched contract %s on %s", tokenAddr, platform)
+}
+
+func fetchGeckoIDByContractProAPI(ctx context.Context, platform, tokenAddr string) (string, error) {
 	url := fmt.Sprintf(
 		"https://pro-api.coingecko.com/api/v3/coins/%s/contract/%s",
 		platform, strings.ToLower(tokenAddr),
@@ -250,27 +338,53 @@ func fetchGeckoIDByContract(ctx context.Context, platform, tokenAddr string) (st
 	if err != nil {
 		return "", err
 	}
-	if coingeckoAPIKey != "" {
-		req.Header.Set("x-cg-pro-api-key", coingeckoAPIKey)
-	}
+	req.Header.Set("x-cg-pro-api-key", coingeckoAPIKey)
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := geckoHTTPClient.Do(req)
 	if err != nil {
 		return "", err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("CoinGecko API returned status %d", resp.StatusCode)
+		return "", fmt.Errorf("CoinGecko Pro API returned status %d", resp.StatusCode)
 	}
 
-	var result struct {
-		ID string `json:"id"`
-	}
+	var result struct{ ID string `json:"id"` }
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return "", err
 	}
 	if result.ID == "" {
 		return "", fmt.Errorf("coin ID not found for %s", tokenAddr)
+	}
+	return result.ID, nil
+}
+
+func fetchGeckoIDByContractFreeAPI(ctx context.Context, platform, tokenAddr string) (string, error) {
+	url := fmt.Sprintf(
+		"https://api.coingecko.com/api/v3/coins/%s/contract/%s",
+		platform, strings.ToLower(tokenAddr),
+	)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return "", err
+	}
+
+	resp, err := geckoHTTPClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, 200))
+		return "", fmt.Errorf("CoinGecko Free API returned status %d, body: %s", resp.StatusCode, string(body))
+	}
+
+	var result struct{ ID string `json:"id"` }
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return "", err
+	}
+	if result.ID == "" {
+		return "", fmt.Errorf("coin ID empty for %s", tokenAddr)
 	}
 	return result.ID, nil
 }
@@ -304,7 +418,7 @@ func fetchPriceFromProAPI(ctx context.Context, platform, tokenAddr string) (floa
 	}
 	req.Header.Set("x-cg-pro-api-key", coingeckoAPIKey)
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := geckoHTTPClient.Do(req)
 	if err != nil {
 		return 0, err
 	}
@@ -330,7 +444,7 @@ func fetchPriceFromFreeAPI(ctx context.Context, platform, tokenAddr string) (flo
 		return 0, err
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := geckoHTTPClient.Do(req)
 	if err != nil {
 		return 0, err
 	}
@@ -350,8 +464,9 @@ func fetchPriceFromFreeAPI(ctx context.Context, platform, tokenAddr string) (flo
 func fetchHistoricalPrice(ctx context.Context, platform, tokenAddr, date string) (float64, error) {
 	geckoID, err := resolveGeckoID(ctx, platform, tokenAddr)
 	if err != nil {
-		return 1.0, err
+		return 1.0, fmt.Errorf("resolveGeckoID failed: %w", err)
 	}
+	logrus.WithField("token", tokenAddr).Debugf("geckoID=%s, date=%s", geckoID, date)
 
 	if coingeckoAPIKey != "" {
 		price, err := fetchHistoricalFromProAPI(ctx, geckoID, date)
@@ -361,7 +476,11 @@ func fetchHistoricalPrice(ctx context.Context, platform, tokenAddr, date string)
 		logrus.WithField("token", tokenAddr).Warnf("Pro historical API failed, fallback to free: %v", err)
 	}
 
-	return fetchHistoricalFromFreeAPI(ctx, geckoID, date)
+	price, err := fetchHistoricalFromFreeAPI(ctx, geckoID, date)
+	if err != nil {
+		return 1.0, fmt.Errorf("fetchHistoricalFromFreeAPI failed: %w", err)
+	}
+	return price, nil
 }
 
 func fetchHistoricalFromProAPI(ctx context.Context, geckoID, date string) (float64, error) {
@@ -375,11 +494,16 @@ func fetchHistoricalFromProAPI(ctx context.Context, geckoID, date string) (float
 	}
 	req.Header.Set("x-cg-pro-api-key", coingeckoAPIKey)
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := geckoHTTPClient.Do(req)
 	if err != nil {
 		return 0, err
 	}
 	defer resp.Body.Close()
+
+	// Demo key rejection → let caller fall back to free API
+	if resp.StatusCode == http.StatusUnauthorized {
+		return 0, fmt.Errorf("pro-api rejected demo key (10011)")
+	}
 
 	var result struct {
 		MarketData struct {
@@ -405,7 +529,7 @@ func fetchHistoricalFromFreeAPI(ctx context.Context, geckoID, date string) (floa
 		return 0, err
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := geckoHTTPClient.Do(req)
 	if err != nil {
 		return 0, err
 	}
