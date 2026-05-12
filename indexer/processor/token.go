@@ -535,13 +535,18 @@ func fetchHistoricalFromFreeAPI(ctx context.Context, geckoID, date string) (floa
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, 200))
+		return 0, fmt.Errorf("CoinGecko Free API returned status %d: %s", resp.StatusCode, string(body))
+	}
+
 	var result struct {
 		MarketData struct {
 			CurrentPrice map[string]float64 `json:"current_price"`
 		} `json:"market_data"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return 0, err
+		return 0, fmt.Errorf("JSON decode failed: %w", err)
 	}
 	if price, ok := result.MarketData.CurrentPrice["usd"]; ok {
 		return price, nil
