@@ -26,8 +26,20 @@ var geckoHTTPClient = &http.Client{Timeout: 15 * time.Second}
 
 // geckoIDCache caches CoinGecko coin ID per (platform, tokenAddr).
 // Coin IDs rarely change, so this is a long-lived cache (no TTL).
-var geckoIDCache   = map[string]string{}
-var geckoIDCacheMu sync.RWMutex
+var geckoIDCache = map[string]geckoIDCacheEntry{}
+
+type geckoIDCacheEntry struct {
+	id        string
+	fetchedAt time.Time
+}
+
+// negativeCache prevents repeated API calls for tokens that don't exist on CoinGecko.
+// key: "platform:addr", value: timestamp when the lookup failed.
+var negativeCache   = map[string]time.Time{}
+var geckoIDCacheMu  sync.RWMutex
+var negativeCacheMu sync.RWMutex
+
+const negativeCacheTTL = 5 * time.Minute
 
 func geckoIDKey(platform, tokenAddr string) string {
 	return platform + ":" + strings.ToLower(tokenAddr)
@@ -35,15 +47,35 @@ func geckoIDKey(platform, tokenAddr string) string {
 
 func getCachedGeckoID(platform, tokenAddr string) (string, bool) {
 	geckoIDCacheMu.RLock()
-	id, ok := geckoIDCache[geckoIDKey(platform, tokenAddr)]
+	entry, ok := geckoIDCache[geckoIDKey(platform, tokenAddr)]
 	geckoIDCacheMu.RUnlock()
-	return id, ok
+	return entry.id, ok
 }
 
 func setCachedGeckoID(platform, tokenAddr, id string) {
 	geckoIDCacheMu.Lock()
-	geckoIDCache[geckoIDKey(platform, tokenAddr)] = id
+	geckoIDCache[geckoIDKey(platform, tokenAddr)] = geckoIDCacheEntry{id: id, fetchedAt: time.Now()}
 	geckoIDCacheMu.Unlock()
+}
+
+// isNegativeCached returns true if the (platform, tokenAddr) lookup recently failed.
+func isNegativeCached(platform, tokenAddr string) bool {
+	negativeCacheMu.RLock()
+	t, ok := negativeCache[geckoIDKey(platform, tokenAddr)]
+	negativeCacheMu.RUnlock()
+	return ok && time.Since(t) < negativeCacheTTL
+}
+
+func setNegativeCache(platform, tokenAddr string) {
+	negativeCacheMu.Lock()
+	negativeCache[geckoIDKey(platform, tokenAddr)] = time.Now()
+	negativeCacheMu.Unlock()
+}
+
+func clearNegativeCache(platform, tokenAddr string) {
+	negativeCacheMu.Lock()
+	delete(negativeCache, geckoIDKey(platform, tokenAddr))
+	negativeCacheMu.Unlock()
 }
 
 // Price cache: key = "platform:addr:date" → price.
@@ -258,6 +290,9 @@ func resolveGeckoID(ctx context.Context, platform, tokenAddr string) (string, er
 	if id, ok := getCachedGeckoID(platform, tokenAddr); ok {
 		return id, nil
 	}
+	if isNegativeCached(platform, tokenAddr) {
+		return "", fmt.Errorf("negative cache: coin ID not found for %s on %s (cached)", tokenAddr, platform)
+	}
 	id, err := fetchGeckoIDByContract(ctx, platform, tokenAddr)
 	if err != nil {
 		return "", err
@@ -267,9 +302,11 @@ func resolveGeckoID(ctx context.Context, platform, tokenAddr string) (string, er
 }
 
 // fetchGeckoIDByContract tries free contract lookup → search fallback → Pro API.
+// Records failed lookups in negative cache to avoid repeated API calls.
 func fetchGeckoIDByContract(ctx context.Context, platform, tokenAddr string) (string, error) {
 	id, err := fetchGeckoIDByContractFreeAPI(ctx, platform, tokenAddr)
 	if err == nil && id != "" {
+		clearNegativeCache(platform, tokenAddr) // success clears negative cache
 		return id, nil
 	}
 	logrus.WithField("token", tokenAddr).Debugf("contract lookup failed, trying search: %v", err)
@@ -277,16 +314,21 @@ func fetchGeckoIDByContract(ctx context.Context, platform, tokenAddr string) (st
 	id, err = searchGeckoIDByContract(ctx, platform, tokenAddr)
 	if err == nil && id != "" {
 		logrus.WithField("token", tokenAddr).Debugf("search fallback found: %s", id)
+		clearNegativeCache(platform, tokenAddr)
 		return id, nil
 	}
 
 	if coingeckoAPIKey != "" {
 		id, err := fetchGeckoIDByContractProAPI(ctx, platform, tokenAddr)
 		if err == nil && id != "" {
+			clearNegativeCache(platform, tokenAddr)
 			return id, nil
 		}
 		logrus.WithField("token", tokenAddr).Warnf("Pro contract lookup failed: %v", err)
 	}
+
+	// Token not found on CoinGecko — negative cache it
+	setNegativeCache(platform, tokenAddr)
 	return "", fmt.Errorf("coin ID not found for %s on %s", tokenAddr, platform)
 }
 
