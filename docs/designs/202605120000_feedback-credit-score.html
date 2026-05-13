@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>ERC-8004 Feedback Credit Score — 设计文档</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #161a22;
+    --panel-2: #1c2230;
+    --border: #2a3142;
+    --text: #e4e7ee;
+    --text-soft: #a4abbb;
+    --text-mute: #6f7689;
+    --accent: #6ea8ff;
+    --accent-2: #8b7cff;
+    --green: #5fd49d;
+    --yellow: #f3c969;
+    --red: #ff7a8a;
+    --pink: #ff8fbd;
+    --code-bg: #11141b;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+    line-height: 1.65;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 56px 32px 96px; }
+
+  /* ────── Header ────── */
+  .doc-header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 28px;
+    margin-bottom: 40px;
+  }
+  .doc-tag {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    background: rgba(110, 168, 255, 0.1);
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-size: 32px;
+    margin: 0 0 12px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  .doc-meta {
+    color: var(--text-mute);
+    font-size: 13px;
+  }
+  .doc-meta b { color: var(--text-soft); font-weight: 500; }
+
+  /* ────── Headings ────── */
+  h2 {
+    font-size: 22px;
+    margin: 56px 0 16px;
+    padding-left: 12px;
+    border-left: 3px solid var(--accent);
+    line-height: 1.3;
+  }
+  h3 {
+    font-size: 16px;
+    margin: 28px 0 12px;
+    color: var(--text);
+    font-weight: 600;
+  }
+  h3::before {
+    content: "▸ ";
+    color: var(--accent);
+  }
+  p { margin: 12px 0; color: var(--text-soft); }
+  strong { color: var(--text); font-weight: 600; }
+
+  /* ────── Callouts ────── */
+  .callout {
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-left: 3px solid var(--accent);
+    background: var(--panel);
+  }
+  .callout.warn { border-color: var(--yellow); background: rgba(243, 201, 105, 0.06); }
+  .callout.danger { border-color: var(--red); background: rgba(255, 122, 138, 0.06); }
+  .callout.good { border-color: var(--green); background: rgba(95, 212, 157, 0.06); }
+  .callout-label {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .callout.warn .callout-label { color: var(--yellow); }
+  .callout.danger .callout-label { color: var(--red); }
+  .callout.good .callout-label { color: var(--green); }
+  .callout p { margin: 4px 0; color: var(--text); }
+
+  /* ────── Code ────── */
+  pre, code {
+    font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 16px 18px;
+    border-radius: 8px;
+    overflow-x: auto;
+    color: #c8cbd5;
+    line-height: 1.55;
+  }
+  :not(pre) > code {
+    background: var(--panel-2);
+    color: var(--pink);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+  }
+
+  /* ────── Table ────── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    background: var(--panel);
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 14px;
+  }
+  th, td {
+    text-align: left;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: var(--panel-2);
+    color: var(--text-soft);
+    font-weight: 500;
+    font-size: 12.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  tr:last-child td { border-bottom: none; }
+  td { color: var(--text); }
+  td code { font-size: 12.5px; }
+
+  /* ────── Flow Diagram ────── */
+  .flow {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 24px;
+    margin: 24px 0;
+  }
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 10px 0;
+  }
+  .flow-step {
+    flex: 1;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 13.5px;
+  }
+  .flow-step .step-num {
+    display: inline-block;
+    font-size: 10px;
+    background: var(--accent);
+    color: #0f1115;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 700;
+    margin-right: 8px;
+    letter-spacing: 0.5px;
+  }
+  .flow-arrow {
+    text-align: center;
+    color: var(--accent);
+    font-size: 18px;
+    margin: -4px 0;
+  }
+  .flow-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 12px 0;
+  }
+  .flow-split .flow-step {
+    border-left-width: 3px;
+  }
+  .flow-step.layer-a { border-left: 3px solid var(--green); }
+  .flow-step.layer-b { border-left: 3px solid var(--accent-2); }
+  .flow-step.merge { border-left: 3px solid var(--yellow); }
+
+  /* ────── Pillars ────── */
+  .pillars {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .pillar {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px;
+  }
+  .pillar.a { border-top: 3px solid var(--green); }
+  .pillar.b { border-top: 3px solid var(--accent-2); }
+  .pillar-title {
+    font-size: 13px;
+    color: var(--text-mute);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .pillar-name { font-size: 18px; font-weight: 600; margin-bottom: 12px; }
+  .pillar.a .pillar-name { color: var(--green); }
+  .pillar.b .pillar-name { color: var(--accent-2); }
+  .pillar p { margin: 8px 0; font-size: 13.5px; }
+
+  /* ────── Formula ────── */
+  .formula {
+    background: linear-gradient(135deg, rgba(110,168,255,0.06), rgba(139,124,255,0.04));
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 18px 0;
+    font-family: "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.9;
+  }
+  .formula .var { color: var(--accent); }
+  .formula .op { color: var(--text-mute); }
+  .formula .comment { color: var(--text-mute); font-style: italic; font-family: -apple-system, sans-serif; }
+
+  /* ────── Checklist ────── */
+  ul, ol { padding-left: 20px; color: var(--text-soft); }
+  ul li, ol li { margin: 8px 0; }
+  ul li::marker { color: var(--accent); }
+
+  .decision-list {
+    list-style: none;
+    padding: 0;
+    counter-reset: dnum;
+  }
+  .decision-list li {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px 16px 60px;
+    margin: 10px 0;
+    position: relative;
+  }
+  .decision-list li::before {
+    counter-increment: dnum;
+    content: counter(dnum);
+    position: absolute;
+    left: 18px;
+    top: 14px;
+    width: 28px;
+    height: 28px;
+    background: var(--accent);
+    color: var(--bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .decision-list li b { display: block; margin-bottom: 4px; color: var(--text); }
+  .decision-list li .ans { color: var(--green); font-size: 13px; margin-top: 6px; display: block; }
+
+  /* ────── Pills / Labels ────── */
+  .pill {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 4px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .pill.a { background: rgba(95,212,157,0.15); color: var(--green); }
+  .pill.b { background: rgba(139,124,255,0.15); color: var(--accent-2); }
+  .pill.warn { background: rgba(243,201,105,0.15); color: var(--yellow); }
+
+  /* ────── Phases ────── */
+  .phases {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 18px 0;
+  }
+  .phase {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+  }
+  .phase .ph-num {
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+  .phase .ph-name {
+    font-size: 14px;
+    margin: 6px 0;
+    color: var(--text);
+    font-weight: 600;
+  }
+  .phase .ph-desc {
+    font-size: 12px;
+    color: var(--text-mute);
+  }
+
+  /* ────── TOC ────── */
+  .toc {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 24px 0 40px;
+  }
+  .toc-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-mute);
+    margin-bottom: 10px;
+  }
+  .toc ol { margin: 0; padding-left: 20px; }
+  .toc a { color: var(--text-soft); text-decoration: none; font-size: 14px; }
+  .toc a:hover { color: var(--accent); }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 56px 0; }
+
+  /* ────── Small viz ────── */
+  .range-viz {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0;
+    font-size: 13px;
+    color: var(--text-soft);
+    flex-wrap: wrap;
+  }
+  .range-bar {
+    flex: 1;
+    height: 8px;
+    background: linear-gradient(to right, var(--red) 0%, var(--yellow) 40%, var(--green) 100%);
+    border-radius: 4px;
+    min-width: 200px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ────── HEADER ────── -->
+  <div class="doc-header">
+    <span class="doc-tag">Design Doc</span>
+    <h1>ERC-8004 Feedback Credit Score</h1>
+    <div class="doc-meta">
+      <b>Status</b> Draft &nbsp;·&nbsp;
+      <b>Date</b> 2026-05-12 &nbsp;·&nbsp;
+      <b>Author</b> Pan &nbsp;·&nbsp;
+      <b>Scope</b> Server (model + logic), no migration / indexer changes in this doc
+    </div>
+  </div>
+
+  <!-- ────── TOC ────── -->
+  <div class="toc">
+    <div class="toc-title">目录</div>
+    <ol>
+      <li><a href="#goal">目标与定位</a></li>
+      <li><a href="#constraint">核心约束（决定一切）</a></li>
+      <li><a href="#existing">现状与缺陷</a></li>
+      <li><a href="#design">设计：双层 Credit</a></li>
+      <li><a href="#layer-a">Layer A — Behavioral Credit</a></li>
+      <li><a href="#layer-b">Layer B — Sentiment Credit</a></li>
+      <li><a href="#authority">Tag Authority — 自适应权重</a></li>
+      <li><a href="#fusion">最终融合</a></li>
+      <li><a href="#schema">数据模型</a></li>
+      <li><a href="#decisions">已决策事项</a></li>
+      <li><a href="#phases">实现节奏</a></li>
+      <li><a href="#api">对外消费接口（概念）</a></li>
+    </ol>
+  </div>
+
+  <!-- ────── 1. GOAL ────── -->
+  <h2 id="goal">1. 目标与定位</h2>
+
+  <p>
+    在 ERC-8004 的链上 <code>NewFeedback</code> 事件之上，构建一个可供 <strong>链上其他合约消费</strong>
+    的 <strong>Credit Score</strong>。要同时输出：
+  </p>
+
+  <ul>
+    <li><strong>per-tag 的子分</strong>：每个 tag1 一个 score</li>
+    <li><strong>agent 级综合分</strong>：用于支付授信、permissioning、agent bank 评级</li>
+  </ul>
+
+  <div class="callout">
+    <span class="callout-label">使用场景</span>
+    <p>
+      未来 <strong>Agent Profile</strong> 直接消费 score + confidence + tag breakdown；<br>
+      未来 <strong>Agent Bank</strong> 用 credit_score × confidence 做综合授信，
+      与 commerce_score、validation_pass_rate 一起加权融合。
+    </p>
+  </div>
+
+  <p>对外数值约定：</p>
+  <ul>
+    <li><code>score</code>：<code>numeric(6,4)</code>，范围 <strong>[0, 1]</strong>，和 commerce 一致</li>
+    <li><code>confidence</code>：<code>numeric(4,2)</code>，范围 <strong>[0, 1]</strong></li>
+  </ul>
+
+  <div class="range-viz">
+    <span style="color:var(--red)">0 差</span>
+    <div class="range-bar"></div>
+    <span style="color:var(--green)">1 好</span>
+  </div>
+
+  <!-- ────── 2. CONSTRAINT ────── -->
+  <h2 id="constraint">2. 核心约束（决定一切）</h2>
+
+  <div class="callout danger">
+    <span class="callout-label">硬约束</span>
+    <p>
+      <strong>我们不是协议官方。</strong>
+      tag 是用户随意填写的字符串，value 的语义无法预先约定。
+    </p>
+  </div>
+
+  <p>这意味着：</p>
+  <ul>
+    <li>❌ <strong>不能</strong>维护 tag schema（注册表、白名单）</li>
+    <li>❌ <strong>不能</strong>假设 value 的方向（越大越好 vs 越小越好）</li>
+    <li>❌ <strong>不能</strong>假设 value 的量纲（0~1？毫秒？美元？星级？）</li>
+    <li>❌ 同名 tag 在不同人手里语义可能完全不同（"accuracy" 一个人写 0.95，另一个写 95）</li>
+  </ul>
+
+  <div class="callout warn">
+    <span class="callout-label">推论</span>
+    <p>
+      任何 <strong>依赖 value 语义</strong> 的聚合都不可靠。<br>
+      Credit score 必须有一部分 <strong>完全不碰 value 含义</strong> 也能算。
+    </p>
+  </div>
+
+  <!-- ────── 3. EXISTING ────── -->
+  <h2 id="existing">3. 现状与缺陷</h2>
+
+  <p>现有 <code>feedback_tag_scores</code> 表 + Postgres 触发器：</p>
+
+  <div class="formula">
+    <span class="comment">// 每来一条 feedback：</span><br>
+    <span class="var">new_score</span> <span class="op">=</span> (<span class="var">old_score</span> × <span class="var">old_count</span> <span class="op">+</span> <span class="var">new_format_value</span>) <span class="op">/</span> (<span class="var">old_count</span> <span class="op">+</span> 1)
+  </div>
+
+  <p>缺陷一览：</p>
+
+  <table>
+    <thead>
+      <tr><th>问题</th><th>表现</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>简单算术平均</td><td>同一 client 多次刷好评等权累加</td></tr>
+      <tr><td>无时间衰减</td><td>三年前的反馈和今天权重相同</td></tr>
+      <tr><td>无评分人权重</td><td>零信誉账号和资深 client 等权，sybil 成本 ≈ 0</td></tr>
+      <tr><td>无置信度</td><td>1 条 5 分 ≡ 100 条 5 分，对外都是 5 分</td></tr>
+      <tr><td>无综合分</td><td>只有 per-tag，没有 agent 级总分</td></tr>
+      <tr><td>tag2 没用</td><td>副标签只存表，不参与任何计算</td></tr>
+      <tr><td>分布信息丢失</td><td>5×1分 与 5×5分 均值都是 3，方差信号不见</td></tr>
+      <tr><td>无负面非对称</td><td>差评和好评对称，不符合真实信任建模</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ────── 4. DESIGN ────── -->
+  <h2 id="design">4. 设计：双层 Credit</h2>
+
+  <p>
+    把 credit 拆成 <strong>两层</strong>：
+    第一层完全不碰 value 语义，第二层只在 value 看起来"像评分"时才启动。
+  </p>
+
+  <div class="pillars">
+    <div class="pillar a">
+      <div class="pillar-title">Layer A</div>
+      <div class="pillar-name">Behavioral Credit</div>
+      <p><strong>始终计算</strong>，不依赖 value 语义。</p>
+      <p>只看：<em>谁评了、什么时候、撤没撤、多少独立人评、跨多少 tag</em>。</p>
+      <p>抗 sybil 主力。</p>
+    </div>
+    <div class="pillar b">
+      <div class="pillar-title">Layer B</div>
+      <div class="pillar-name">Sentiment Credit</div>
+      <p><strong>自适应启用</strong>。</p>
+      <p>当某 (agent, tag) 下的 value <em>看起来像在 [-1,1] 区间评分</em>时，才把它当 sentiment 处理。</p>
+      <p>否则当作 profile 上的"参数分布"展示，不入 credit。</p>
+    </div>
+  </div>
+
+  <h3>整体管线</h3>
+
+  <div class="flow">
+    <div class="flow-row">
+      <div class="flow-step">
+        <span class="step-num">IN</span>
+        <code>NewFeedback</code> 事件 + reviewer 行为
+      </div>
+    </div>
+    <div class="flow-arrow">▼</div>
+    <div class="flow-row">
+      <div class="flow-step">
+        <span class="step-num">①</span>
+        每条 feedback 算 <code>w = reviewer_weight × time_decay × dedupe_factor</code>
+      </div>
+    </div>
+    <div class="flow-arrow">▼</div>
+    <div class="flow-split">
+      <div class="flow-step layer-a">
+        <span class="step-num" style="background:var(--green)">A</span>
+        <strong>Behavioral 信号</strong>：unique reviewer 加权数 / 撤销率 / client 分散度 / cross-tag breadth
+      </div>
+      <div class="flow-step layer-b">
+        <span class="step-num" style="background:var(--accent-2)">B</span>
+        <strong>Sentiment 检测</strong>：判断 (agent,tag) 的 value 是不是评分。是则归一化加权平均；否则跳过。
+      </div>
+    </div>
+    <div class="flow-arrow">▼</div>
+    <div class="flow-row">
+      <div class="flow-step merge">
+        <span class="step-num" style="background:var(--yellow); color:#0f1115">②</span>
+        Tag-level：<code>tag_score</code> + <code>tag_authority</code>（自适应权重）+ <code>tag_confidence</code>
+      </div>
+    </div>
+    <div class="flow-arrow">▼</div>
+    <div class="flow-row">
+      <div class="flow-step merge">
+        <span class="step-num" style="background:var(--yellow); color:#0f1115">③</span>
+        Agent-level：<code>credit_score = α × A + (1−α) × Σ tag_sentiment × authority</code>
+      </div>
+    </div>
+    <div class="flow-arrow">▼</div>
+    <div class="flow-row">
+      <div class="flow-step">
+        <span class="step-num" style="background:var(--accent)">OUT</span>
+        <code>credit_score ∈ [0,1]</code> + <code>confidence ∈ [0,1]</code> + per-tag breakdown
+      </div>
+    </div>
+  </div>
+
+  <!-- ────── 5. LAYER A ────── -->
+  <h2 id="layer-a">5. Layer A — Behavioral Credit <span class="pill a">value-agnostic</span></h2>
+
+  <p>不看 value 大小、不看 tag 含义，只看"谁、什么时候、对谁、撤没撤"。</p>
+
+  <h3>单条 feedback 权重</h3>
+  <div class="formula">
+    <span class="var">w<sub>i</sub></span> <span class="op">=</span> <span class="var">reviewer_weight</span> <span class="op">×</span> <span class="var">time_decay</span> <span class="op">×</span> <span class="var">dedupe_factor</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>因子</th><th>计算</th><th>说明</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>reviewer_weight</code></td>
+        <td><code>0.3 + 0.7 × min(1, completed_jobs / 20)</code></td>
+        <td>从 <code>commerce_score_global</code> 借力。零历史 → 0.1；已识别 sybil → 0。</td>
+      </tr>
+      <tr>
+        <td><code>time_decay</code></td>
+        <td><code>0.5 ^ ((now − ts) / 180d)</code></td>
+        <td>半衰期 180 天。可调。</td>
+      </tr>
+      <tr>
+        <td><code>dedupe_factor</code></td>
+        <td><code>0.5 ^ (k − 1)</code></td>
+        <td>同 reviewer 对同 (agent,tag) 第 k 次评分的权重。</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p><code>revoked = true</code> 的反馈不进入加权（但 <strong>会被记入 revocation_rate</strong>）。</p>
+
+  <h3>Behavioral Score 公式</h3>
+  <div class="formula">
+    <span class="var">R</span> <span class="op">=</span> Σ <span class="var">w<sub>unique-reviewer</sub></span>  <span class="comment">// 加权后的有效独立评审人数</span><br>
+    <span class="var">revocation_rate</span> <span class="op">=</span> revoked_count <span class="op">/</span> total_count<br>
+    <span class="var">diversity</span> <span class="op">=</span> 1 <span class="op">−</span> HHI(reviewer_volume)  <span class="comment">// 0~1，越分散越接近 1</span><br>
+    <br>
+    <span class="var">A</span> <span class="op">=</span> σ(<span class="var">log</span>(1<span class="op">+</span><span class="var">R</span>)) <span class="op">×</span> (1<span class="op">−</span><span class="var">revocation_rate</span>) <span class="op">×</span> <span class="var">diversity</span>
+  </div>
+
+  <p>
+    <code>σ(x) = x / (x + 3)</code>，一个简洁的 saturation。<br>
+    <code>R = 0</code> → <code>A ≈ 0</code>；<code>R = 10</code> → <code>A ≈ 0.78 × …</code>。
+  </p>
+
+  <!-- ────── 6. LAYER B ────── -->
+  <h2 id="layer-b">6. Layer B — Sentiment Credit <span class="pill b">adaptive</span></h2>
+
+  <p>核心创新：<strong>不预注册 tag schema，而是运行时判断这个 (agent, tag) 的 value 是不是评分。</strong></p>
+
+  <h3>Sentiment 自适应检测</h3>
+
+  <div class="callout">
+    <span class="callout-label">触发条件 — 全部满足</span>
+    <p>设该 (agent, tag) 下所有未撤销 feedback 的 value 集合为 <strong>V</strong>，</p>
+    <ul style="margin-top:8px">
+      <li><code>|V| ≥ 3</code> — 至少 3 条样本</li>
+      <li><code>median(|v|) ≤ 1.0</code> — 中位绝对值落在 [-1, 1] 区间</li>
+      <li><code>max(|v|) ≤ 2.0</code> — 没有出现 999 / 12345 这种"参数"</li>
+      <li><code>stddev(V) ≤ 1.0</code> — 离散度合理</li>
+    </ul>
+  </div>
+
+  <p>
+    <strong>人话</strong>：这个 (agent, tag) 下大家都在 [-1, 1] 老老实实打分 → 当 sentiment 处理；<br>
+    有人写延迟毫秒（850） → 这个 tag 自动被排除出 sentiment，进入 profile 原始展示。
+  </p>
+
+  <h3>归一化 + 负面非对称</h3>
+  <div class="formula">
+    <span class="comment">// 已知 v ∈ [-1, 1]</span><br>
+    <span class="var">n<sub>i</sub></span> <span class="op">=</span> clamp((<span class="var">v<sub>i</sub></span> <span class="op">+</span> 1) <span class="op">/</span> 2, 0, 1)  <span class="comment">// 映射到 [0, 1]</span><br>
+    <br>
+    <span class="comment">// 差评轻度放大（不夸张）</span><br>
+    if <span class="var">n<sub>i</sub></span> &lt; 0.4: <span class="var">n<sub>i</sub><sup>eff</sup></span> <span class="op">=</span> 0.4 <span class="op">−</span> (0.4 <span class="op">−</span> <span class="var">n<sub>i</sub></span>) <span class="op">×</span> 1.3<br>
+    else:            <span class="var">n<sub>i</sub><sup>eff</sup></span> <span class="op">=</span> <span class="var">n<sub>i</sub></span>
+  </div>
+
+  <h3>反恶意单 reviewer 上限</h3>
+  <p>
+    单个 reviewer 对同一 agent 的<strong>负贡献累计权重上限 ≤ 0.15</strong>，
+    防止单一恶意账号搞垮某个 agent。
+  </p>
+
+  <h3>Tag-level Sentiment 分数</h3>
+  <div class="formula">
+    <span class="var">tag_sentiment</span> <span class="op">=</span> Σ(<span class="var">n<sub>i</sub><sup>eff</sup></span> <span class="op">×</span> <span class="var">w<sub>i</sub></span>) <span class="op">/</span> Σ(<span class="var">w<sub>i</sub></span>)<br>
+    <span class="var">tag_confidence</span> <span class="op">=</span> min(1, Σ <span class="var">w<sub>unique-reviewer</sub></span> <span class="op">/</span> 10)
+  </div>
+
+  <!-- ────── 7. AUTHORITY ────── -->
+  <h2 id="authority">7. Tag Authority — 自适应权重</h2>
+
+  <p>
+    既然不能预注册 tag，那么每个 tag 在综合分里的<strong>权重不是预设的，是从数据本身推出来的</strong>。
+  </p>
+
+  <div class="formula">
+    <span class="var">tag_authority</span> <span class="op">=</span> <span class="var">log</span>(1 <span class="op">+</span> <span class="var">unique_reviewer_count</span>)<br>
+    <span class="op">×</span> min(1, <span class="var">time_active_days</span> <span class="op">/</span> 30)<br>
+    <span class="op">×</span> (1 <span class="op">−</span> <span class="var">newcomer_dominance</span>)
+  </div>
+
+  <div class="callout good">
+    <span class="callout-label">直觉</span>
+    <p>
+      <strong>多人评、评了一段时间、不是新号刷出来</strong> 的 tag，自动在综合分里占更高权重。<br>
+      一个被 1 个人在 <code>i_love_this</code> 上刷了 100 条的 tag → 极低 authority → 不 dominate 综合分。
+    </p>
+  </div>
+
+  <table>
+    <thead><tr><th>因子</th><th>含义</th></tr></thead>
+    <tbody>
+      <tr><td><code>log(1 + unique_reviewer_count)</code></td><td>独立评分人数越多，tag 越可信。log 防爆炸。</td></tr>
+      <tr><td><code>time_active_days / 30</code></td><td>30 天内才出现的新 tag 权重打折，防止短期刷量。</td></tr>
+      <tr><td><code>1 − newcomer_dominance</code></td><td>"newcomer reviewer 占比"，过高则 authority 大幅下降。</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ────── 8. FUSION ────── -->
+  <h2 id="fusion">8. 最终融合</h2>
+
+  <h3>Sentiment 综合（跨 tag）</h3>
+  <div class="formula">
+    <span class="var">B</span> <span class="op">=</span> <strong>Σ</strong> <span class="var">tag_sentiment<sub>i</sub></span> <span class="op">×</span> <span class="var">tag_authority<sub>i</sub></span> <span class="op">×</span> <span class="var">tag_confidence<sub>i</sub></span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="op">/</span> <strong>Σ</strong> <span class="var">tag_authority<sub>i</sub></span> <span class="op">×</span> <span class="var">tag_confidence<sub>i</sub></span>
+  </div>
+
+  <h3>最终 credit_score</h3>
+  <div class="formula">
+    <span class="var">credit_score</span> <span class="op">=</span> <span class="var">α</span> <span class="op">×</span> <span class="var">A</span> <span class="op">+</span> (1 <span class="op">−</span> <span class="var">α</span>) <span class="op">×</span> <span class="var">B</span>
+  </div>
+
+  <table>
+    <thead><tr><th>场景</th><th>α</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>有 sentiment-eligible tag</td><td><strong>0.4</strong></td><td>情感为主，行为兜底。</td></tr>
+      <tr><td>完全没有 sentiment tag</td><td><strong>1.0</strong></td><td>退化为纯行为信号。</td></tr>
+      <tr><td>新 agent / 反馈极少（R &lt; 1）</td><td><code>credit_score = NULL</code></td><td>不出分，让消费方决定 fallback。</td></tr>
+    </tbody>
+  </table>
+
+  <h3>overall confidence</h3>
+  <div class="formula">
+    <span class="var">confidence</span> <span class="op">=</span> clamp(Σ <span class="var">w<sub>unique-reviewer</sub></span> <span class="op">/</span> 10, 0, 1)
+  </div>
+
+  <!-- ────── 9. SCHEMA ────── -->
+  <h2 id="schema">9. 数据模型</h2>
+
+  <div class="callout warn">
+    <span class="callout-label">范围</span>
+    <p>本节只给<strong>表结构概念</strong>，不写 migration SQL。具体 DDL 与触发器/任务实现见后续 exec-plan。</p>
+  </div>
+
+  <h3><code>feedback_tag_scores_v2</code> — 每 (agent, tag) 一行</h3>
+  <table>
+    <thead><tr><th>字段</th><th>类型</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><code>agent_uid</code></td><td>bigint</td><td>PK 之一</td></tr>
+      <tr><td><code>tag</code></td><td>varchar</td><td>PK 之一（即 tag1）</td></tr>
+      <tr><td><code>is_sentiment</code></td><td>bool</td><td>自适应判定结果</td></tr>
+      <tr><td><code>sentiment_score</code></td><td>numeric(6,4)</td><td>0~1；<code>is_sentiment=false</code> 时 NULL</td></tr>
+      <tr><td><code>authority</code></td><td>numeric(6,4)</td><td>自适应权重 0~1</td></tr>
+      <tr><td><code>confidence</code></td><td>numeric(4,2)</td><td>0~1</td></tr>
+      <tr><td><code>value_min / p50 / p95 / max</code></td><td>numeric(36,8)</td><td>value 原始分布（供 profile 展示）</td></tr>
+      <tr><td><code>feedback_count</code></td><td>bigint</td><td>原始条数（含撤销）</td></tr>
+      <tr><td><code>unique_reviewer_count</code></td><td>bigint</td><td>独立 reviewer 数</td></tr>
+      <tr><td><code>effective_n</code></td><td>numeric(36,8)</td><td>加权后的有效样本量</td></tr>
+      <tr><td><code>revoked_count</code></td><td>bigint</td><td>用于 revocation_rate</td></tr>
+      <tr><td><code>last_updated</code></td><td>bigint</td><td>on-chain timestamp</td></tr>
+    </tbody>
+  </table>
+
+  <h3><code>feedback_credit_scores</code> — 每个 agent 一行</h3>
+  <table>
+    <thead><tr><th>字段</th><th>类型</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><code>agent_uid</code></td><td>bigint PK</td><td></td></tr>
+      <tr><td><code>behavioral_score</code></td><td>numeric(6,4)</td><td>Layer A，永远有</td></tr>
+      <tr><td><code>sentiment_score</code></td><td>numeric(6,4)</td><td>Layer B，可能 NULL</td></tr>
+      <tr><td><code>credit_score</code></td><td>numeric(6,4)</td><td>融合后的最终分；可能 NULL（冷启动）</td></tr>
+      <tr><td><code>confidence</code></td><td>numeric(4,2)</td><td>0~1</td></tr>
+      <tr><td><code>tag_count</code></td><td>int</td><td>覆盖的 tag 数</td></tr>
+      <tr><td><code>sentiment_tag_count</code></td><td>int</td><td>其中识别为 sentiment 的 tag 数</td></tr>
+      <tr><td><code>effective_n</code></td><td>numeric(36,8)</td><td>加权有效样本</td></tr>
+      <tr><td><code>last_updated</code></td><td>bigint</td><td></td></tr>
+    </tbody>
+  </table>
+
+  <h3><code>feedback_reviewer_weights</code> — 评分人权重缓存</h3>
+  <table>
+    <thead><tr><th>字段</th><th>类型</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><code>client_address</code></td><td>varchar PK</td><td></td></tr>
+      <tr><td><code>weight</code></td><td>numeric(4,2)</td><td>0~1</td></tr>
+      <tr><td><code>source</code></td><td>varchar(32)</td><td><code>'commerce'</code> / <code>'identity'</code> / <code>'default'</code></td></tr>
+      <tr><td><code>last_computed</code></td><td>bigint</td><td>过期则重算</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    <strong>注意</strong>：旧的 <code>feedback_tag_scores</code> 表暂时保留不动，<code>_v2</code> 并行写入。
+    切换在迁移阶段决定。
+  </p>
+
+  <!-- ────── 10. DECISIONS ────── -->
+  <h2 id="decisions">10. 已决策事项</h2>
+
+  <ol class="decision-list">
+    <li>
+      <b>用途：链上消费</b>
+      <span class="ans">→ 严格 [0,1] + confidence，所有公式都要可链上低开销复算，并保证 monotonic</span>
+    </li>
+    <li>
+      <b>粒度：per-tag + 综合分都要</b>
+      <span class="ans">→ 数据模型分两张表：<code>feedback_tag_scores_v2</code> + <code>feedback_credit_scores</code></span>
+    </li>
+    <li>
+      <b>反作弊：中等强度</b>
+      <span class="ans">→ reviewer_weight + dedupe + time_decay + tag_authority + Layer A 撤销率</span>
+    </li>
+    <li>
+      <b>负面非对称：要，但不夸张</b>
+      <span class="ans">→ 差评轻放大 1.3 倍 + 单 reviewer 负贡献上限 0.15</span>
+    </li>
+    <li>
+      <b>标度：和 commerce 一致</b>
+      <span class="ans">→ <code>numeric(6,4)</code> 范围 [0,1]，<code>confidence numeric(4,2)</code></span>
+    </li>
+    <li>
+      <b>tag schema：不能注册</b>
+      <span class="ans">→ 完全自适应：sentiment 检测 + tag_authority 都从数据推</span>
+    </li>
+    <li>
+      <b>未识别为 sentiment 的 tag</b>
+      <span class="ans">→ 仅 profile 展示 value 原始分布（min/p50/p95/max），不入 credit</span>
+    </li>
+    <li>
+      <b>reviewer_weight 数据源</b>
+      <span class="ans">→ 起步只用 <code>commerce_score_global</code> + identity 持有，避开 feedback→feedback 的递归依赖</span>
+    </li>
+    <li>
+      <b>时间衰减半衰期</b>
+      <span class="ans">→ 180 天起步，agent bank 接入时可调到 90 天</span>
+    </li>
+    <li>
+      <b>冷启动策略</b>
+      <span class="ans">→ <code>credit_score = NULL</code>，由消费方决定 fallback（不强制给 0.5 "中性"）</span>
+    </li>
+    <li>
+      <b>α 策略</b>
+      <span class="ans">→ 有 sentiment tag 时 0.4；没有时退化为 1.0（纯行为信号）</span>
+    </li>
+    <li>
+      <b>revocation 处理</b>
+      <span class="ans">→ 不进 Layer B 计算；但计入 Layer A 的 revocation_rate（影响 behavioral）</span>
+    </li>
+  </ol>
+
+  <!-- ────── 11. PHASES ────── -->
+  <h2 id="phases">11. 实现节奏</h2>
+
+  <div class="phases">
+    <div class="phase">
+      <div class="ph-num">PHASE 1</div>
+      <div class="ph-name">骨架</div>
+      <div class="ph-desc">两张新表 + Layer A 计算 + 离线批跑作业</div>
+    </div>
+    <div class="phase">
+      <div class="ph-num">PHASE 2</div>
+      <div class="ph-name">Sentiment</div>
+      <div class="ph-desc">自适应检测 + Layer B + 负面非对称</div>
+    </div>
+    <div class="phase">
+      <div class="ph-num">PHASE 3</div>
+      <div class="ph-name">Authority</div>
+      <div class="ph-desc">tag_authority 自适应权重 + 综合 credit_score</div>
+    </div>
+    <div class="phase">
+      <div class="ph-num">PHASE 4</div>
+      <div class="ph-name">集成</div>
+      <div class="ph-desc">Profile / Agent Bank 接入 + API 暴露</div>
+    </div>
+  </div>
+
+  <!-- ────── 12. API ────── -->
+  <h2 id="api">12. 对外消费接口（概念）</h2>
+
+  <p>本节仅描述<strong>输出契约</strong>，具体 HTTP 路由 / 链上读取方式留到 spec。</p>
+
+  <pre>GET /agent/feedback/credit?uid=...
+
+{
+  "agent_uid": 467,
+  "credit_score": 0.7234,            // [0,1] | null
+  "confidence": 0.62,                 // [0,1]
+  "behavioral_score": 0.81,
+  "sentiment_score": 0.65,
+  "alpha": 0.4,
+  "tag_count": 7,
+  "sentiment_tag_count": 4,
+  "effective_n": 18.3,
+  "last_updated": 1778481371,
+  "tags": [
+    {
+      "tag": "accuracy",
+      "is_sentiment": true,
+      "sentiment_score": 0.78,
+      "authority": 0.91,
+      "confidence": 0.82,
+      "feedback_count": 24,
+      "unique_reviewer_count": 11
+    },
+    {
+      "tag": "latency_ms",
+      "is_sentiment": false,
+      "value_distribution": { "p50": 320, "p95": 850, "max": 1200 },
+      "feedback_count": 18,
+      "unique_reviewer_count": 8
+    }
+  ]
+}</pre>
+
+  <hr>
+
+  <div style="text-align:center; color:var(--text-mute); font-size:13px; margin-top:24px">
+    End of design doc · 下一步：spec → exec-plan → migration & indexer 改造
+  </div>
+
+</div>
+</body>
+</html>
