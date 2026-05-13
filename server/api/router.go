@@ -56,6 +56,9 @@ func Run(_cors []string, port string) {
 	r.GET("agent/identity/detail/feedbacks", handle.GetAgentFeedbacksHandler)
 	r.POST("agent/identity/set/feedback", handle.UploadFeedbackHandler)
 
+	// ERC-8004 Feedback Credit Score (design: docs/designs/202605120000_feedback-credit-score.html)
+	r.GET("agent/feedback/credit", handle.GetFeedbackCreditHandler)
+
 	r.GET("agent/identity/commerce/scores", handle.GetCommerceScoresHandler)
 	r.GET("agent/identity/commerce/actions", handle.GetCommerceActionsHandler)
 	r.GET("agent/identity/commerce/stats", handle.GetCommerceStatsHandler)

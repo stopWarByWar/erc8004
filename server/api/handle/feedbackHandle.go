@@ -60,6 +60,31 @@ func GetAgentFeedbacksHandler(c *gin.Context) {
 
 }
 
+// GetFeedbackCreditHandler responds to GET /agent/feedback/credit?uid=...
+//
+// On success: returns the orchestrator response under "credit" inside the
+// standard success envelope. On cold-start, credit_score is JSON null.
+func GetFeedbackCreditHandler(c *gin.Context) {
+	uidStr := c.Query("uid")
+	if uidStr == "" {
+		serverUtils.ErrResp(nil, "fail to get agent uid (missing)", "Invalid Request", c)
+		return
+	}
+	agentUID, err := strconv.ParseUint(uidStr, 10, 64)
+	if err != nil {
+		serverUtils.ErrResp(nil, "fail to parse agent uid", "Invalid Request", c)
+		return
+	}
+
+	credit, err := serverLogic.GetFeedbackCredit(agentUID)
+	if err != nil {
+		serverUtils.ErrResp(logrus.Fields{"error": err, "uid": agentUID},
+			"fail to compute feedback credit", "Internal Error", c)
+		return
+	}
+	serverUtils.SuccessResp(gin.H{"credit": credit}, c)
+}
+
 func GetFeedbackScoresHandler(c *gin.Context) {
 	agentUID, err := strconv.ParseUint(c.Query("uid"), 10, 64)
 	if err != nil {
