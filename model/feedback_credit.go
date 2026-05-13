@@ -92,3 +92,53 @@ func UpsertReviewerWeight(row *FeedbackReviewerWeight) error {
 		}),
 	}).Create(row).Error
 }
+
+// ─── feedback iteration for credit computation ────────────────────────────
+
+// GetActiveFeedbacksForCredit returns all non-revoked feedbacks for an agent,
+// ordered by (tag1, timestamps ASC). Returned rows include only the fields
+// needed by the credit-score orchestrator; large columns like FeedbackURI
+// are still loaded by GORM but unused.
+func GetActiveFeedbacksForCredit(agentUID uint64) ([]Feedback, error) {
+	var rows []Feedback
+	err := db.
+		Where("agent_uid = ? AND revoked = ? AND tag1 IS NOT NULL AND tag1 <> ''", agentUID, false).
+		Order("tag1 ASC, timestamps ASC, uid ASC").
+		Find(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+	return rows, nil
+}
+
+// ─── test helpers (exported only for use by *_test.go in other packages) ──
+
+// DeleteFeedbacksForTest removes all feedback + v2 score data for a test
+// agent_uid. Test-only helper; do not call from production code.
+func DeleteFeedbacksForTest(agentUID uint64) error {
+	if err := db.Where("agent_uid = ?", agentUID).Delete(&Feedback{}).Error; err != nil {
+		return err
+	}
+	if err := db.Exec("DELETE FROM feedback_tag_scores_v2 WHERE agent_uid = ?", agentUID).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteFeedbackCreditScoreForTest clears the credit cache for an agent.
+func DeleteFeedbackCreditScoreForTest(agentUID uint64) error {
+	return db.Exec("DELETE FROM feedback_credit_scores WHERE agent_uid = ?", agentUID).Error
+}
+
+// RevokeFeedbackForTest marks all feedback rows for (agent_uid, client_address)
+// as revoked. Test-only helper.
+func RevokeFeedbackForTest(agentUID uint64, clientAddress string) error {
+	return db.Model(&Feedback{}).
+		Where("agent_uid = ? AND client_address = ?", agentUID, clientAddress).
+		Update("revoked", true).Error
+}
+
+// DeleteReviewerWeightForTest removes a single reviewer weight cache row.
+func DeleteReviewerWeightForTest(clientAddress string) error {
+	return db.Exec("DELETE FROM feedback_reviewer_weights WHERE client_address = ?", clientAddress).Error
+}
