@@ -1,0 +1,211 @@
+-- ERC-8004 Feedback Credit Score tables (v1)
+-- Design: docs/designs/202605120000_feedback-credit-score.html
+--
+-- Approach: triggers maintain ONLY time-invariant raw aggregates per (agent, tag).
+-- Time-dependent math (time_decay, sentiment-detection, authority, credit_score)
+-- is computed on demand in the Go logic layer (server/api/logic/feedbackCreditLogic.go)
+-- to avoid score drift between inserts.
+--
+-- Tables:
+--   feedback_tag_scores_v2       — per (agent_uid, tag1) raw stats
+--   feedback_credit_scores       — per agent_uid rolled-up cache (Go-populated, may be empty)
+--   feedback_reviewer_weights    — per client_address weight cache (Go-populated, may be empty)
+
+DROP TABLE IF EXISTS feedback_tag_scores_v2 CASCADE;
+DROP TABLE IF EXISTS feedback_credit_scores CASCADE;
+DROP TABLE IF EXISTS feedback_reviewer_weights CASCADE;
+
+-- ═════════════════════ feedback_tag_scores_v2 ═════════════════════
+
+CREATE TABLE feedback_tag_scores_v2 (
+  agent_uid              bigint        NOT NULL,
+  tag                    varchar(255)  NOT NULL,
+
+  -- Raw counts (maintained by trigger; time-invariant)
+  feedback_count         bigint        NOT NULL DEFAULT 0,  -- total inserts (active + revoked)
+  active_count           bigint        NOT NULL DEFAULT 0,  -- feedback_count - revoked_count
+  revoked_count          bigint        NOT NULL DEFAULT 0,
+  unique_reviewer_count  bigint        NOT NULL DEFAULT 0,  -- distinct active reviewer addresses
+
+  -- Value distribution (active only; recomputed by trigger on every change)
+  value_min              numeric(36,8),
+  value_p50              numeric(36,8),
+  value_p95              numeric(36,8),
+  value_max              numeric(36,8),
+
+  -- Time bounds (on-chain block_timestamps; help compute time_active_days in Go)
+  first_active_ts        bigint,
+  last_active_ts         bigint,
+
+  last_updated           bigint        NOT NULL,  -- on-chain timestamp of trigger fire
+
+  PRIMARY KEY (agent_uid, tag)
+);
+
+CREATE INDEX idx_fts_v2_agent ON feedback_tag_scores_v2(agent_uid);
+CREATE INDEX idx_fts_v2_tag ON feedback_tag_scores_v2(tag);
+CREATE INDEX idx_fts_v2_active_count ON feedback_tag_scores_v2(active_count);
+
+-- ═════════════════════ feedback_credit_scores ═════════════════════
+-- Cache table; Go logic layer populates on read or on a separate refresh job.
+
+CREATE TABLE feedback_credit_scores (
+  agent_uid              bigint        PRIMARY KEY,
+  behavioral_score       numeric(6,4),
+  sentiment_score        numeric(6,4),
+  credit_score           numeric(6,4),
+  alpha                  numeric(4,2),
+  confidence             numeric(4,2),
+  tag_count              integer       NOT NULL DEFAULT 0,
+  sentiment_tag_count    integer       NOT NULL DEFAULT 0,
+  effective_n            numeric(36,8),
+  last_computed_at       bigint,        -- unix timestamp (wall clock) at compute time
+  last_updated           bigint         -- on-chain timestamp of last underlying feedback
+);
+
+CREATE INDEX idx_fcs_credit_score ON feedback_credit_scores(credit_score);
+
+-- ═════════════════════ feedback_reviewer_weights ═════════════════════
+-- Cache table; Go logic layer populates from commerce_scores_global.
+
+CREATE TABLE feedback_reviewer_weights (
+  client_address         varchar(255)  PRIMARY KEY,
+  weight                 numeric(4,2)  NOT NULL DEFAULT 0.1,
+  source                 varchar(32)   NOT NULL DEFAULT 'default',  -- 'commerce' | 'identity' | 'default'
+  last_computed          bigint        NOT NULL                     -- unix timestamp at compute
+);
+
+-- ═════════════════════ Helper SQL function: recompute one (agent, tag) row ═════════════════════
+--
+-- This function reads from `feedbacks` and overwrites the corresponding row in
+-- feedback_tag_scores_v2. It is intentionally idempotent so we can call it from
+-- both INSERT and UPDATE (revoke) triggers, and from a manual SQL backfill.
+--
+-- Note: percentile_cont over a small set is fine. For agents with thousands of
+-- feedbacks per tag we may revisit; v1 prioritizes correctness over perf.
+
+CREATE OR REPLACE FUNCTION fc_refresh_tag_stats(p_agent_uid bigint, p_tag varchar)
+RETURNS void AS $$
+DECLARE
+  v_feedback_count        bigint;
+  v_active_count          bigint;
+  v_revoked_count         bigint;
+  v_unique_reviewer_count bigint;
+  v_value_min             numeric(36,8);
+  v_value_p50             numeric(36,8);
+  v_value_p95             numeric(36,8);
+  v_value_max             numeric(36,8);
+  v_first_active_ts       bigint;
+  v_last_active_ts        bigint;
+  v_now_ts                bigint;
+BEGIN
+  IF p_tag IS NULL OR p_tag = '' THEN
+    RETURN;
+  END IF;
+
+  v_now_ts := EXTRACT(EPOCH FROM NOW())::bigint;
+
+  -- Total counts (incl. revoked)
+  SELECT
+    COUNT(*),
+    COUNT(*) FILTER (WHERE revoked = false),
+    COUNT(*) FILTER (WHERE revoked = true)
+  INTO
+    v_feedback_count,
+    v_active_count,
+    v_revoked_count
+  FROM feedbacks
+  WHERE agent_uid = p_agent_uid AND tag1 = p_tag;
+
+  -- Active-only aggregates
+  SELECT
+    COUNT(DISTINCT client_address),
+    MIN(format_value),
+    PERCENTILE_CONT(0.5)  WITHIN GROUP (ORDER BY format_value),
+    PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY format_value),
+    MAX(format_value),
+    MIN(timestamps),
+    MAX(timestamps)
+  INTO
+    v_unique_reviewer_count,
+    v_value_min,
+    v_value_p50,
+    v_value_p95,
+    v_value_max,
+    v_first_active_ts,
+    v_last_active_ts
+  FROM feedbacks
+  WHERE agent_uid = p_agent_uid AND tag1 = p_tag AND revoked = false AND format_value IS NOT NULL;
+
+  -- If nothing left active and nothing ever existed, delete the row
+  IF v_feedback_count = 0 THEN
+    DELETE FROM feedback_tag_scores_v2
+    WHERE agent_uid = p_agent_uid AND tag = p_tag;
+    RETURN;
+  END IF;
+
+  INSERT INTO feedback_tag_scores_v2 (
+    agent_uid, tag,
+    feedback_count, active_count, revoked_count, unique_reviewer_count,
+    value_min, value_p50, value_p95, value_max,
+    first_active_ts, last_active_ts,
+    last_updated
+  ) VALUES (
+    p_agent_uid, p_tag,
+    v_feedback_count, v_active_count, v_revoked_count, COALESCE(v_unique_reviewer_count, 0),
+    v_value_min, v_value_p50, v_value_p95, v_value_max,
+    v_first_active_ts, v_last_active_ts,
+    v_now_ts
+  )
+  ON CONFLICT (agent_uid, tag) DO UPDATE SET
+    feedback_count        = EXCLUDED.feedback_count,
+    active_count          = EXCLUDED.active_count,
+    revoked_count         = EXCLUDED.revoked_count,
+    unique_reviewer_count = EXCLUDED.unique_reviewer_count,
+    value_min             = EXCLUDED.value_min,
+    value_p50             = EXCLUDED.value_p50,
+    value_p95             = EXCLUDED.value_p95,
+    value_max             = EXCLUDED.value_max,
+    first_active_ts       = EXCLUDED.first_active_ts,
+    last_active_ts        = EXCLUDED.last_active_ts,
+    last_updated          = EXCLUDED.last_updated;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ═════════════════════ Trigger functions ═════════════════════
+
+CREATE OR REPLACE FUNCTION fc_on_feedback_insert() RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.tag1 IS NULL OR NEW.tag1 = '' THEN
+    RETURN NEW;
+  END IF;
+  PERFORM fc_refresh_tag_stats(NEW.agent_uid, NEW.tag1);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION fc_on_feedback_revoke() RETURNS TRIGGER AS $$
+BEGIN
+  -- Only react when revoked flips false -> true
+  IF OLD.revoked IS DISTINCT FROM TRUE AND NEW.revoked = TRUE THEN
+    IF NEW.tag1 IS NOT NULL AND NEW.tag1 <> '' THEN
+      PERFORM fc_refresh_tag_stats(NEW.agent_uid, NEW.tag1);
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ═════════════════════ Triggers ═════════════════════
+
+DROP TRIGGER IF EXISTS feedback_credit_insert_trigger ON feedbacks;
+CREATE TRIGGER feedback_credit_insert_trigger
+  AFTER INSERT ON feedbacks
+  FOR EACH ROW
+  EXECUTE FUNCTION fc_on_feedback_insert();
+
+DROP TRIGGER IF EXISTS feedback_credit_revoke_trigger ON feedbacks;
+CREATE TRIGGER feedback_credit_revoke_trigger
+  AFTER UPDATE ON feedbacks
+  FOR EACH ROW
+  EXECUTE FUNCTION fc_on_feedback_revoke();

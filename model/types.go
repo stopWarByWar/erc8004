@@ -264,6 +264,61 @@ type FeedbackTagScore struct {
 
 func (FeedbackTagScore) TableName() string { return "feedback_tag_scores" }
 
+// ─────────────── ERC-8004 Feedback Credit Score (v2) ───────────────
+//
+// Design: docs/designs/202605120000_feedback-credit-score.html
+// Migration: migrations/202605120000_feedback_credit_score.psql
+//
+// Triggers maintain only raw, time-invariant aggregates here. Sentiment /
+// authority / credit math is computed on demand in server/api/logic.
+
+type FeedbackTagScoreV2 struct {
+	AgentUID            uint64   `gorm:"column:agent_uid;type:bigint;primaryKey"`
+	Tag                 string   `gorm:"column:tag;type:varchar(255);primaryKey"`
+	FeedbackCount       uint64   `gorm:"column:feedback_count;type:bigint;not null;default:0"`
+	ActiveCount         uint64   `gorm:"column:active_count;type:bigint;not null;default:0"`
+	RevokedCount        uint64   `gorm:"column:revoked_count;type:bigint;not null;default:0"`
+	UniqueReviewerCount uint64   `gorm:"column:unique_reviewer_count;type:bigint;not null;default:0"`
+	ValueMin            *float64 `gorm:"column:value_min;type:numeric(36,8)"`
+	ValueP50            *float64 `gorm:"column:value_p50;type:numeric(36,8)"`
+	ValueP95            *float64 `gorm:"column:value_p95;type:numeric(36,8)"`
+	ValueMax            *float64 `gorm:"column:value_max;type:numeric(36,8)"`
+	FirstActiveTs       uint64   `gorm:"column:first_active_ts;type:bigint"`
+	LastActiveTs        uint64   `gorm:"column:last_active_ts;type:bigint"`
+	LastUpdated         uint64   `gorm:"column:last_updated;type:bigint;not null"`
+}
+
+func (FeedbackTagScoreV2) TableName() string { return "feedback_tag_scores_v2" }
+
+// FeedbackCreditScore is the per-agent rolled-up credit cache. Populated by
+// the Go logic layer (either on read or by a periodic refresh job).
+type FeedbackCreditScore struct {
+	AgentUID          uint64   `gorm:"column:agent_uid;type:bigint;primaryKey"`
+	BehavioralScore   *float64 `gorm:"column:behavioral_score;type:numeric(6,4)"`
+	SentimentScore    *float64 `gorm:"column:sentiment_score;type:numeric(6,4)"`
+	CreditScore       *float64 `gorm:"column:credit_score;type:numeric(6,4)"`
+	Alpha             *float64 `gorm:"column:alpha;type:numeric(4,2)"`
+	Confidence        *float64 `gorm:"column:confidence;type:numeric(4,2)"`
+	TagCount          int      `gorm:"column:tag_count;type:integer;not null;default:0"`
+	SentimentTagCount int      `gorm:"column:sentiment_tag_count;type:integer;not null;default:0"`
+	EffectiveN        *float64 `gorm:"column:effective_n;type:numeric(36,8)"`
+	LastComputedAt    *int64   `gorm:"column:last_computed_at;type:bigint"`
+	LastUpdated       *int64   `gorm:"column:last_updated;type:bigint"`
+}
+
+func (FeedbackCreditScore) TableName() string { return "feedback_credit_scores" }
+
+// FeedbackReviewerWeight caches per-reviewer credibility weight derived from
+// commerce_scores_global and (later) identity ownership.
+type FeedbackReviewerWeight struct {
+	ClientAddress string  `gorm:"column:client_address;type:varchar(255);primaryKey"`
+	Weight        float64 `gorm:"column:weight;type:numeric(4,2);not null;default:0.1"`
+	Source        string  `gorm:"column:source;type:varchar(32);not null;default:'default'"`
+	LastComputed  int64   `gorm:"column:last_computed;type:bigint;not null"`
+}
+
+func (FeedbackReviewerWeight) TableName() string { return "feedback_reviewer_weights" }
+
 // ─────────────── ERC-8183 Commerce Reputation ───────────────
 
 type CommerceAction struct {
