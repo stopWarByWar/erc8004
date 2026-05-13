@@ -151,7 +151,7 @@ func TestCommerceHandlers_MockMode_HeaderAndShape(t *testing.T) {
 		{"/agent/commerce/jobs/general", []string{`"summary"`, `"distributions"`, `"chain_contracts"`, `"erc8183_contracts"`}},
 		{"/agent/commerce/jobs/charts", []string{`"charts"`, `"activity"`, `"volume"`, `"paid_volume_usd_over_time"`, `"value_usd"`, `"drilldown"`, `"chain_contracts"`, `"erc8183_contracts"`}},
 		{"/agent/commerce/jobs/actions?chain_id=1&commerce_contract=0x1111111111111111111111111111111111111111&job_id=10001&page=1&page_size=5", []string{`"actions"`, `"total"`}},
-		{"/agent/commerce/jobs/filters", []string{`"filters"`, `"chains"`, `"commerce_contracts"`, `"payment_tokens"`, `"last_updated"`}},
+		{"/agent/commerce/jobs/filters", []string{`"filters"`, `"chains"`, `"commerce_contracts"`, `"payment_tokens"`, `"last_updated"`, `"contract"`}},
 	}
 
 	for _, tc := range cases {

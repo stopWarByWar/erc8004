@@ -21,7 +21,9 @@ func TestJobsFiltersCache_OnDemandBuildOnce(t *testing.T) {
 				{ChainID: "1", ChainName: "Ethereum"},
 			},
 			CommerceContracts: []string{"0xabc"},
-			PaymentTokens:     []string{"0xdef"},
+			PaymentTokens: []types.CommerceJobsFilterPaymentToken{
+				{ChainID: "1", Contract: "0xdef"},
+			},
 			LastUpdated:       123,
 		}, nil
 	}

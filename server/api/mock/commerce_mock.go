@@ -785,9 +785,19 @@ func CommerceJobsFilters() types.CommerceJobsFilters {
 			"0x1111111111111111111111111111111111111111",
 			"0x2222222222222222222222222222222222222222",
 		},
-		PaymentTokens: []string{
-			"0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", // USDC (example)
-			"0x0000000000000000000000000000000000000000", // native placeholder
+		PaymentTokens: []types.CommerceJobsFilterPaymentToken{
+			{
+				ChainID:    "8453",
+				ChainLogo:  baseLogo,
+				Symbol:     "USDC",
+				Contract:   "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+			},
+			{
+				ChainID:    "1",
+				ChainLogo:  ethLogo,
+				Symbol:     "ETH",
+				Contract:   "0x0000000000000000000000000000000000000000",
+			},
 		},
 		LastUpdated: now,
 	}

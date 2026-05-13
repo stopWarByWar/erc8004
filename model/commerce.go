@@ -74,17 +74,37 @@ func GetCommerceJobsDistinctCommerceContracts() ([]string, error) {
 	return contracts, nil
 }
 
-func GetCommerceJobsDistinctPaymentTokens() ([]string, error) {
-	var tokens []string
-	if err := db.Model(&CommerceJob{}).
-		Distinct("payment_token").
-		Where("payment_token <> ''").
-		Pluck("payment_token", &tokens).Error; err != nil {
+// CommerceJobPaymentTokenFacet is one distinct (chain_id, payment_token) row from commerce_jobs
+// with an aggregated token_symbol for filter UI.
+type CommerceJobPaymentTokenFacet struct {
+	ChainID      string `gorm:"column:chain_id"`
+	PaymentToken string `gorm:"column:payment_token"`
+	TokenSymbol  string `gorm:"column:token_symbol"`
+}
+
+// GetCommerceJobsDistinctPaymentTokenFacets returns distinct (chain_id, payment_token) pairs
+// with a deterministic non-empty symbol when any row has token_symbol set.
+func GetCommerceJobsDistinctPaymentTokenFacets() ([]CommerceJobPaymentTokenFacet, error) {
+	var rows []CommerceJobPaymentTokenFacet
+	err := db.Model(&CommerceJob{}).
+		Select("chain_id, payment_token, MAX(NULLIF(TRIM(token_symbol), '')) AS token_symbol").
+		Where("payment_token <> ?", "").
+		Where("chain_id <> ?", "").
+		Group("chain_id, payment_token").
+		Scan(&rows).Error
+	if err != nil {
 		return nil, err
 	}
-	tokens = uniqueNonEmptyStrings(tokens)
-	sort.Strings(tokens)
-	return tokens, nil
+	out := make([]CommerceJobPaymentTokenFacet, 0, len(rows))
+	for _, r := range rows {
+		r.ChainID = strings.TrimSpace(r.ChainID)
+		r.PaymentToken = strings.TrimSpace(r.PaymentToken)
+		if r.ChainID == "" || r.PaymentToken == "" {
+			continue
+		}
+		out = append(out, r)
+	}
+	return out, nil
 }
 
 func uniqueNonEmptyStrings(in []string) []string {

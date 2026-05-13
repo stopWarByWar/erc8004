@@ -70,18 +70,18 @@ type CommerceScore struct {
 
 // PassportResponse is the API response structure for passport/agent summary view.
 type PassportResponse struct {
-	UID           string                    `json:"uid"`
-	Name          string                    `json:"name"`
-	Avatar        string                    `json:"avatar"`
-	ChainID       string                    `json:"chain_id"`
-	ChainName     string                    `json:"chain_name"`
-	ChainLogo     string                    `json:"chain_logo"`
-	CreatedAt     int64                     `json:"created_at"`
-	BasicStats    PassportBasicStats         `json:"basic_stats"`
-	CommerceScore map[string]CommerceScore  `json:"commerce_scores"`
-	Skills        []string                  `json:"skills"`
-	Verification  string                    `json:"verification_level"`
-	ShareURL      string                    `json:"share_url"`
+	UID           string                   `json:"uid"`
+	Name          string                   `json:"name"`
+	Avatar        string                   `json:"avatar"`
+	ChainID       string                   `json:"chain_id"`
+	ChainName     string                   `json:"chain_name"`
+	ChainLogo     string                   `json:"chain_logo"`
+	CreatedAt     int64                    `json:"created_at"`
+	BasicStats    PassportBasicStats       `json:"basic_stats"`
+	CommerceScore map[string]CommerceScore `json:"commerce_scores"`
+	Skills        []string                 `json:"skills"`
+	Verification  string                   `json:"verification_level"`
+	ShareURL      string                   `json:"share_url"`
 }
 
 // PassportBasicStats holds high-level agent statistics.
@@ -486,8 +486,8 @@ type CommerceActionDTO struct {
 }
 
 type CommerceJobDetailEvidence struct {
-	TimelineSource    string             `json:"timeline_source"`
-	EventsTableSource string             `json:"events_table_source"`
+	TimelineSource    string              `json:"timeline_source"`
+	EventsTableSource string              `json:"events_table_source"`
 	SettlementEvents  []CommerceActionDTO `json:"settlement_events"`
 }
 
@@ -506,9 +506,9 @@ type CommerceJobsGeneralSummaryResp struct {
 }
 
 type CommerceJobsGeneralDistributionsResp struct {
-	Token          any                             `json:"token"`
+	Token          any                              `json:"token"`
 	ChainContracts []CommerceJobsChainContractsItem `json:"chain_contracts"`
-	Fees           any                             `json:"fees"`
+	Fees           any                              `json:"fees"`
 }
 
 type CommerceJobsGeneralResp struct {
@@ -527,9 +527,9 @@ type CommerceJobsChainContractItem struct {
 
 // CommerceJobsChainContractsItem groups contract aggregates by chain_id for UI display.
 type CommerceJobsChainContractsItem struct {
-	ChainID          string                       `json:"chain_id"`
-	ChainName        string                       `json:"chain_name,omitempty"`
-	ChainLogo        string                       `json:"chain_logo,omitempty"`
+	ChainID          string                          `json:"chain_id"`
+	ChainName        string                          `json:"chain_name,omitempty"`
+	ChainLogo        string                          `json:"chain_logo,omitempty"`
 	ERC8183Contracts []CommerceJobsChainContractItem `json:"erc8183_contracts"`
 }
 
@@ -545,13 +545,22 @@ type CommerceJobsFilterChain struct {
 	ChainLogo string `json:"chain_logo,omitempty"`
 }
 
+// CommerceJobsFilterPaymentToken is one distinct (chain, payment token) option for Job Browser filters.
+type CommerceJobsFilterPaymentToken struct {
+	ChainID   string `json:"chain_id"`
+	ChainLogo string `json:"chain_logo,omitempty"`
+	Symbol    string `json:"symbol,omitempty"`
+	Logo      string `json:"logo,omitempty"`
+	Contract  string `json:"contract"`
+}
+
 // CommerceJobsFilters holds default filter options for Job Browser.
 // It is returned by GET /agent/commerce/jobs/filters.
 type CommerceJobsFilters struct {
-	Chains            []CommerceJobsFilterChain `json:"chains"`
-	CommerceContracts []string                 `json:"commerce_contracts"`
-	PaymentTokens     []string                 `json:"payment_tokens"`
-	LastUpdated       uint64                   `json:"last_updated"`
+	Chains            []CommerceJobsFilterChain        `json:"chains"`
+	CommerceContracts []string                         `json:"commerce_contracts"`
+	PaymentTokens     []CommerceJobsFilterPaymentToken `json:"payment_tokens"`
+	LastUpdated       uint64                           `json:"last_updated"`
 }
 
 // ─────────────── Commerce Job Actions (Job Detail) ───────────────

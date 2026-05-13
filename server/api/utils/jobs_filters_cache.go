@@ -102,10 +102,29 @@ func buildJobsFilters(ctx context.Context) (*types.CommerceJobsFilters, error) {
 	if err != nil {
 		return nil, fmt.Errorf("distinct commerce_contracts: %w", err)
 	}
-	tokens, err := model.GetCommerceJobsDistinctPaymentTokens()
+	facets, err := model.GetCommerceJobsDistinctPaymentTokenFacets()
 	if err != nil {
-		return nil, fmt.Errorf("distinct payment_tokens: %w", err)
+		return nil, fmt.Errorf("distinct payment_token facets: %w", err)
 	}
+
+	paymentTokens := make([]types.CommerceJobsFilterPaymentToken, 0, len(facets))
+	for _, f := range facets {
+		item := types.CommerceJobsFilterPaymentToken{
+			ChainID:  f.ChainID,
+			Contract: f.PaymentToken,
+			Symbol:   f.TokenSymbol,
+		}
+		if chain, ok := config.GetChainInfo(f.ChainID); ok {
+			item.ChainLogo = chain.ChainLogo
+		}
+		paymentTokens = append(paymentTokens, item)
+	}
+	sort.Slice(paymentTokens, func(i, j int) bool {
+		if paymentTokens[i].ChainID != paymentTokens[j].ChainID {
+			return paymentTokens[i].ChainID < paymentTokens[j].ChainID
+		}
+		return paymentTokens[i].Contract < paymentTokens[j].Contract
+	})
 
 	chains := make([]types.CommerceJobsFilterChain, 0, len(chainIDs))
 	for _, id := range chainIDs {
@@ -121,7 +140,7 @@ func buildJobsFilters(ctx context.Context) (*types.CommerceJobsFilters, error) {
 	return &types.CommerceJobsFilters{
 		Chains:            chains,
 		CommerceContracts: contracts,
-		PaymentTokens:     tokens,
+		PaymentTokens:     paymentTokens,
 		LastUpdated:       uint64(time.Now().Unix()),
 	}, nil
 }
