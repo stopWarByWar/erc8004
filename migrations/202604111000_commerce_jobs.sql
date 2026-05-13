@@ -1,7 +1,10 @@
 -- migrations/202604111000_commerce_jobs.sql
 -- Commerce Jobs 表：存储所有 Job 的实时状态快照
+--
+-- Idempotent rerun: every CREATE uses IF NOT EXISTS so this migration can be
+-- replayed safely on an existing DB without dropping data.
 
-CREATE TABLE commerce_jobs (
+CREATE TABLE IF NOT EXISTS commerce_jobs (
     uid bigserial PRIMARY KEY,
     chain_id varchar(255) NOT NULL,
     commerce_contract varchar(255) NOT NULL,
@@ -27,8 +30,8 @@ CREATE TABLE commerce_jobs (
     CONSTRAINT uniq_commerce_job UNIQUE (chain_id, commerce_contract, job_id)
 );
 
-CREATE INDEX idx_cj_chain_contract ON commerce_jobs(chain_id, commerce_contract);
-CREATE INDEX idx_cj_client ON commerce_jobs(client);
-CREATE INDEX idx_cj_provider ON commerce_jobs(provider);
-CREATE INDEX idx_cj_status ON commerce_jobs(status);
-CREATE INDEX idx_cj_updated ON commerce_jobs(updated_at);
+CREATE INDEX IF NOT EXISTS idx_cj_chain_contract ON commerce_jobs(chain_id, commerce_contract);
+CREATE INDEX IF NOT EXISTS idx_cj_client ON commerce_jobs(client);
+CREATE INDEX IF NOT EXISTS idx_cj_provider ON commerce_jobs(provider);
+CREATE INDEX IF NOT EXISTS idx_cj_status ON commerce_jobs(status);
+CREATE INDEX IF NOT EXISTS idx_cj_updated ON commerce_jobs(updated_at);
