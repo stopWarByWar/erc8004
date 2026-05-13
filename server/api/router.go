@@ -3,6 +3,7 @@ package api
 import (
 	"agent_identity/logger"
 	"agent_identity/server/api/handle"
+	serverLogic "agent_identity/server/api/logic"
 	apiUtils "agent_identity/server/api/utils"
 	"context"
 	"fmt"
@@ -80,5 +81,8 @@ func Run(_cors []string, port string) {
 
 	go apiUtils.UpdateGeneralInfo()
 	apiUtils.StartJobsFiltersCache(context.Background(), 5*time.Minute)
+	// ERC-8004 Feedback Credit Score cache preheater. See
+	// docs/designs/202605120000_feedback-credit-score.html
+	serverLogic.StartFeedbackCreditCron(context.Background(), 5*time.Minute)
 	r.Run(fmt.Sprintf(":%s", port))
 }

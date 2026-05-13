@@ -93,6 +93,25 @@ func UpsertReviewerWeight(row *FeedbackReviewerWeight) error {
 	}).Create(row).Error
 }
 
+// ─── agent enumeration for cron preheater ─────────────────────────────────
+
+// ListAgentUIDsWithFeedback returns the distinct agent_uids that currently
+// have at least one row in feedback_tag_scores_v2 — i.e. agents whose credit
+// score is worth (re)computing. Used by the background refresh cron.
+//
+// Order is ascending agent_uid for deterministic batching across runs.
+func ListAgentUIDsWithFeedback() ([]uint64, error) {
+	var uids []uint64
+	err := db.Model(&FeedbackTagScoreV2{}).
+		Distinct("agent_uid").
+		Order("agent_uid ASC").
+		Pluck("agent_uid", &uids).Error
+	if err != nil {
+		return nil, err
+	}
+	return uids, nil
+}
+
 // ─── feedback iteration for credit computation ────────────────────────────
 
 // GetActiveFeedbacksForCredit returns all non-revoked feedbacks for an agent,

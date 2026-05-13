@@ -357,6 +357,47 @@ func TestFeedbackCredit_ReviewerWeightCache(t *testing.T) {
 	}
 }
 
+// ─── ListAgentUIDsWithFeedback (used by cron preheater) ───────────────────
+
+func TestFeedbackCredit_ListAgentUIDsWithFeedback(t *testing.T) {
+	initFeedbackCreditTest(t)
+	const (
+		a1 = uint64(9000100)
+		a2 = uint64(9000101)
+		a3 = uint64(9000102) // will get no feedback
+	)
+	nukeAgent(t, a1)
+	nukeAgent(t, a2)
+	nukeAgent(t, a3)
+	t.Cleanup(func() {
+		nukeAgent(t, a1)
+		nukeAgent(t, a2)
+		nukeAgent(t, a3)
+	})
+
+	insertFeedback(t, a1, "tag-a", "0xC1", 0.5, 1_700_001_000)
+	insertFeedback(t, a2, "tag-b", "0xC2", 0.6, 1_700_001_001)
+	// a3 has no feedback — must not appear
+
+	uids, err := ListAgentUIDsWithFeedback()
+	if err != nil {
+		t.Fatalf("ListAgentUIDsWithFeedback: %v", err)
+	}
+	found := map[uint64]bool{}
+	for _, u := range uids {
+		found[u] = true
+	}
+	if !found[a1] {
+		t.Errorf("expected a1=%d in result, got %v", a1, uids)
+	}
+	if !found[a2] {
+		t.Errorf("expected a2=%d in result, got %v", a2, uids)
+	}
+	if found[a3] {
+		t.Errorf("a3=%d should NOT appear (no feedback rows)", a3)
+	}
+}
+
 // ─── tiny helpers ─────────────────────────────────────────────────────────
 
 func ptrFloat(f float64) *float64 { return &f }
