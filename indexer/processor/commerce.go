@@ -133,7 +133,7 @@ func (p *CommerceProcessor) Process() {
 }
 
 func (p *CommerceProcessor) process(currentBlockNum int64) {
-	fromBlock := int64(p.execBlock) + 1
+	fromBlock := int64(p.execBlock) // re-fetch execBlock to catch events after last processed index in the same block
 	topics := []common.Hash{
 		JobCreatedTopic, JobFundedTopic, JobSubmittedTopic,
 		JobCompletedTopic, JobRejectedTopic, JobExpiredTopic,

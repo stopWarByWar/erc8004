@@ -142,7 +142,7 @@ func (idx *IdentityProcessor) Process() {
 
 func (idx *IdentityProcessor) process(currentBlockNum int64) {
 	idx.mu.RLock()
-	fromBlock := int64(idx.execBlock) + 1
+	fromBlock := int64(idx.execBlock) // re-fetch execBlock to catch events after last processed index in the same block
 	currentExecBlock := idx.execBlock
 	currentExecIndex := idx.execIndex
 	idx.mu.RUnlock()

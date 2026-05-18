@@ -129,7 +129,7 @@ func (p *ReputationProcessor) Process() {
 }
 
 func (p *ReputationProcessor) process(currentBlockNum int64) {
-	fromBlock := int64(p.execBlock) + 1
+	fromBlock := int64(p.execBlock) // re-fetch execBlock to catch events after last processed index in the same block
 loop:
 	for {
 		toBlock := fromBlock + p.fetchBlockInterval
