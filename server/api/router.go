@@ -79,6 +79,10 @@ func Run(_cors []string, port string) {
 	// Passport / Agent Summary (ERC-8183)
 	r.GET("agent/identity/commerce/passport", handle.GetPassportHandler)
 
+	// Unified agent credits view: identity + Commerce (8183) + Feedback (8004).
+	// Powers the redesigned agent detail page. See dev-doc/agent-credits.html.
+	r.GET("agent/identity/credits", handle.GetAgentCreditsHandler)
+
 	go apiUtils.UpdateGeneralInfo()
 	apiUtils.StartJobsFiltersCache(context.Background(), 5*time.Minute)
 	// ERC-8004 Feedback Credit Score cache preheater. See
