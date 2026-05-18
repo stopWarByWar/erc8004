@@ -94,28 +94,84 @@ func TestReviewerWeight(t *testing.T) {
 	}
 }
 
+// ─── detectScale ────────────────────────────────────────────────────────────
+
+func TestDetectScale(t *testing.T) {
+	tests := []struct {
+		name   string
+		values []float64
+		want   string // expected scale name, "" for nil
+	}{
+		{"empty → nil", []float64{}, ""},
+		{"signed [-1,0,1] → signed_unit", []float64{-1, 0, 1}, "signed_unit"},
+		{"unit cluster {0.4,0.6,0.9} → unit", []float64{0.4, 0.6, 0.9}, "unit"},
+		{"five-star {4,5,5,3} → five_star", []float64{4, 5, 5, 3}, "five_star"},
+		{"ten-point {6,7,8,5,9} → ten_point", []float64{6, 7, 8, 5, 9}, "ten_point"},
+		{"percent {60,70,80,85,75} → percent", []float64{60, 70, 80, 85, 75}, "percent"},
+		{"way out of range {150,200} → nil", []float64{150, 200}, ""},
+		{"unit boundary {0,1} → unit", []float64{0, 1}, "unit"},
+		{"signed boundary {-1,1} → signed_unit", []float64{-1, 1}, "signed_unit"},
+		{"unit upper micro-overshoot 1.04 → unit (5% tol)", []float64{0.5, 1.04}, "unit"},
+		{"any negative in unsigned-only data → signed_unit", []float64{-0.1, 0.5, 0.7}, "signed_unit"},
+		{"percent {0,50,100} → percent (boundary)", []float64{0, 50, 100}, "percent"},
+	}
+	for _, tt := range tests {
+		got := detectScale(tt.values)
+		gotName := ""
+		if got != nil {
+			gotName = got.Name
+		}
+		if gotName != tt.want {
+			t.Errorf("%s: detectScale(%v)=%q want %q", tt.name, tt.values, gotName, tt.want)
+		}
+	}
+}
+
 // ─── normalizeSentiment ─────────────────────────────────────────────────────
 
 func TestNormalizeSentiment(t *testing.T) {
+	unit := &ratingScale{Name: "unit", Min: 0, Max: 1}
+	signed := &ratingScale{Name: "signed_unit", Min: -1, Max: 1}
+	fiveStar := &ratingScale{Name: "five_star", Min: 0, Max: 5}
+	percent := &ratingScale{Name: "percent", Min: 0, Max: 100}
+
 	tests := []struct {
-		v    float64
-		want float64
+		name  string
+		v     float64
+		scale *ratingScale
+		want  float64
 	}{
-		{-1.0, 0.0},
-		{0.0, 0.5},
-		{1.0, 1.0},
-		{0.5, 0.75},
-		{-0.5, 0.25},
-		{-2.0, 0.0}, // clamped
-		{2.0, 1.0},  // clamped
+		// signed_unit (original behavior preserved)
+		{"signed -1 → 0", -1.0, signed, 0.0},
+		{"signed 0 → 0.5", 0.0, signed, 0.5},
+		{"signed 1 → 1", 1.0, signed, 1.0},
+		{"signed 0.5 → 0.75", 0.5, signed, 0.75},
+		{"signed -0.5 → 0.25", -0.5, signed, 0.25},
+		{"signed -2 clamps to 0", -2.0, signed, 0.0},
+		{"signed 2 clamps to 1", 2.0, signed, 1.0},
+		// unit
+		{"unit 0 → 0", 0.0, unit, 0.0},
+		{"unit 0.5 → 0.5", 0.5, unit, 0.5},
+		{"unit 1 → 1", 1.0, unit, 1.0},
+		// five_star
+		{"five_star 4 → 0.8", 4.0, fiveStar, 0.8},
+		{"five_star 5 → 1", 5.0, fiveStar, 1.0},
+		// percent
+		{"percent 80 → 0.8", 80, percent, 0.8},
+		{"percent 0 → 0", 0, percent, 0.0},
+		{"percent 100 → 1", 100, percent, 1.0},
+		{"percent 150 clamps to 1", 150, percent, 1.0},
+		// nil scale: defensive fallback
+		{"nil scale → 0.5 neutral", 42, nil, 0.5},
 	}
 	for _, tt := range tests {
-		got := normalizeSentiment(tt.v)
+		got := normalizeSentiment(tt.v, tt.scale)
 		if !floatEq(got, tt.want, 1e-9) {
-			t.Errorf("normalizeSentiment(%.2f)=%.4f want %.4f", tt.v, got, tt.want)
+			t.Errorf("%s: normalizeSentiment(%.4f, %v)=%.6f want %.6f",
+				tt.name, tt.v, tt.scale, got, tt.want)
 		}
 		if got < 0 || got > 1 {
-			t.Errorf("normalizeSentiment(%.2f)=%.4f out of [0,1]", tt.v, got)
+			t.Errorf("%s: result %.6f out of [0,1]", tt.name, got)
 		}
 	}
 }
@@ -162,27 +218,51 @@ func TestApplyNegativeAsymmetry(t *testing.T) {
 
 func TestIsSentimentEligible(t *testing.T) {
 	tests := []struct {
-		name   string
-		values []float64
-		want   bool
+		name      string
+		values    []float64
+		wantOK    bool
+		wantScale string // "" when wantOK=false
 	}{
-		{"empty → false", []float64{}, false},
-		{"single sample → false (< 3)", []float64{0.5}, false},
-		{"two samples → false (< 3)", []float64{0.5, 0.7}, false},
-		{"three valid sentiment values → true", []float64{0.5, 0.7, -0.3}, true},
-		{"all in [-1,1] but len=3 → true", []float64{-1.0, 0.0, 1.0}, true},
-		{"one out-of-range value (850) → false", []float64{0.5, 0.6, 850}, false},
-		{"max(|v|) > 2.0 → false", []float64{0.5, 0.7, 2.5}, false},
-		{"median(|v|) > 1.0 → false", []float64{1.5, 1.5, 1.5}, false},
-		{"high stddev → false", []float64{-2.0, 0.0, 2.0}, false},
-		{"latency-style cluster → false", []float64{200, 350, 500, 800, 1200}, false},
-		{"5-star style (0..5) → false (median > 1)", []float64{4, 5, 5, 3, 4}, false},
-		{"borderline 1.0 values → true", []float64{1.0, -1.0, 0.5}, true},
+		// sample-count gate
+		{"empty → false", []float64{}, false, ""},
+		{"single sample → false", []float64{0.5}, false, ""},
+		{"two samples → false", []float64{0.5, 0.7}, false, ""},
+
+		// signed_unit (backward compat with original [-1,1] design)
+		{"signed cluster {0.5,0.7,-0.3} → signed_unit", []float64{0.5, 0.7, -0.3}, true, "signed_unit"},
+		{"signed extremes {-1,0,1} → signed_unit", []float64{-1.0, 0.0, 1.0}, true, "signed_unit"},
+
+		// new scales
+		{"percent {60,70,80,90,85} → percent", []float64{60, 70, 80, 90, 85}, true, "percent"},
+		{"five_star {4,5,5,3,4} → five_star", []float64{4, 5, 5, 3, 4}, true, "five_star"},
+		{"ten_point {6,7,8,5,9} → ten_point", []float64{6, 7, 8, 5, 9}, true, "ten_point"},
+		{"unit {0.4,0.6,0.9} → unit", []float64{0.4, 0.6, 0.9}, true, "unit"},
+
+		// out-of-range / no preset fits
+		{"{0.5,0.6,850} → false (no preset)", []float64{0.5, 0.6, 850}, false, ""},
+		{"{150,200,180} → false (above all presets)", []float64{150, 200, 180}, false, ""},
+
+		// stddev gate (scale-relative: > 50% × span). For bounded data
+		// within a preset, max possible population stddev is 0.5×span (perfect
+		// bimodal), so the gate only ever rejects values that *also* breach
+		// the upper bound — covered by the no-preset cases above.
+		{"high-variance signed {-2,0,2} → false (no preset fits)",
+			[]float64{-2.0, 0.0, 2.0}, false, ""},
+
+		// metric-style distributions still correctly rejected
+		{"latency cluster {200..1200} → false", []float64{200, 350, 500, 800, 1200}, false, ""},
 	}
 	for _, tt := range tests {
-		got := isSentimentEligible(tt.values)
-		if got != tt.want {
-			t.Errorf("%s: isSentimentEligible(%v)=%v want %v", tt.name, tt.values, got, tt.want)
+		gotOK, gotScale := isSentimentEligible(tt.values)
+		if gotOK != tt.wantOK {
+			t.Errorf("%s: ok=%v want %v", tt.name, gotOK, tt.wantOK)
+		}
+		gotName := ""
+		if gotScale != nil {
+			gotName = gotScale.Name
+		}
+		if gotName != tt.wantScale {
+			t.Errorf("%s: scale=%q want %q", tt.name, gotName, tt.wantScale)
 		}
 	}
 }

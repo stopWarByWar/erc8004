@@ -9,7 +9,6 @@ package logic
 
 import (
 	"math"
-	"sort"
 
 	"agent_identity/model"
 )
@@ -28,10 +27,16 @@ const (
 	asymmetryAmplifier = 1.3 // amplification factor for diff below pivot
 
 	// sentiment eligibility thresholds
-	sentimentMinSamples    = 3
-	sentimentMaxAbsMedian  = 1.0
-	sentimentMaxAbsExtreme = 2.0
-	sentimentMaxStddev     = 1.0
+	sentimentMinSamples = 3
+	// Scale-relative stddev gate: values are considered "rating-like" only if
+	// their population stddev is ≤ this fraction of the matched scale's span.
+	// Replaces the old absolute stddev=1.0 threshold so 0-100 / 0-5 / 0-10
+	// distributions are treated on the same footing as the original [-1, 1].
+	sentimentMaxStddevFraction = 0.5
+	// 5% tolerance on the upper bound for floating-point / micro-overshoot
+	// (e.g. percent value 100.5). For unsigned scales the lower bound stays
+	// strict at 0 so a single negative value forces fallback to signed_unit.
+	scaleBoundTolerance = 0.05
 
 	// tag-authority normalization: how many unique reviewers saturate the log term
 	authorityLogSaturateAt = 50.0
@@ -112,18 +117,81 @@ func reviewerWeight(global *model.CommerceScoreGlobal) float64 {
 	return clamp01(w)
 }
 
+// ─── ratingScale ────────────────────────────────────────────────────────────
+
+// ratingScale is one of the known rating ranges we auto-detect. Sentiment
+// detection is multi-scale: we accept [-1,1] (signed_unit), [0,1] (unit),
+// [0,5] (five_star), [0,10] (ten_point) and [0,100] (percent). After
+// detection every value is normalized to [0,1] before fusion, so the final
+// credit_score range stays [0,1] (commerce-aligned).
+type ratingScale struct {
+	Name string  // "unit" | "five_star" | "ten_point" | "percent" | "signed_unit"
+	Min  float64
+	Max  float64
+}
+
+// ratingScalePresets is intentionally ordered: positive-only scales come
+// first in ascending span order, so positive-clustered data (e.g. {0.5, 0.7})
+// matches unit rather than the wider signed_unit. signed_unit comes last as
+// the fallback for any distribution containing negative values.
+var ratingScalePresets = []ratingScale{
+	{Name: "unit", Min: 0, Max: 1},
+	{Name: "five_star", Min: 0, Max: 5},
+	{Name: "ten_point", Min: 0, Max: 10},
+	{Name: "percent", Min: 0, Max: 100},
+	{Name: "signed_unit", Min: -1, Max: 1},
+}
+
+// detectScale returns the smallest preset that contains every observed value
+// (with a small upper-bound tolerance for floating-point overshoot), or nil
+// when no preset fits. Empty input → nil.
+//
+// Lower-bound semantics: for unsigned scales (Min=0) we require min ≥ 0
+// strictly — so any negative value forces signed_unit (or nil). For
+// signed_unit we allow a symmetric tolerance.
+func detectScale(values []float64) *ratingScale {
+	if len(values) == 0 {
+		return nil
+	}
+	minV, maxV := values[0], values[0]
+	for _, v := range values {
+		if v < minV {
+			minV = v
+		}
+		if v > maxV {
+			maxV = v
+		}
+	}
+	for i := range ratingScalePresets {
+		s := &ratingScalePresets[i]
+		span := s.Max - s.Min
+		hiBound := s.Max + scaleBoundTolerance*span
+		// Unsigned scales: strict lower bound to keep negatives out.
+		loBound := s.Min
+		if s.Min < 0 {
+			loBound = s.Min - scaleBoundTolerance*span
+		}
+		if minV >= loBound && maxV <= hiBound {
+			return s
+		}
+	}
+	return nil
+}
+
 // ─── normalizeSentiment ─────────────────────────────────────────────────────
 
-// normalizeSentiment maps a raw value in [-1, 1] to [0, 1]: n = (v+1)/2.
-// Values outside [-1, 1] are clamped.
-func normalizeSentiment(v float64) float64 {
-	if v <= -1 {
-		return 0
+// normalizeSentiment linearly maps v from scale.[Min, Max] to [0, 1] and
+// clamps. A nil scale falls back to a neutral 0.5 (defensive — callers
+// should only normalize after isSentimentEligible returned a non-nil scale).
+func normalizeSentiment(v float64, scale *ratingScale) float64 {
+	if scale == nil {
+		return 0.5
 	}
-	if v >= 1 {
-		return 1
+	span := scale.Max - scale.Min
+	if span <= 0 {
+		return 0.5
 	}
-	return (v + 1) / 2
+	return clamp01((v - scale.Min) / span)
 }
 
 // ─── applyNegativeAsymmetry ─────────────────────────────────────────────────
@@ -145,47 +213,51 @@ func applyNegativeAsymmetry(n float64) float64 {
 
 // ─── isSentimentEligible ────────────────────────────────────────────────────
 
-// isSentimentEligible returns true iff the value distribution looks like a
-// sentiment rating in [-1, 1]: ≥3 samples, median(|v|) ≤ 1, max(|v|) ≤ 2,
-// stddev ≤ 1.
-func isSentimentEligible(values []float64) bool {
+// isSentimentEligible decides whether a value distribution looks like ratings
+// on one of the known scales (unit / five_star / ten_point / percent /
+// signed_unit). On success it returns the matched scale so callers can
+// normalize without re-running detection.
+//
+// Rules:
+//   1. ≥ sentimentMinSamples (3) samples.
+//   2. All values fit one preset scale (see detectScale).
+//   3. Population stddev ≤ sentimentMaxStddevFraction × span — keeps
+//      bimodal/noisy distributions out even when they technically fit the
+//      range (e.g. {0, 100, 0, 100} on percent).
+func isSentimentEligible(values []float64) (bool, *ratingScale) {
 	if len(values) < sentimentMinSamples {
-		return false
+		return false, nil
 	}
-	abs := make([]float64, len(values))
-	var sum, maxAbs float64
-	for i, v := range values {
-		a := math.Abs(v)
-		abs[i] = a
-		if a > maxAbs {
-			maxAbs = a
-		}
+	scale := detectScale(values)
+	if scale == nil {
+		return false, nil
+	}
+	mean := meanOf(values)
+	stddev := populationStddev(values, mean)
+	span := scale.Max - scale.Min
+	if stddev > sentimentMaxStddevFraction*span {
+		return false, nil
+	}
+	return true, scale
+}
+
+// meanOf returns the arithmetic mean. len(values) must be > 0.
+func meanOf(values []float64) float64 {
+	var sum float64
+	for _, v := range values {
 		sum += v
 	}
-	if maxAbs > sentimentMaxAbsExtreme {
-		return false
-	}
-	// median of |v|
-	sort.Float64s(abs)
-	var med float64
-	mid := len(abs) / 2
-	if len(abs)%2 == 1 {
-		med = abs[mid]
-	} else {
-		med = (abs[mid-1] + abs[mid]) / 2
-	}
-	if med > sentimentMaxAbsMedian {
-		return false
-	}
-	// population stddev
-	mean := sum / float64(len(values))
+	return sum / float64(len(values))
+}
+
+// populationStddev returns sqrt(Σ(v-mean)²/n). len(values) must be > 0.
+func populationStddev(values []float64, mean float64) float64 {
 	var sq float64
 	for _, v := range values {
 		d := v - mean
 		sq += d * d
 	}
-	stddev := math.Sqrt(sq / float64(len(values)))
-	return stddev <= sentimentMaxStddev
+	return math.Sqrt(sq / float64(len(values)))
 }
 
 // ─── tagAuthority ───────────────────────────────────────────────────────────

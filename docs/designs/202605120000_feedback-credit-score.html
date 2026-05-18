@@ -626,33 +626,57 @@
 
   <p>核心创新：<strong>不预注册 tag schema，而是运行时判断这个 (agent, tag) 的 value 是不是评分。</strong></p>
 
-  <h3>Sentiment 自适应检测</h3>
+  <h3>Sentiment 自适应检测（多 scale）</h3>
+
+  <p>
+    真实世界的 raw <code>value</code> 通常落在以下几种"评分 scale"之一。运行时
+    根据观察到的 <code>min/max</code> 自动选取<strong>最小可容纳</strong>的预设：
+  </p>
+
+  <table>
+    <thead>
+      <tr><th>Scale 名称</th><th>范围</th><th>典型用途</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>unit</code></td><td>[0, 1]</td><td>概率 / 归一化好的评分</td></tr>
+      <tr><td><code>five_star</code></td><td>[0, 5]</td><td>五星制</td></tr>
+      <tr><td><code>ten_point</code></td><td>[0, 10]</td><td>十分制</td></tr>
+      <tr><td><code>percent</code></td><td>[0, 100]</td><td>百分制（最常见）</td></tr>
+      <tr><td><code>signed_unit</code></td><td>[-1, 1]</td><td>带正负号的评分（含负面）</td></tr>
+    </tbody>
+  </table>
 
   <div class="callout">
     <span class="callout-label">触发条件 — 全部满足</span>
     <p>设该 (agent, tag) 下所有未撤销 feedback 的 value 集合为 <strong>V</strong>，</p>
     <ul style="margin-top:8px">
       <li><code>|V| ≥ 3</code> — 至少 3 条样本</li>
-      <li><code>median(|v|) ≤ 1.0</code> — 中位绝对值落在 [-1, 1] 区间</li>
-      <li><code>max(|v|) ≤ 2.0</code> — 没有出现 999 / 12345 这种"参数"</li>
-      <li><code>stddev(V) ≤ 1.0</code> — 离散度合理</li>
+      <li><code>detectScale(V) ≠ ∅</code> — 能匹配到某一预设 scale；上界允许 5% 容差，
+        unsigned scale 下界严格 ≥ 0（任何负值会回落到 <code>signed_unit</code>）</li>
+      <li><code>stddev(V) ≤ 0.5 × span</code> — 离散度 scale-relative；
+        例如 <code>percent</code> 下 stddev ≤ 50</li>
     </ul>
   </div>
 
   <p>
-    <strong>人话</strong>：这个 (agent, tag) 下大家都在 [-1, 1] 老老实实打分 → 当 sentiment 处理；<br>
-    有人写延迟毫秒（850） → 这个 tag 自动被排除出 sentiment，进入 profile 原始展示。
+    <strong>人话</strong>：用户在 <code>{0, 5, 10, 100}</code> 任意一档老实打分 → 当 sentiment 处理；<br>
+    有人写延迟毫秒（850） / 跨度怪异（<code>{0.5, 50, 100}</code>）→ 该 tag 自动出局，进入 profile 原始分布展示。
   </p>
 
   <h3>归一化 + 负面非对称</h3>
   <div class="formula">
-    <span class="comment">// 已知 v ∈ [-1, 1]</span><br>
-    <span class="var">n<sub>i</sub></span> <span class="op">=</span> clamp((<span class="var">v<sub>i</sub></span> <span class="op">+</span> 1) <span class="op">/</span> 2, 0, 1)  <span class="comment">// 映射到 [0, 1]</span><br>
+    <span class="comment">// scale 来自 detectScale(V)；范围根据 scale 不同</span><br>
+    <span class="var">n<sub>i</sub></span> <span class="op">=</span> clamp((<span class="var">v<sub>i</sub></span> <span class="op">−</span> scale.min) <span class="op">/</span> (scale.max <span class="op">−</span> scale.min), 0, 1)<br>
     <br>
-    <span class="comment">// 差评轻度放大（不夸张）</span><br>
+    <span class="comment">// 差评轻度放大（不夸张）— 在归一化后的 [0, 1] 上操作，对任何 scale 通用</span><br>
     if <span class="var">n<sub>i</sub></span> &lt; 0.4: <span class="var">n<sub>i</sub><sup>eff</sup></span> <span class="op">=</span> 0.4 <span class="op">−</span> (0.4 <span class="op">−</span> <span class="var">n<sub>i</sub></span>) <span class="op">×</span> 1.3<br>
     else:            <span class="var">n<sub>i</sub><sup>eff</sup></span> <span class="op">=</span> <span class="var">n<sub>i</sub></span>
   </div>
+
+  <p>
+    无论原始 scale 是什么，每条 feedback 归一化后都落在 <code>[0, 1]</code>。这保证
+    <strong>最终 <code>credit_score</code> 仍然在 <code>[0, 1]</code></strong>，与 commerce 标度对齐。
+  </p>
 
   <h3>反恶意单 reviewer 上限</h3>
   <p>
@@ -885,6 +909,7 @@
     {
       "tag": "accuracy",
       "is_sentiment": true,
+      "detected_scale": "signed_unit",     // 可能为 unit / five_star / ten_point / percent / signed_unit
       "sentiment_score": 0.78,
       "authority": 0.91,
       "confidence": 0.82,
@@ -892,8 +917,18 @@
       "unique_reviewer_count": 11
     },
     {
+      "tag": "starred",
+      "is_sentiment": true,
+      "detected_scale": "percent",         // 100 分制评分被自动识别
+      "sentiment_score": 0.80,
+      "authority": 0.55,
+      "confidence": 0.40,
+      "feedback_count": 5,
+      "unique_reviewer_count": 5
+    },
+    {
       "tag": "latency_ms",
-      "is_sentiment": false,
+      "is_sentiment": false,                // detected_scale 字段省略（omitempty）
       "value_distribution": { "p50": 320, "p95": 850, "max": 1200 },
       "feedback_count": 18,
       "unique_reviewer_count": 8

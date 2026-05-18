@@ -30,20 +30,30 @@ type FeedbackCreditResp struct {
 	SentimentTagCount int                     `json:"sentiment_tag_count"`
 	EffectiveN        float64                 `json:"effective_n"`
 	LastUpdated       uint64                  `json:"last_updated"`
-	Tags              []FeedbackTagCreditResp `json:"tags"`
+	// TotalFeedbacks is the cross-tag count of all (active + revoked) feedback
+	// rows backing this credit. Computed live, not cached in the DB row.
+	TotalFeedbacks uint64 `json:"total_feedbacks"`
+	// RevokedCount is the subset of TotalFeedbacks that were revoked. Used by
+	// consumers to surface "0 revoked / N total" credibility signal.
+	RevokedCount uint64                  `json:"revoked_count"`
+	Tags         []FeedbackTagCreditResp `json:"tags"`
 }
 
 // FeedbackTagCreditResp is the per-(agent, tag) breakdown.
 type FeedbackTagCreditResp struct {
 	Tag                 string             `json:"tag"`
 	IsSentiment         bool               `json:"is_sentiment"`
+	DetectedScale       string             `json:"detected_scale,omitempty"` // "percent" | "five_star" | "" (non-sentiment)
 	SentimentScore      *float64           `json:"sentiment_score,omitempty"`
 	Authority           float64            `json:"authority"`
 	Confidence          float64            `json:"confidence"`
 	FeedbackCount       uint64             `json:"feedback_count"`
 	UniqueReviewerCount uint64             `json:"unique_reviewer_count"`
 	EffectiveN          float64            `json:"effective_n"`
-	ValueDistribution   *ValueDistribution `json:"value_distribution,omitempty"`
+	// LastActiveTs is the most recent feedback timestamp for this (agent, tag),
+	// exposed so UI can sort tags by recency. Unix seconds.
+	LastActiveTs      uint64             `json:"last_active_ts"`
+	ValueDistribution *ValueDistribution `json:"value_distribution,omitempty"`
 }
 
 // ValueDistribution is shown for non-sentiment tags so consumers can see the
@@ -171,8 +181,12 @@ func GetFeedbackCredit(agentUID uint64) (*FeedbackCreditResp, error) {
 		}
 
 		// Sentiment detection + tag sentiment score
-		isSent := isSentimentEligible(values)
+		isSent, scale := isSentimentEligible(values)
 		var tagSent *float64
+		var detectedScale string
+		if scale != nil {
+			detectedScale = scale.Name
+		}
 		if isSent && weightSum > 0 {
 			// Re-walk feedbacks with weighted normalized+asymmetric values.
 			// Identical weights to the first pass; dedupe ordinal recomputed
@@ -185,7 +199,7 @@ func GetFeedbackCredit(agentUID uint64) (*FeedbackCreditResp, error) {
 				td := timeDecay(fb.Timestamps, now, creditHalfLifeDays)
 				dd := dedupeFactor(k)
 				w := rw * td * dd
-				n := normalizeSentiment(fb.FormatValue)
+				n := normalizeSentiment(fb.FormatValue, scale)
 				n = applyNegativeAsymmetry(n)
 				weightedSentSum += n * w
 			}
@@ -207,12 +221,14 @@ func GetFeedbackCredit(agentUID uint64) (*FeedbackCreditResp, error) {
 		tr := FeedbackTagCreditResp{
 			Tag:                 ts.Tag,
 			IsSentiment:         isSent,
+			DetectedScale:       detectedScale,
 			SentimentScore:      tagSent,
 			Authority:           auth,
 			Confidence:          conf,
 			FeedbackCount:       ts.FeedbackCount,
 			UniqueReviewerCount: ts.UniqueReviewerCount,
 			EffectiveN:          effectiveN,
+			LastActiveTs:        ts.LastActiveTs,
 		}
 		if !isSent {
 			tr.ValueDistribution = makeValueDistribution(ts)
@@ -275,6 +291,8 @@ func GetFeedbackCredit(agentUID uint64) (*FeedbackCreditResp, error) {
 		SentimentTagCount: sentimentTagCount,
 		EffectiveN:        totalEffectiveN,
 		LastUpdated:       latestUpdated,
+		TotalFeedbacks:    totalFeedback,
+		RevokedCount:      totalRevoked,
 		Tags:              tagResponses,
 	}
 	if R >= creditMinEffectiveForOK {
